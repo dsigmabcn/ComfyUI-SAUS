@@ -27,7 +27,6 @@
     --color-button-primary-text-hover: #131312; 
     --color-button-primary-active: #8621b7; 
     --color-button-primary-active-strong: #c96af8; 
-
     --color-button-primary-text-active: #8621b7; 
     --color-button-secondary: #131312; 
     --color-button-secondary-hover: #8621b7; 
@@ -44,6 +43,14 @@
     --color-spinner:#570d7b;
     --color-spinner-highlight:#7d0ab6;
     --color-spinner-highlight: #7d0ab6;
+
+    /* --- ESSENTIAL MISSING THEME VARIABLES --- */
+    --border-color: var(--color-border); /* Uses existing border color */
+    --background-color-panel: var(--color-background-secondary); /* Uses the dark secondary background for sidebars */
+    --background-color-hover: #2c063f; /* A darker, non-primary purple for hover state */
+    --background-color-panel-active: var(--color-progress-background); /* A distinct, slightly lighter dark purple */
+    --text-color: var(--color-primary-text); /* Primary text color */
+    --text-color-faded: #8c8c8c; /* Standard gray for faded text */
 }
 
 html, body {
@@ -354,6 +361,7 @@ a {
   .hidden {
     display: none;
   }
+
 #prompts {
     display: flex;
     flex-direction: column;
@@ -362,6 +370,7 @@ a {
     /* padding: 6px; */
     width: 100%;
     gap: 4px;
+    margin-bottom: 15px;
 }
 
 #prompt{
@@ -375,8 +384,8 @@ a {
 }
 
 #prompts textarea {
-    border:none;
-    /* border-bottom: 1px solid var(--color-border); */
+    /*border:none;*/
+    border-bottom: 1px solid var(--color-border); 
     transition: border-color 0.3s ease-in-out;
     /* padding: 8px; */
     /* background-color: var(--color-background-secondary); */
@@ -2811,3 +2820,79 @@ html:not(.css-loading) body {
     background-color: #ff4444;
 }
 
+/* ==================================== */
+/* 1. TAB HEADER AND BUTTON STYLES      */
+/* ==================================== */
+
+/* Container for the tab buttons */
+.control-tabs-header {
+    display: flex;
+    justify-content: space-around; /* Distribute buttons evenly */
+    align-items: center;
+    border-bottom: 1px solid var(--border-color); /* Separator line below tabs */
+    padding: 0 0 10px 0; /* Space below the tabs */
+    margin-bottom: 10px; /* Space between tabs and content */
+    background-color: var(--background-color-panel);
+    position: sticky; /* Keep tabs visible when scrolling control panel */
+    top: 0;
+    z-index: 10;
+}
+
+/* Base style for all tab buttons */
+.tab-button {
+    flex-grow: 1; /* Make buttons fill the width */
+    padding: 8px 5px;
+    margin: 0 2px;
+    border: none;
+    background-color: transparent; /* Default state: transparent */
+    color: var(--text-color-faded);
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Hover effect */
+.tab-button:hover {
+    color: var(--text-color);
+    background-color: var(--background-color-hover);
+}
+
+/* Active (selected) tab button style */
+.tab-button.active {
+    color: var(--color-button-primary-text); /* Highlight color */
+    /* border-bottom: 2px solid var(--color-primary); */
+    background-color: var(--color-background-pattern); /* Subtle background for active tab */
+    font-weight: 600;
+}
+
+
+/* ==================================== */
+/* 2. TAB CONTENT STYLES                */
+/* ==================================== */
+
+/* Main container for tab panels (optional, for layout) */
+.control-tabs-content {
+    /* Ensures content below the sticky header scrolls */
+}
+
+/* Base style for all panels */
+.tab-panel {
+    display: none;
+    padding-top: 5px; /* Add a bit of space between tab header and content */
+}
+
+/* Since the JS handles display: none/block, this is mostly for clarity. */
+/* You already have the inline style 'display: none;' on the advanced-tab in HTML. */
+/* The JS toggles the 'active' class and 'display' property. */
+.tab-panel.active {
+    display: block !important; /* Overrides the inline style or default hidden state */
+}
+
+/* Styling for the control groups to maintain consistency */
+#basic-controls-container > div,
+#advanced-controls-container > div {
+    margin-bottom: 15px; /* Add separation between individual controls */
+}

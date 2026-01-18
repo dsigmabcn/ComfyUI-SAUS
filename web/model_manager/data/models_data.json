@@ -1,0 +1,714 @@
+{
+  "JUGGERNAUT XL": {
+    "id": "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors",
+    "name": "Juggernaut XL v9",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/RunDiffusion/Juggernaut-XL-v9/resolve/main/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors",
+    "model_path": "/checkpoints/SDXL",
+    "thumbnail_path": ""
+  },
+  "REALISTIC VISION XL": {
+    "id": "RealVisXL_V5.0_fp16.safetensors",
+    "name": "RealVis XL V5",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0_fp16.safetensors",
+    "model_path": "/checkpoints/SDXL",
+    "thumbnail_path": ""
+  },
+  "DREAMSHAPER XL": {
+    "id": "dreamshaperXL10.safetensors",
+    "name": "DreamShaper XL",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/jayparmr/DreamShaper_XL1_0_Alpha2/resolve/main/dreamshaperXL10.safetensors",
+    "model_path": "/checkpoints/SDXL",
+    "thumbnail_path": ""
+  },
+  "EPIC REALISM": {
+    "id": "epicrealism_pureEvolutionV5.safetensors",
+    "name": "Epic Realism SD 1.5 V5",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/snugsewey/epicrealismv5/resolve/main/epicrealism_pureEvolutionV5.safetensors",
+    "model_path": "/checkpoints/SD15",
+    "thumbnail_path": ""
+  },
+    "REV ANIMATED": {
+    "id": "rev-animated-v1-2-2.safetensors",
+    "name": "REV Animated V2 Rebirth",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/danbrown/RevAnimated-v1-2-2/resolve/main/rev-animated-v1-2-2.safetensors",
+    "model_path": "/checkpoints/SD15",
+    "thumbnail_path": ""
+  },
+  "FLUX_DEV_MODEL": {
+    "id": "flux1-dev.safetensors",
+    "name": "FLUX-DEV",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "FLUX_KREA": {
+    "id": "flux1-krea-dev.safetensors",
+    "name": "FLUX-KREA-DEV",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/DeepBeepMeep/Flux/resolve/main/flux1-krea-dev_bf16.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "AE_VAE": {
+    "id": "ae.safetensors",
+    "name": "FLUX AE VAE",
+    "type": "VAE",
+    "url_model": "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/vae/ae.safetensors",
+    "model_path": "/vae/",
+    "thumbnail_path": ""
+  },
+  "T5XXL_ENCODER": {
+    "id": "t5xxl_fp8_e4m3fn.safetensors",
+    "name": "T5 Text Encoder",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "CLIP_L_ENCODER": {
+    "id": "clip_l.safetensors",
+    "name": "CLIP-L Text Encoder",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_IMAGE_MODEL": {
+    "id": "qwen_image_bf16.safetensors",
+    "name": "QWEN Image Core Model",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_bf16.safetensors",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "WAN_VAE": {
+    "id": "wan_2.1_vae.safetensors",
+    "name": "VAE for WAN 2.1 and QWEN",
+    "type": "VAE",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors",
+    "model_path": "/vae/",
+    "thumbnail_path": ""
+  },
+  "QWEN_2.5VL_ENCODER": {
+    "id": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "name": "QWEN text encoder FP8",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+    "ANIMATEDIFF MM V3": {
+    "id": "v3_sd15_mm.ckpt",
+    "name": "AnimateDiff V3 MM",
+    "type": "MOTION_MODULE",
+    "url_model": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_mm.ckpt",
+    "model_path": "/animatediff_models/",
+    "thumbnail_path": ""
+  },
+  "ANIMATEDIFF ADAPTER": {
+    "id": "v3_sd15_adapter.ckpt",
+    "name": "AnimateDiff V3 LORA ADAPTER",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_adapter.ckpt",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "UMT5_XXL_ENCODER": {
+    "id": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+    "name": "UMT5 XXL ENCODER",
+    "type": "TEXT ENCODER",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_t2v_1.3B_MODEL": {
+    "id": "wan2.1_t2v_1.3B_fp16.safetensors",
+    "name": "WAN 2.1 T2V 1.3B",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_t2v_14B_MODEL": {
+    "id": "wan2.1_t2v_14B_fp16.safetensors",
+    "name": "WAN 2.1 T2V 14B",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_i2v_480p_MODEL": {
+    "id": "wan2.1_i2v_480p_14B_fp16.safetensors",
+    "name": "WAN 2.1 T2V 480p",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_i2v_720p_MODEL": {
+    "id": "wan2.1_i2v_720p_14B_fp16.safetensors",
+    "name": "WAN 2.1 T2V 720p",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "CLIPVISION_H": {
+    "id": "clip_vision_h.safetensors",
+    "name": "CLIPVISION H (for WAN)",
+    "type": "Clipvision",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors",
+    "model_path": "/clip_vision/",
+    "thumbnail_path": ""
+  },
+    "CAUSVID 1.3B": {
+    "id": "Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors",
+    "name": "CAUSVID 1.3B LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "CAUSVID 14B": {
+    "id": "Wan21_CausVid_14B_T2V_lora_rank32.safetensors",
+    "name": "CAUSVID 14B LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_14B_T2V_lora_rank32.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "WAN VACE 1.3B": {
+    "id": "wan2.1_vace_1.3B_fp16.safetensors",
+    "name": "WAN VACE 1.3B",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_vace_1.3B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN VACE 14B": {
+    "id": "wan2.1_vace_14B_fp16.safetensors",
+    "name": "WAN VACE 14B",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_HIGH": {
+    "id": "wan2.2_t2v_high_noise_14B_fp16.safetensors",
+    "name": "WAN 2.2 T2V HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_LOW": {
+    "id": "wan2.2_t2v_low_noise_14B_fp16.safetensors",
+    "name": "WAN 2.2 T2V LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+    "LIGHT_4steps_t2v_high": {
+    "id": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+    "name": "WAN 2.2 T2V HIGH",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "LIGHT_4steps_t2v_low": {
+    "id": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+    "name": "WAN 2.2 T2V LOW",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_HIGH": {
+    "id": "wan2.2_i2v_high_noise_14B_fp16.safetensors",
+    "name": "WAN 2.2 I2V HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_LOW": {
+    "id": "wan2.2_i2v_low_noise_14B_fp16.safetensors",
+    "name": "WAN 2.2 I2V LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+    "LIGHT_4steps_i2v_high": {
+    "id": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+    "name": "WAN 2.2 T2V HIGH",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "LIGHT_4steps_i2v_low": {
+    "id": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+    "name": "WAN 2.2 I2V LOW",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+    "WAN_VAE_2.2": {
+    "id": "wan2.2_vae.safetensors",
+    "name": "VAE for WAN 2.2 TI2V (5B)",
+    "type": "VAE",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan2.2_vae.safetensors",
+    "model_path": "/vae/",
+    "thumbnail_path": ""
+  },
+    "WAN 2.2 TI2V 5B MODEL": {
+    "id": "wan2.1_t2v_1.3B_fp16.safetensors",
+    "name": "WAN 2.2 TI2V 5B",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "IP ADAPTER SD1.5": {
+    "id": "",
+    "name": "IP ADAPTER SD1.5",
+    "type": "Clipvision",
+    "url_model": "",
+    "model_path": "",
+    "thumbnail_path": ""
+  },
+  "IP ADAPTER SDXL": {
+    "id": "",
+    "name": "IP ADAPTER SDXL",
+    "type": "Clipvision",
+    "url_model": "",
+    "model_path": "",
+    "thumbnail_path": ""
+  },
+  "IP ADAPTER FLUX": {
+    "id": "",
+    "name": "IP ADAPTER FLUX",
+    "type": "Clipvision",
+    "url_model": "",
+    "model_path": "",
+    "thumbnail_path": ""
+  },
+  "SIG CLIP VISION": {
+    "id": "clip_vision_h.safetensors",
+    "name": "SIG CLIP VISION 384",
+    "type": "Clipvision",
+    "url_model": "https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors",
+    "model_path": "/clip_vision/",
+    "thumbnail_path": ""
+  },
+  "FLUX REDUX": {
+    "id": "flux1-redux-dev.safetensors",
+    "name": "FLUX REDUX",
+    "type": "Style",
+    "url_model": "https://huggingface.co/Comfy-Org/Flux1-Redux-Dev/resolve/main/flux1-redux-dev.safetensors",
+    "model_path": "/style_models/",
+    "thumbnail_path": ""
+  },
+  "FLUX_KONTEXT_MODEL": {
+    "id": "flux1-kontext-dev.safetensors",
+    "name": "FLUX-KONTEXT",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/KoalaNation/colorize_models/resolve/main/diffusion_models/flux1-kontext-dev.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "FLUX_KONTEXT": {
+    "id": "flux1-kontext-dev.safetensors",
+    "name": "FLUX-KONTEXT",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/KoalaNation/colorize_models/resolve/main/diffusion_models/flux1-kontext-dev.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "FLUX_FILL_DEV_MODEL": {
+    "id": "flux1-fill-dev.safetensors",
+    "name": "FLUX-DEV-FILL",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/mp3pintyo/FLUX.1/resolve/main/flux1-fill-dev.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "FLUX_FILL_GGUF_Q8": {
+    "id": "flux1-fill-dev-Q8_0.gguf",
+    "name": "FLUX-DEV-FILL GGUF Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/YarvixPA/FLUX.1-Fill-dev-GGUF/resolve/main/flux1-fill-dev-Q8_0.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "FLUX_FILL_GGUF_Q6": {
+    "id": "flux1-fill-dev-Q6_K.gguf",
+    "name": "FLUX-DEV-FILL GGUF Q6",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/YarvixPA/FLUX.1-Fill-dev-GGUF/resolve/main/flux1-fill-dev-Q6_K.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "QWEN_EDIT_MODEL": {
+    "id": "qwen_image_edit_bf16.safetensors",
+    "name": "QWEN EDIT",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_bf16.safetensors",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN_EDIT_2509_MODEL": {
+    "id": "qwen_image_edit_bf16.safetensors",
+    "name": "QWEN EDIT v2509",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2509_bf16.safetensors",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN_LIGHT_4steps": {
+    "id": "Qwen-Image-Lightning-4steps-V1.0.safetensors",
+    "name": "QWEN LIGHTNING 4-steps LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-4steps-V1.0.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },
+  "QWEN_LIGHT_8steps": {
+    "id": "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+    "name": "QWEN LIGHTNING 8-steps LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+    "model_path": "/loras/",
+    "thumbnail_path": ""
+  },  
+  "FLUX GGUF Q8": {
+    "id": "flux1-dev-Q8_0.gguf",
+    "name": "GGUF Q8 FLUX-DEV",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q8_0.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "FLUX GGUF Q6": {
+    "id": "flux1-dev-Q6_K.gguf",
+    "name": "GGUF Q6_K FLUX-DEV",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q6_K.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "FLUX GGUF Q4": {
+    "id": "flux1-dev-Q4_K_S.gguf",
+    "name": "GGUF Q4_K_S FLUX-DEV",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "KONTEXT GGUF Q8": {
+    "id": "flux1-kontext-dev-Q8_0.gguf",
+    "name": "GGUF Q8 KONTEXT",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/FLUX.1-Kontext-dev-GGUF/resolve/main/flux1-kontext-dev-Q8_0.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "KONTEXT GGUF Q6": {
+    "id": "flux1-kontext-dev-Q6_K.gguf",
+    "name": "GGUF Q6_K KONTEXT",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/FLUX.1-Kontext-dev-GGUF/resolve/main/flux1-kontext-dev-Q6_K.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "KONTEXT GGUF Q4": {
+    "id": "flux1-kontext-dev-Q4_K_S.gguf",
+    "name": "GGUF Q4_K_S KONTEXT",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/FLUX.1-Kontext-dev-GGUF/resolve/main/flux1-kontext-dev-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "QWEN IMAGE GGUF Q8": {
+    "id": "qwen-image-Q8_0.gguf",
+    "name": "GGUF QWEN IMAGE Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q8_0.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN IMAGE GGUF Q6": {
+    "id": "qwen-image-Q6_K.gguf",
+    "name": "GGUF QWEN IMAGE Q6_K",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q6_K.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN IMAGE GGUF Q4": {
+    "id": "qwen-image-Q4_K_S.gguf",
+    "name": "GGUF QWEN IMAGE Q4_K_S",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN EDIT GGUF Q8": {
+    "id": "Qwen_Image_Edit-Q8_0.gguf",
+    "name": "GGUF QWEN EDIT Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/resolve/main/Qwen_Image_Edit-Q8_0.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN EDIT GGUF Q6": {
+    "id": "Qwen_Image_Edit-Q6_K.gguf",
+    "name": "GGUF QWEN EDIT Q6",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/resolve/main/Qwen_Image_Edit-Q6_K.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "QWEN EDIT GGUF Q4": {
+    "id": "Qwen_Image_Edit-Q4_K_S.gguf",
+    "name": "GGUF QWEN EDIT Q4",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/resolve/main/Qwen_Image_Edit-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_T2V_GGUF Q8": {
+    "id": "wan2.1-t2v-14b-Q8_0.gguf",
+    "name": "WAN 2.1 T2V GGUF Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-T2V-14B-gguf/resolve/main/wan2.1-t2v-14b-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_T2V_GGUF Q6": {
+    "id": "wan2.1-t2v-14b-Q6_K.gguf",
+    "name": "WAN 2.1 T2V GGUF Q6",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-T2V-14B-gguf/resolve/main/wan2.1-t2v-14b-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_T2V_GGUF Q4": {
+    "id": "wan2.1-t2v-14b-Q4_K_S.gguf",
+    "name": "WAN 2.1 T2V GGUF Q4",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-T2V-14B-gguf/resolve/main/wan2.1-t2v-14b-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+    "WAN2.1_I2V_GGUF Q8": {
+    "id": "wan2.1-i2v-14b-480p-Q8_0.gguf",
+    "name": "WAN 2.1 I2V GGUF Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-I2V-14B-480P-gguf/resolve/main/wan2.1-i2v-14b-480p-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_I2V_GGUF Q6": {
+    "id": "wan2.1-i2v-14b-480p-Q6_K.gguf",
+    "name": "WAN 2.1 I2V GGUF Q6",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-I2V-14B-480P-gguf/resolve/main/wan2.1-i2v-14b-480p-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_I2V_GGUF Q4": {
+    "id": "wan2.1-i2v-14b-480p-Q4_K_S.gguf",
+    "name": "WAN 2.1 I2V GGUF Q4",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/city96/Wan2.1-I2V-14B-480P-gguf/resolve/main/wan2.1-i2v-14b-480p-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+    "WAN2.1_VACE_GGUF Q8": {
+    "id": "Wan2.1_14B_VACE-Q8_0.gguf",
+    "name": "WAN 2.1 VACE GGUF Q8",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.1_14B_VACE-GGUF/resolve/main/Wan2.1_14B_VACE-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_VACE_GGUF Q6": {
+    "id": "Wan2.1_14B_VACE-Q6_K.gguf",
+    "name": "WAN 2.1 VACE GGUF Q6",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.1_14B_VACE-GGUF/resolve/main/Wan2.1_14B_VACE-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.1_VACE_GGUF Q4": {
+    "id": "Wan2.1_14B_VACE-Q4_K_S.gguf",
+    "name": "WAN 2.1 VACE GGUF Q4",
+    "type": "Quantization",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.1_14B_VACE-GGUF/resolve/main/Wan2.1_14B_VACE-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN21/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_HIGH_GGUF Q8": {
+    "id": "Wan2.2-T2V-A14B-HighNoise-Q8_0.gguf",
+    "name": "WAN 2.2 T2V Q8 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_HIGH_GGUF Q6": {
+    "id": "Wan2.2-T2V-A14B-HighNoise-Q6_K.gguf",
+    "name": "WAN 2.2 T2V Q6 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_HIGH_GGUF Q4": {
+    "id": "Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf",
+    "name": "WAN 2.2 T2V Q4 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_HIGH_GGUF Q8": {
+    "id": "Wan2.2-I2V-A14B-HighNoise-Q8_0.gguf",
+    "name": "WAN 2.2 I2V Q8 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-I2V-A14B-HighNoise-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_HIGH_GGUF Q6": {
+    "id": "Wan2.2-I2V-A14B-HighNoise-Q6_K.gguf",
+    "name": "WAN 2.2 I2V Q6 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-I2V-A14B-HighNoise-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_HIGH_GGUF Q4": {
+    "id": "Wan2.2-I2V-A14B-HighNoise-Q4_K_S.gguf",
+    "name": "WAN 2.2 I2V Q4 HIGH",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-I2V-A14B-HighNoise-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_LOW_GGUF Q8": {
+    "id": "Wan2.2-T2V-A14B-LowNoise-Q8_0.gguf",
+    "name": "WAN 2.2 T2V Q8 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_LOW_GGUF Q6": {
+    "id": "Wan2.2-T2V-A14B-LowNoise-Q6_K.gguf",
+    "name": "WAN 2.2 T2V Q6 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_T2V_LOW_GGUF Q4": {
+    "id": "Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf",
+    "name": "WAN 2.2 T2V Q4 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_LOW_GGUF Q8": {
+    "id": "Wan2.2-I2V-A14B-LowNoise-Q8_0.gguf",
+    "name": "WAN 2.2 I2V Q8 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-I2V-A14B-LowNoise-Q8_0.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_LOW_GGUF Q6": {
+    "id": "Wan2.2-I2V-A14B-LowNoise-Q6_K.gguf",
+    "name": "WAN 2.2 T2V Q6 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-I2V-A14B-LowNoise-Q6_K.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "WAN2.2_I2V_LOW_GGUF Q4": {
+    "id": "Wan2.2-I2V-A14B-LowNoise-Q4_K_S.gguf",
+    "name": "WAN 2.2 I2V Q4 LOW",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-I2V-A14B-LowNoise-Q4_K_S.gguf",
+    "model_path": "/diffusion_models/WAN22/",
+    "thumbnail_path": ""
+  },
+  "T5 XXL GGUF Q8": {
+    "id": "t5-v1_1-xxl-encoder-Q8_0.gguf",
+    "name": "T5 GGUF Q8",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/city96/t5-v1_1-xxl-encoder-gguf/resolve/main/t5-v1_1-xxl-encoder-Q8_0.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "T5 XXL GGUF Q6": {
+    "id": "t5-v1_1-xxl-encoder-Q6_K.gguf",
+    "name": "T5 GGUF Q6",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/city96/t5-v1_1-xxl-encoder-gguf/resolve/main/t5-v1_1-xxl-encoder-Q6_K.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "T5 XXL GGUF Q4": {
+    "id": "t5-v1_1-xxl-encoder-Q4_K_S.gguf",
+    "name": "T5 GGUF Q4",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/city96/t5-v1_1-xxl-encoder-gguf/resolve/main/t5-v1_1-xxl-encoder-Q4_K_S.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_ENCODER GGUF Q8": {
+    "id": "Qwen2.5-VL-7B-Instruct-q8_0.gguf",
+    "name": "QWEN ENCODER GGUF Q8",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Mungert/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-q8_0.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_ENCODER GGUF Q6": {
+    "id": "Qwen2.5-VL-7B-Instruct-q6_k_m.gguf",
+    "name": "QWEN ENCODER GGUF Q6",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Mungert/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-q6_k_m.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_ENCODER GGUF Q4": {
+    "id": "Qwen2.5-VL-7B-Instruct-q4_k_s.gguf",
+    "name": "QWEN ENCODER GGUF Q4",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Mungert/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-q4_k_s.gguf",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+    "CONTROLNET": {
+    "id": "controlnet_base",
+    "name": "ControlNet Base Asset",
+    "type": "CONTROLNET",
+    "url_model": "",
+    "model_path": "",
+    "thumbnail_path": ""
+  }
+}

@@ -1,35 +1,45 @@
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
-
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+<br />
 <div align="center">
 
-[![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?logo=youtube&logoColor=white&style=for-the-badge)](https://www.youtube.com/@koalanation/videos)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/koalanation)
+[![Patreon](https://img.shields.io/badge/Patreon-Support-orange?logo=patreon&logoColor=white&style=for-the-badge)](https://www.patreon.com/distyx)
+[![Discord](https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white&style=for-the-badge)](https://discord.com/invite/M3PWExxVbP)
+[![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?logo=youtube&logoColor=white&style=for-the-badge)](https://www.youtube.com/@Flowcomfy/videos)
 
 
 
 <!-- <img src="media/covers/cover.jpg"> -->
 
-  <h1 align="center">🌊 SAUS UI</h1>
-  <h3 align="center"><strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
-    <p align="center">
-    <strong>Cut the spaghetti. Cook it with <i>Saus</i></strong>
-  </p>
-<!--<img src="web/core/media/git/cover_flow.jpg">
-***
-***  <h4 align="center"><em>Let your creativity flow naturally</em></h4>
+  <h1 align="center">Flow - Streamlined Way to ComfyUI</h1>
+<img src="web/core/media/git/cover_flow.jpg">
+
+  <h4 align="center"><em>Let your creativity flow naturally</em></h4>
   <h4 align="center">Don't forget to leave a star.</h4>
-*** 
-***  
-***  <p align="center">
+  
+  
+  <p align="center">
     <a href="https://github.com/diStyApps/ComfyUI-disty-Flow/issues">Report Bug</a>
-  </p> -->
+  </p>
 </div>
 
 
 
 <!-- TABLE OF CONTENTS -->
-<!--
-***
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -48,14 +58,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-SAUS is a streamlined interface for ComfyUI designed to transform complex, "spaghetti" node workflows into a clean, production-ready application environment.
+Flow is a custom node designed to provide user-friendly interface for ComfyUI by acting as an alternative user interface for running workflows. It is not a replacement for workflow creation.
 
-### Why SAUS?
-* **Simple:** Built for creators who need results without the node-induced headaches.
-* **App:** A powerful wrapper that extends ComfyUI's capabilities into a standalone-app feel.
-* **U See:** A clean, expansive "view" of your creative output—not just your backend.
+Flow is currently in the early stages of development, so expect bugs and ongoing feature enhancements. With your support and feedback, Flow will settle into a steady stream.
 
-<!--### Watch on Youtube
+### Watch on Youtube
 
 [![Flow](web/core/media/git/flow_yt.jpg)](https://www.youtube.com/watch?v=g8zMs2B5tic "Flow")
 
@@ -68,7 +75,7 @@ SAUS is a streamlined interface for ComfyUI designed to transform complex, "spag
 <img src="web/core/media/git/flow_1.jpg">
 
 <img src="web/core/media/git/flow_2.jpg">
--->
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -77,8 +84,8 @@ SAUS is a streamlined interface for ComfyUI designed to transform complex, "spag
  - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
  
 <!-- INSTALLATION -->
-
 ## Installation
+
 
 In [ComfyUI](https://github.com/comfyanonymous/ComfyUI) root folder, navigate to the `custom_nodes` folder and run the following command:
 
@@ -163,3 +170,5 @@ distty@gmail.com
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+

@@ -37,24 +37,11 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         sortValue: 'nameAsc',
         selectedTheme: null 
     };
+    
     const preferencesManager = new PreferencesManager(defaultPreferences);
     ThemeManager.applyInitialTheme(preferencesManager);
     const themeManager = new ThemeManager(preferencesManager);
     themeManager.init();
-
-    // ----------------------------------------------------------------------
-    // NEW: Define the labels for components that should appear in the 'Basic' section.
-    // Prompts are handled separately by setPromptComponents, so they are excluded here.
-    const basicControlLabels = [
-        "Checkpoint",
-        "Model",
-        "Type",
-        "Steps",
-        "Seed",
-        "Dimension Selector" 
-    ];
-    // ----------------------------------------------------------------------
-    
 
 
     function getFlowName() {
@@ -98,7 +85,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     console.log("workflow", workflow);
 
 
-    /*function generateWorkflowControls(config) {
+    function generateWorkflowControls(config) {
         const container = document.getElementById('side-workflow-controls');
         if (config.dropdowns && Array.isArray(config.dropdowns)) {
             config.dropdowns.forEach(dropdown => {
@@ -151,75 +138,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
                 container.appendChild(div);
             });
         }
-    }*/
-
-    // ----------------------------------------------------------------------
-    // MODIFIED: Refactored generateWorkflowControls to use Basic/Advanced containers
-    function generateWorkflowControls(config) {
-        // Get the new destination containers
-        const basicContainer = document.getElementById('basic-controls-container');
-        const advancedContainer = document.getElementById('advanced-controls-container');
-
-        // Helper to determine the container
-        function getContainer(itemConfig) {
-            // DimensionSelector and Seeder configs often lack a 'label', use ID as fallback
-            const label = itemConfig.label || (itemConfig.id.includes('dimension-selector') ? "Dimension Selector" : itemConfig.id);
-            if (basicControlLabels.includes(label)) {
-                return basicContainer;
-            }
-            return advancedContainer;
-        }
-
-        function appendControl(itemConfig, className) {
-            const container = getContainer(itemConfig);
-            
-            const div = document.createElement('div');
-            div.id = itemConfig.id;
-            div.classList.add(className);
-            container.appendChild(div);
-        }
-
-        if (config.dropdowns && Array.isArray(config.dropdowns)) {
-            config.dropdowns.forEach(dropdown => {
-                appendControl(dropdown, 'loader');
-            });
-        }
-        
-        if (config.steppers && Array.isArray(config.steppers)) {
-            config.steppers.forEach(stepper => {
-                appendControl(stepper, 'stepper-container');
-            });
-        }
-
-        if (config.dimensionSelectors) {
-            config.dimensionSelectors.forEach(selector => {
-                // Manually add 'Dimension Selector' as label for categorization
-                selector.label = "Dimension Selector"; 
-                appendControl(selector, 'dimension-selector-container');
-            });
-        }
-        
-        if (config.inputs && Array.isArray(config.inputs)) {
-            config.inputs.forEach(input => {
-                appendControl(input, 'input-container');
-            });
-        }
-
-        if (config.toggles && Array.isArray(config.toggles)) {
-            config.toggles.forEach(toggle => {
-                appendControl(toggle, 'toggle-container');
-            });
-        }
-
-        if (config.seeders && Array.isArray(config.seeders)) {
-            config.seeders.forEach(seeder => {
-                // Manually add 'Seed' as label for categorization
-                seeder.label = "Seed";
-                appendControl(seeder, 'seeder-container');
-            });
-        }
     }
-    // ----------------------------------------------------------------------
 
     function setPromptComponents(config, options = { clearInputs: false }) {
         if (!config.prompts || !Array.isArray(config.prompts)) {
@@ -250,7 +169,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
 
     function generateDynamicScriptDefault(index) {
         const defaultsPrompts = [
-            'An astronaut surfing in the space, between colorful neon planets and stars',
+            'A cartoon cute happy white female goat with purple eyes and a black horn in the jungle',
             'ugly, blur, jpeg artifacts, low quality, lowres, child',
         ];
         return defaultsPrompts[index] || ''; 
@@ -498,52 +417,6 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         }
     }
 
-    // ----------------------------------------------------------------------
-    // NEW: Function to handle tab switching logic
-    // In main.js
-
-function setupTabSwitching() {
-    const tabButtons = document.querySelectorAll('.control-tabs-header .tab-button');
-    const tabPanels = document.querySelectorAll('.control-tabs-content .tab-panel');
-
-    console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
-    
-    if (tabButtons.length === 0 || tabPanels.length === 0) {
-        console.error("FINAL TEST: Tab elements not found.");
-        return; 
-    }
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
-
-            // 1. Deactivate all buttons and panels
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => {
-                panel.classList.remove('active');
-            });
-
-            // 2. Activate the clicked button and panel
-            this.classList.add('active');
-            
-            const targetPanel = document.getElementById(targetId);
-            if (targetPanel) {
-                targetPanel.classList.add('active'); 
-
-                // REPORT THIS VALUE!
-                const computedStyle = window.getComputedStyle(targetPanel);
-                console.warn(`FINAL TEST: Computed Display Style for ${targetId} is: ${computedStyle.getPropertyValue('display')}`);
-                
-            } else {
-                 console.error(`FINAL TEST: Target Panel ${targetId} not found!`);
-            }
-        });
-    });
-}
-
-
-
     document.getElementById('generateButton').addEventListener('click', function () {
         queue();
     });
@@ -565,9 +438,6 @@ function setupTabSwitching() {
         interrupt();
     });
 
-    setupTabSwitching(); 
-
-
     window.addEventListener('jobCompleted', () => {
         StateManager.removeJob();
         updateQueueDisplay(StateManager.getJobQueue());
@@ -584,8 +454,6 @@ function setupTabSwitching() {
 
     document.addEventListener('DOMContentLoaded', () => {
         initialize(false, false, false, false);
-        // Call the new tab setup function once the DOM is ready
-        //setupTabSwitching();
 
         const overlay = document.getElementById('css-loading-overlay');
         overlay.classList.add('fade-out');

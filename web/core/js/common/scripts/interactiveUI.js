@@ -244,7 +244,9 @@ export function initialize(
     mediaQuery.addEventListener('change', handleMediaQueryChange);
 }
 
-initialize(false, false, false, false);
+if (toggleLeftBtn) {
+    initialize(false, false, false, false);
+}
 
 
 const iconList = {

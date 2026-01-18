@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flow</title>
+    <title>Model Manager</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" href="/core/media/ui/flow_logo.png" type="image/png">
     <link rel="stylesheet" href="model_manager/css/styles.css">
@@ -16,109 +16,65 @@
     <div class="container">
         <header></header>
         <div class="main-wrapper">
-            <nav class="sidebar">
-                <div class="menu-category">
-                    <!-- <a href="#" onclick="loadManagerApp()"><span><i class="fas fa-cogs"></i> Manager</span></a>-->
-                    <a href="#" onclick="triggerFileUpload()"><span><i class="fas fa-upload"></i> Upload File</span></a>
-                    <input type="file" id="hidden-upload" style="display: none;" onchange="handleFileUpload()" />
-                    <a href="#" onclick="loadDownloadApp()"><span><i class="fas fa-download"></i> Download from
-                            URL</span></a>
+            <div class="content-wrapper"> 
+                
+                <nav class="sidebar">
 
-                    <a href="/flow"><span><i class="fas fa-project-diagram"></i> Return to Flow</span></a>
-                </div>
-                <!-- progress bar for upload-->
-                <div id="upload-progress-container" style="display: none; margin-top: 10px;">
-                    <div id="upload-progress-label"
-                        style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--color-primary-text);">
-                        Upload progress
-                    </div>
-                    <div id="upload-progress"
-                        style="height: 20px; background: var(--color-progress-background); border-radius: 4px; position: relative;">
-                        <div id="upload-progress-bar"
-                            style="width: 0%; height: 100%; background: var(--color-progress-value); border-radius: 4px;">
+                    <!-- testing dynamic-->
+                    <div id="dynamic-architecture-menu">
                         </div>
-                        <span id="upload-progress-text" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                     font-size: 12px; color: var(--color-primary-text); pointer-events: none;">
-                        </span>
-                    </div>
-                </div>
+    
+                    
+                    
+                    <div id="theme-selector"></div>
+                </nav>
 
+                <div class="content">
+                    <div class="mid-col">
+                        
+                        <div class="manager-header">
+                            <h1 id="current-architecture-title">SDXL Base Generation</h1>
+                            
+                            <div class="search-and-status">
+                                <input type="text" id="modelSearchInput" placeholder="Search components..." class="model-search-input">
 
-                <div id="theme-selector"></div>
-            </nav>
+                                <div id="architecture-status" class="architecture-status-bar">
+                                    <span id="status-text" class="status-ready">Status: READY</span>
+                                    <button id="actionButton" class="action-button hidden" onclick = "downloadAllMissing()">Download All Missing</button>
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="content">
-                <div class="mid-col">
-                    <div id="file-explorer">
-                        <!-- <a href="/flow"><span><i class="fas fa-project-diagram"></i> Flow</span></a> -->
-                    </div>
-                </div>
-
-
-                <!-- <div class="flow-grid" id="flowGrid">
-                    <div id="file-explorer"></div>
-                </div>-->
-            </div>
+                        <div class="model-grid" id="modelComponentGrid">
+                            </div> 
+                    </div> 
+                </div> 
+            </div> 
         </div>
         <footer>
             <p id="copyright"></p>
         </footer>
     </div>
-    <div id="download-modal" class="modal hidden">
+    
+    <!--<div id="download-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
             <h2>Add URL to download model</h2>
-            <input type="text" id="download-url" placeholder="Paste URL here" />
+            <input type="text" id="download-url" class="download-input" placeholder="Paste URL here" />
             <button id="download-button" onclick="startDownload()">Download</button>
-            <div id="download-status" style="margin-top: 10px;"></div>
-            <!--- OLD progress bar
-            <div id="download-progress" style="height: 4px; background: #ccc; margin-top: 5px;">
-                <div id="progress-bar" style="width: 0%; height: 100%; background: #4caf50;"></div>
-            </div> -->
-            <div id="download-progress-container" style="display: none; margin-top: 10px;">
-                <div id="download-progress-label"
-                    style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--color-primary-text);">
-                    Download progress
-                </div>
-                <div id="download-progress"
-                    style="height: 20px; background: var(--color-progress-background); border-radius: 4px; position: relative;">
-                    <div id="download-progress-bar"
-                        style="width: 0%; height: 100%; background: var(--color-progress-value); border-radius: 4px;">
-                    </div>
-                    <span id="download-progress-text" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                     font-size: 12px; color: var(--color-primary-text); pointer-events: none;">
-                    </span>
+            <div id="download-status" class="download-status-message"></div>
+            
+            <div id="download-progress-container" class="progress-container hidden-initial">
+                <div id="download-progress-label" class="progress-label">Download progress</div>
+                <div id="download-progress" class="progress-bar-base">
+                    <div id="download-progress-bar" class="progress-bar-value"></div>
+                    <span id="download-progress-text" class="progress-text"></span>
                 </div>
             </div>
-
-
-
         </div>
-    </div>
-    <!-- <script>window.appName = "Model Manager"</script> -->
+    </div>-->
     <script type="module" src="model_manager/js/main.js"></script>
     
-<!--    <script type="module">
-
-        import { insertElement } from '../../core/js/common/components/header.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const headerContainer = document.querySelector('header');
-            insertElement(headerContainer);
-
-            // Delay the update to ensure the header is fully rendered
-            setTimeout(() => {
-                const appNameElement = document.querySelector('.appName');
-                if (appNameElement) {
-                    appNameElement.textContent = 'Model Manager';
-                    appNameElement.style.fontSize = '1.5em'; // or '20px', '24px', etc.
-
-                }
-            }, 300);
-        });
-    </script> -->
-
-
 </body>
 
 </html>

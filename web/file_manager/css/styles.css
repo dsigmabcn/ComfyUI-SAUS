@@ -17,7 +17,7 @@
     --color-background-pattern: #4d0f7c;
     --color-header-background: #131312;
     --color-header-logo-text: #570d7b;
-    --color-header-text:#570d7b;
+    --color-header-text: #570d7b;
     --color-social-icons: #570d7b;
     --color-button-primary: #570d7b;
     --color-button-primary-hover: #8621b7;
@@ -32,16 +32,17 @@
     --color-button-secondary-active: #8621b7;
     --color-button-secondary-text-active: #f4b6ff;
     --color-progress-background: #2c063f;
-    --color-progress-value:#7d0ab6;
+    --color-progress-value: #7d0ab6;
     --color-scrollbar-track: #1e1e1f;
     --color-scrollbar-thumb: #570d7b;
     --color-input-range-thumb: #f4b6ff;
     --color-input-range-background: #570d7b;
-    --color-spinner:#570d7b;
-    --color-spinner-highlight:#7d0ab6;
+    --color-spinner: #570d7b;
+    --color-spinner-highlight: #7d0ab6;
 }
 
-html, body {
+html,
+body {
     background-color: #131312;
     height: 100%;
     margin: 0;
@@ -151,47 +152,6 @@ header .right {
     display: flex;
     flex: 1;
     overflow: hidden;
-    flex-direction: column;
-    height: calc(100vh - 100px); /* Adjust height to fit new nav */
-}
-/*CONTENT WRAPPER STYLE*/
-.content-wrapper{
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.header-nav {
-    display: flex; /* Use flexbox for centering */
-    justify-content: flex-start; /* Center links horizontally */
-    align-items: center; /* Center links vertically */
-    gap: 30px; /* Increase space between links for better visibility */
-    background-color: var(--color-background-pattern); /* Use a solid background color */
-    padding: 0px 0; /* Add vertical padding */
-    margin-bottom: 5px; /* Add space below the nav bar */
-    border: 1px dashed var(--color-highlight); /* Add a more prominent border */
-}
-
-.header-nav a {
-    color: var(--color-button-primary-text); /* Ensure link color is visible */
-    text-decoration: none;
-    font-size: 1.1em; /* Increase font size */
-    font-weight: bold; /* Make the text bold */
-    padding: 10px 20px; /* Increase padding for a larger hit area */
-    transition: background-color 0.3s, color 0.3s;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-}
-
-.header-nav a:hover {
-    background-color: var(--color-button-primary-text); /* Change background on hover */
-    /*color: #ffffff;*/
-    color: var(--color-primary);
-}
-
-.header-nav a i {
-    margin-right: 8px; /* Increase space between icon and text */
 }
 
 .sidebar {
@@ -206,7 +166,7 @@ header .right {
     margin-bottom: 15px;
 }
 
-.menu-category > span {
+.menu-category>span {
     display: block;
     padding: 10px 20px;
     cursor: pointer;
@@ -214,7 +174,7 @@ header .right {
     font-weight: bold;
 }
 
-.menu-category > a {
+.menu-category>a {
     display: block;
     padding: 10px 20px;
     cursor: pointer;
@@ -224,35 +184,23 @@ header .right {
     color: var(--color-primary-text);
 }
 
-.menu-category > a:hover {
+.menu-category>a:hover {
     background-color: var(--color-background-pattern);
 }
 
-.menu-category > span:hover {
+.menu-category>span:hover {
     background-color: var(--color-background-pattern);
 }
 
-.menu-category > span i {
+.menu-category>span i {
     margin-right: 10px;
     width: 20px;
     text-align: center;
 }
 
-.menu-item.active {
-    background-color: var(--color-accent);
-    color: white;
-}
-
-.menu-item.nested-item {
-    padding-left: 40px;
-}
-
 .submenu {
-    /* CHANGED: Removed display: none, relying on .hidden class from JS */
+    display: none;
     padding-left: 30px;
-    /* ADDED: Transition for smoother collapse */
-    transition: max-height 0.3s ease-in-out, opacity 0.3s;
-    overflow: hidden;
 }
 
 .submenu a {
@@ -267,31 +215,6 @@ header .right {
     background-color: var(--color-background-secondary);
 }
 
-/* ADDED: Explicit hidden class */
-.submenu.hidden {
-    display: none;
-}
-
-.submenu-item {
-    display: block;
-    padding: 8px 10px;
-    color: var(--color-primary-text);
-    text-decoration: none;
-    transition: background-color 0.3s, color 0.3s;
-    cursor: pointer;
-    font-size: 0.95em;
-}
-
-.submenu-item:hover {
-    background-color: var(--color-background-pattern);
-}
-
-.submenu-item.active {
-    background-color: var(--color-accent);
-    color: white;
-    border-radius: 4px;
-}
-
 .content {
     flex: 1;
     display: flex;
@@ -300,7 +223,13 @@ header .right {
 
 .mid-col {
     padding: 10px;
-    flex: 1;
+    /*flex: 1;*/
+    /*new to facilitate the image/video preview*/
+    flex: 2; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /**/
     background-color: var(--color-background);
     border-radius: var(--border-radius);
     height: 100%;
@@ -325,7 +254,7 @@ footer {
     margin-top: auto;
 }
 
-/*.flow-grid {
+.flow-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
@@ -361,7 +290,7 @@ footer {
 
 .flow-card img {
     width: 100%;
-    height: 250px;
+    height: 150px;
     object-fit: contain;
     background-color: var(--color-scrollbar-track);
     z-index: 1;
@@ -383,9 +312,9 @@ footer {
     transform: translateY(-5px);
 
     box-shadow: 0 5px 15px var(--shadow-hover);
-}*/
+}
 
-/*.filter-menu {
+.filter-menu {
     position: relative;
     display: inline-block;
 }
@@ -423,12 +352,12 @@ footer {
     transform: translateX(-50%);
     background-color: var(--color-background-secondary);
     min-width: 600px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     max-height: 700px;
     overflow-y: auto;
     border: 1px dashed var(--color-border);
-    border-radius:  var(--border-radius);
+    border-radius: var(--border-radius);
     padding: 10px;
     box-sizing: border-box;
 }
@@ -473,13 +402,16 @@ footer {
 .filter-button,
 .toggle-button {
     padding: 10px 14px;
+    /* border: 1px dashed var(--color-border); */
     border: none;
 
     background-color: var(--color-background);
     color: var(--color-primary-text);
+    /* color: yellow; */
     border-radius: var(--border-radius);
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    font-size: 0.875rem;    
+    font-size: 0.875rem;
+    /* 14px */
 }
 
 .controls input {
@@ -528,7 +460,7 @@ footer {
 .category-tag.selected {
     background-color: var(--color-accent);
     color: #ffffff;
-}*/
+}
 
 .favorite-button {
     position: absolute;
@@ -671,19 +603,37 @@ footer {
 }
 
 @keyframes animation-text {
-    0% { opacity: 0; }
-    40% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 @keyframes animation-left {
-    from { left: 30px; }
-    to { left: -30px; }
+    from {
+        left: 30px;
+    }
+
+    to {
+        left: -30px;
+    }
 }
 
 @keyframes animation-right {
-    from { right: 30px; }
-    to { right: -30px; }
+    from {
+        right: 30px;
+    }
+
+    to {
+        right: -30px;
+    }
 }
 
 .appName {
@@ -719,7 +669,7 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
     transition: transform 0.3s ease;
 }
 
@@ -745,7 +695,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     white-space: nowrap;
     font-size: 1.5em;
     border: 1px dashed var(--color-button-primary-active);
@@ -898,7 +848,7 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
 }
 
 .update-dialog {
@@ -994,7 +944,7 @@ footer {
     font-size: 20px;
     color: var(--color-button-primary-text);
     transition: background 0.2s, transform 0.2s;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .close-dialog-btn:hover {
@@ -1058,198 +1008,270 @@ footer {
 
 }
 
-/*
-* ------------------ ADDED START ------------------
-* ADDED: Styles for the Model Manager's main content area (Model Grid and Status Bar)
-*/
 
-/* Status Bar & Header */
-.architecture-status-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--color-background-secondary);
-    padding: 15px;
-    border-radius: var(--border-radius);
-    margin-bottom: 20px;
-    border: 1px dashed var(--color-border);
-}
-
-#status-text {
-    font-size: 1.1em;
-    font-weight: bold;
-}
-
-.status-ready { color: #4CAF50; }
-.status-partial { color: #FFC107; }
-.status-missing { color: #F44336; }
-
-.action-button {
-    background: var(--color-button-primary);
-    color: var(--color-button-primary-text);
-    border: none;
-    padding: 10px 15px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.action-button:hover {
-    background-color: var(--color-button-primary-hover);
-    transform: translateY(-1px);
-}
-
-#current-architecture-title {
-    color: var(--color-secondary);
-    margin-bottom: 10px;
-    font-size: 1.8em;
-}
-
-#modelSearchInput {
-    padding: 10px 14px;
-    border: none;
-    border-bottom: 2px solid var(--color-border);
+/* this additional styling is for the explorer*/
+#file-explorer {
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
     background-color: var(--color-background);
-    color: var(--color-primary-text);
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s, box-shadow 0.3s;
-    font-size: 1em;
-    width: 300px;
-    margin-bottom: 15px;
 }
 
-#modelSearchInput:focus {
-    outline: none;
-    border-bottom: 2px solid var(--color-accent);
-    box-shadow: 0 1px 0 var(--color-accent);
-}
-
-/* Main Grid for Model Cards */
-.model-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    justify-content: start;
-    padding: 10px 0;
-}
-
-/* --- MODEL COMPONENT CARD STYLES --- */
-
-.model-component-card {
-    /* Mimics the structure and look of the flow-card */
-    background-color: var(--color-background-secondary);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    min-height: 150px; /* Ensure a minimum size */
-    position: relative;
-    padding: 15px;
-}
-
-.model-component-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px var(--shadow-hover); /* Using a new variable, ensure it's defined */
-}
-
-/* Card Header/Title Area */
-.card-header {
-    display: flex;
+.file-item {
+    display: block;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--color-border);
+    font-family: sans-serif;
+    color: var(--color-button-primary-text);
+    background-color: var(--color-background);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    gap: 10px;
 }
 
-.model-type-badge {
-    background-color: var(--color-accent);
-    color: #ffffff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.model-component-card h3 {
-    font-size: 1.1em;
-    color: var(--color-secondary);
-    margin: 0;
-    flex-grow: 1; /* Allows the title to take space */
-    padding-right: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Status & File Name Area */
-.card-details {
-    flex-grow: 1;
-    margin-bottom: 15px;
-    font-size: 0.9em;
-}
-
-.current-file-name {
-    display: block;
-    margin-top: 5px;
-    color: var(--color-primary-text);
-    word-break: break-word;
-}
-
-.file-status {
+.file-icon {
+    margin-right: 8px;
     display: flex;
     align-items: center;
+}
+
+
+.file-item.up i {
     font-weight: bold;
-    margin-top: 8px;
-    gap: 8px;
-}
-
-/* Status Colors */
-.status-icon.ready { color: #4CAF50; }
-.status-icon.missing { color: #F44336; }
-.status-icon.downloading { color: var(--color-highlight); }
-
-/* Card Footer/Actions Area */
-.card-actions {
-    display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
-    gap: 8px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--color-border);
-}
-
-.card-action-btn {
-    background: var(--color-button-primary);
-    color: var(--color-button-primary-text);
-    border: none;
-    padding: 8px 12px;
-    border-radius: var(--border-radius);
+    margin-right: 8px;
     cursor: pointer;
-    font-size: 0.8em;
-    transition: background-color 0.3s, transform 0.2s;
 }
 
-.card-action-btn:hover {
-    background-color: var(--color-button-primary-hover);
-    transform: translateY(-1px);
+
+.file-item:hover {
+    background-color: var(--color-highlight);
+    color: var(--color-button-primary-text-hover);
 }
 
-.card-action-btn.delete {
-    background: transparent;
-    border: 1px solid #F44336;
-    color: #F44336;
+.folder {
+    font-weight: bold;
 }
 
-.card-action-btn.delete:hover {
-    background: #F44336;
-    color: white;
+.file {
+    margin-left: 20px;
 }
-/*
-* ------------------ ADDED END ------------------
-*/
 
+.file-item.up {
+    font-weight: bold;
+    color: var(--color-button-primary-text);
+    cursor: pointer;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+
+.modal-content button {
+    padding: 8px 16px;
+}
+
+.close-button {
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.file-name {
+    /*flex-grow: 1;*/
+    cursor: pointer;
+}
+
+.file-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.file-actions button {
+    background: none;
+    border: none;
+    color: var(--color-button-primary-text);
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.file-actions button:hover {
+    color: var(--color-button-primary-text-hover);
+
+}
+
+.file-actions a {
+    /* Copy of button styles */
+    background: none;
+    border: none;
+    color: var(--color-button-primary-text); /* Matches the default icon color */
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s ease;
+    
+    /* Ensure it behaves like a button for layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Remove default link padding */
+}
+
+/* Add hover style for the link as well */
+.file-actions a:hover {
+    color: var(--color-button-primary-text-hover);
+}
+
+/* Style the new preview column */
+.preview-col {
+    /* flex: 1;  This will be set dynamically in JS when visible */
+    padding: 10px;
+    border-left: 1px solid var(--color-border);
+    background-color: var(--color-background-secondary); 
+    overflow-y: auto;
+    min-width: 0; /* Allows shrinking */
+
+    /*Use flexbox to center content vertically */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center;    /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+}
+
+/* Initial hidden state for the preview column */
+.preview-col.hidden {
+    display: none;
+    flex: 0;
+}
+
+#preview-content {
+    text-align: center;
+    /*padding-top: 20px;*/
+    text-align: center; /* Keep this for centering content like the filename */
+    width: 100%; /* Ensure content takes full width for horizontal centering */
+}
+
+
+/*FOR THE HEADER NAVIGATION*/
+.header-nav {
+    display: flex; /* Use flexbox for centering */
+    justify-content: flex-start; /* Center links horizontally */
+    align-items: center; /* Center links vertically */
+    gap: 30px; /* Increase space between links for better visibility */
+    background-color: var(--color-background-pattern); /* Use a solid background color */
+    padding: 0px 0; /* Add vertical padding */
+    margin-bottom: 5px; /* Add space below the nav bar */
+    border: 1px dashed var(--color-highlight); /* Add a more prominent border */
+}
+
+.header-nav a {
+    color: var(--color-button-primary-text); /* Ensure link color is visible */
+    text-decoration: none;
+    font-size: 1.1em; /* Increase font size */
+    font-weight: bold; /* Make the text bold */
+    padding: 10px 20px; /* Increase padding for a larger hit area */
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+}
+
+.header-nav a:hover {
+    background-color: var(--color-button-primary-text); /* Change background on hover */
+    /*color: #ffffff;*/
+    color: var(--color-primary);
+}
+
+.header-nav a i {
+    margin-right: 8px; /* Increase space between icon and text */
+}
+
+/* --- MODAL BASE STYLES (If not already defined) --- */
+/* Assuming 'modal' and 'modal-content' classes already exist for basic dialog layout */
+
+.hidden-initial {
+    /* Used for elements that start hidden via inline style, matching the original 'display: none;' */
+    display: none !important; 
+}
+
+/* --- DOWNLOAD-SPECIFIC STYLES --- */
+
+.download-input {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 8px;
+    box-sizing: border-box; /* Ensures padding doesn't widen the input */
+}
+
+.download-status-message {
+    margin-top: 10px;
+    /* Optional: Add styling for success/error messages */
+}
+
+/* --- PROGRESS BAR STYLES --- */
+
+.progress-container {
+    margin-top: 10px;
+}
+
+.progress-label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: var(--color-primary-text);
+}
+
+.progress-bar-base {
+    height: 20px;
+    background: var(--color-progress-background);
+    border-radius: 4px;
+    position: relative; /* Essential for positioning the text over the bar */
+}
+
+.progress-bar-value {
+    width: 0%; /* Initial state, will be updated by JS */
+    height: 100%;
+    background: var(--color-progress-value);
+    border-radius: 4px;
+}
+
+.progress-text {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%); /* Centers text vertically */
+    font-size: 12px;
+    color: var(--color-primary-text);
+    pointer-events: none; /* Allows clicks to pass through to the element underneath */
+}

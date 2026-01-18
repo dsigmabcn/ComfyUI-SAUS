@@ -31,6 +31,7 @@ export class UIUpdater {
 }
 
 (async function initApp() {
+    if (!window.location.pathname.includes('/flow/')) return;
     try {
         const configLoader = new ConfigurationLoader();
         const config = await configLoader.load();

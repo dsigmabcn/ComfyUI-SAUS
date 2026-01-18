@@ -1,337 +1,250 @@
+import { initializeWebSocketListener } from './websocket.js'; // Websocket for progress download
+import { loadAllModelData, checkModelStatus, downloadModel, deleteModel } from './model-api.js'; // Model API functions
+import { renderArchitectureDetails, updateCardStatus, getMissingRequiredModels } from './card-renderer.js'; // CARD FUNCTIONS
+import { insertElement } from '../../../core/js/common/components/header.js'; //common header of all apps
 
-//import { insertElement } from './core/js/common/components/header.js';
-//import { initializeUI } from '/model_manager/js/main.js';
-document.addEventListener('DOMContentLoaded', () => {
-    //initializeUI();
-    //insertElement();
-    displayDirectory('/workspace/ComfyUI/models', 'file-explorer');
-});
+// --- 1. CORE ARCHITECTURE LIST & CONFIGURATION ---
+let ARCHITECTURES = {};
+window.currentActiveArchitecture = 'SDXL'; // Default view
 
-let currentDirectory = '/workspace/ComfyUI/models'; // Track the current directory
-
-function loadManagerApp() {
-    // Code to load the Manager app into the content area
-    const content = document.querySelector('.content');
-    content.innerHTML = '<div id="manager-app">Manager App Loaded</div>';
-    // Add additional logic to initialize the Manager app
-}
-
-window.loadDownloadApp = function () {
-    /* Show the modal instead of replacing the content*/
-    document.getElementById('download-modal').classList.remove('hidden');
+// A map to associate categories with icons (using Font Awesome). Sidebar categories also follow this order
+const CATEGORY_ICONS = {
+    "Image Models": "fas fa-image", 
+    "Video Models": "fas fa-film", 
+    "Style, Edit, inpaint": "fas fa-palette",
+    "Low VRAM - GGUF": "fas fa-cube",    
+    "LORA": "fas fa-compress-arrows-alt",
+    "Fast - Distillation": "fas fa-bolt",
+    "ControlNet": "fas fa-sitemap", 
+    "Upscalers": "fas fa-magnifying-glass-plus", 
+    // Add any future categories here
 };
 
-window.closeModal = function () {
-    document.getElementById('download-modal').classList.add('hidden');
-};
+// Sidebar navigation: dynamically based on the categories in ARCHITECTURES data (loaded at the DOM).
+function generateSidebarNavigation() {
+    const menuContainer = document.getElementById('dynamic-architecture-menu');
+    if (!menuContainer) return;
 
-window.startDownload = async function () {
-    const url = document.getElementById('download-url').value;
-    const button = document.getElementById('download-button');
-
-    const progressContainer = document.getElementById('download-progress-container');
-    const progressBar = document.getElementById('download-progress-bar');
-    const progressText = document.getElementById('download-progress-text');
-    const progressLabel = document.getElementById('download-progress-label');
-
-    if (!url) {
-        alert("Please enter a URL.");
-        return;
+    // 1. Group Architectures by Category
+    const categorizedMenu = {};
+    for (const key in ARCHITECTURES) {
+        const arch = ARCHITECTURES[key];
+        arch.categories.forEach(category => {
+            if (!categorizedMenu[category]) {
+                categorizedMenu[category] = [];
+            }            
+            categorizedMenu[category].push({ key: key, title: arch.title });
+        });
     }
 
-    // UI: Start progress
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressText.textContent = '';
-    progressLabel.style.display = 'block';
-    button.disabled = true;
+    // 2. Generate HTML for each Category
+    let menuHTML = '';
+    // Sort categories alphabetically for consistent display
+    const sortedCategories = Object.keys(CATEGORY_ICONS).filter(category => categorizedMenu[category]);
+    sortedCategories.forEach((category, index) => {
+        const submenuId = `submenu-${index}`; // Unique ID for the collapsible part
+        const iconClass = CATEGORY_ICONS[category] || 'fas fa-cog';
 
-    // Simulate progress (since we can't track real download progress from server)
-    let fakeProgress = 0;
-    const interval = setInterval(() => {
-        fakeProgress += Math.floor(Math.random() * 10) + 5;
-        if (fakeProgress >= 90) fakeProgress = 90;
-        progressBar.style.width = `${fakeProgress}%`;
-        progressText.textContent = `${fakeProgress}%`;
-    }, 200);
+        // Start of the menu-category (collapsible top level)
+        let categoryBlock = `
+            <div class="menu-category">
+                <span class="menu-item collapsible-header" onclick="toggleSubMenu('${submenuId}')">
+                    <i class="${iconClass}"></i> ${category}
+                    <i class="fas fa-caret-right expand-icon"></i>
+                </span>
+                <div id="${submenuId}" class="submenu hidden">
+        `;
 
-    try {
-        const response = await fetch('/flow/api/download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, targetPath: currentDirectory })
+        // Add submenu items (architectures) for this category. Architectures sortedby title within the category  (alphabetical)
+        categorizedMenu[category].sort((a, b) => a.title.localeCompare(b.title)).forEach(arch => {
+            categoryBlock += `
+                <a class="submenu-item" onclick="loadArchitecture('${arch.key}')">${arch.title}</a>
+            `;
         });
 
-        clearInterval(interval);
+        // End of the menu-category
+        categoryBlock += `
+                </div> 
+            </div>
+        `;
 
-        if (!response.ok) {
-            throw new Error(`Download failed: ${response.statusText}`);
-        }
-
-        progressBar.style.width = '100%';
-        progressText.textContent = '100%';
-
-        setTimeout(() => {
-            window.closeModal();
-            displayDirectory(currentDirectory);
-            progressBar.style.width = '0%';
-            progressText.textContent = '';
-            progressContainer.style.display = 'none';
-            button.disabled = false;
-        }, 1000);
-    } catch (error) {
-        clearInterval(interval);
-        console.error("Download error:", error);
-        alert("Failed to start download.");
-        progressBar.style.width = '0%';
-        progressText.textContent = '';
-        progressContainer.style.display = 'none';
-        button.disabled = false;
-    }
-};
-
-
-
-/*function for uploading files*/
-window.triggerFileUpload = function () {
-    document.getElementById('hidden-upload').click();
-};
-
-window.handleFileUpload = function () {
-    const fileInput = document.getElementById('hidden-upload');
-    const progressContainer = document.getElementById('upload-progress-container');
-    const progressBar = document.getElementById('upload-progress-bar');
-    const progressText = document.getElementById('upload-progress-text');
-
-
-    if (!fileInput.files.length) return;
-
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('targetPath', currentDirectory);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/flow/api/upload', true);
-
-    xhr.upload.onprogress = function (event) {
-        if (event.lengthComputable) {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}%`;
-
-        }
-    };
-
-    xhr.onloadstart = function () {
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-    };
-
-    xhr.onloadend = function () {
-        progressBar.style.width = '100%';
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
-            fileInput.value = '';
-        }, 1000);
-    };
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                displayDirectory(currentDirectory);
-                alert("Upload successful!");
-            } else {
-                alert("Upload failed.");
-            }
-        }
-    };
-
-    xhr.send(formData);
-};
-
-
-
-
-
-/*functions for the navigation of folders */
-
-async function displayDirectory(path, explorerId = 'file-explorer') {
-    currentDirectory = path;
-    const explorer = document.getElementById(explorerId);
-    if (!explorer) {
-        console.warn(`Explorer element with ID "${explorerId}" not found.`);
-        return;
-    }
-    explorer.innerHTML = ''; /* Clear current contents*/
-
-
-    // Add "Go Up" link if not at root
-    const rootPath = '/workspace/ComfyUI/models';
-    if (path !== rootPath) {
-        const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
-        const upItem = document.createElement('div');
-        upItem.className = 'file-item up';
-
-        // Create a span for the name and icon (like other items)
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'file-name';
-        nameSpan.style.display = 'flex';
-        nameSpan.style.alignItems = 'center';
-        nameSpan.style.gap = 'center';
-
-        // Add the icon inside the name span
-        const upIcon = document.createElement('i');
-        upIcon.className = 'fas fa-arrow-up';
-        upIcon.title = 'Go Up';
-        upIcon.style.marginRight = '6px'; // tighter spacing
-
-
-        const upLabel = document.createElement('span');
-        upLabel.textContent = 'Go Up';
-
-        nameSpan.appendChild(upIcon);
-        nameSpan.appendChild(upLabel);
-
-        upItem.appendChild(nameSpan);
-        upItem.onclick = () => displayDirectory(parentPath, explorerId);
-        explorer.appendChild(upItem);
-
-    }
-
-    const directory = await loadDirectory(path);
-    directory.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    directory.forEach(item => {
-        const fileItem = createFileItem(item.name, item.type, `${path}/${item.name}`, explorerId);
-        explorer.appendChild(fileItem);
+        menuHTML += categoryBlock;
     });
+
+    menuContainer.innerHTML = menuHTML;
 }
 
-function createFileItem(name, type, path) {
-    const item = document.createElement('div');
-    item.className = `file-item ${type}`;
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'file-name';
-    nameSpan.textContent = name;
-    nameSpan.onclick = () => {
-        if (type === 'folder') {
-            displayDirectory(path);
+// --- 2. GLOBAL UI HANDLERS (EXPOSED TO WINDOW) ---
+
+/** * Toggles the visibility of a submenu in the sidebar.
+ * @param {string} submenuId - The ID of the submenu UL element.*/
+
+window.toggleSubMenu = function (submenuId) {
+    const submenu = document.getElementById(submenuId);
+    if (!submenu) return;
+
+    // Toggle the 'hidden' class to show/hide the submenu
+    const isHidden = submenu.classList.toggle('hidden');
+
+    // Find the icon and rotate it based on visibility
+    const parentHeader = submenu.previousElementSibling;
+    const expandIcon = parentHeader ? parentHeader.querySelector('.expand-icon') : null;
+
+    if (expandIcon) {
+        if (isHidden) {
+            expandIcon.classList.remove('rotated');
+        } else {
+            expandIcon.classList.add('rotated');
         }
-    };
+    }
+};
+/** Handles the click event for an architecture/category link. Updates the UI to reflect the new active architecture and renders cards.
+ * @param {string} archKey - The key of the architecture (e.g., 'SDXL_BASE').*/
 
-    const actions = document.createElement('span');
-    actions.className = 'file-actions';
+window.loadArchitecture = async function (archKey) {
 
-    if (type === 'file') {
-        // Rename button
-        const renameBtn = document.createElement('button');
-        renameBtn.innerHTML = '<i class="fas fa-pen"></i>';
-        renameBtn.title = 'Rename';
-        renameBtn.onclick = async (e) => {
-            e.stopPropagation();
-            const newName = prompt("Enter new name:", name);
-            if (newName && newName !== name) {
-                await renameFile(path, newName);
-            }
-        };
+    // 1. Update active menu item
+    const allActiveElements = document.querySelectorAll('.menu-item.active, .submenu-item.active');
+    allActiveElements.forEach(el => {
+        el.classList.remove('active');
+    });
 
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.title = 'Delete';
-        deleteBtn.onclick = async (e) => {
-            e.stopPropagation();
-            if (confirm(`Are you sure you want to delete "${name}"?`)) {
-                await deleteFile(path);
-            }
-        };
-
-        actions.appendChild(renameBtn);
-        actions.appendChild(deleteBtn);
+    let newActiveElement = document.querySelector(`[onclick="loadArchitecture('${archKey}')"]`);
+    if (newActiveElement) {
+        newActiveElement.classList.add('active');
     }
 
-    const nameAndActions = document.createElement('div');
-    nameAndActions.style.display = 'flex';
-    nameAndActions.style.alignItems = 'center';
-    nameAndActions.style.gap = '8px';
-
-    nameAndActions.appendChild(nameSpan);
-    nameAndActions.appendChild(actions);
-
-    item.appendChild(nameAndActions);
-
-
-    return item;
-}
-
-
-
-
-async function loadDirectory(path) {
-    try {
-        const response = await fetch(`/flow/api/directory?path=${encodeURIComponent(path)}`);
-        if (!response.ok) {
-            throw new Error(`Failed to load directory: ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error loading directory:", error);
-        return [];
+    // 🚨 FIX: Synchronously clear the grid BEFORE the asynchronous render begins
+    const componentGrid = document.getElementById('modelComponentGrid');
+    if (componentGrid) {
+    componentGrid.innerHTML = ''; // Ensure the grid is cleared immediately
     }
-}
-
-async function renameFile(currentPath, newName) {
-    try {
-        const response = await fetch('/flow/api/rename-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ currentPath, newName })
-        });
-        if (!response.ok) {
-            throw new Error(`Rename failed: ${response.statusText}`);
-        }
-        await displayDirectory(currentDirectory);
-    } catch (error) {
-        console.error("Rename error:", error);
-        alert("Failed to rename file.");
-    }
-}
-
-async function deleteFile(filePath) {
-    try {
-        const response = await fetch('/flow/api/delete-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filePath })
-        });
-        if (!response.ok) {
-            throw new Error(`Delete failed: ${response.statusText}`);
-        }
-        await displayDirectory(currentDirectory);
-    } catch (error) {
-        console.error("Delete error:", error);
-        alert("Failed to delete file.");
+    // 2. Update the main content header and render cards
+    window.currentActiveArchitecture = archKey;
+    const archData = ARCHITECTURES[archKey];
+    if (archData) {
+        document.getElementById('current-architecture-title').textContent = archData.title;
+        //await renderArchitectureDetails(archData);
+        await renderArchitectureDetails(archData, ARCHITECTURES);
     }
 };
 
-import { insertElement } from '../../../core/js/common/components/header.js';
+/**
+ * Initiates the download of all core components currently missing for the active architecture.
+ * This function is called when the 'Download All Missing' button is clicked.
+ */
+window.downloadAllMissing = async function() {
+    console.log('[Download All Missing] Initiating batch download for required models.');
+    
+    // Use the imported function to get the list of missing models
+    const missingModels = getMissingRequiredModels();
+    
+    if (missingModels.length === 0) {
+        alert('No missing core components found to download.');
+        return;
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const headerContainer = document.querySelector('header');
-            insertElement(headerContainer);
+    const confirmMessage = `Are you sure you want to download ${missingModels.length} missing core component(s) for the '${ARCHITECTURES[window.currentActiveArchitecture].title}' architecture?`;
 
-            // Delay the update to ensure the header is fully rendered
-            setTimeout(() => {
-                const appNameElement = document.querySelector('.appName');
-                if (appNameElement) {
-                    appNameElement.textContent = 'Model Manager';
-                    appNameElement.style.fontSize = '1.5em'; // or '20px', '24px', etc.
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    const actionButtonEl = document.getElementById('actionButton');
+    if (actionButtonEl) {
+        actionButtonEl.disabled = true;
+        actionButtonEl.textContent = 'Starting Downloads...';
+    }
 
-                }
-            }, 300);
-        });
+    // Call the individual downloadModel function for each missing model
+    for (const model of missingModels) {
+        // Pass null for the event as we don't need UI feedback on the batch button itself
+        // The individual model card will be updated via the WebSocket connection.
+        await downloadModel(model.type, model.url_model, model.model_path, null);
+    }
+
+    // Re-enable and reset the button after initiating all downloads
+    if (actionButtonEl) {
+        actionButtonEl.disabled = false; 
+        actionButtonEl.textContent = 'Download All Missing'; 
+    }
+
+    console.log(`[Download All Missing] Started download task initiation for ${missingModels.length} models.`);
+};
 
 
 
+
+window.updateCardStatus = updateCardStatus;
+
+window.downloadModel = downloadModel;
+window.deleteModel = deleteModel;
+window.downloadAllMissing = window.downloadAllMissing; // Exposes the batch download function
+
+// --- 3. INITIALIZATION --- 
+
+
+export function initializeUI() {
+    window.loadArchitecture(currentActiveArchitecture);
+    window.toggleSubMenu('submenu-0');
+}
+
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("[DEBUG: Startup] main.js DOMContentLoaded handler executed."); 
+
+    initializeWebSocketListener(); // <--- CALL IT HERE
+    console.log("[DEBUG: Startup] main.js DOMContentLoaded after initializeWebScoketListener"); 
+
+    // 1. Fetch Architectures Data
+    try {
+        const response = await fetch('/flow/api/architectures');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        ARCHITECTURES = await response.json();
+        window.ARCHITECTURES = ARCHITECTURES;
+    } catch (error) {
+        console.error("CRITICAL: Failed to load architectures data.", error);
+        document.getElementById('current-architecture-title').textContent = 'Error Loading Architectures';
+        return;
+    }
+
+    // 2. Fetch Model Component Data (MUST BE AWAITED BEFORE RENDERING)
+    // We update loadAllModelData to be awaited here
+    await loadAllModelData();
+
+
+
+    const headerContainer = document.querySelector('header');
+
+    if (headerContainer) {
+        // 1. Insert header element
+        insertElement(headerContainer);
+
+        setTimeout(() => {
+            const appNameElement = document.querySelector('.appName');
+            if (appNameElement) {
+                appNameElement.textContent = 'File Manager';
+                appNameElement.style.fontSize = '1.5em'; // or '20px', '24px', etc.
+
+            }
+        }, 300);
+    }
+
+    // 2. Set copyright year
+    const copyrightEl = document.getElementById('copyright');
+    if (copyrightEl) {
+        copyrightEl.textContent = `© ${new Date().getFullYear()} Flow.`;
+    }
+
+    // 3. Initialize the Model Manager UI
+    generateSidebarNavigation(); // <--- NEW STEP: Generate the menu first
+    //loadAllModelData(); // <--- IN HERE?
+
+
+
+    initializeUI();
+});

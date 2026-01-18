@@ -1,4 +1,16 @@
 const appName = "Flow";
+/*Defining the navigation menu below the actual header*/
+const navHTML = `
+    <nav class="header-nav">
+        <a href="/flow"><span><i class="fas fa-water"></i> Flow</span></a>
+        <!-- <a href="/flow/model_manager"><i class="fas fa-cube"></i> Model Manager</a> -->
+        <!-- <a href="/flow/lora_manager"><i class="fas fa-cube"></i> Lora Manager</a> "cooming soon"-->
+        <a href="/flow/file_manager" ><i class="fas fa-folder"></i> File Manager</a>
+        <!-- <a href="#settings-placeholder"><i class="fas fa-cog"></i> Settings</a> -->
+        <a href="/" target="_blank"><i class="fas fa-project-diagram"></i> ComfyUI</a>
+    </nav>
+`;
+/* $navHTML is included now in the "mid" section*/
 const headerHTML = `
   <a href="/flow">
     <div id="logo">
@@ -13,7 +25,7 @@ const headerHTML = `
     </div>
   </a>
   <div class="appName"><h2>${appName}s</h2></div>
-  <div id="mid"></div>
+  <div id="mid">${navHTML} </div>
   <div id="right-header">
     <div id="theme-selector"></div>
 

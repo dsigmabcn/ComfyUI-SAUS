@@ -16,6 +16,7 @@ FLOWS_PATH = WEBROOT / "flows"
 LINKER_PATH = WEBROOT / "linker"
 #Added to access the new model manager app
 MODEL_MANAGER_PATH = WEBROOT / "model_manager"
+FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
 CUSTOM_THEMES_DIR = WEBROOT / 'custom-themes'
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
@@ -23,9 +24,21 @@ CUSTOM_NODES_DIR = ROOT_DIR.parent
 EXTENSION_NODE_MAP_PATH = ROOT_DIR.parent / "ComfyUI-Manager" / "extension-node-map.json"
 #added constant to point to the Models directory in the api handlers
 MODELS_DIRECTORY = CUSTOM_NODES_DIR.parent / "models"
+INPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "input"
+OUTPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "output"
+COMFYUI_DIRECTORY = CUSTOM_NODES_DIR.parent
+#Previously in api_handlers
+DATA_DIR = Path(__file__).parent / "data"
+PREVIEWS_REGISTRY_DIR = DATA_DIR / "model_previews_registry"
+PREVIEWS_IMAGES_DIR = DATA_DIR / "model_previews"
+# Paths for the file manager
+FILE_REGISTRY_DIR = DATA_DIR / "file_registry"
+FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
-#FLOWS_DOWNLOAD_PATH = 'https://github.com/diStyApps/flows_lib'
-FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/lib_WanVACE_flows'
+
+#FLOWS_DOWNLOAD_PATH = 'https://github.com/diStyApps/flows_lib' #ORIGINAL CODE
+#FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/lib_WanVACE_flows' #VACE REPO
+FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/lib_all_flows' #APP REPO
 
 
 SAFE_FOLDER_NAME_REGEX = re.compile(r'^[\w\-]+$')

@@ -179,13 +179,24 @@ function scrollToSelectedItem(listContainer, selectedValue) {
     }
 }
 
+
+// correction of building path
+// A simple function to build the path correctly
+function buildPath(parent, key) {
+    if (parent) {
+        return pathToKey(`${parent}/${key}`);
+    }
+    return pathToKey(key);
+}
+
 function createNestedList(nestedData, parentUl, parentPath, handleSelection, getImageUrl, selectedValue, autoExpand = false) {
     const allKeys = Object.keys(nestedData);
     const folderKeys = allKeys.filter(k => !nestedData[k]._isLeaf);
     const leafKeys = allKeys.filter(k => nestedData[k]._isLeaf);
 
     folderKeys.forEach(key => {
-        const currentPath = parentPath ? `${parentPath}\\${key}` : key;
+        //const currentPath = parentPath ? `${parentPath}\\${key}` : key;
+        const currentPath = buildPath(parentPath,key); // NEW
         const folderHtml = `
           <li>
             <div class="dropdownFolderCard">
@@ -237,8 +248,11 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
     });
 
     leafKeys.forEach(key => {
-        const currentPath = parentPath ? `${parentPath}\\${key}` : key;
-        const mk = pathToKey(currentPath);
+        //const currentPath = parentPath ? `${parentPath}\\${key}` : key;
+        //const mk = pathToKey(currentPath);
+        const currentPath = buildPath(parentPath,key); //New to correct the paths for linux system
+        const mk = currentPath; //NEW to correct the path for linux system
+
         const liHtml = `
           <li class="dropdownItemCard" data-model-path="${currentPath}">
             <div class="dropdownCardTopRow">
@@ -265,7 +279,7 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
     const visiblePaths = [];
 
     items.forEach(item => {
-        if (!filterTerm || item.toLowerCase().includes(filterTerm.toLowerCase())) {
+        if (!filterTerm || item.toLowerCase().includes(filterTerm.toLowerCase())) {            
             visiblePaths.push(item);
             const mk = pathToKey(item);
             const liHtml = `
@@ -742,6 +756,12 @@ export function populateDropdown(
 
         updateToggleButton(toggleButton, isAllExpanded);
 
+        // TO normalize
+        function normalizePath(path) {
+            return path.replace(/\\/g, '/');
+        }
+        /////////////
+        
         function onSearchChange() {
             const filter = searchInput.value.trim().toLowerCase();
             listContainer.innerHTML = '';
@@ -757,7 +777,13 @@ export function populateDropdown(
                     ? parseInt(nestingTriggerInput.value, 10)
                     : DEFAULT_NESTING_TRIGGER_VALUE;
                 const dynamicNestingTrigger = userTriggerValue > 0 ? userTriggerValue : DEFAULT_NESTING_TRIGGER_VALUE;
-                const filteredItems = items.filter(it => it.toLowerCase().includes(filter));
+                //const filteredItems = items.filter(it => it.toLowerCase().includes(filter));
+
+                // NORMALIZE BEFORE FILTERING //
+                const normalizedItems = items.map(normalizePath);
+                const filteredItems = normalizedItems.filter(it => it.toLowerCase().includes(filter));
+                console.log(filteredItems); // This will print the filtered array to the browser's console
+
 
                 if (!useNesting) {
                     createFlatList(filteredItems, listContainer, handleSelection, getImageUrl, filter, selectedValue);

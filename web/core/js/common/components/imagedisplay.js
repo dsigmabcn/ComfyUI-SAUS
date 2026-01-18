@@ -22,6 +22,18 @@ class ImageLoader {
         }
 
         mediaElement.onerror = () => {
+            // Try to recover if it's a 404 on a view URL by searching for the file
+            if (!mediaElement.dataset.retried && mediaUrl.includes('filename=')) {
+                mediaElement.dataset.retried = "true";
+                // Extract filename from URL (works for /view?filename=... or similar)
+                const urlObj = new URL(mediaUrl, window.location.href);
+                const filename = urlObj.searchParams.get('filename');
+                if (filename) {
+                    console.log(`[ImageLoader] Image failed. Attempting to find '${filename}' in subfolders...`);
+                    mediaElement.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                    return;
+                }
+            }
             console.error(`Failed to load ${isVideo ? 'video' : 'image'}: ${mediaUrl}`);
             this.imageContainer.innerHTML = `<p>Failed to load ${isVideo ? 'video' : 'image'}.</p>`;
         };
@@ -149,6 +161,18 @@ class HistoryManager {
         img.style.width = '100%';
         img.style.height = 'auto';
         img.onerror = (e) => {
+            if (!img.dataset.retried && src.includes('filename=')) {
+                img.dataset.retried = "true";
+                try {
+                    const urlObj = new URL(src, window.location.href);
+                    const filename = urlObj.searchParams.get('filename');
+                    if (filename) {
+                        img.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                        return;
+                    }
+                } catch (err) {
+                }
+            }
             console.error('Failed to load thumbnail image', e);
         };
         return img;
@@ -162,6 +186,20 @@ class HistoryManager {
         video.loop = true;
         video.style.width = '100%';
         video.style.height = 'auto';
+
+        video.onerror = () => {
+            if (!video.dataset.retried && src.includes('filename=')) {
+                video.dataset.retried = "true";
+                try {
+                    const urlObj = new URL(src, window.location.href);
+                    const filename = urlObj.searchParams.get('filename');
+                    if (filename) {
+                        video.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                    }
+                } catch (err) {
+                }
+            }
+        };
 
         video.onloadeddata = function() {
             this.currentTime = 0;
@@ -621,6 +659,18 @@ class Lightbox {
         }
 
         this.mediaElement.onerror = () => {
+            if (!this.mediaElement.dataset.retried && mediaUrl.includes('filename=')) {
+                this.mediaElement.dataset.retried = "true";
+                try {
+                    const urlObj = new URL(mediaUrl, window.location.href);
+                    const filename = urlObj.searchParams.get('filename');
+                    if (filename) {
+                        this.mediaElement.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                        return;
+                    }
+                } catch (err) {
+                }
+            }
             console.error(`Failed to load media: ${mediaUrl}`);
             this.clearMedia();
             const errorMsg = document.createElement('p');

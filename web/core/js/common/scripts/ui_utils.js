@@ -1,6 +1,9 @@
 import { app } from "../../scripts/app.js";
 const extension = {
     name: "flow.widget",
+    async setup() {
+        initializeWidgets();
+    },
 };
 
 app.registerExtension(extension);
@@ -12,6 +15,7 @@ const createWidget = ({ className, text, tooltip, includeIcon, svgMarkup }) => {
     const button = document.createElement('button');
     button.className = className;
     button.setAttribute('aria-label', tooltip);
+    button.classList.add('flow-widget-btn');
     button.title = tooltip;
 
     if (includeIcon && svgMarkup) {
@@ -42,6 +46,8 @@ const onClick = () => {
 };
 
 const addWidgetMenuRight = (menuRight) => {
+    if (document.querySelector('.actionbar-container')) return;
+
     let buttonGroup = menuRight.querySelector('.comfyui-button-group');
 
     if (!buttonGroup) {
@@ -49,6 +55,8 @@ const addWidgetMenuRight = (menuRight) => {
         buttonGroup.className = 'comfyui-button-group';
         menuRight.appendChild(buttonGroup);
     }
+
+    if (buttonGroup.querySelector('.flow-widget-btn')) return;
 
     const flowButton = createWidget({
         className: 'comfyui-button comfyui-menu-mobile-collapse primary',
@@ -78,6 +86,11 @@ const addWidgetMenu = (menu) => {
 };
 
 const addWidget = (selector, callback) => {
+    const existing = document.querySelector(selector);
+    if (existing) {
+        callback(existing);
+        return;
+    }
     const observer = new MutationObserver((mutations, obs) => {
         const element = document.querySelector(selector);
         if (element) {
@@ -89,9 +102,34 @@ const addWidget = (selector, callback) => {
     observer.observe(document.body, { childList: true, subtree: true });
 };
 
+const addWidgetActionBar = (actionBar) => {
+    const buttonGroups = actionBar.querySelectorAll('.comfyui-button-group');
+    if (buttonGroups.length > 0) {
+        let targetGroup = buttonGroups[0];
+        for (const group of buttonGroups) {
+            if (group.children.length > 0) {
+                targetGroup = group;
+                break;
+            }
+        }
+
+        if (targetGroup.querySelector('.flow-widget-btn')) return;
+
+        const flowButton = createWidget({
+            className: 'comfyui-button comfyui-menu-mobile-collapse primary',
+            text: '',// 'Flow',
+            tooltip: 'Launch Flow',
+            includeIcon: true,
+            svgMarkup: getFlowIcon(), 
+        });
+        targetGroup.appendChild(flowButton);
+    }
+};
+
 const initializeWidgets = () => {
     addWidget('.comfyui-menu-right', addWidgetMenuRight);
     addWidget('.comfy-menu', addWidgetMenu);
+    addWidget('.actionbar-container', addWidgetActionBar);
 };
 
 const getFlowIcon = () => {
@@ -145,5 +183,3 @@ const getFlowIcon = () => {
         </svg>
     `;
 };
-
-initializeWidgets();

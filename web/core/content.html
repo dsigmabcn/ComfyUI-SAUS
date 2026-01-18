@@ -9,7 +9,28 @@
                 </svg>
                 </button>
                 <div class="left-panel-content">
-                    <div id="side-workflow-controls" class="custom-scrollbar"></div>
+                    <div id="side-workflow-controls" class="custom-scrollbar">
+                                                
+                        <div class="control-tabs-header">
+                            <button class="tab-button active" data-target="basic-tab">Basic Controls</button>
+                            <button class="tab-button" data-target="advanced-tab">Advanced Controls</button>
+                        </div>
+
+                        <div class="control-tabs-content">
+                            
+                            <div class="tab-panel active" id="basic-tab">
+                                <div id="prompts"></div>
+                                <div id="basic-controls-container"></div>
+                            </div>
+
+                            <div class="tab-panel" id="advanced-tab">
+                                <div id="advanced-controls-container"></div>
+                            </div>
+
+                        </div>                     
+
+
+                    </div> <!--sidebar controls-->
 
                 </div>
             </aside>
@@ -26,7 +47,7 @@
                     <div id="quick-controls"></div>
                     <div id="pluginUIContainer" class="plugin-ui-container">
                     </div>
-                    <div id="prompts"></div>
+                    <!--<div id="prompts"></div>-->
                 </div>
             </section>
 

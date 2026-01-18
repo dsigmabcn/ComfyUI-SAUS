@@ -10,22 +10,29 @@ from aiohttp import web
 from typing import Any
 from io import BytesIO
 from PIL import Image
+from typing import Any
+import sys
+import asyncio
+from server import PromptServer
+
 
 from .constants import (
     APP_CONFIGS, APP_VERSION, EXTENSION_NODE_MAP_PATH,
     CUSTOM_NODES_DIR, FLOWMSG, logger, FLOWS_PATH, WEBROOT, CORE_PATH,
-    SAFE_FOLDER_NAME_REGEX, ALLOWED_EXTENSIONS, CUSTOM_THEMES_DIR, FLOWS_CONFIG_FILE, MODELS_DIRECTORY
+    SAFE_FOLDER_NAME_REGEX, ALLOWED_EXTENSIONS, CUSTOM_THEMES_DIR, FLOWS_CONFIG_FILE, MODELS_DIRECTORY,
+    INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, COMFYUI_DIRECTORY, FILE_REGISTRY_DIR, FILE_IMAGES_DIR, #added for file_manager
+    DATA_DIR, PREVIEWS_REGISTRY_DIR, PREVIEWS_IMAGES_DIR,
+    MODEL_MANAGER_PATH,
 )
 
-DATA_DIR = Path(__file__).parent / "data"
-PREVIEWS_REGISTRY_DIR = DATA_DIR / "model_previews_registry"
-PREVIEWS_IMAGES_DIR = DATA_DIR / "model_previews"
 
 def ensure_data_folders():
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         PREVIEWS_REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
         PREVIEWS_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+        FILE_REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
+        FILE_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     except Exception as e:
         logger.error(f"{FLOWMSG}: Could not create data dirs: {e}")
 
@@ -128,11 +135,16 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
         if request.method == 'POST':
             data = await request.json()
             raw_paths = data.get('paths', [])
+            print("************ raw paths:")
+            print(raw_paths)
             if not isinstance(raw_paths, list):
                 return web.Response(status=400, text="Invalid JSON: 'paths' must be an array")
 
             for rp in raw_paths:
-                rp = urllib.parse.unquote(rp).strip()
+                #rp = urllib.parse.unquote(rp).strip()
+                rp = pathToKey(urllib.parse.unquote(rp).strip())
+                print("/////// rp from post statement  ///////")
+                print(rp)
                 if not rp:
                     continue
                 pid = get_preview_id(rp)
@@ -144,6 +156,8 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                     b64 = base64.b64encode(b).decode("utf-8")
                     data_url = f"data:image/jpeg;base64,{b64}"
                     result_map[rp] = data_url
+                    print("printing result map")
+                    print(result_map)
 
             return web.json_response(result_map)
 
@@ -151,10 +165,13 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
         if paths_param:
             raw_split = paths_param.split(',')
             for rp in raw_split:
-                rp = rp.strip()
+                #rp = rp.strip()
                 if not rp:
                     continue
-                rp = urllib.parse.unquote(rp)
+                #rp = urllib.parse.unquote(rp)
+                rp = pathToKey(urllib.parse.unquote(rp).strip())
+                print("/////// rp from paths param statement  ///////")
+                print(rp)
                 pid = get_preview_id(rp)
                 _, image_folder = get_preview_paths(pid)
                 thumb = image_folder / "thumbnail.jpg"
@@ -163,6 +180,8 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                         b = tf.read()
                     b64 = base64.b64encode(b).decode("utf-8")
                     result_map[rp] = f"data:image/jpeg;base64,{b64}"
+                print("printing result map")
+                print(result_map)
             return web.json_response(result_map)
 
         for root, dirs, files in os.walk(PREVIEWS_REGISTRY_DIR):
@@ -184,6 +203,8 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                                 b = tf.read()
                             b64 = base64.b64encode(b).decode("utf-8")
                             result_map[mp] = f"data:image/jpeg;base64,{b64}"
+                            print("!!!!!!! from thumb.exists:")
+                            print(result_map)
                     except Exception as ex:
                         logger.error(f"{FLOWMSG}: Error reading registry {regp}: {ex}")
                         continue
@@ -198,10 +219,17 @@ async def get_model_preview_handler(request: web.Request) -> web.Response:
     try:
         ensure_data_folders()
         rawPath = request.query.get("modelPath", None)
+        print("*************get_model_preview")
+        print(rawPath)
         if not rawPath:
             return web.Response(status=400, text="Missing 'modelPath'")
 
+        rawPath = pathToKey(rawPath) # Add this line to normalize the path
+        print("********** after path to Key")
+        print(rawPath)
         pid = get_preview_id(rawPath)
+        print("////////pid")
+        print(pid)
         _, image_folder = get_preview_paths(pid)
 
         thumb = image_folder / "thumbnail.jpg"
@@ -210,6 +238,10 @@ async def get_model_preview_handler(request: web.Request) -> web.Response:
                 b = tf.read()
             b64 = base64.b64encode(b).decode("utf-8")
             data_url = f"data:image/jpeg;base64,{b64}"
+            print("rawPath:")
+            print(rawPath)
+            print("data_url")
+            print(data_url)
             return web.json_response({rawPath: data_url})
         else:
             return web.Response(status=404, text="Preview not found")
@@ -705,8 +737,11 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
         requested_path = Path(path_param).resolve()
 
         # Ensure the requested path is within the allowed models directory
-        if not str(requested_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        #if not str(requested_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        #    return web.json_response({"error": "Access denied"}, status=403)
+        if not str(requested_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
             return web.json_response({"error": "Access denied"}, status=403)
+
 
         if not requested_path.exists() or not requested_path.is_dir():
             return web.json_response({"error": "Directory not found"}, status=404)
@@ -785,7 +820,8 @@ async def rename_file_handler(request: web.Request) -> web.Response:
             return web.json_response({"error": "Missing newName"}, status=400)
 
         # Ensure the file is within the allowed directory
-        if not str(current_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        #if not str(current_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        if not str(current_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
             return web.json_response({"error": "Access denied"}, status=403)
 
         new_path = current_path.parent / new_name
@@ -808,7 +844,8 @@ async def delete_file_handler(request: web.Request) -> web.Response:
             return web.json_response({"error": "File not found"}, status=404)
 
         # Ensure the file is within the allowed directory
-        if not str(file_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        #if not str(file_path).startswith(str(MODELS_DIRECTORY.resolve())):
+        if not str(file_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
             return web.json_response({"error": "Access denied"}, status=403)
 
         if file_path.is_dir():
@@ -822,6 +859,7 @@ async def delete_file_handler(request: web.Request) -> web.Response:
         return web.json_response({"error": str(e)}, status=500)
 
 #This is the handler to upload a file
+''' 
 async def upload_file_handler(request: web.Request) -> web.Response:
     reader = await request.multipart()
 
@@ -853,3 +891,486 @@ async def upload_file_handler(request: web.Request) -> web.Response:
             f.write(chunk)
 
     return web.json_response({'status': 'success', 'filename': filename})
+'''
+
+
+async def upload_file_handler(request: web.Request) -> web.Response:
+    print("\n--- UPLOAD STARTED (Simple Sequential Read) ---")
+    
+    try:
+        reader = await request.multipart()
+    except ValueError:
+        return web.json_response({'error': 'Invalid content type'}, status=400)
+    
+    # ----------------------------------------------------
+    # 1. Read the 'file' field (The large stream)
+    # ----------------------------------------------------
+    file_field = await reader.next()
+    if not file_field or file_field.name != 'file':
+        print(f"DEBUG: ERROR - Expected 'file' field first, got '{file_field.name if file_field else 'None'}'")
+        return web.json_response({'error': 'Missing or incorrect first field: expected file'}, status=400)
+    
+    # Read the ENTIRE file content into memory immediately
+    file_content = await file_field.read()
+    bytes_to_write = len(file_content)
+    
+    print(f"DEBUG: Read file content into memory. Size: {bytes_to_write} bytes")
+    
+    if bytes_to_write == 0:
+        print("DEBUG: FATAL ERROR - Content read from stream was 0 bytes. Stream consumed elsewhere?")
+        # Consume the next field (targetPath) to ensure connection doesn't hang
+        await reader.next() 
+        return web.json_response({'error': 'File data stream empty (consumed by server).'}, status=500)
+
+
+    # ----------------------------------------------------
+    # 2. Read the 'targetPath' field (The small text)
+    # ----------------------------------------------------
+    target_path_field = await reader.next()
+    
+    if not target_path_field or target_path_field.name != 'targetPath':
+        print(f"DEBUG: ERROR - Expected 'targetPath' field next, got '{target_path_field.name if target_path_field else 'None'}'")
+        return web.json_response({'error': 'Missing or incorrect second field: expected targetPath'}, status=400)
+
+    target_path = await target_path_field.text()
+    print(f"DEBUG: targetPath received: '{target_path}'")
+    
+    
+    # ----------------------------------------------------
+    # 3. Save the file
+    # ----------------------------------------------------
+    
+    filename = file_field.filename
+    os.makedirs(target_path, exist_ok=True)
+    file_path = os.path.join(target_path, filename)
+    print(f"DEBUG: Full save path constructed: '{file_path}'")
+
+    try:
+        with open(file_path, 'wb') as f:
+            f.write(file_content)
+        
+        print(f"DEBUG: File close successful. Total bytes written: {bytes_to_write}")
+
+    except Exception as e:
+        print(f"DEBUG: FATAL ERROR during file save: {e}", file=sys.stderr)
+        return web.json_response({'error': f'Failed to save file: {e}'}, status=500)
+
+    return web.json_response({'status': 'success', 'filename': filename})
+
+
+
+# This function handles the request for the list of flows
+async def get_flows_list_handler(request):
+    """
+    Handles GET requests for the flows_list.json file.
+    """
+    file_path = FLOWS_PATH / "flows_list.json"
+    
+    # Check if the file exists
+    if not file_path.exists():
+        return web.Response(text=json.dumps({"error": "File not found"}), status=404, content_type='application/json')
+    
+    try:
+        # Read the contents of the file
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        
+        # Return the data as a JSON response
+        return web.json_response(data)
+    except Exception as e:
+        return web.Response(text=json.dumps({"error": str(e)}), status=500, content_type='application/json')
+
+#This handler is to be able to download files:
+
+async def download_file_handler(request: web.Request) -> web.Response:
+    """Handles file download requests."""
+    # Get the file path from the query parameters.
+    file_path_str = request.query.get('filePath')
+
+    if not file_path_str:
+        return web.json_response({'error': 'Missing filePath parameter'}, status=400)
+
+    # If force_find is requested, search for the filename in the output directory
+    if request.query.get('force_find'):
+        target_filename = os.path.basename(file_path_str)
+        for root, dirs, files in os.walk(OUTPUT_FILES_DIRECTORY):
+            if target_filename in files:
+                file_path_str = os.path.join(root, target_filename)
+                break
+
+    # Use a secure path to prevent directory traversal attacks
+    # For example, ensure the path is within your designated directories
+    # like /workspace/ComfyUI/models or /workspace/ComfyUI/output
+    if not file_path_str.startswith(('/workspace/ComfyUI/input', '/workspace/ComfyUI/output', '/workspace/ComfyUI/models')):
+        return web.json_response({'error': 'Invalid file path'}, status=403)
+
+    # Get the file name from the path for the Content-Disposition header
+    file_name = os.path.basename(file_path_str)
+
+    try:
+        # Use web.FileResponse to serve the file efficiently
+        return web.FileResponse(file_path_str, headers={
+            'Content-Disposition': f'inline; filename="{file_name}"'
+        })
+    except FileNotFoundError:
+        return web.json_response({'error': 'File not found'}, status=404)
+    except Exception as e:
+        return web.json_response({'error': f'An error occurred: {e}'}, status=500)
+
+
+
+TEMP_UPLOAD_DIR = "/tmp/flow_uploads" # Use a dedicated temp path
+
+async def upload_chunk_handler(request: web.Request) -> web.Response:
+    try:
+        reader = await request.multipart()
+    except ValueError:
+        return web.json_response({'error': 'Invalid content type'}, status=400)
+
+    # Dictionary to hold all required multipart data
+    data = {}
+    while True:
+        field = await reader.next()
+        if field is None:
+            break
+        
+        if field.name == 'fileChunk':
+            data['chunk'] = await field.read() # Read the chunk data
+            data['filename'] = field.filename
+        else:
+            data[field.name] = await field.text() # Read text fields
+
+    file_id = data.get('fileId')
+    target_path = data.get('targetPath')
+    chunk_index = data.get('chunkIndex')
+    is_last = data.get('isLast') == 'true'
+    
+    if not file_id or not data.get('chunk'):
+        return web.json_response({'error': 'Missing fileId or chunk data'}, status=400)
+    
+    # -----------------------------------------------
+    # 1. Store the chunk in a temporary file
+    # -----------------------------------------------
+    
+    # Create a sub-directory for this specific file upload session
+    temp_file_dir = Path(TEMP_UPLOAD_DIR) / file_id
+    temp_file_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Write the chunk to a file named after its index
+    chunk_path = temp_file_dir / f"chunk_{chunk_index}.part"
+    with open(chunk_path, 'wb') as f:
+        f.write(data['chunk'])
+
+    # -----------------------------------------------
+    # 2. Check for the final chunk and assemble
+    # -----------------------------------------------
+    
+    if is_last:
+        final_file_path = Path(target_path) / data.get('fileName')
+        final_file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Assemble all chunks in order
+        try:
+            with open(final_file_path, 'wb') as outfile:
+                for i in range(int(chunk_index) + 1):
+                    part_path = temp_file_dir / f"chunk_{i}.part"
+                    with open(part_path, 'rb') as infile:
+                        shutil.copyfileobj(infile, outfile)
+            
+            # Clean up the temporary files
+            shutil.rmtree(temp_file_dir)
+            
+            return web.json_response({'status': 'success', 'message': 'File assembled successfully'})
+            
+        except Exception as e:
+            logger.error(f"Assembly error for {file_id}: {e}")
+            return web.json_response({'error': 'File assembly failed'}, status=500)
+    
+    return web.json_response({'status': 'chunk_received', 'chunk': chunk_index})
+
+
+ARCHITECTURES_FILE = MODEL_MANAGER_PATH / "data" / "architectures.json"
+
+async def get_architectures_handler(request: web.Request) -> web.Response:
+    """
+    Handles the GET request for the /flow/api/architectures endpoint.
+    Reads the architectures data from a JSON file and returns it as a response.
+    """
+    try:
+        # Check if the file exists before attempting to read it.
+        if not ARCHITECTURES_FILE.exists():
+            return web.json_response(
+                {"error": "Architectures data file not found."},
+                status=404
+            )
+
+        # Open, read, and parse the JSON file.
+        with open(ARCHITECTURES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # Return the JSON data with a 200 OK status.
+        return web.json_response(data, status=200)
+
+    except json.JSONDecodeError:
+        # Handle cases where the JSON file is malformed.
+        return web.json_response(
+            {"error": "Invalid JSON format in the architectures file."},
+            status=500
+        )
+    except Exception as e:
+        # Catch any other unexpected errors and return a 500 status.
+        return web.json_response(
+            {"error": f"An unexpected error occurred: {e}"},
+            status=500
+        )
+
+MODEL_DATA_FILE = MODEL_MANAGER_PATH / "data" / "models_data.json"
+
+async def get_model_data_handler(request: web.Request) -> web.Response:
+    """
+    Handles the GET request for the get_model_data_handler/flow/api/data-model-data/ endpoint.
+    Reads the information of the models and from a JSON file and returns it as a response.
+    """
+    try:
+        # Check if the file exists before attempting to read it.
+        if not MODEL_DATA_FILE.exists():
+            return web.json_response(
+                {"error": "Data Model file not found."},
+                status=404
+            )
+
+        # Open, read, and parse the JSON file.
+        with open(MODEL_DATA_FILE , 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # Return the JSON data with a 200 OK status.
+        return web.json_response(data, status=200)
+
+    except json.JSONDecodeError:
+        # Handle cases where the JSON file is malformed.
+        return web.json_response(
+            {"error": "Invalid JSON format in the Models Data file."},
+            status=500
+        )
+    except Exception as e:
+        # Catch any other unexpected errors and return a 500 status.
+        return web.json_response(
+            {"error": f"An unexpected error occurred: {e}"},
+            status=500
+        )
+
+#### TO CHECK IF THE MODEL IS AVAILABLE OR NOT
+
+async def check_model_status_handler(request: web.Request) -> web.Response:
+    model_path = request.query.get('model_path', '')
+    file_id = request.query.get('file_id', '')
+
+    if not model_path or not file_id:
+        return web.json_response({'status': 'error', 'message': 'Missing model_path or file_id'}, status=400)
+
+    # Construct the full absolute path
+    # Note: Using Path() handles joining correctly and securely
+    full_file_path = MODELS_DIRECTORY / model_path.lstrip('/') / file_id 
+
+    # Ensure the path is safely inside the MODELS_DIRECTORY
+    try:
+        full_file_path.resolve().relative_to(MODELS_DIRECTORY.resolve())
+    except ValueError:
+        return web.json_response({'status': 'error', 'message': 'Invalid file path.'}, status=403)
+
+    # Check existence
+    if full_file_path.exists() and full_file_path.is_file():
+        status = 'ready'
+    else:
+        status = 'missing'
+
+    return web.json_response({'status': status})
+
+#### TO DELETE THE MODEL HANDLER ###########
+
+async def delete_model_handler(request: web.Request) -> web.Response:
+    try:
+        data = await request.json()
+        file_id = data.get('file_id')
+        model_path = data.get('model_path')
+
+        if not file_id or not model_path:
+            return web.json_response({'status': 'error', 'message': 'Missing file_id or model_path'}, status=400)
+
+        # Construct the full absolute path
+        full_file_path = MODELS_DIRECTORY / model_path.lstrip('/') / file_id
+
+        # ⚠️ SECURITY CHECK: Ensure the path is safely inside the MODELS_DIRECTORY
+        # This prevents directory traversal attacks (e.g., deleting files outside the 'models' folder)
+        try:
+            full_file_path.resolve().relative_to(MODELS_DIRECTORY.resolve())
+        except ValueError:
+            return web.json_response({'status': 'error', 'message': 'Invalid file path or security violation.'}, status=403)
+
+        if full_file_path.exists() and full_file_path.is_file():
+            os.remove(full_file_path) # Delete the file
+            return web.json_response({'status': 'success', 'message': f'File {file_id} deleted.'})
+        else:
+            return web.json_response({'status': 'error', 'message': f'File not found at {full_file_path}'}, status=404)
+
+    except Exception as e:
+        logger.error(f"Error during file deletion: {e}")
+        return web.json_response({'status': 'error', 'message': 'Internal Server Error'}, status=500)
+
+### HELPER AND HANDLER FUNCTIONS TO DOWNLOAD THE MODELS ####
+
+#import os
+#import aiohttp
+#from aiohttp import web
+#from pathlib import Path
+#import asyncio # Needed for running download asynchronously
+
+# Assuming MODELS_DIRECTORY is correctly defined:
+# MODELS_DIRECTORY = CUSTOM_NODES_DIR.parent / "models" 
+
+# ⚠️ Helper function to perform the actual file download 
+async def perform_download(component_type, url_model, model_path, file_name=None): # 🚨 NOTE: Assuming component_type is passed here
+    # 1. Setup paths and timeout
+    if not file_name:
+        file_name = Path(url_model).name
+    destination_dir = MODELS_DIRECTORY / model_path.lstrip('/')
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    full_file_path = destination_dir / file_name
+    timeout = aiohttp.ClientTimeout(total=3600, connect=60) 
+
+    max_retries = 5
+    downloaded_size = 0
+    total_size = 0
+    
+    logger.info(f"Initiating download/resume for {file_name}. Max retries: {max_retries}")
+
+    for attempt in range(max_retries):
+        try:
+            # 2. Determine if we are resuming
+            headers = {}
+            file_mode = 'wb'
+            if full_file_path.exists() and full_file_path.is_file():
+                downloaded_size = full_file_path.stat().st_size
+                headers['Range'] = f'bytes={downloaded_size}-'
+                file_mode = 'ab'
+                logger.info(f"Attempt {attempt + 1}: Resuming from byte {downloaded_size}")
+            else:
+                downloaded_size = 0
+                logger.info(f"Attempt {attempt + 1}: Starting new download.")
+
+
+            # 3. Start the session with timeout
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(url_model, headers=headers, allow_redirects=True) as response:
+                    
+                    # Handle status codes
+                    status = response.status
+                    if status not in (200, 206):
+                        logger.error(f"Download failed with status: {status}")
+                        return False
+                    
+                    # 4. Calculate total expected size
+                    content_range = response.headers.get('Content-Range')
+                    if status == 206 and content_range:
+                        # Resumed: Total size is in Content-Range header (e.g., bytes 123-456/1000)
+                        total_size = int(content_range.split('/')[-1])
+                    else: 
+                        # New download (200): Total size is in Content-Length
+                        if downloaded_size > 0:
+                            logger.warning("Server ignored Range header. Restarting download from byte 0.")
+                            downloaded_size = 0
+                            file_mode = 'wb'
+                            
+                        # Calculate total size based on full file download
+                        total_size = int(response.headers.get('Content-Length', 0))
+
+                    logger.info(f"File size expected: {total_size} bytes.")
+
+                    # 5. Stream the data
+                    bytes_read_in_attempt = 0
+                    
+                    # Use 'await response.content.read(CHUNK_SIZE)' approach for interruptible streaming
+                    with open(full_file_path, file_mode) as f:
+                        while True:
+                            chunk = await response.content.read(1024 * 1024) 
+                            if not chunk:
+                                break
+                            f.write(chunk)
+                            bytes_read_in_attempt += len(chunk)
+                            
+                            # Update total size downloaded across all attempts
+                            current_downloaded_total = downloaded_size + bytes_read_in_attempt
+                            
+                            if current_downloaded_total % (100 * 1024 * 1024) < len(chunk): 
+                                
+                                # 🚨 START OF NEW PROGRESS LOGIC 🚨
+                                progress_percent = round((current_downloaded_total / total_size) * 100, 1) if total_size else 0
+                                
+                                # Send WebSocket notification to the frontend
+                                PromptServer.instance.send_sync("model_download_progress", {
+                                    "component_type": component_type,
+                                    "model_path": model_path, # Key for targeting the card
+                                    "file_name": file_name,
+                                    "progress": progress_percent
+                                })
+                                # 🚨 END OF NEW PROGRESS LOGIC 🚨
+                                
+                                logger.info(f"Progress: {current_downloaded_total} / {total_size} bytes. ({progress_percent}%)")
+
+                    # 6. Check for completion and successful transfer
+                    if (downloaded_size + bytes_read_in_attempt) == total_size:
+                        logger.info(f"Successfully downloaded and verified {file_name} in {attempt + 1} attempts.")
+                        
+                        # --- UPDATED COMPLETION NOTIFICATION ---
+                        PromptServer.instance.send_sync("model_download_complete", {
+                            "component_type": component_type,
+                            "model_path": model_path, # Use this or some other unique key to re-identify the card
+                            "file_name": file_name
+                        })
+                        
+                        return True
+                    else:
+                        # Transfer interrupted (ContentLengthError manifests here)
+                        downloaded_size += bytes_read_in_attempt # Update for next retry
+                        logger.warning(f"Download interrupted at {downloaded_size}/{total_size}. Retrying...")
+                        await asyncio.sleep(5) # Wait before next attempt
+
+        except Exception as e:
+            # Handle network errors, etc.
+            logger.error(f"Error during download process on attempt {attempt + 1}: {e}")
+            if downloaded_size == 0:
+                # Clean up partial file on critical failure only if it's a fresh start
+                if full_file_path.exists():
+                    os.remove(full_file_path)
+                return False
+            await asyncio.sleep(10) # Wait a bit longer for network to recover
+
+    # If the loop completes without success
+    logger.error(f"Download failed after {max_retries} attempts.")
+    return False
+
+async def download_model_handler(request: web.Request) -> web.Response:
+    try:
+        data = await request.json()
+        
+        # 1. Extract the missing component_type
+        component_type = data.get('component_type')
+        url_model = data.get('url_model')
+        model_path = data.get('model_path')
+        file_name = data.get('file_name')
+
+        if not all([component_type, url_model, model_path]):
+            # Improved error logging to capture which parameter is missing
+            return web.json_response({
+                'status': 'error', 
+                'message': f'Missing model URL, destination path, or component type. Received: type={component_type}, url={url_model}, path={model_path}'
+            }, status=400)
+
+        # 2. Pass all three arguments in the correct order
+        asyncio.create_task(perform_download(component_type, url_model, model_path, file_name))
+
+        return web.json_response({'status': 'initiated', 'message': 'Download started in the background.'})
+
+    except Exception as e:
+        logger.error(f"Error handling download request: {e}", exc_info=True)
+        return web.json_response({'status': 'error', 'message': 'Internal Server Error'}, status=500)
