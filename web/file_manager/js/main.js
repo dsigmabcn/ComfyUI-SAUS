@@ -1,7 +1,103 @@
 
 document.addEventListener('DOMContentLoaded', () => {    
     displayDirectory('/workspace/ComfyUI/output', 'file-explorer');
+    
+    setTimeout(() => {
+        const appNameElement = document.querySelector('.appName');
+        if (appNameElement) {
+            appNameElement.innerHTML = '<h2>File Manager</h2>';
+        }
+    }, 500);
+
+    // Inject API Token field if it doesn't exist
+    const urlInput = document.getElementById('download-url');
+    if (urlInput && !document.getElementById('download-token')) {
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'text';
+        tokenInput.id = 'download-token';
+        tokenInput.placeholder = 'API Token (Optional)';
+        urlInput.parentNode.insertBefore(tokenInput, urlInput.nextSibling);
+    }
+
+    // Initialize WebSocket for Progress
+    setupWebSocket();
 });
+
+function setupWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    console.log(`[File Manager] Connecting to WebSocket: ${wsUrl}`);
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'file_download_progress') {
+                const { filename, progress } = msg.data;
+                console.log(`[WS] Progress for ${filename}: ${progress}%`);
+                updateDownloadProgress(progress, `Downloading ${filename}...`);
+            } else if (msg.type === 'file_download_complete') {
+                const { filename } = msg.data;
+                console.log(`[WS] Complete: ${filename}`);
+                finishDownload(filename);
+            } else if (msg.type === 'file_download_error') {
+                console.error(`[WS] Error:`, msg.data);
+                alert(`Download error: ${msg.data.error}`);
+                resetDownloadUI();
+            }
+        } catch (e) {
+            console.error("[WS] Error parsing message", e);
+        }
+    };
+
+    ws.onclose = () => {
+        console.warn("[File Manager] WebSocket closed. Reconnecting in 5s...");
+        setTimeout(setupWebSocket, 5000);
+    };
+}
+
+function updateDownloadProgress(percent, text) {
+    const progressBar = document.getElementById('download-progress-bar');
+    const progressText = document.getElementById('download-progress-text');
+    if (progressBar) progressBar.style.width = `${percent}%`;
+    if (progressText) progressText.textContent = `${percent}%`;
+    
+    const statusDiv = document.getElementById('download-status');
+    if (statusDiv && text) statusDiv.textContent = text;
+}
+
+function finishDownload(filename) {
+    updateDownloadProgress(100);
+    const statusDiv = document.getElementById('download-status');
+    if (statusDiv) statusDiv.textContent = `Successfully downloaded: ${filename}`;
+    
+    setTimeout(() => {
+        window.closeModal();
+        displayDirectory(currentDirectory);
+        resetDownloadUI();
+    }, 1500);
+}
+
+function resetDownloadUI() {
+    const progressContainer = document.getElementById('download-progress-container');
+    const progressBar = document.getElementById('download-progress-bar');
+    const progressText = document.getElementById('download-progress-text');
+    const button = document.getElementById('download-button');
+    const statusDiv = document.getElementById('download-status');
+
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.textContent = '';
+    if (progressContainer) {
+        progressContainer.style.display = 'none';
+        progressContainer.classList.add('hidden-initial');
+    }
+    if (button) {
+        button.disabled = false;
+        button.style.display = 'block';
+    }
+    if (statusDiv) statusDiv.textContent = '';
+}
 
 let currentDirectory = '/workspace/ComfyUI/output'; // sets initial drectory
 
@@ -23,66 +119,56 @@ window.closeModal = function () {
 
 window.startDownload = async function () {
     const url = document.getElementById('download-url').value;
+    const tokenInput = document.getElementById('download-token');
+    const apiToken = tokenInput ? tokenInput.value.trim() : '';
     const button = document.getElementById('download-button');
 
     const progressContainer = document.getElementById('download-progress-container');
     const progressBar = document.getElementById('download-progress-bar');
     const progressText = document.getElementById('download-progress-text');
     const progressLabel = document.getElementById('download-progress-label');
+    const statusDiv = document.getElementById('download-status');
 
     if (!url) {
         alert("Please enter a URL.");
         return;
     }
 
+    console.log(`[Download] Starting download for URL: ${url}`);
+
     // UI: Start progress
-    progressContainer.style.display = 'block';
+    if (progressContainer) {
+        progressContainer.classList.remove('hidden-initial');
+        progressContainer.style.display = 'block';
+    }
     progressBar.style.width = '0%';
     progressText.textContent = '';
     progressLabel.style.display = 'block';
+    if (statusDiv) statusDiv.textContent = "Initiating download...";
+    
     button.disabled = true;
-
-    // Simulate progress (since we can't track real download progress from server)
-    let fakeProgress = 0;
-    const interval = setInterval(() => {
-        fakeProgress += Math.floor(Math.random() * 10) + 5;
-        if (fakeProgress >= 90) fakeProgress = 90;
-        progressBar.style.width = `${fakeProgress}%`;
-        progressText.textContent = `${fakeProgress}%`;
-    }, 200);
+    button.style.display = 'none';
 
     try {
         const response = await fetch('/flow/api/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, targetPath: currentDirectory })
+            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken })
         });
-
-        clearInterval(interval);
 
         if (!response.ok) {
             throw new Error(`Download failed: ${response.statusText}`);
         }
+        
+        console.log("[Download] Server accepted request. Waiting for WebSocket updates...");
+        if (statusDiv) statusDiv.textContent = "Download started on server...";
+        
+        // We do NOT close the modal here. We wait for WS 'file_download_complete'.
 
-        progressBar.style.width = '100%';
-        progressText.textContent = '100%';
-
-        setTimeout(() => {
-            window.closeModal();
-            displayDirectory(currentDirectory);
-            progressBar.style.width = '0%';
-            progressText.textContent = '';
-            progressContainer.style.display = 'none';
-            button.disabled = false;
-        }, 1000);
     } catch (error) {
-        clearInterval(interval);
         console.error("Download error:", error);
         alert("Failed to start download.");
-        progressBar.style.width = '0%';
-        progressText.textContent = '';
-        progressContainer.style.display = 'none';
-        button.disabled = false;
+        resetDownloadUI();
     }
 };
 
@@ -461,22 +547,7 @@ async function deleteFile(filePath) {
 };
 
 import { insertElement } from '../../../core/js/common/components/header.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const headerContainer = document.querySelector('header');
-            insertElement(headerContainer);
-
-            // Delay the update to ensure the header is fully rendered
-            setTimeout(() => {
-                const appNameElement = document.querySelector('.appName');
-                if (appNameElement) {
-                    appNameElement.textContent = 'File Manager';
-                    appNameElement.style.fontSize = '1.5em'; // or '20px', '24px', etc.
-
-                }
-            }, 300);
-        });
-
+import '../../../core/js/common/components/footer.js';
 /// FUNCTION TO SHOW PREVIEWS IN THE RIGHT PANEL //////////////
 window.showPreview = function(path, type, fileName) {
     const previewCol = document.getElementById('preview-col');
@@ -551,4 +622,3 @@ window.showPreview = function(path, type, fileName) {
         previewCol.style.flex = '0'; // Ensure it takes no space when hidden
     }
 };
-

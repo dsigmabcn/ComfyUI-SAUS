@@ -17,6 +17,7 @@ from .api_handlers import (
     list_model_previews_handler,
     get_model_preview_handler,
     directory_listing_handler,
+    download_generic_handler,
     download_model_handler,
     rename_file_handler,
     delete_file_handler,
@@ -59,6 +60,15 @@ class FlowManager:
             if not flow_url:
                 logger.warning(f"{FLOWMSG}: Missing 'url' in config for {flow_dir}")
                 continue
+            
+            try:
+                rel_path = flow_dir.relative_to(FLOWS_PATH)
+                if len(rel_path.parts) > 1:
+                    conf['flow_type'] = rel_path.parts[0]
+                else:
+                    conf['flow_type'] = 'open'
+            except Exception:
+                conf['flow_type'] = 'open'
                 
             app.add_routes(RouteManager.create_routes(f"flow/{flow_url}", flow_dir))
             APP_CONFIGS.append(conf)
@@ -90,7 +100,8 @@ class FlowManager:
             (f'/flow/api/model-previews', 'POST', list_model_previews_handler),
             (f'/flow/api/model-preview', 'GET', get_model_preview_handler),
             (f"/flow/api/directory", "GET", directory_listing_handler),
-            (f'/flow/api/download', 'POST', download_model_handler),
+            #(f'/flow/api/download', 'POST', download_model_handler),
+            (f'/flow/api/download', 'POST', download_generic_handler),
             (f'/flow/api/rename-file', 'POST', rename_file_handler),
             (f'/flow/api/delete-file', 'POST', delete_file_handler),
             (f'/flow/api/upload', 'POST', upload_file_handler),

@@ -29,6 +29,16 @@
       "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
     }
   },
+  "Z-IMAGE-TURBO": {
+    "title": "Z-Image Turbo",
+    "description": "Core models required to run Z-Image Turbo image generation.",
+    "categories": ["Image Models"],
+    "components": {      
+      "compulsory": ["QWEN_3_4B_VL_ENCODER","Z_IMAGE_TURBO_BF16","AE_VAE"],
+      "at_least_one": [],
+      "optional": []     
+    }
+  },
     "FLUX_DEV_GGUF": {
     "title": "FLUX DEV GGUF",
     "description": "Models required for (GGUF) FLUX image generation.",
@@ -115,6 +125,16 @@
     "categories": ["Video Models"],
     "components": {
       "compulsory": ["WAN_VAE_2.2","UMT5_XXL_ENCODER","WAN 2.2 TI2V 5B MODEL"],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LTX2_T2V_I2V": {
+    "title": "LTX-2 Text and image to video",
+    "description": "LTX-2 Models (checkpoint, text encoder, distilled lora and upscaler)",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["LTX2_BASE","LTX2_DISTILLED_LORA","LTX2_VIDEO_UPSCALER","GEMMA_3_12B_ENCODER"],
       "at_least_one": [],
       "optional": []
     }

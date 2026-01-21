@@ -6,7 +6,7 @@
     font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial, sans-serif;
 }
 
-:root {
+/*:root {
     --control-height: 36px;
     --color-primary: #430474;
     --color-secondary: #f4b6ff;
@@ -42,15 +42,63 @@
     --color-input-range-background: #570d7b;
     --color-spinner:#570d7b;
     --color-spinner-highlight:#7d0ab6;
-    --color-spinner-highlight: #7d0ab6;
+    --color-spinner-highlight: #7d0ab6;*/
 
     /* --- ESSENTIAL MISSING THEME VARIABLES --- */
-    --border-color: var(--color-border); /* Uses existing border color */
-    --background-color-panel: var(--color-background-secondary); /* Uses the dark secondary background for sidebars */
-    --background-color-hover: #2c063f; /* A darker, non-primary purple for hover state */
-    --background-color-panel-active: var(--color-progress-background); /* A distinct, slightly lighter dark purple */
-    --text-color: var(--color-primary-text); /* Primary text color */
-    --text-color-faded: #8c8c8c; /* Standard gray for faded text */
+    /*
+    --border-color: var(--color-border); /* Uses existing border color 
+    --background-color-panel: var(--color-background-secondary); /* Uses the dark secondary background for sidebars 
+    --background-color-hover: #2c063f; /* A darker, non-primary purple for hover state 
+    --background-color-panel-active: var(--color-progress-background); /* A distinct, slightly lighter dark purple 
+    --text-color: var(--color-primary-text); /* Primary text color
+    --text-color-faded: #8c8c8c; /* Standard gray for faded text 
+}*/
+:root {
+    /* --- CORE BRANDING --- */
+    --color-primary: #ff4500;            /* Fire: Orange-Red */
+    --color-secondary: #00f2ff;          /* Ice: Electric Cyan */
+    --color-accent: #ff8c00;             /* Heat: Dark Orange */
+    --color-highlight: #00d4ff;          /* Glacial: Bright Blue */
+    --color-primary-text: #e0f7fa;       /* Frost: Very Pale Blue */
+    --color-border: #1e3f5a;             /* Deep Arctic Blue */
+
+    /* --- BACKGROUNDS --- */
+    --color-background: #0b1622;         /* Night: Deep Midnight Blue */
+    --color-background-secondary: #050a0f; /* Absolute Zero: Darkest Blue */
+    --color-background-pattern: #162a3d; /* Frozen Lake Texture */
+    --color-background-pattern-light: #1e3f5a; /* Frozen Lake Texture */
+
+    /* --- HEADER & NAVIGATION --- */
+    --color-header-background: #050a0f;
+    --color-header-logo-text: #ff4500;    /* The logo glows like fire */
+    --color-header-text: #00f2ff;        /* Menu items are cool ice */
+    --color-social-icons: #00f2ff;
+
+    /* --- PRIMARY BUTTON (FIRE) --- */
+    --color-button-primary: #ff4500; 
+    --color-button-primary-hover: #ff6347; 
+    --color-button-primary-text: #8d9399; 
+    --color-button-primary-text-hover: #ffffff; 
+    --color-button-primary-active: #cc3700; 
+    --color-button-primary-text-active: #ffffff; 
+
+    /* --- SECONDARY BUTTON (ICE) --- */
+    --color-button-secondary: #131312; 
+    --color-button-secondary-hover: #1e3f5a; 
+    --color-button-secondary-text: #00f2ff; 
+    --color-button-secondary-text-hover: #ffffff; 
+    --color-button-secondary-active: #00d4ff; 
+    --color-button-secondary-text-active: #f4b6ff; 
+
+    /* --- UI FEEDBACK --- */
+    --color-progress-background: #102a43;
+    --color-progress-value: #ff4500;     /* Progress bar fills like lava */
+    --color-scrollbar-track: #050a0f;
+    --color-scrollbar-thumb: #1e3f5a;
+    --color-input-range-thumb: #ff4500;
+    --color-input-range-background: #1e3f5a;
+    --color-spinner: #00f2ff;           /* Ice spinning into fire */
+    --color-spinner-highlight: #ff4500;
 }
 
 html, body {
@@ -79,15 +127,57 @@ body {
 header {
     display: flex;
     justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     background-color: var(--color-header-background);
     padding: 4px 20px;
+    padding: 10px 50px 0 0;
     text-align: left;
     border-bottom: 1px dashed var(--color-border);
     position: relative; /* For positioning child elements if needed */
 }
 
+.header-nav {
+    display: flex; /* Use flexbox for centering */
+    justify-content: flex-start; /* Center links horizontally */
+    align-items: center; /* Center links vertically */
+    gap: 30px; /* Increase space between links for better visibility */
+    background-color: var(--color-background-pattern); /* Use a solid background color */
+    padding: 0px 0; /* Add vertical padding */
+    margin-bottom: 5px; /* Add space below the nav bar */
+    border: 1px dashed var(--color-highlight); /* Add a more prominent border */
+}
+
+.header-nav a {
+    color: var(--color-button-primary-text); /* Ensure link color is visible */
+    text-decoration: none;
+    font-size: 1.1em; /* Increase font size */
+    font-weight: bold; /* Make the text bold */
+    padding: 10px 20px; /* Increase padding for a larger hit area */
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+}
+
+.header-nav a:hover {
+    /*background-color: var(--color-button-primary-text); /* Change background on hover */
+    background-color: var(--color-background-secondary); /* Change background on hover */
+
+    /*color: #ffffff;*/
+    color: var(--color-accent);
+}
+
+.header-nav a i {
+    margin-right: 8px; /* Increase space between icon and text */
+}
+
+
 #logo {
+    width: 250px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding-left: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -99,7 +189,7 @@ header {
 
 #img-logo img {
     max-width: 100%;
-    height: auto;
+    height: auto;    
 }
 
 .logo-text {
@@ -157,23 +247,26 @@ header {
 
 .appName {
     padding: 10px;
-    color: var(--color-header-text);
-    border: 1px dashed var(--color-border);
-    border-top: none;
-    border-bottom: none;
-    font-size: 12px;
+    color: var(--color-header-logo-text);
+    border-top: 1px dashed var(--color-border);
+    border-left: 1px dashed var(--color-border);
+    border-right: 1px dashed var(--color-border);
+    font-size: 16px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.appName h2 {
+/*.appName h2 {
     font-size: 16px;
     font-weight: normal;
-}
+}*/
 
 #right-header {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-right: 10px;
+    margin-left: 0;
     padding: 5px;
 }
 
@@ -373,7 +466,7 @@ a {
     margin-bottom: 15px;
 }
 
-#prompt{
+/*#prompt{
     align-items: center;
     background-color: var(--color-background-secondary);
     border-top: 1px dashed var(--color-border);
@@ -381,19 +474,126 @@ a {
     width: 100%;
     display: flex;
     flex-direction: row;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 #prompts textarea {
     /*border:none;*/
-    border-bottom: 1px solid var(--color-border); 
+    /*border-bottom: 1px solid var(--color-border); 
     transition: border-color 0.3s ease-in-out;
     /* padding: 8px; */
     /* background-color: var(--color-background-secondary); */
-    color: var(--color-primary-text);
+    /*color: var(--color-primary-text);
     /* margin:0 10px; */
     /* width: 100%; */
-    flex:3;
+    /*flex:3;
     
+}*/
+
+#prompt {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-background-secondary);
+    border-bottom: 1px dashed var(--color-border); /* Changed from top to bottom */
+    padding: 12px; /* Increased size as requested */
+    width: 100%;
+    position: sticky;
+    top: 0;        /* Sticks to the top */
+    z-index: 100;
+}
+
+#prompts textarea {
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    transition: all 0.3s ease-in-out;
+    color: var(--color-primary-text);
+    flex: 3;
+    resize: none;   /* Disables the manual dragging thing */
+    height: 40px;   /* Default height */
+    height: 75px;   /* Default height */
+    overflow-y: auto;
+}
+
+/* Class to be toggled via JS */
+#prompts textarea.expanded {
+    height: 200px;
+    height: 250px;
+}
+
+.prompt-container {
+    display: flex;
+    flex-direction: column; /* Stacks topRow and Arrow vertically */
+    align-items: center;
+    background-color: var(--color-background-secondary);
+    border-bottom: 1px dashed var(--color-border);
+    padding: 24px 24px 8px 24px; /* Bottom padding reduced for the arrow */
+    padding: 12px 12px 4px 12px; /* Bottom padding reduced for the arrow */
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* This replaces the old horizontal layout */
+.prompt-top-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    min-height: 80px;
+}
+
+.title-text {
+    flex: 1;
+    font-weight: bold;
+}
+
+.prompt-textarea {
+    flex: 3;
+    height: 100px;
+    height: 150px;
+    resize: none;
+    transition: height 0.3s ease-in-out;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    background: transparent;
+}
+
+.prompt-textarea.expanded {
+    height: 200px;
+    height: 300px;
+}
+
+/* Arrow now sits centered at the bottom */
+.expand-arrow-bottom {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centers arrow horizontally */
+    cursor: pointer;
+    padding: 4px 0;
+    font-size: 12px;
+    user-select: none;
+    transition: transform 0.3s ease;
+}
+
+.expand-arrow-bottom.rotated {
+    transform: rotate(180deg);
+}
+
+#expand-btn {
+    cursor: pointer;
+    padding: 0 10px;
+    transition: transform 0.3s;
+    user-select: none;
+}
+
+/* Rotates the arrow when expanded */
+.rotate {
+    transform: rotate(180deg);
 }
 
 #prompt #title-text {
@@ -883,7 +1083,7 @@ button:last-child {
 
 button.active {
     background-color: var(--color-button-secondary-active);
-    color: var(--color-button-secondary-text-active);
+    color: var(--color-button-primary-text-active);
 }
 
 button:hover {
@@ -898,15 +1098,15 @@ button:hover {
 #buttonsgen button {
     display: flex;
     justify-content: right;
-    background-color: var(--color-button-primary);
+    background-color: var(--color-accent);
     padding: 10px;
     margin: 0px 10px;
-    color: var(--color-button-primary-text);
+    color: var(--color-button-secondary);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #buttonsgen button:hover {
-    background-color: var(--color-button-primary-hover);
+    background-color: #ffaa47;
     color: var(--color-button-primary-text-hover);
 
 }
@@ -1053,7 +1253,7 @@ button:hover {
     width: 100%;
 }
 #history h2 {
-    color: var(--color-border);
+    color: var(--color-primary-text);
     text-align: center;
     margin-bottom: 2px;
     font-size: 1.2em;

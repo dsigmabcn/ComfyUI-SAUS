@@ -97,10 +97,26 @@
   },
   "QWEN_2.5VL_ENCODER": {
     "id": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
-    "name": "QWEN text encoder FP8",
+    "name": "QWEN 2.5 text encoder FP8",
     "type": "TEXT_ENCODER",
     "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
     "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_3_4B_VL_ENCODER": {
+    "id": "qwen_3_4b.safetensors",
+    "name": "QWEN 3 text encoder",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "Z_IMAGE_TURBO_BF16": {
+    "id": "z_image_turbo_bf16.safetensors",
+    "name": "Z-IMAGE TURBO BF16",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors",
+    "model_path": "/diffusion_models/Z-Image/",
     "thumbnail_path": ""
   },
     "ANIMATEDIFF MM V3": {
@@ -116,7 +132,7 @@
     "name": "AnimateDiff V3 LORA ADAPTER",
     "type": "LORA",
     "url_model": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_adapter.ckpt",
-    "model_path": "/loras/",
+    "model_path": "/loras/SD15",
     "thumbnail_path": ""
   },
   "UMT5_XXL_ENCODER": {
@@ -159,6 +175,38 @@
     "model_path": "/diffusion_models/WAN21/",
     "thumbnail_path": ""
   },
+    "LTX2_BASE": {
+    "id": "ltx-2-19b-dev-fp8.safetensors",
+    "name": "LTX-2 19B DEV FP8",
+    "type": "CHECKPOINT",
+    "url_model": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors",
+    "model_path": "/checkpoints/LTX2/",
+    "thumbnail_path": ""
+  },
+    "LTX2_DISTILLED_LORA": {
+    "id": "ltx-2-19b-distilled-lora-384.safetensors",
+    "name": "LTX-2 19B DISTILLED LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-lora-384.safetensors",
+    "model_path": "/loras/LTX2/",
+    "thumbnail_path": ""
+  },
+    "LTX2_VIDEO_UPSCALER": {
+    "id": "ltx-2-spatial-upscaler-x2-1.0.safetensors",
+    "name": "LTX-2 Spatial Upscaler",
+    "type": "Laten Upscaler",
+    "url_model": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors",
+    "model_path": "/latent_upscale_models/",
+    "thumbnail_path": ""
+  },
+    "GEMMA_3_12B_ENCODER": {
+    "id": "gemma_3_12B_it_fp4_mixed.safetensors",
+    "name": "GEMMA 3 12B FP4 ENCODER",
+    "type": "TEXT ENCODER",
+    "url_model": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
   "CLIPVISION_H": {
     "id": "clip_vision_h.safetensors",
     "name": "CLIPVISION H (for WAN)",
@@ -172,7 +220,7 @@
     "name": "CAUSVID 1.3B LORA",
     "type": "LORA",
     "url_model": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN21/",
     "thumbnail_path": ""
   },
   "CAUSVID 14B": {
@@ -180,7 +228,7 @@
     "name": "CAUSVID 14B LORA",
     "type": "LORA",
     "url_model": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_14B_T2V_lora_rank32.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN21/",
     "thumbnail_path": ""
   },
   "WAN VACE 1.3B": {
@@ -220,7 +268,7 @@
     "name": "WAN 2.2 T2V HIGH",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN22/",
     "thumbnail_path": ""
   },
   "LIGHT_4steps_t2v_low": {
@@ -228,7 +276,7 @@
     "name": "WAN 2.2 T2V LOW",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN22/",
     "thumbnail_path": ""
   },
   "WAN2.2_I2V_HIGH": {
@@ -252,7 +300,7 @@
     "name": "WAN 2.2 T2V HIGH",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN22/",
     "thumbnail_path": ""
   },
   "LIGHT_4steps_i2v_low": {
@@ -260,7 +308,7 @@
     "name": "WAN 2.2 I2V LOW",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/WAN22",
     "thumbnail_path": ""
   },
     "WAN_VAE_2.2": {
@@ -304,7 +352,7 @@
     "thumbnail_path": ""
   },
   "SIG CLIP VISION": {
-    "id": "clip_vision_h.safetensors",
+    "id": "sigclip_vision_patch14_384.safetensors",
     "name": "SIG CLIP VISION 384",
     "type": "Clipvision",
     "url_model": "https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors",
@@ -380,7 +428,7 @@
     "name": "QWEN LIGHTNING 4-steps LORA",
     "type": "LORA",
     "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-4steps-V1.0.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/QWEN/",
     "thumbnail_path": ""
   },
   "QWEN_LIGHT_8steps": {
@@ -388,7 +436,7 @@
     "name": "QWEN LIGHTNING 8-steps LORA",
     "type": "LORA",
     "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-8steps-V1.0.safetensors",
-    "model_path": "/loras/",
+    "model_path": "/loras/QWEN/",
     "thumbnail_path": ""
   },  
   "FLUX GGUF Q8": {

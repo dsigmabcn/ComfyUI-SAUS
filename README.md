@@ -14,15 +14,15 @@
     <p align="center">
     <strong>Cut the spaghetti. Cook it with <i>Saus</i></strong>
   </p>
-<!--<img src="web/core/media/git/cover_flow.jpg">
+  <img src="web/core/media/git/cover_flow.jpg">
 ***
 ***  <h4 align="center"><em>Let your creativity flow naturally</em></h4>
   <h4 align="center">Don't forget to leave a star.</h4>
 *** 
 ***  
 ***  <p align="center">
-    <a href="https://github.com/diStyApps/ComfyUI-disty-Flow/issues">Report Bug</a>
-  </p> -->
+    <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/issues">Report Bug</a>
+  </p>
 </div>
 
 
@@ -48,7 +48,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-SAUS is a streamlined interface for ComfyUI designed to transform complex, "spaghetti" node workflows into a clean, production-ready application environment.
+SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI as backend Engine. 
+"Spaghetti" node workflows converted into a clean, production-ready application environment.
 
 ### Why SAUS?
 * **Simple:** Built for creators who need results without the node-induced headaches.
@@ -75,10 +76,22 @@ SAUS is a streamlined interface for ComfyUI designed to transform complex, "spag
 #### Requirements
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
  - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
+
+ Custom nodes:
+ [TO DO]
  
 <!-- INSTALLATION -->
 
 ## Installation
+
+# ComfyUI via ComfyUI Manager
+
+If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager
+
+[IMAGE HERE]
+
+
+# ComfyUI Manual Install
 
 In [ComfyUI](https://github.com/comfyanonymous/ComfyUI) root folder, navigate to the `custom_nodes` folder and run the following command:
 
@@ -88,11 +101,39 @@ Open the terminal, or in the address bar type CMD to open a command prompt, then
 git clone https://github.com/diStyApps/ComfyUI-disty-Flow
 ```
 
-To run Flow, navigate to this address in your web browser:
+# New installation - Windows [modified ]
+
+If you have not yet installed ComfyUI, the following instructions will install comfyui portable with comfyui manager, ComfyUI-SAUS and the other custom nodes required to run the base workflows/apps
+
+# New installation - Linux
+
+If you have not yet installed ComfyUI, the following instructions will install comfyui portable with comfyui manager, ComfyUI-SAUS and the other custom nodes required to run the base workflows/apps
+
+# Runpod - pods
+Runpod offers rental of GPU's at a good price that can be used to run the latest image and video models. This is convenient as you do not need to keep grinding and optimizing workflows to get a sub-optimal quality in your results.
+
+After signing up in Runpod, create a Network Disk (with enough capacity to run the models) and use the ComfyUI SUAVE template.
+
+## Accessing SAUS 
+
+# via Browser
+
+To run SAUS, navigate to this address in your web browser:
 
 ```bash
 http://127.0.0.1:8188/flow
 ```
+
+
+# via ComfyUI
+To run SAUS, navigate to this address in your web browser:
+
+```bash
+http://127.0.0.1:8188/flow
+```
+
+# in Runpod
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

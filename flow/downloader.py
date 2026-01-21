@@ -4,10 +4,19 @@ import shutil
 from pathlib import Path
 from .constants import FLOWS_DOWNLOAD_PATH, FLOWS_PATH, FLOWS_TO_REMOVE, FLOWMSG, logger
 
+def find_destination_path(item_name: str) -> Path:
+    p = FLOWS_PATH / item_name
+    if p.exists():
+        return p
+    for p in FLOWS_PATH.rglob(item_name):
+        if p.is_dir() and p.name == item_name:
+            return p
+    return FLOWS_PATH / item_name
+
 def download_update_flows() -> None:
     try:
         for flow in FLOWS_TO_REMOVE:
-            flow_path = FLOWS_PATH / flow
+            flow_path = find_destination_path(flow)
             if flow_path.exists() and flow_path.is_dir():
                 # logger.info(f"{FLOWMSG}: Removing existing flow directory '{flow}'")
                 shutil.rmtree(flow_path)
@@ -37,7 +46,7 @@ def download_update_flows() -> None:
                 if item.name in ['.git', '.github']:
                     # logger.debug(f"{FLOWMSG}: Skipping directory '{item.name}'")
                     continue
-                dest_item = FLOWS_PATH / item.name
+                dest_item = find_destination_path(item.name)
                 if item.is_dir():
                     if dest_item.exists():
                         # logger.info(f"{FLOWMSG}: Updating existing directory '{item.name}'")

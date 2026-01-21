@@ -2,9 +2,11 @@ import logging
 import mimetypes
 from pathlib import Path
 import re
-APP_NAME = "Flow"
-APP_VERSION = "0.5.2" 
-FLOWMSG = f"\033[38;5;129mFlow - {APP_VERSION}\033[0m"
+#APP_NAME = "Flow"#
+APP_NAME = "SAUS"
+APP_VERSION = "0.2.0" 
+#FLOWMSG = f"\033[38;5;129mSAUS App - {APP_VERSION}\033[0m"
+FLOWMSG = f"\033[38;5;208mSAUS App - {APP_VERSION}\033[0m"
 APP_CONFIGS = []
 
 CURRENT_DIR = Path(__file__).parent
@@ -75,7 +77,7 @@ FLOWS_TO_REMOVE = [
     "afl_mochi2v",
     "afl_pulid_flux",
     "afl_pulid_flux_GGUF",
-    "afl_reactor"
+    "afl_reactor",
     "5otvy-cogvideox-orbit-left-lora",
     "umbi9-hunyuan-text-to-video",
 ]

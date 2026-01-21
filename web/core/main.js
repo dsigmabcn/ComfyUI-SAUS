@@ -38,9 +38,9 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         selectedTheme: null 
     };
     const preferencesManager = new PreferencesManager(defaultPreferences);
-    ThemeManager.applyInitialTheme(preferencesManager);
-    const themeManager = new ThemeManager(preferencesManager);
-    themeManager.init();
+    /*ThemeManager.applyInitialTheme(preferencesManager);*/
+    /*const themeManager = new ThemeManager(preferencesManager);*/
+    /*themeManager.init();*/
 
     // ----------------------------------------------------------------------
     // NEW: Define the labels for components that should appear in the 'Basic' section.
@@ -92,7 +92,8 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     initializeWebSocket(client_id);
     setFaviconStatus.Default();
     injectStylesheet('/core/css/main.css', 'main');
-    injectStylesheet('/core/css/themes.css', 'themes-stylesheet');
+    injectStylesheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'font-awesome');
+    /*injectStylesheet('/core/css/themes.css', 'themes-stylesheet');*/
 
     console.log("flowConfig", flowConfig);
     console.log("workflow", workflow);
@@ -221,7 +222,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     }
     // ----------------------------------------------------------------------
 
-    function setPromptComponents(config, options = { clearInputs: false }) {
+    /*function setPromptComponents(config, options = { clearInputs: false }) {
         if (!config.prompts || !Array.isArray(config.prompts)) {
             return;
         }
@@ -246,7 +247,56 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             titleDiv.appendChild(textArea);
             promptsContainer.appendChild(titleDiv);
         });
+    }*/
+function setPromptComponents(config, options = { clearInputs: false }) {
+    if (!config.prompts || !Array.isArray(config.prompts)) {
+        return;
     }
+    const promptsContainer = document.getElementById('prompts');
+
+    config.prompts.forEach((input, index) => {
+        const container = document.createElement('div');
+        container.className = 'prompt-container'; 
+
+        // 1. Create a top row for Label and Textarea
+        const topRow = document.createElement('div');
+        topRow.className = 'prompt-top-row';
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'title-text';
+        labelDiv.textContent = input.label;
+
+        const textArea = document.createElement('textarea');
+        textArea.id = input.id;
+        textArea.className = 'prompt-textarea';
+
+        if (options.clearInputs) {
+            textArea.value = '';
+        } else {
+            textArea.value = input.default || generateDynamicScriptDefault(index);
+        }
+
+        // Assemble Top Row
+        topRow.appendChild(labelDiv);
+        topRow.appendChild(textArea);
+
+        // 2. Create the Arrow Button (now for the bottom)
+        const expandBtn = document.createElement('div');
+        expandBtn.className = 'expand-arrow-bottom';
+        expandBtn.innerHTML = '▼'; 
+        
+        expandBtn.onclick = () => {
+            textArea.classList.toggle('expanded');
+            expandBtn.classList.toggle('rotated');
+        };
+
+        // Final Assembly: Top Row first, then Arrow below it
+        container.appendChild(topRow);
+        container.appendChild(expandBtn); 
+        
+        promptsContainer.appendChild(container);
+    });
+}
 
     function generateDynamicScriptDefault(index) {
         const defaultsPrompts = [
@@ -596,4 +646,3 @@ function setupTabSwitching() {
     });
    
 })(window, document, undefined);
-

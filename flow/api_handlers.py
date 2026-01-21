@@ -14,6 +14,7 @@ from typing import Any
 import sys
 import asyncio
 from server import PromptServer
+import aiohttp
 
 
 from .constants import (
@@ -38,6 +39,15 @@ def ensure_data_folders():
 
 def pathToKey(model_path: str) -> str:
     return model_path.replace('\\', '/')
+
+def find_flow_path(flow_url: str) -> Path:
+    p = FLOWS_PATH / flow_url
+    if p.exists() and p.is_dir():
+        return p
+    for p in FLOWS_PATH.rglob(flow_url):
+        if p.is_dir() and p.name == flow_url:
+            return p
+    return None
 
 def get_filename_only(model_path: str) -> str:
     fwd = pathToKey(model_path)
@@ -568,10 +578,11 @@ async def create_flow_handler(request: web.Request) -> web.Response:
         if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
             return web.Response(status=400, text="Invalid 'url' in 'flowConfig'. Only letters, numbers, dashes, and underscores are allowed.")
 
-        flow_folder = FLOWS_PATH / flow_url
-        if flow_folder.exists():
+        if find_flow_path(flow_url):
             return web.Response(status=400, text=f"Flow with url '{flow_url}' already exists")
 
+        flow_folder = FLOWS_PATH / 'user' / flow_url
+        flow_folder.parent.mkdir(parents=True, exist_ok=True)
         flow_folder.mkdir(parents=True, exist_ok=False)
 
         flow_config_path = flow_folder / FLOWS_CONFIG_FILE
@@ -665,8 +676,8 @@ async def update_flow_handler(request: web.Request) -> web.Response:
         if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
             return web.Response(status=400, text="Invalid 'url' in 'flowConfig'. Only letters, numbers, dashes, and underscores are allowed.")
 
-        flow_folder = FLOWS_PATH / flow_url
-        if not flow_folder.exists():
+        flow_folder = find_flow_path(flow_url)
+        if not flow_folder:
             return web.Response(status=400, text=f"Flow with url '{flow_url}' does not exist")
 
         flow_config_path = flow_folder / FLOWS_CONFIG_FILE
@@ -707,8 +718,8 @@ async def delete_flow_handler(request: web.Request) -> web.Response:
         if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
             return web.Response(status=400, text="Invalid 'url' parameter.")
 
-        flow_folder = FLOWS_PATH / flow_url
-        if not flow_folder.exists():
+        flow_folder = find_flow_path(flow_url)
+        if not flow_folder:
             return web.Response(status=400, text=f"Flow with url '{flow_url}' does not exist")
 
         shutil.rmtree(flow_folder)
@@ -758,38 +769,124 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
-from aiohttp import web
-import aiohttp
-import os
+async def perform_generic_download(url, target_path, headers):
+    logger.info(f"[Generic Download] Background task started for URL: {url}")
+    
+    timeout = aiohttp.ClientTimeout(total=3600, connect=60)
+    max_retries = 5
+    filename = None
+    save_path = None
 
-async def download_model_handler(request):
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        for attempt in range(max_retries):
+            try:
+                request_headers = headers.copy()
+                mode = 'wb'
+                downloaded_size = 0
+                
+                # Determine filename and path early if possible, or after first request
+                # For resume logic to work, we need to know the path. 
+                # If we don't have it yet, we can't resume on the very first try, but we can on retries if we set it.
+                
+                if save_path and os.path.exists(save_path):
+                    downloaded_size = os.path.getsize(save_path)
+                    if downloaded_size > 0:
+                        request_headers['Range'] = f'bytes={downloaded_size}-'
+                        mode = 'ab'
+                        logger.info(f"[Generic Download] Resuming {filename} from byte {downloaded_size}")
+
+                logger.info(f"[Generic Download] Attempt {attempt+1}/{max_retries} connecting...")
+                async with session.get(url, headers=request_headers) as resp:
+                    if resp.status not in (200, 206):
+                        logger.error(f"[Generic Download] HTTP Error {resp.status}")
+                        if resp.status in [401, 403, 404]:
+                            # Fatal errors, stop retrying
+                            PromptServer.instance.send_sync("file_download_error", {"filename": filename or "unknown", "error": f"HTTP {resp.status}"})
+                            return
+                        raise Exception(f"HTTP Error {resp.status}")
+                    
+                    if not filename:
+                        filename = extract_filename_from_response(resp, url)
+                        save_path = os.path.join(target_path, filename)
+                        logger.info(f"[Generic Download] Resolved filename: {filename}, Saving to: {save_path}")
+                    
+                    total_size = int(resp.headers.get('Content-Length', 0))
+                    if resp.status == 206:
+                        content_range = resp.headers.get('Content-Range', '')
+                        if content_range:
+                            try:
+                                total_size = int(content_range.split('/')[-1])
+                            except:
+                                pass
+                    elif resp.status == 200 and downloaded_size > 0:
+                        downloaded_size = 0
+                        mode = 'wb'
+                        logger.warning("[Generic Download] Server ignored Range header, restarting download.")
+
+                    with open(save_path, mode) as f:
+                        bytes_read_in_attempt = 0
+                        last_progress_update = -1
+                        
+                        while True:
+                            chunk = await resp.content.read(1024 * 1024)
+                            if not chunk:
+                                break
+                            f.write(chunk)
+                            bytes_read_in_attempt += len(chunk)
+                            
+                            current_total = downloaded_size + bytes_read_in_attempt
+                            
+                            if total_size > 0:
+                                progress = int((current_total / total_size) * 100)
+                                if progress > last_progress_update:
+                                    last_progress_update = progress
+                                    # Send progress to UI
+                                    PromptServer.instance.send_sync("file_download_progress", {
+                                        "filename": filename,
+                                        "progress": progress,
+                                        "total_bytes": total_size,
+                                        "downloaded_bytes": current_total
+                                    })
+                    
+                    logger.info(f"[Generic Download] Complete: {filename}")
+                    PromptServer.instance.send_sync("file_download_complete", {
+                        "filename": filename,
+                        "path": save_path
+                    })
+                    return # Success
+
+            except Exception as e:
+                logger.error(f"[Generic Download] Attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    PromptServer.instance.send_sync("file_download_error", {"filename": filename or "unknown", "error": str(e)})
+                await asyncio.sleep(2)
+
+
+async def download_generic_handler(request):
     try:
         data = await request.json()
         url = data.get('url')
         target_path = data.get('targetPath')
+        api_token = data.get('apiToken')
+
+        logger.info(f"[API] Received download request for: {url}")
 
         if not url or not target_path:
             return web.json_response({'error': 'Missing url or targetPath'}, status=400)
 
-        #filename = os.path.basename(url)
-        #save_path = os.path.join(target_path, filename)
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                if resp.status != 200:
-                    return web.json_response({'error': f'Failed to download file: {resp.status}'}, status=resp.status)
-                
-                filename = extract_filename_from_response(resp, url)
-                save_path = os.path.join(target_path, filename)
+        # Security Check: Ensure target_path is within allowed directories
+        resolved_target = Path(target_path).resolve()
+        if not str(resolved_target).startswith(str(COMFYUI_DIRECTORY.resolve())):
+             return web.json_response({"error": "Access denied: Target path outside allowed directories"}, status=403)
 
-                with open(save_path, 'wb') as f:
-                    while True:
-                        chunk = await resp.content.read(1024)
-                        if not chunk:
-                            break
-                        f.write(chunk)
+        headers = {}
+        if api_token:
+            headers['Authorization'] = f'Bearer {api_token}'
 
-        return web.json_response({'message': 'Download successful', 'path': save_path})
+        # Start background task
+        asyncio.create_task(perform_generic_download(url, target_path, headers))
+
+        return web.json_response({'message': 'Download initiated in background'})
 
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
@@ -833,7 +930,6 @@ async def rename_file_handler(request: web.Request) -> web.Response:
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
-import shutil
 
 async def delete_file_handler(request: web.Request) -> web.Response:
     try:
@@ -980,7 +1076,7 @@ async def get_flows_list_handler(request):
     except Exception as e:
         return web.Response(text=json.dumps({"error": str(e)}), status=500, content_type='application/json')
 
-#This handler is to be able to download files:
+#Download files from the server to local computer:
 
 async def download_file_handler(request: web.Request) -> web.Response:
     """Handles file download requests."""
@@ -1218,15 +1314,6 @@ async def delete_model_handler(request: web.Request) -> web.Response:
         return web.json_response({'status': 'error', 'message': 'Internal Server Error'}, status=500)
 
 ### HELPER AND HANDLER FUNCTIONS TO DOWNLOAD THE MODELS ####
-
-#import os
-#import aiohttp
-#from aiohttp import web
-#from pathlib import Path
-#import asyncio # Needed for running download asynchronously
-
-# Assuming MODELS_DIRECTORY is correctly defined:
-# MODELS_DIRECTORY = CUSTOM_NODES_DIR.parent / "models" 
 
 # ⚠️ Helper function to perform the actual file download 
 async def perform_download(component_type, url_model, model_path, file_name=None): # 🚨 NOTE: Assuming component_type is passed here

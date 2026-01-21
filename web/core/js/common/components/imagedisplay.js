@@ -207,7 +207,7 @@ class HistoryManager {
         };
 
         video.addEventListener('mouseenter', () => {
-            video.play();
+            video.play().catch(() => {});
         });
 
         video.addEventListener('mouseleave', () => {

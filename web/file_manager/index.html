@@ -36,22 +36,7 @@
                             URL</span></a>
                     <!--<a href="/flow"><span><i class="fas fa-project-diagram"></i> Return to Flow</span></a>-->
                 </div>
-                <!-- The progress bar for upload with appear her -->
-                <div id="upload-progress-container" style="display: none; margin-top: 10px;">
-                    <div id="upload-progress-label"
-                        style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--color-primary-text);">
-                        Upload progress
-                    </div>
-                    <div id="upload-progress"
-                        style="height: 20px; background: var(--color-progress-background); border-radius: 4px; position: relative;">
-                        <div id="upload-progress-bar"
-                            style="width: 0%; height: 100%; background: var(--color-progress-value); border-radius: 4px;">
-                        </div>
-                        <span id="upload-progress-text" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                            font-size: 12px; color: var(--color-primary-text); pointer-events: none;">
-                        </span>
-                    </div>
-                </div>
+
             </nav>
 
             <div class="content">
@@ -78,7 +63,7 @@
     <div id="download-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
-            <h2>Add URL to download model</h2>
+            <h2>URL to download file/model</h2>
             <input type="text" id="download-url" class="download-input" placeholder="Paste URL here" />
             <button id="download-button" onclick="startDownload()">Download</button>
             <div id="download-status" class="download-status-message"></div>
@@ -98,8 +83,25 @@
                 </div>
             </div>
         </div>
-    </div>>
-    
+    </div>
+    <!-- The progress bar for upload with appear her -->
+    <div id="upload-progress-container" style="display: none; margin-top: 10px;">
+        <div id="upload-progress-label"
+            style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--color-primary-text);">
+            Upload progress
+        </div>
+        <div id="upload-progress"
+            style="height: 20px; background: var(--color-progress-background); border-radius: 4px; position: relative;">
+            <div id="upload-progress-bar"
+                style="width: 0%; height: 100%; background: var(--color-progress-value); border-radius: 4px;">
+            </div>
+            <span id="upload-progress-text"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                                font-size: 12px; color: var(--color-primary-text); pointer-events: none;">
+            </span>
+        </div>
+    </div>
+
     <script type="module" src="file_manager/js/main.js"></script>
 </body>
 

@@ -39,7 +39,8 @@ const defaultPreferences = {
     hideTitles: false,
     sortValue: 'nameAsc',
     showHiddenOnly: false, 
-    selectedTheme: null 
+    selectedTheme: null,
+    typeFilter: 'all'
 };
 
 const preferencesManager = new PreferencesManager(defaultPreferences);
@@ -201,6 +202,24 @@ function createFlowCard(flow) {
     card.insertBefore(imageContainer, card.firstChild);
     card.appendChild(infoButton);
     card.appendChild(favoriteButton);
+
+    if (flow.flow_type) {
+        const badge = document.createElement('div');
+        badge.className = `flow-type-badge type-${flow.flow_type}`;
+        badge.title = `${flow.flow_type} workflow`;
+        
+        let iconClass = 'fa-layer-group';
+        switch(flow.flow_type) {
+            case 'gold': iconClass = 'fa-crown'; break;
+            case 'beta': iconClass = 'fa-flask'; break;
+            case 'user': iconClass = 'fa-user'; break;
+            case 'open': iconClass = 'fa-box-open'; break;
+        }
+        
+        badge.innerHTML = `<i class="fas ${iconClass}"></i>`;
+        card.appendChild(badge);
+    }
+
     /*card.appendChild(hiddenButton);*/
     card.dataset.flowId = flow.id;
 
@@ -235,6 +254,7 @@ export async function loadFlows() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         allFlows = await response.json();
+        console.log("[Flow] Loaded flows data:", allFlows);
 
         // Step 2: Fetch the separate list of categories (your flows_list.json)
         // You will need to replace this URL with the correct path to flows_list.json
@@ -580,21 +600,18 @@ window.deleteModel = async function(fileId, modelPath) {
 function createToggleButtons() {
     const controlsDiv = document.querySelector('.right-controls');
     
+    favoritesFilterActive = preferencesManager.get('favoritesFilterActive');
   
     const favoritesToggle = createElement('button', 'toggle-button');
     favoritesToggle.id = 'favoritesToggle';
-    favoritesToggle.innerHTML = '<i class="fas fa-star"></i>';
-    favoritesToggle.title = 'Show Favorites';
+    favoritesToggle.innerHTML = favoritesFilterActive ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+    favoritesToggle.title = favoritesFilterActive ? 'Show All Flows' : 'Show Favorites';
     
     controlsDiv.appendChild(favoritesToggle);
     
     favoritesToggle.addEventListener('click', () => toggleFavoritesFilter(favoritesToggle));
     
-    favoritesFilterActive = preferencesManager.get('favoritesFilterActive');
-    
-   
     favoritesToggle.classList.toggle('active', favoritesFilterActive);
-    favoritesToggle.title = favoritesFilterActive ? 'Show All Flows' : 'Show Favorites';
     
 }
 
@@ -602,6 +619,7 @@ function toggleFavoritesFilter(button) {
     favoritesFilterActive = !favoritesFilterActive;
     preferencesManager.set('favoritesFilterActive', favoritesFilterActive);
     button.classList.toggle('active', favoritesFilterActive);
+    button.innerHTML = favoritesFilterActive ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
     button.title = favoritesFilterActive ? 'Show All Flows' : 'Show Favorites';
     renderFlows(filterCurrentFlows());
 }
@@ -621,6 +639,7 @@ function updateFlowCardVisibility() {
 function filterCurrentFlows() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const sortValue = preferencesManager.get('sortValue') || 'nameAsc';
+    const typeFilter = preferencesManager.get('typeFilter') || 'all';
     //let filteredFlows = filterFlows(allFlows, searchTerm, selectedCategories);
     let filteredFlows = allFlows;
     
@@ -639,11 +658,15 @@ function filterCurrentFlows() {
 
     if (sidebarFilter) {
         filteredFlows = filteredFlows.filter(flow => {
+            //console.log(`Checking flow "${flow.name}" with category: ${flow.category}`); // Log the flow and its category
             console.log(`Checking flow "${flow.name}" with category: ${flow.category}`); // Log the flow and its category
             return flow.category && flow.category.toLowerCase().includes(sidebarFilter.toLowerCase());
         });
     }
 
+    if (typeFilter !== 'all') {
+        filteredFlows = filteredFlows.filter(flow => flow.flow_type === typeFilter);
+    }
 
     
     if (favoritesFilterActive) {
@@ -733,6 +756,20 @@ function initializeSorting() {
         preferencesManager.set('sortValue', newSortValue);
         const filteredFlows = filterCurrentFlows();
         renderFlows(filteredFlows);
+    });
+}
+
+function initializeTypeFiltering() {
+    const typeSelect = document.getElementById('typeFilterSelect');
+    if (!typeSelect) return;
+    
+    const savedTypeFilter = preferencesManager.get('typeFilter') || 'all';
+    typeSelect.value = savedTypeFilter;
+    
+    typeSelect.addEventListener('change', () => {
+        const newTypeFilter = typeSelect.value;
+        preferencesManager.set('typeFilter', newTypeFilter);
+        renderFlows(filterCurrentFlows());
     });
 }
 
@@ -1146,6 +1183,7 @@ export function initializeUI() {
     initializeMenu();
     initializeSearch();
     initializeSorting();
+    initializeTypeFiltering();
     initializeFilterMenu();
     createToggleButtons();
     //initializeSidebarFilters(); // <- This line was added
