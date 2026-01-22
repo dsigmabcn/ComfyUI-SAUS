@@ -8,8 +8,8 @@ license = {file = "LICENSE"}
 [project.urls]
 Repository = "https://github.com/dsigmabcn/ComfyUI-SAUS"
 #  Used by Comfy Registry https://comfyregistry.org
-
+#to be done
 [tool.comfy]
-PublisherId = "disty"
-DisplayName = "ComfyUI-disty-Flow"
+PublisherId = "KN-AI"
+DisplayName = "ComfyUI-SAUS"
 Icon = ""
