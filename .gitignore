@@ -4,3 +4,5 @@ web/model_manager/backup_index.html
 web/model_manager/js/main copy.js
 web/flows/
 .ipynb_checkpoints/
+flow/data/settings.json
+flow/data/.secret.key

@@ -1,0 +1,292 @@
+[
+  {
+    "id": "2m1x4",
+    "name": "Base Stable Diffusion",
+    "url": "2m1x4-base-stable-diffusion",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["SD1.5", "SDXL"]
+    },
+    "architecture": "SD15"
+  },
+  {
+    "id": "30kk2",
+    "name": "Base Flux Dev",
+    "url": "30kk2-base-flux-dev",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"]
+    },
+    "architecture": "FLUX_DEV"
+  },
+  {
+    "id": "jj0qd",
+    "name": "Z-Image Turbo",
+    "url": "jj0qd-z-image-turbo-t2v",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["Z-image"]
+    },
+    "architecture": "Z-IMAGE-TURBO"
+  },
+  {
+    "id": "ju12s",
+    "name": "Flux Dev GGUF",
+    "url": "ju12s-base-flux-dev-gguf",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["quantized"],
+      "base_models": ["FLUX"]
+    },
+    "architecture": "FLUX_DEV_GGUF"
+  },
+  {
+    "id": "9w957",
+    "name": "Base Flux Dev Image to Image GGUF",
+    "url": "9w957-base-flux-dev-image-to-image-gguf",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["quantized"],
+      "base_models": ["FLUX"],
+      "other": ["image-to-image"]
+    },
+    "architecture": "FLUX_DEV_GGUF"
+  },
+  {
+    "id": "afoye",
+    "name": "Base Stable Diffusion Image to Image",
+    "url": "afoye-base-stable-diffusion-image-to-image",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["SD1.5","SDXL"],
+      "other": ["image-to-image"]
+    },
+    "architecture": "SD15"
+  },
+  {
+    "id": "bf3ea",
+    "name": "Flux Dev Fill GGUF Inpainting",
+    "url": "bf3ea-flux-dev-fill-gguf-inpainting",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["quantized"],
+      "base_models": ["FLUX"],
+      "other": ["inpainting"]
+    },
+    "architecture": "FLUX_INPAINT_GGUF"
+  },
+  {
+    "id": "k5ttn",
+    "name": "Stable Diffusion Inpainting",
+    "url": "k5ttn-stable-diffusion-inpainting",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["SD1.5","SDXL"],
+      "other": ["inpainting"]
+    },
+    "architecture": "SD15"
+  },
+  {
+    "id": "n0y8e",
+    "name": "Base Flux Dev Image to Image",
+    "url": "n0y8e-base-flux-dev-image-to-image",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"],
+      "other": ["image-to-image"]
+    },
+    "architecture": "FLUX_DEV"
+  },
+  {
+    "id": "y2gic",
+    "name": "Flux Dev Fill Inpainting",
+    "url": "y2gic-flux-dev-fill-inpainting",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"],
+      "other": ["inpainting"]
+    },
+    "architecture": "FLUX_INPAINT"
+  },
+  {
+    "id": "7bxez",
+    "name": "Flux Redux",
+    "url": "7bxez-flux-redux",
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"],
+      "other": ["(re-)styling"]
+    },
+    "architecture": "FLUX_REDUX"
+  },
+  {
+    "id": "94lhm",
+    "name": "Flux Redux 2 Images",
+    "url": "94lhm-flux-redux-2-images",
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"],
+      "other": ["(re-)styling"]
+    },
+    "architecture": "FLUX_REDUX"
+  },
+  {
+    "id": "ppfxh",
+    "name": "Flux Depth",
+    "url": "ppfxh-flux-depth",
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["FLUX"],
+      "other": ["controlnet"]
+    },
+    "architecture": "CONTROLNET FLUX"
+  },
+  {
+    "id": "7lm54",
+    "name": "Basic Animatediff",
+    "url": "7lm54-basic-animatediff",
+    "category": "text-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["SD1.5"],
+      "other": ["animatediff"]
+    },
+    "architecture": "ANIMATE_DIFF_SD1.5"
+  },
+  {
+    "id": "b82lw",
+    "name": "Basic Animatediff LCM",
+    "url": "b82lw-basic-animatediff-lcm",
+    "category": "text-to-video",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["SD1.5"],
+      "other": ["animatediff"]
+    },
+    "architecture": "ANIMATE_DIFF_LCM"
+  },
+  {
+    "id": "hqj80",
+    "name": "Wan VACE Image Reference",
+    "url": "hqj80-wan-vace-image-reference",
+    "category": "image-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["WAN"],
+      "other":["VACE" ]     
+    },
+    "architecture": "WAN2.1 VACE"
+  },
+  {
+    "id": "j5mss",
+    "name": "Wan VACE preprocessed Control Video",
+    "url": "j5mss-wan-vace-preprocessed-control-video",
+    "category": "video-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["WAN"],
+      "other": ["VACE"]
+    },
+    "architecture": "WAN2.1 VACE"
+  },
+  {
+    "id": "ovlxj",
+    "name": "Wan VACE Control Video",
+    "url": "ovlxj-wan-vace-control-video",
+    "category": "video-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["WAN"],
+      "other": ["VACE"]
+    },
+    "architecture": "WAN2.1 VACE"
+  },
+  {
+    "id": "jzhqq",
+    "name": "LTX-2 Text to Video",
+    "url": "jzhqq-ltx2-text-to-video",
+    "category": "text-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["LTX-2"],
+      "other": []
+    },
+    "architecture": "LTX2_T2V_I2V"
+  },
+  {
+    "id": "b7o1t",
+    "name": "LTX-2 Image to Video",
+    "url": "b7o1t-ltx2-image-to-video",
+    "category": "image-to-video",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["LTX-2"],
+      "other": []
+    },
+    "architecture": "LTX2_T2V_I2V"
+  },
+  {
+    "id": "lrml1",
+    "name": "OpenPose Controlnet Video",
+    "url": "lrml1-openpose-controlnet-video",
+    "category": "tools",
+    "tags": {
+      "type": ["controlnet" ]           
+    },
+    "architecture": "OTHER"
+  },
+  {
+    "id": "vlcfl",
+    "name": "Crop and Pad",
+    "url": "vlcfl-crop-and-pad",
+    "category": "tools",
+    "tags": {
+      "type": ["layout"],
+      "base_models": []
+    },
+    "architecture": "OTHER"
+  },
+  {
+    "id": "z1xtb",
+    "name": "Depth Controlnet Video",
+    "url": "z1xtb-depth-controlnet-video",
+    "category": "tools",
+    "tags": {
+      "type": ["controlnet"],
+      "base_models": []      
+    },
+    "architecture": "OTHER"
+  },
+  {
+    "id": "65j5u",
+    "name": "Background Remover",
+    "url": "65j5u-background-remover",
+    "category": "tools",
+    "tags": {
+      "type": ["remove"],
+      "base_models": []
+    },
+    "architecture": "OTHER"
+  },
+  {
+    "id": "9m3bo",
+    "name": "Crop, pad 2 images side by side",
+    "url": "9m3bo-crop-pad-2-images-side-by-side",
+    "category": "tools",
+    "tags": {
+      "type": ["layout"],
+      "base_models": []
+    },
+    "architecture": "OTHER"
+  }
+]

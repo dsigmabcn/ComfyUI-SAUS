@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 import os
 import re
 import base64
@@ -15,11 +16,14 @@ import sys
 import asyncio
 from server import PromptServer
 import aiohttp
+import secrets
+from itertools import cycle
 
 
 from .constants import (
     APP_CONFIGS, APP_VERSION, EXTENSION_NODE_MAP_PATH,
-    CUSTOM_NODES_DIR, FLOWMSG, logger, FLOWS_PATH, WEBROOT, CORE_PATH,
+    CUSTOM_NODES_DIR, FLOWMSG, logger, FLOWS_PATH,
+    WEBROOT, CORE_PATH, FLOW_PATH,
     SAFE_FOLDER_NAME_REGEX, ALLOWED_EXTENSIONS, CUSTOM_THEMES_DIR, FLOWS_CONFIG_FILE, MODELS_DIRECTORY,
     INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, COMFYUI_DIRECTORY, FILE_REGISTRY_DIR, FILE_IMAGES_DIR, #added for file_manager
     DATA_DIR, PREVIEWS_REGISTRY_DIR, PREVIEWS_IMAGES_DIR,
@@ -40,12 +44,12 @@ def ensure_data_folders():
 def pathToKey(model_path: str) -> str:
     return model_path.replace('\\', '/')
 
-def find_flow_path(flow_url: str) -> Path:
-    p = FLOWS_PATH / flow_url
+def find_flow_path(SAUS_url: str) -> Path:
+    p = FLOWS_PATH / SAUS_url
     if p.exists() and p.is_dir():
         return p
-    for p in FLOWS_PATH.rglob(flow_url):
-        if p.is_dir() and p.name == flow_url:
+    for p in FLOWS_PATH.rglob(SAUS_url):
+        if p.is_dir() and p.name == SAUS_url:
             return p
     return None
 
@@ -424,8 +428,8 @@ async def preview_flow_handler(request: web.Request) -> web.Response:
                 except json.JSONDecodeError:
                     return web.Response(status=400, text="Invalid JSON format in 'flowConfig'")
                 
-                flow_url = flow_config.get('url', None)
-                if not flow_url:
+                SAUS_url = flow_config.get('url', None)
+                if not SAUS_url:
                     return web.Response(status=400, text="Missing 'url' in 'flowConfig'")
 
             elif part.name == 'wf':
@@ -527,7 +531,7 @@ async def create_flow_handler(request: web.Request) -> web.Response:
         reader = await request.multipart()
         flow_config = None
         wf_file = None
-        flow_url = None
+        SAUS_url = None
         thumbnail_data = None
 
         while True:
@@ -542,8 +546,8 @@ async def create_flow_handler(request: web.Request) -> web.Response:
                 except json.JSONDecodeError:
                     return web.Response(status=400, text="Invalid JSON format in 'flowConfig'")
                 
-                flow_url = flow_config.get('url', None)
-                if not flow_url:
+                SAUS_url = flow_config.get('url', None)
+                if not SAUS_url:
                     return web.Response(status=400, text="Missing 'url' in 'flowConfig'")
 
             elif part.name == 'wf':
@@ -575,13 +579,13 @@ async def create_flow_handler(request: web.Request) -> web.Response:
         if not flow_config or not wf_file:
             return web.Response(status=400, text="Missing 'flowConfig' or 'wf' in request")
 
-        if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
+        if not SAFE_FOLDER_NAME_REGEX.match(SAUS_url):
             return web.Response(status=400, text="Invalid 'url' in 'flowConfig'. Only letters, numbers, dashes, and underscores are allowed.")
 
-        if find_flow_path(flow_url):
-            return web.Response(status=400, text=f"Flow with url '{flow_url}' already exists")
+        if find_flow_path(SAUS_url):
+            return web.Response(status=400, text=f"Flow with url '{SAUS_url}' already exists")
 
-        flow_folder = FLOWS_PATH / 'user' / flow_url
+        flow_folder = FLOWS_PATH / 'user' / SAUS_url
         flow_folder.parent.mkdir(parents=True, exist_ok=True)
         flow_folder.mkdir(parents=True, exist_ok=False)
 
@@ -604,7 +608,7 @@ async def create_flow_handler(request: web.Request) -> web.Response:
             with flow_config_path.open('w', encoding='utf-8') as f:
                 json.dump(flow_config, f, indent=2)
 
-            logger.info(f"Thumbnail saved as '{thumbnail_filename}' in flow '{flow_url}'")
+            logger.info(f"Thumbnail saved as '{thumbnail_filename}' in flow '{SAUS_url}'")
 
         index_template_path = CORE_PATH / 'templates' / 'index.html'
         if not index_template_path.exists():
@@ -613,8 +617,8 @@ async def create_flow_handler(request: web.Request) -> web.Response:
         index_destination_path = flow_folder / 'index.html'
         shutil.copy2(index_template_path, index_destination_path)
 
-        logger.info(f"{FLOWMSG}: Flow '{flow_url}' created successfully.")
-        return web.json_response({'status': 'success', 'message': f"Flow '{flow_url}' created successfully."})
+        logger.info(f"{FLOWMSG}: Flow '{SAUS_url}' created successfully.")
+        return web.json_response({'status': 'success', 'message': f"Flow '{SAUS_url}' created successfully."})
 
     except Exception as e:
         logger.error(f"{FLOWMSG}: Error creating flow: {e}")
@@ -625,7 +629,7 @@ async def update_flow_handler(request: web.Request) -> web.Response:
         reader = await request.multipart()
         flow_config = None
         wf_file = None
-        flow_url = None
+        SAUS_url = None
         thumbnail_data = None
 
         while True:
@@ -640,8 +644,8 @@ async def update_flow_handler(request: web.Request) -> web.Response:
                 except json.JSONDecodeError:
                     return web.Response(status=400, text="Invalid JSON format in 'flowConfig'")
                 
-                flow_url = flow_config.get('url', None)
-                if not flow_url:
+                SAUS_url = flow_config.get('url', None)
+                if not SAUS_url:
                     return web.Response(status=400, text="Missing 'url' in 'flowConfig'")
 
             elif part.name == 'wf':
@@ -673,12 +677,12 @@ async def update_flow_handler(request: web.Request) -> web.Response:
         if not flow_config:
             return web.Response(status=400, text="Missing 'flowConfig' in request")
 
-        if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
+        if not SAFE_FOLDER_NAME_REGEX.match(SAUS_url):
             return web.Response(status=400, text="Invalid 'url' in 'flowConfig'. Only letters, numbers, dashes, and underscores are allowed.")
 
-        flow_folder = find_flow_path(flow_url)
+        flow_folder = find_flow_path(SAUS_url)
         if not flow_folder:
-            return web.Response(status=400, text=f"Flow with url '{flow_url}' does not exist")
+            return web.Response(status=400, text=f"Flow with url '{SAUS_url}' does not exist")
 
         flow_config_path = flow_folder / FLOWS_CONFIG_FILE
         with flow_config_path.open('w', encoding='utf-8') as f:
@@ -700,10 +704,10 @@ async def update_flow_handler(request: web.Request) -> web.Response:
             with flow_config_path.open('w', encoding='utf-8') as f:
                 json.dump(flow_config, f, indent=2)
 
-            logger.info(f"Thumbnail updated as '{thumbnail_filename}' in flow '{flow_url}'")
+            logger.info(f"Thumbnail updated as '{thumbnail_filename}' in flow '{SAUS_url}'")
 
-        logger.info(f"{FLOWMSG}: Flow '{flow_url}' updated successfully.")
-        return web.json_response({'status': 'success', 'message': f"Flow '{flow_url}' updated successfully."})
+        logger.info(f"{FLOWMSG}: Flow '{SAUS_url}' updated successfully.")
+        return web.json_response({'status': 'success', 'message': f"Flow '{SAUS_url}' updated successfully."})
 
     except Exception as e:
         logger.error(f"{FLOWMSG}: Error updating flow: {e}")
@@ -711,21 +715,21 @@ async def update_flow_handler(request: web.Request) -> web.Response:
 
 async def delete_flow_handler(request: web.Request) -> web.Response:
     try:
-        flow_url = request.query.get('url', None)
-        if not flow_url:
+        SAUS_url = request.query.get('url', None)
+        if not SAUS_url:
             return web.Response(status=400, text="Missing 'url' parameter")
 
-        if not SAFE_FOLDER_NAME_REGEX.match(flow_url):
+        if not SAFE_FOLDER_NAME_REGEX.match(SAUS_url):
             return web.Response(status=400, text="Invalid 'url' parameter.")
 
-        flow_folder = find_flow_path(flow_url)
+        flow_folder = find_flow_path(SAUS_url)
         if not flow_folder:
-            return web.Response(status=400, text=f"Flow with url '{flow_url}' does not exist")
+            return web.Response(status=400, text=f"Flow with url '{SAUS_url}' does not exist")
 
         shutil.rmtree(flow_folder)
 
-        logger.info(f"{FLOWMSG}: Flow '{flow_url}' deleted successfully.")
-        return web.json_response({'status': 'success', 'message': f"Flow '{flow_url}' deleted successfully."})
+        logger.info(f"{FLOWMSG}: Flow '{SAUS_url}' deleted successfully.")
+        return web.json_response({'status': 'success', 'message': f"Flow '{SAUS_url}' deleted successfully."})
 
     except Exception as e:
         logger.error(f"{FLOWMSG}: Error deleting flow: {e}")
@@ -759,6 +763,8 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
 
         items = []
         for item in requested_path.iterdir():
+            if item.name.startswith('.'):
+                continue
             items.append({
                 "name": item.name,
                 "type": "folder" if item.is_dir() else "file"
@@ -868,6 +874,7 @@ async def download_generic_handler(request):
         url = data.get('url')
         target_path = data.get('targetPath')
         api_token = data.get('apiToken')
+        token_source = data.get('tokenSource')
 
         logger.info(f"[API] Received download request for: {url}")
 
@@ -880,8 +887,28 @@ async def download_generic_handler(request):
              return web.json_response({"error": "Access denied: Target path outside allowed directories"}, status=403)
 
         headers = {}
-        if api_token:
-            headers['Authorization'] = f'Bearer {api_token}'
+        
+        final_token = None
+        if token_source in ['civitai', 'huggingface']:
+            settings_file = DATA_DIR / "settings.json"
+            if settings_file.exists():
+                try:
+                    with open(settings_file, 'r', encoding='utf-8') as f:
+                        settings = json.load(f)
+                    
+                    key_map = {
+                        'civitai': 'civitai_api_key',
+                        'huggingface': 'huggingface_api_key'
+                    }
+                    encrypted_token = settings.get(key_map.get(token_source))
+                    final_token = decrypt_value(encrypted_token)
+                except Exception as e:
+                    logger.error(f"Error reading stored token: {e}")
+        elif api_token:
+            final_token = api_token
+
+        if final_token:
+            headers['Authorization'] = f'Bearer {final_token}'
 
         # Start background task
         asyncio.create_task(perform_generic_download(url, target_path, headers))
@@ -1060,8 +1087,9 @@ async def get_flows_list_handler(request):
     """
     Handles GET requests for the flows_list.json file.
     """
-    file_path = FLOWS_PATH / "flows_list.json"
-    
+    #print (FLOW_PATH)
+    file_path = FLOW_PATH / "data/flows_list.json"
+    #print(file_path)
     # Check if the file exists
     if not file_path.exists():
         return web.Response(text=json.dumps({"error": "File not found"}), status=404, content_type='application/json')
@@ -1097,15 +1125,23 @@ async def download_file_handler(request: web.Request) -> web.Response:
     # Use a secure path to prevent directory traversal attacks
     # For example, ensure the path is within your designated directories
     # like /workspace/ComfyUI/models or /workspace/ComfyUI/output
-    if not file_path_str.startswith(('/workspace/ComfyUI/input', '/workspace/ComfyUI/output', '/workspace/ComfyUI/models')):
+    
+    # Resolve to absolute path to handle relative paths from frontend
+    file_path = Path(file_path_str).resolve()
+    allowed_dirs = (
+        str(INPUT_FILES_DIRECTORY.resolve()),
+        str(OUTPUT_FILES_DIRECTORY.resolve()),
+        str(MODELS_DIRECTORY.resolve())
+    )
+    if not str(file_path).startswith(allowed_dirs):
         return web.json_response({'error': 'Invalid file path'}, status=403)
 
     # Get the file name from the path for the Content-Disposition header
-    file_name = os.path.basename(file_path_str)
+    file_name = file_path.name
 
     try:
         # Use web.FileResponse to serve the file efficiently
-        return web.FileResponse(file_path_str, headers={
+        return web.FileResponse(file_path, headers={
             'Content-Disposition': f'inline; filename="{file_name}"'
         })
     except FileNotFoundError:
@@ -1185,7 +1221,8 @@ async def upload_chunk_handler(request: web.Request) -> web.Response:
     return web.json_response({'status': 'chunk_received', 'chunk': chunk_index})
 
 
-ARCHITECTURES_FILE = MODEL_MANAGER_PATH / "data" / "architectures.json"
+#ARCHITECTURES_FILE = MODEL_MANAGER_PATH / "data" / "architectures.json"
+ARCHITECTURES_FILE = FLOW_PATH / "data" / "architectures.json"
 
 async def get_architectures_handler(request: web.Request) -> web.Response:
     """
@@ -1220,7 +1257,8 @@ async def get_architectures_handler(request: web.Request) -> web.Response:
             status=500
         )
 
-MODEL_DATA_FILE = MODEL_MANAGER_PATH / "data" / "models_data.json"
+#MODEL_DATA_FILE = MODEL_MANAGER_PATH / "data" / "models_data.json"
+MODEL_DATA_FILE = FLOW_PATH / "data" / "models_data.json"
 
 async def get_model_data_handler(request: web.Request) -> web.Response:
     """
@@ -1266,7 +1304,7 @@ async def check_model_status_handler(request: web.Request) -> web.Response:
 
     # Construct the full absolute path
     # Note: Using Path() handles joining correctly and securely
-    full_file_path = MODELS_DIRECTORY / model_path.lstrip('/') / file_id 
+    full_file_path = MODELS_DIRECTORY / model_path.strip('/\\') / file_id 
 
     # Ensure the path is safely inside the MODELS_DIRECTORY
     try:
@@ -1294,7 +1332,7 @@ async def delete_model_handler(request: web.Request) -> web.Response:
             return web.json_response({'status': 'error', 'message': 'Missing file_id or model_path'}, status=400)
 
         # Construct the full absolute path
-        full_file_path = MODELS_DIRECTORY / model_path.lstrip('/') / file_id
+        full_file_path = MODELS_DIRECTORY / model_path.strip('/\\') / file_id
 
         # ⚠️ SECURITY CHECK: Ensure the path is safely inside the MODELS_DIRECTORY
         # This prevents directory traversal attacks (e.g., deleting files outside the 'models' folder)
@@ -1320,7 +1358,7 @@ async def perform_download(component_type, url_model, model_path, file_name=None
     # 1. Setup paths and timeout
     if not file_name:
         file_name = Path(url_model).name
-    destination_dir = MODELS_DIRECTORY / model_path.lstrip('/')
+    destination_dir = MODELS_DIRECTORY / model_path.strip('/\\')
     destination_dir.mkdir(parents=True, exist_ok=True)
     full_file_path = destination_dir / file_name
     timeout = aiohttp.ClientTimeout(total=3600, connect=60) 
@@ -1461,3 +1499,115 @@ async def download_model_handler(request: web.Request) -> web.Response:
     except Exception as e:
         logger.error(f"Error handling download request: {e}", exc_info=True)
         return web.json_response({'status': 'error', 'message': 'Internal Server Error'}, status=500)
+
+def get_or_create_key():
+    ensure_data_folders()
+    key_file = DATA_DIR / ".secret.key"
+    if not key_file.exists():
+        # Generate a 32-byte random key
+        key = secrets.token_bytes(32)
+        with open(key_file, 'wb') as f:
+            f.write(key)
+    
+    with open(key_file, 'rb') as f:
+        return f.read()
+
+def encrypt_value(plain_text):
+    if not plain_text: return ""
+    try:
+        key = get_or_create_key()
+        # Simple XOR cipher with base64 encoding
+        # This prevents plain-text reading of the settings file
+        encrypted = bytes(a ^ b for a, b in zip(plain_text.encode('utf-8'), cycle(key)))
+        return "ENC:" + base64.b64encode(encrypted).decode('utf-8')
+    except Exception as e:
+        logger.error(f"{FLOWMSG}: Encryption failed: {e}")
+        return plain_text
+
+def decrypt_value(encrypted_text):
+    if not encrypted_text or not isinstance(encrypted_text, str): return ""
+    if not encrypted_text.startswith("ENC:"):
+        return encrypted_text # Return as-is if not encrypted (migration support)
+    
+    try:
+        raw_b64 = encrypted_text[4:] # Strip ENC:
+        key = get_or_create_key()
+        encrypted_bytes = base64.b64decode(raw_b64)
+        decrypted = bytes(a ^ b for a, b in zip(encrypted_bytes, cycle(key)))
+        return decrypted.decode('utf-8')
+    except Exception as e:
+        logger.error(f"{FLOWMSG}: Decryption failed: {e}")
+        return ""
+
+async def get_settings_handler(request: web.Request) -> web.Response:
+    settings_file = DATA_DIR / "settings.json"
+    if settings_file.exists():
+        try:
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # SECURITY: Mask sensitive keys before sending to frontend
+            # We send a placeholder so the UI knows a key exists, but not what it is.
+            response_data = data.copy()
+            sensitive_keys = ['civitai_api_key', 'huggingface_api_key', 'saus_token']
+            for key in sensitive_keys:
+                if response_data.get(key):
+                    response_data[key] = "********"
+            
+            return web.json_response(response_data)
+        except Exception as e:
+            logger.error(f"{FLOWMSG}: Error reading settings: {e}")
+            return web.json_response({}, status=500)
+    return web.json_response({})
+
+async def save_settings_handler(request: web.Request) -> web.Response:
+    try:
+        new_data = await request.json()
+        settings_file = DATA_DIR / "settings.json"
+        # Ensure data directory exists
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        
+        existing_data = {}
+        if settings_file.exists():
+            try:
+                with open(settings_file, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+            except Exception:
+                existing_data = {}
+
+        # Update logic: Only update if value is NOT the mask
+        # If the user sends "********", it means they didn't change that field.
+        sensitive_keys = ['civitai_api_key', 'huggingface_api_key', 'saus_token']
+        
+        for key, value in new_data.items():
+            if key in sensitive_keys and value == "********":
+                continue # Skip update, keep existing value
+            
+            if key in sensitive_keys:
+                existing_data[key] = encrypt_value(value)
+            else:
+                existing_data[key] = value
+
+        with open(settings_file, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, indent=2)
+        return web.json_response({"status": "success"})
+    except Exception as e:
+        logger.error(f"{FLOWMSG}: Error saving settings: {e}")
+        return web.json_response({"status": "error", "message": str(e)}, status=500)
+
+async def restart_server_handler(request: web.Request) -> web.Response:
+    try:
+        def do_restart():
+            import time
+            import sys
+            import os
+            time.sleep(1)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+            
+        import threading
+        threading.Thread(target=do_restart).start()
+        
+        return web.json_response({"status": "success", "message": "Server restarting..."})
+    except Exception as e:
+        logger.error(f"{FLOWMSG}: Error restarting server: {e}")
+        return web.json_response({"status": "error", "message": str(e)}, status=500)

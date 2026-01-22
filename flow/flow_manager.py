@@ -27,8 +27,10 @@ from .api_handlers import (
     upload_chunk_handler,
     get_architectures_handler,
     get_model_data_handler,
-    check_model_status_handler, delete_model_handler, download_model_handler #Used in model manager for the cards
+    check_model_status_handler, delete_model_handler, download_model_handler,
+    get_settings_handler, save_settings_handler, restart_server_handler
 )
+from .downloader import sync_flows_handler
 
 class FlowManager:
     @staticmethod
@@ -56,8 +58,8 @@ class FlowManager:
         for conf_file in FLOWS_PATH.rglob(FLOWS_CONFIG_FILE):
             flow_dir = conf_file.parent
             conf = FlowManager._load_config(conf_file)
-            flow_url = conf.get('url')
-            if not flow_url:
+            SAUS_url = conf.get('url')
+            if not SAUS_url:
                 logger.warning(f"{FLOWMSG}: Missing 'url' in config for {flow_dir}")
                 continue
             
@@ -70,7 +72,7 @@ class FlowManager:
             except Exception:
                 conf['flow_type'] = 'open'
                 
-            app.add_routes(RouteManager.create_routes(f"flow/{flow_url}", flow_dir))
+            app.add_routes(RouteManager.create_routes(f"flow/{SAUS_url}", flow_dir))
             APP_CONFIGS.append(conf)
 
     @staticmethod
@@ -100,7 +102,6 @@ class FlowManager:
             (f'/flow/api/model-previews', 'POST', list_model_previews_handler),
             (f'/flow/api/model-preview', 'GET', get_model_preview_handler),
             (f"/flow/api/directory", "GET", directory_listing_handler),
-            #(f'/flow/api/download', 'POST', download_model_handler),
             (f'/flow/api/download', 'POST', download_generic_handler),
             (f'/flow/api/rename-file', 'POST', rename_file_handler),
             (f'/flow/api/delete-file', 'POST', delete_file_handler),
@@ -113,6 +114,10 @@ class FlowManager:
             (f'/flow/api/model-status', 'GET', check_model_status_handler),
             (f'/flow/api/delete-model', 'DELETE', delete_model_handler),
             (f'/flow/api/download-model', 'POST', download_model_handler),
+            (f'/flow/api/settings', 'GET', get_settings_handler),
+            (f'/flow/api/settings', 'POST', save_settings_handler),
+            (f'/flow/api/sync-flows', 'POST', sync_flows_handler),
+            (f'/flow/api/restart', 'POST', restart_server_handler),
 
         ]
 
@@ -146,5 +151,3 @@ class FlowManager:
         except Exception as e:
             logger.error(f"{FLOWMSG}: Error loading config from {conf_file}: {e}")
             return {}
-        
-        

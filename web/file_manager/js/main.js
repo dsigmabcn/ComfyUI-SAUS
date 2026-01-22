@@ -1,6 +1,9 @@
+import { SettingsComponent } from '../../../core/js/common/components/settings.js';
+
+let settingsComponent = null;
 
 document.addEventListener('DOMContentLoaded', () => {    
-    displayDirectory('/workspace/ComfyUI/output', 'file-explorer');
+    displayDirectory('output', 'file-explorer');
     
     setTimeout(() => {
         const appNameElement = document.querySelector('.appName');
@@ -9,19 +12,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 500);
 
-    // Inject API Token field if it doesn't exist
-    const urlInput = document.getElementById('download-url');
-    if (urlInput && !document.getElementById('download-token')) {
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'text';
-        tokenInput.id = 'download-token';
-        tokenInput.placeholder = 'API Token (Optional)';
-        urlInput.parentNode.insertBefore(tokenInput, urlInput.nextSibling);
-    }
+    // Initialize Token UI
+    initTokenUI();
+
+    // Initialize Settings
+    initializeSettings();
 
     // Initialize WebSocket for Progress
     setupWebSocket();
 });
+
+async function initTokenUI() {
+    const tokenSourceSelect = document.getElementById('token-source');
+    const tokenInput = document.getElementById('download-token');
+    
+    if (!tokenSourceSelect || !tokenInput) return;
+
+    // Fetch settings to check for stored tokens
+    try {
+        const response = await fetch('/flow/api/settings');
+        if (response.ok) {
+            const settings = await response.json();
+            
+            if (settings.civitai_api_key) {
+                const option = document.createElement('option');
+                option.value = 'civitai';
+                option.textContent = 'Stored Civitai Token';
+                tokenSourceSelect.appendChild(option);
+            }
+            
+            if (settings.huggingface_api_key) {
+                const option = document.createElement('option');
+                option.value = 'huggingface';
+                option.textContent = 'Stored Hugging Face Token';
+                tokenSourceSelect.appendChild(option);
+            }
+        }
+    } catch (e) {
+        console.error("Error fetching settings for token UI:", e);
+    }
+
+    tokenSourceSelect.addEventListener('change', () => {
+        if (tokenSourceSelect.value === 'custom') {
+            tokenInput.classList.remove('hidden-initial');
+            tokenInput.style.display = 'block';
+        } else {
+            tokenInput.classList.add('hidden-initial');
+            tokenInput.style.display = 'none';
+        }
+    });
+}
 
 function setupWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -99,7 +139,7 @@ function resetDownloadUI() {
     if (statusDiv) statusDiv.textContent = '';
 }
 
-let currentDirectory = '/workspace/ComfyUI/output'; // sets initial drectory
+let currentDirectory = 'output'; // sets initial drectory
 
 function loadManagerApp() {
     // Code to load the Manager app into the content area
@@ -119,8 +159,16 @@ window.closeModal = function () {
 
 window.startDownload = async function () {
     const url = document.getElementById('download-url').value;
+    const tokenSourceSelect = document.getElementById('token-source');
     const tokenInput = document.getElementById('download-token');
-    const apiToken = tokenInput ? tokenInput.value.trim() : '';
+    
+    const tokenSource = tokenSourceSelect ? tokenSourceSelect.value : 'none';
+    let apiToken = '';
+    
+    if (tokenSource === 'custom' && tokenInput) {
+        apiToken = tokenInput.value.trim();
+    }
+    
     const button = document.getElementById('download-button');
 
     const progressContainer = document.getElementById('download-progress-container');
@@ -153,7 +201,7 @@ window.startDownload = async function () {
         const response = await fetch('/flow/api/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken })
+            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken, tokenSource })
         });
 
         if (!response.ok) {
@@ -337,6 +385,19 @@ window.triggerFileUpload = function () {
 
 /*functions for the navigation of folders */
 
+async function loadDirectory(path) {
+    try {
+        const response = await fetch(`/flow/api/directory?path=${encodeURIComponent(path)}`);
+        if (!response.ok) {
+            throw new Error(`Failed to load directory: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error loading directory:", error);
+        return [];
+    }
+}
+
 //async function displayDirectory(path, explorerId = 'file-explorer') {
 window.displayDirectory = async function displayDirectory(path, explorerId = 'file-explorer') {
      // Get the title element
@@ -346,6 +407,11 @@ window.displayDirectory = async function displayDirectory(path, explorerId = 'fi
     if (titleElement) {
         titleElement.textContent = '' + path;
     }   
+
+    // Ensure settings are hidden and explorer is shown
+    const midCol = document.querySelector('.mid-col');
+    if (settingsComponent) settingsComponent.hide();
+    if (midCol) midCol.classList.remove('hidden');
     
     
     
@@ -360,10 +426,11 @@ window.displayDirectory = async function displayDirectory(path, explorerId = 'fi
 
 
     // Add "Go Up" link if not at root
-    //const rootPath = '/workspace/ComfyUI/models';
-    const rootPath = '/workspace/ComfyUI';
+    const rootPath = '.';
     if (path !== rootPath) {
-        const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
+        let parentPath = path.substring(0, path.lastIndexOf('/'));
+        if (!parentPath) parentPath = '.';
+
         const upItem = document.createElement('div');
         upItem.className = 'file-item up';
 
@@ -497,19 +564,30 @@ function createFileItem(name, type, path) {
 }
 
 
+function initializeSettings() {
+    settingsComponent = new SettingsComponent('.content');
 
-
-async function loadDirectory(path) {
-    try {
-        const response = await fetch(`/flow/api/directory?path=${encodeURIComponent(path)}`);
-        if (!response.ok) {
-            throw new Error(`Failed to load directory: ${response.statusText}`);
+    // Handle Settings Link (Delegation since header is injected)
+    document.addEventListener('click', (event) => {
+        const target = event.target.closest('a');
+        if (target && (target.id === 'settingsLink' || target.getAttribute('href') === '#settings')) {
+            event.preventDefault();
+            showSettings();
         }
-        return await response.json();
-    } catch (error) {
-        console.error("Error loading directory:", error);
-        return [];
+    });
+}
+
+async function showSettings() {
+    const midCol = document.querySelector('.mid-col');
+    const previewCol = document.getElementById('preview-col');
+
+    if (midCol) midCol.classList.add('hidden');
+    if (previewCol) {
+        previewCol.classList.add('hidden');
+        previewCol.style.flex = '0';
     }
+    
+    if (settingsComponent) settingsComponent.show();
 }
 
 async function renameFile(currentPath, newName) {
@@ -545,6 +623,7 @@ async function deleteFile(filePath) {
         alert("Failed to delete file.");
     }
 };
+
 
 import { insertElement } from '../../../core/js/common/components/header.js';
 import '../../../core/js/common/components/footer.js';

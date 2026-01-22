@@ -2,6 +2,7 @@ import { PreferencesManager } from '/core/js/common/scripts/preferences.js';
 import ThemeManager from '/core/js/common/scripts/ThemeManager.js';
 import injectStylesheet from '/core/js/common/scripts/injectStylesheet.js';
 import { PromptServerClient } from './websocket.js';
+import { SettingsComponent } from '../../core/js/common/components/settings.js';
 
 let allFlows = [];
 let categories = [];
@@ -15,6 +16,7 @@ let favoritesFilterActive = false;
 let sidebarFilter = null; // Add this line to define the variable
 let ARCHITECTURES = {};
 let MODELS_DATA = {};
+let settingsComponent = null;
 
 let hiddenFlows = new Set();
 const HIDDEN_FLOWS_KEY = 'HiddenFlows';
@@ -997,6 +999,15 @@ function initializeStaticSidebarEvents() {
             renderFlows(filterCurrentFlows());
         });
     }
+
+    // Handle Settings Link (Delegation since header is injected)
+    document.addEventListener('click', (event) => {
+        const target = event.target.closest('a');
+        if (target && (target.id === 'settingsLink' || target.getAttribute('href') === '#settings')) {
+            event.preventDefault();
+            showSettings();
+        }
+    });
 }
 
 function showHome() {
@@ -1009,6 +1020,8 @@ function showHome() {
     if (flowGrid) flowGrid.classList.add('hidden');
     if (detailsCol) detailsCol.classList.add('hidden');
     if (controls) controls.classList.add('hidden');
+    
+    if (settingsComponent) settingsComponent.hide();
 
     document.querySelectorAll('.sidebar-filter-category').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.sidebar-section-header').forEach(el => el.classList.remove('active-section'));
@@ -1021,7 +1034,23 @@ function showFlows() {
     document.getElementById('flowGrid')?.classList.remove('hidden');
     document.querySelector('.controls')?.classList.remove('hidden');
     document.getElementById('homeLink')?.classList.remove('active');
+    if (settingsComponent) settingsComponent.hide();
     document.getElementById('resetFiltersLink')?.classList.add('active');
+}
+
+async function showSettings() {
+    document.getElementById('homeContainer')?.classList.add('hidden');
+    document.getElementById('flowGrid')?.classList.add('hidden');
+    document.querySelector('.controls')?.classList.add('hidden');
+    document.getElementById('flow-details-col')?.classList.add('hidden');
+    
+    if (settingsComponent) settingsComponent.show();
+    
+    // Reset sidebar active states
+    document.querySelectorAll('.sidebar-filter-category').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar-section-header').forEach(el => el.classList.remove('active-section'));
+    document.getElementById('resetFiltersLink')?.classList.remove('active');
+    document.getElementById('homeLink')?.classList.remove('active');
 }
 
 // Define the fixed, preferred order for categories
@@ -1178,6 +1207,9 @@ function initializeHiddenFlows() {
 }
 
 export function initializeUI() {
+    // Initialize Settings Component
+    settingsComponent = new SettingsComponent('.mid-col');
+
     loadFavorites();
     initializeHiddenFlows();
     initializeMenu();
@@ -1185,12 +1217,16 @@ export function initializeUI() {
     initializeSorting();
     initializeTypeFiltering();
     initializeFilterMenu();
-    createToggleButtons();
-    //initializeSidebarFilters(); // <- This line was added
+    createToggleButtons();    
     initializeStaticSidebarEvents();
     initializeWebSocket();
     loadFlows();
     showVersion();
+    
+    window.addEventListener('flowsSynced', () => {
+        console.log('[Flow] Flows synced, reloading...');
+        loadFlows();
+    });
 
     document.addEventListener('click', (event) => {
         const detailsCol = document.getElementById('flow-details-col');

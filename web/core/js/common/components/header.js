@@ -5,9 +5,9 @@ const navHTML = `
         <a href="/flow"><span><i class="fas fa-fire"></i> SAUS Apps</span></a>
         <!-- <a href="/flow/model_manager"><i class="fas fa-cube"></i> Model Manager</a> -->
         <!-- <a href="/flow/lora_manager"><i class="fas fa-cube"></i> Lora Manager</a> "cooming soon"-->
-        <a href="/flow/file_manager" ><i class="fas fa-folder"></i> File Manager</a>
-        <!-- <a href="#settings-placeholder"><i class="fas fa-cog"></i> Settings</a> -->
+        <a href="/flow/file_manager" ><i class="fas fa-folder"></i> File Manager</a>        
         <a href="/" target="_blank"><i class="fas fa-project-diagram"></i> ComfyUI</a>
+        <a href="#settings" id="settingsLink"><i class="fas fa-cog"></i> Settings</a>
     </nav>
 `;
 /* $navHTML is included now in the "mid" section*/

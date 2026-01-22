@@ -1,0 +1,403 @@
+{
+  "SD15": {
+    "title": "SD 1.5 / SDXL",
+    "description": "Models for Stable Diffusion 1.5 and SDXL",
+    "categories": ["Image Models"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": ["EPIC REALISM","REV ANIMATED","JUGGERNAUT XL", "REALISTIC VISION XL", "DREAMSHAPER XL"],
+      "optional": []
+    }
+  },
+  "FLUX_DEV": {
+    "title": "FLUX DEV",
+    "description": "Core models required for standard FLUX-DEV image generation.",
+    "categories": ["Image Models"],
+    "components": {
+      "compulsory": ["AE_VAE", "T5XXL_ENCODER", "CLIP_L_ENCODER"],
+      "at_least_one": ["FLUX_DEV_MODEL", "FLUX_KREA"],
+      "optional": []
+    }
+  },
+  "QWEN": {
+    "title": "QWEN IMAGE",
+    "description": "Core models required for QWEN IMAGE image generation.",
+    "categories": ["Image Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER","QWEN_IMAGE_MODEL"],
+      "at_least_one": [],
+      "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
+    }
+  },
+  "Z-IMAGE-TURBO": {
+    "title": "Z-Image Turbo",
+    "description": "Core models required to run Z-Image Turbo image generation.",
+    "categories": ["Image Models"],
+    "components": {      
+      "compulsory": ["QWEN_3_4B_VL_ENCODER","Z_IMAGE_TURBO_BF16","AE_VAE"],
+      "at_least_one": [],
+      "optional": []     
+    }
+  },
+    "FLUX_DEV_GGUF": {
+    "title": "FLUX DEV GGUF",
+    "description": "Models required for (GGUF) FLUX image generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["AE_VAE", "CLIP_L_ENCODER","T5 XXL GGUF Q8"],
+      "at_least_one": ["FLUX GGUF Q8","FLUX GGUF Q6"],
+      "optional": []
+    }
+  },
+  "ANIMATE_DIFF_SD1.5": {
+    "title": "AnimateDiff SD1.5 V3",
+    "description": "Models for AnimateDiff (smooth animation using SD1.5)",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["ANIMATEDIFF MM V3","ANIMATEDIFF ADAPTER"],
+      "at_least_one": ["SD1.5 BASE","EPIC REALISM","REV ANIMATED"],
+      "optional": []
+    }
+  },
+    "ANIMATE_DIFF_LCM": {
+    "title": "AnimateDiff SD1.5 LCM",
+    "description": "Models for AnimateDiff (with LCM distillation)",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["ANIMATEDIFF MM V3","ANIMATEDIFF ADAPTER"],
+      "at_least_one": ["SD1.5 BASE","EPIC REALISM","REV ANIMATED"],
+      "optional": []
+    }
+  },
+  "WAN21 TEXT TO VIDEO": {
+    "title": "Wan 2.1 Text to Video",
+    "description": "Specialized models for high-quality video generation from single images.",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER"],
+      "at_least_one": ["WAN2.1_t2v_1.3B_MODEL","WAN2.1_t2v_14B_MODEL"],
+      "optional": ["CAUSVID 1.3B","CAUSVID 14B"]
+    }
+  },
+    "WAN21 IMAGE TO VIDEO": {
+    "title": "Wan 2.1 Image to Video",
+    "description": "Specialized models for high-quality video generation from single images.",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER","CLIPVISION_H"],
+      "at_least_one": ["WAN2.1_i2v_480p_MODEL","WAN2.1_i2v_720p_MODEL"],
+      "optional": ["CAUSVID 1.3B","CAUSVID 14B"]
+    }
+  },
+    "WAN2.1 VACE": {
+    "title": "Wan 2.1 VACE",
+    "description": "Specialized models for high-quality video generation from single images.",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER"],
+      "at_least_one": ["WAN VACE 1.3B","WAN VACE 14B"],
+      "optional": ["OPENPOSE","DEPTH"]
+    }
+  },
+  "WAN22 TEXT TO VIDEO": {
+    "title": "Wan 2.2 T2V 14B",
+    "description": "Wan 2.2 models (high and low noise), clip and VAE",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER","WAN2.2_T2V_HIGH","WAN2.2_T2V_LOW"],
+      "at_least_one": [],
+      "optional": ["LIGHT_4steps_t2v_low","LIGHT_4steps_t2v_high"]
+    }
+  },
+  "WAN22 IMAGE TO VIDEO": {
+    "title": "Wan 2.2 I2V 14B",
+    "description": "Wan 2.2 models (high and low noise), clip and VAE",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER","WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
+      "at_least_one": [],
+      "optional": ["LIGHT_4steps_i2v_low","LIGHT_4steps_i2v_high"]
+    }
+  },
+  "WAN22 TEXT AND IMAGE TO VIDEO": {
+    "title": "Wan 2.2 TI2V (5B)",
+    "description": "Wan 2.2 models (high and low noise), clip and VAE",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["WAN_VAE_2.2","UMT5_XXL_ENCODER","WAN 2.2 TI2V 5B MODEL"],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LTX2_T2V_I2V": {
+    "title": "LTX-2 Text and image to video",
+    "description": "LTX-2 Models (checkpoint, text encoder, distilled lora and upscaler)",
+    "categories": ["Video Models"],
+    "components": {
+      "compulsory": ["LTX2_BASE","LTX2_DISTILLED_LORA","LTX2_VIDEO_UPSCALER","GEMMA_3_12B_ENCODER"],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "IPADAPTERS": {
+    "title": "IP Adapters",
+    "description": "Assets for image prompt guidance and style transfer.",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["IP ADAPTER SD1.5","IP ADAPTER SDXL","IP ADAPTER FLUX"]
+    }
+  },
+  "FLUX_REDUX": {
+    "title": "FLUX REDUX",
+    "description": "Assets for image prompt guidance and style transfer.",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": ["AE_VAE", "T5XXL_ENCODER", "CLIP_L_ENCODER","FLUX_DEV_MODEL","SIG CLIP VISION","FLUX REDUX"],
+      "at_least_one": [],      
+      "optional": []
+    }
+  },
+  "FLUX_KONTEXT": {
+    "title": "FLUX KONTEXT",
+    "description": "Assets for image prompt guidance and style transfer.",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": ["AE_VAE", "T5XXL_ENCODER", "CLIP_L_ENCODER","FLUX_KONTEXT_MODEL"],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "FLUX_INPAINT": {
+    "title": "FLUX INPAINT",
+    "description": "Assets for image prompt guidance and style transfer.",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": ["AE_VAE", "T5XXL_ENCODER", "CLIP_L_ENCODER","FLUX_FILL_DEV_MODEL"],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+    "FLUX_INPAINT_GGUF": {
+    "title": "FLUX INPAINT GGUF",
+    "description": "Assets for image prompt guidance and style transfer with quantized models",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": ["AE_VAE", "T5XXL_ENCODER", "CLIP_L_ENCODER"],
+      "at_least_one": ["FLUX_FILL_GGUF_Q8","FLUX_FILL_GGUF_Q6"],
+      "optional": []
+    }
+  },
+  "QWEN_EDIT": {
+    "title": "QWEN EDIT",
+    "description": "Assets for image prompt guidance and style transfer.",
+    "categories": ["Style, Edit, inpaint"],
+    "components": {
+      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
+      "at_least_one": ["QWEN_EDIT_MODEL","QWEN_EDIT_2509_MODEL"],
+      "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
+    }
+  },
+
+  "FLUX_KONTEXT_GGUF": {
+    "title": "FLUX KONTEXT GGUF",
+    "description": "Models required for (GGUF) FLUX KONTEXT image generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["AE_VAE", "CLIP_L_ENCODER"],
+      "at_least_one": ["KONTEXT GGUF Q8","KONTEXT GGUF Q6","KONTEXT GGUF Q4","T5 XXL GGUF Q8","T5 XXL GGUF Q6","T5 XXL GGUF Q4"],
+      "optional": []
+    }
+  },
+  "QWEN_IMAGE_GGUF": {
+    "title": "QWEN IMAGE GGUF",
+    "description": "Models required for (GGUF) FLUX image generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
+      "at_least_one": ["QWEN IMAGE GGUF Q8","QWEN IMAGE GGUF Q6","QWEN IMAGE GGUF Q4","QWEN_ENCODER GGUF Q8","QWEN_ENCODER GGUF Q6","QWEN_ENCODER GGUF Q4"],
+      "optional": []
+    }
+  },
+  "QWEN_EDIT_GGUF": {
+    "title": "QWEN EDIT GGUF",
+    "description": "Models required for (GGUF) FLUX image generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
+      "at_least_one": ["QWEN EDIT GGUF Q8","QWEN EDIT GGUF Q6","QWEN IMAGE GGUF Q4","QWEN_ENCODER GGUF Q8","QWEN_ENCODER GGUF Q6","QWEN_ENCODER GGUF Q4"],
+      "optional": []
+    }
+  },
+  "WAN_21_GGUF": {
+    "title": "WAN 2.1 GGUF",
+    "description": "Models required for (GGUF) WAN 2.1 Video generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER"],
+      "at_least_one": ["WAN2.1_T2V_GGUF Q8","WAN2.1_T2V_GGUF Q6","WAN2.1_T2V_GGUF Q4","WAN2.1_I2V_GGUF Q8","WAN2.1_I2V_GGUF Q6","WAN2.1_I2V_GGUF Q4"],      
+      "optional": []
+    }
+  },
+  "WAN_21_VACE_GGUF": {
+    "title": "WAN 2.1 VACE GGUF",
+    "description": "Models required for (GGUF) VACE - WAN 2.1 Video generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER"],
+      "at_least_one": ["WAN2.1_VACE_GGUF Q8","WAN2.1_VACE_GGUF Q6","WAN2.1_VACE_GGUF Q4"],
+      "optional": []
+    }
+  },
+  "WAN_22_GGUF": {
+    "title": "WAN 2.2 GGUF",
+    "description": "Models required for (GGUF) WAN 2.2 Video generation.",
+    "categories": ["Low VRAM - GGUF"],
+    "components": {
+      "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER"],
+      "at_least_one": ["WAN2.2_T2V_HIGH_GGUF Q8","WAN2.2_T2V_HIGH_GGUF Q6","WAN2.21_T2V__HIGH_GGUF Q4","WAN2.2_I2V_HIGH_GGUF Q8","WAN2.2_I2V_HIGH_GGUF Q6","WAN2.2_I2V_HIGH_GGUF Q4","WAN2.2_T2V_LOW_GGUF Q8","WAN2.2_T2V_LOW_GGUF Q6","WAN2.21_T2V__LOW_GGUF Q4","WAN2.2_I2V_LOW_GGUF Q8","WAN2.2_I2V_LOW_GGUF Q6","WAN2.2_I2V_LOW_GGUF Q4"],
+      "optional": []
+    }
+  },
+  "LORA_SD": {
+    "title": "LoRAs SD 1.5",
+    "description": "Assets for fine-tuning styles and concepts.",
+    "categories": ["LORA"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LORA_SDXL": {
+    "title": "LoRAs SDXL",
+    "description": "Assets for fine-tuning styles and concepts.",
+    "categories": ["LORA"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LORA_FLUX": {
+    "title": "LoRAs FLUX DEV",
+    "description": "Assets for fine-tuning styles and concepts.",
+    "categories": ["LORA"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LORA_WAN": {
+    "title": "LoRAs WAN",
+    "description": "Assets for fine-tuning styles and concepts.",
+    "categories": ["LORA"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "LCM": {
+    "title": "LCM Loras",
+    "description": "Small embed files for specific styles or objects.",
+    "categories": ["Fast - Distillation"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+  "TURBO": {
+    "title": "Turbo Loras",
+    "description": "Small embed files for specific styles or objects.",
+    "categories": ["Fast - Distillation"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+    "LIGHTNING": {
+    "title": "Lightning Loras",
+    "description": "Small embed files for specific styles or objects.",
+    "categories": ["Fast - Distillation"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": []
+    }
+  },
+    "CONTROLNET SD1.5": {
+    "title": "ControlNet SD1.5",
+    "description": "Assets for structural guidance (e.g., Canny, Canny, Pose).",
+    "categories": ["ControlNet"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["CONTROLNET"]
+    }
+  },
+  "CONTROLNET SDXL": {
+    "title": "ControlNet SDXL",
+    "description": "Assets for structural guidance (e.g., Canny, Canny, Pose).",
+    "categories": ["ControlNet"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["CONTROLNET"]
+    }
+  },
+  "CONTROLNET FLUX": {
+    "title": "ControlNet FLUX",
+    "description": "Assets for structural guidance (e.g., Canny, Canny, Pose).",
+    "categories": ["ControlNet"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["CONTROLNET"]
+    }
+  },
+  "HUNYUAN_BASE": {
+    "title": "Hunyuan Base",
+    "description": "Assets for structural guidance (e.g., Canny, Canny, Pose).",
+    "categories": ["ControlNet"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["CONTROLNET"]
+    }
+  },
+  "HUNYUAN_GGUF": {
+    "title": "Hunyuan GGUF",
+    "description": "Assets for structural guidance (e.g., Canny, Canny, Pose).",
+    "categories": ["ControlNet"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["CONTROLNET"]
+    }
+  },
+    "OTHER": {
+    "title": "Other",
+    "description": "Other",
+    "categories": [""],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": [""]
+    }
+  },
+  "UPSCALERS": {
+    "title": "Upscalers",
+    "description": "Small embed files for specific styles or objects.",
+    "categories": ["Upscalers"],
+    "components": {
+      "compulsory": [],
+      "at_least_one": [],
+      "optional": ["EMBEDDING"]
+    }
+  }
+}

@@ -38,9 +38,8 @@ FILE_REGISTRY_DIR = DATA_DIR / "file_registry"
 FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
 
-#FLOWS_DOWNLOAD_PATH = 'https://github.com/diStyApps/flows_lib' #ORIGINAL CODE
-#FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/lib_WanVACE_flows' #VACE REPO
-FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/lib_all_flows' #APP REPO
+FLOWS_DOWNLOAD_PATH = 'https://github.com/dsigmabcn/SAUS_open_WFs' #OPEN REPOS
+FLOWS_DOWNLOAD_PRIVATE_PATH = 'https://github.com/dsigmabcn/SAUS_private_WFs.git'
 
 
 SAFE_FOLDER_NAME_REGEX = re.compile(r'^[\w\-]+$')

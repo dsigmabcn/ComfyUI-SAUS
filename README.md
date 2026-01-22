@@ -10,13 +10,12 @@
 <!-- <img src="media/covers/cover.jpg"> -->
 
   <h1 align="center">🌊 SAUS UI</h1>
+  <img src="web/core/media/git/cover_flow.jpg">
   <h3 align="center"><strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
     <p align="center">
     <strong>Cut the spaghetti. Cook it with <i>Saus</i></strong>
   </p>
-  <img src="web/core/media/git/cover_flow.jpg">
-***
-***  <h4 align="center"><em>Let your creativity flow naturally</em></h4>
+  <h4 align="center"><em>Let your creativity flow naturally</em></h4>
   <h4 align="center">Don't forget to leave a star.</h4>
 *** 
 ***  
@@ -73,6 +72,16 @@ SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+### What is SAUS do?
+
+SAUS is a custom node for comfyui that works as a robust and simple User Interface to run different workflows, without messing and tinkering with all the spaghetti, parameters and options.
+
+ComfyUI is a great tool to understand how AI Image and Video Generation works, 
+
+
+
+
+
 #### Requirements
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
  - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
@@ -89,6 +98,11 @@ SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI 
 If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager
 
 [IMAGE HERE]
+
+I have tried that most of the apps work without other custom nodes, but it is recommended to add the following custom nodes:
+- KJ Nodes
+- GGUF Loader
+- 
 
 
 # ComfyUI Manual Install

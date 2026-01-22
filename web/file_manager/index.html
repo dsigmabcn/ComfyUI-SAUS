@@ -18,13 +18,13 @@
                 <!-- SIDEBAR -->
                 <!-- The sidebar menu with the navigation through the folders -->
                 <div class="menu-category">
-                    <a href="#" onclick="displayDirectory('/workspace/ComfyUI/input', 'file-explorer')">
+                    <a href="#" onclick="displayDirectory('input', 'file-explorer')">
                         <span><i class="fas fa-folder"></i> Input</span>
                     </a>
-                    <a href="#" onclick="displayDirectory('/workspace/ComfyUI/output', 'file-explorer')">
+                    <a href="#" onclick="displayDirectory('output', 'file-explorer')">
                         <span><i class="fas fa-folder"></i> Output</span>
                     </a>
-                    <a href="#" onclick="displayDirectory('/workspace/ComfyUI/models', 'file-explorer')">
+                    <a href="#" onclick="displayDirectory('models', 'file-explorer')">
                         <span><i class="fas fa-folder"></i> Models</span>
                     </a>
                 </div>
@@ -40,6 +40,7 @@
             </nav>
 
             <div class="content">
+
                 <!--CONTENT PART -->
                 <!-- Mid-column/space with the file explorer -->
                 <div class="mid-col">
@@ -65,6 +66,12 @@
             <span class="close-button" onclick="closeModal()">&times;</span>
             <h2>URL to download file/model</h2>
             <input type="text" id="download-url" class="download-input" placeholder="Paste URL here" />
+            <select id="token-source" class="download-input">
+                <option value="none">No API Token</option>
+                <option value="custom">Custom Token</option>
+            </select>
+            <input type="text" id="download-token" class="download-input hidden-initial"
+                placeholder="Paste API Token here" />
             <button id="download-button" onclick="startDownload()">Download</button>
             <div id="download-status" class="download-status-message"></div>
 
