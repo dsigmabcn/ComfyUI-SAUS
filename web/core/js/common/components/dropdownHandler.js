@@ -605,7 +605,7 @@ export function populateDropdown(
             }
         }
 
-        console.log('Initial value:', initialValue);
+        //console.log('Initial value:', initialValue);
 
         if (loadFromWorkflow && !initialValue) {
             initialValue = getValueFromWorkflow(workflow, workflowPath);
@@ -613,7 +613,7 @@ export function populateDropdown(
             validateSelection(initialValue);
 
             if (initialValue && !items.includes(initialValue)) {
-                console.log('Initial value not inside items:', initialValue);
+                //console.log('Initial value not inside items:', initialValue);
             }
         }
 
@@ -782,7 +782,7 @@ export function populateDropdown(
                 // NORMALIZE BEFORE FILTERING //
                 const normalizedItems = items.map(normalizePath);
                 const filteredItems = normalizedItems.filter(it => it.toLowerCase().includes(filter));
-                console.log(filteredItems); // This will print the filtered array to the browser's console
+                //console.log(filteredItems); // This will print the filtered array to the browser's console
 
 
                 if (!useNesting) {

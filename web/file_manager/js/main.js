@@ -75,7 +75,7 @@ function setupWebSocket() {
             const msg = JSON.parse(event.data);
             if (msg.type === 'file_download_progress') {
                 const { filename, progress } = msg.data;
-                console.log(`[WS] Progress for ${filename}: ${progress}%`);
+                //console.log(`[WS] Progress for ${filename}: ${progress}%`);
                 updateDownloadProgress(progress, `Downloading ${filename}...`);
             } else if (msg.type === 'file_download_complete') {
                 const { filename } = msg.data;
@@ -315,73 +315,10 @@ window.handleFileUpload = function () {
 };
 
 
-
-
 /*function for uploading files - OLD VERSION*/
 window.triggerFileUpload = function () {
     document.getElementById('hidden-upload').click();
 };
-
-/*window.handleFileUpload = function () {
-    const fileInput = document.getElementById('hidden-upload');
-    const progressContainer = document.getElementById('upload-progress-container');
-    const progressBar = document.getElementById('upload-progress-bar');
-    const progressText = document.getElementById('upload-progress-text');
-
-
-    if (!fileInput.files.length) return;
-
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('targetPath', currentDirectory);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/flow/api/upload', true);
-    xhr.timeout = 7200000; //max timeout = 2 hours, should be enough
-    //xhr.setRequestHeader('Connection', 'keep-alive');
-
-
-    xhr.upload.onprogress = function (event) {
-        if (event.lengthComputable) {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}%`;
-
-        }
-    };
-
-    xhr.onloadstart = function () {
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-    };
-
-    xhr.onloadend = function () {
-        progressBar.style.width = '100%';
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
-            fileInput.value = '';
-        }, 1000);
-    };
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                displayDirectory(currentDirectory);
-                alert("Upload successful!");
-            } else {
-                alert("Upload failed.");
-            }
-        }
-    };
-
-    xhr.send(formData);
-};*/
-
-
-
-
 
 /*functions for the navigation of folders */
 
@@ -490,7 +427,15 @@ function createFileItem(name, type, path) {
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'file-name';
-    nameSpan.textContent = name;
+
+    if (type === 'folder') {
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-folder';
+        icon.style.marginRight = '8px';
+        nameSpan.appendChild(icon);
+    }
+    nameSpan.appendChild(document.createTextNode(name));
+
     /*nameSpan.onclick = () => {
         if (type === 'folder') {
             displayDirectory(path);

@@ -1,8 +1,13 @@
+# Ignore sensitive user data and configuration
+**/data/settings.json
+**/data/.secret.key
+
+# Ignore Python cache
 __pycache__/
 flow/__pycache__/
-web/model_manager/backup_index.html
-web/model_manager/js/main copy.js
+# other
 web/flows/
 .ipynb_checkpoints/
 flow/data/settings.json
 flow/data/.secret.key
+*.py[cod]

@@ -91,7 +91,7 @@ export class MessageHandler {
 
             newImageFilenames.push(filename);
             const imageUrl = `/view?filename=${encodeURIComponent(filename)}`;
-            console.log('processImages Image URL:', imageUrl);
+            //console.log('processImages Image URL:', imageUrl);
             return imageUrl;
         }).filter(url => url !== null);
 

@@ -227,7 +227,7 @@ export class UndoRedoPlugin extends CanvasPlugin {
         // console.log('UndoRedoPlugin: Undo.');
 
         if (this.undoStack.length === 0) {
-            console.log('UndoRedoPlugin: Undo stack is empty.');
+            //console.log('UndoRedoPlugin: Undo stack is empty.');
             return;
         }
 

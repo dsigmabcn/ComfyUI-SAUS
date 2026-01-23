@@ -72,7 +72,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
             this.initializeMultiModeSelector();
         }
 
-        console.log('ImageCompareSliderPlugin initialized');
+        //console.log('ImageCompareSliderPlugin initialized');
     }
 
     onAfterRender() {
@@ -91,11 +91,11 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
 
         if (lineIndex !== maxIndex - 1) {
             this.sliderLine.moveTo(maxIndex - 1);
-            console.log('sliderLine moved to top -1');
+            //console.log('sliderLine moved to top -1');
         }
         if (handleIndex !== maxIndex) {
             this.sliderHandle.moveTo(maxIndex);
-            console.log('sliderHandle moved to top');
+            //console.log('sliderHandle moved to top');
         }
     }
 
@@ -107,7 +107,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
     }
 
     onImageListUpdated({ images }) {
-        console.log('Image list updated:', images);
+        //console.log('Image list updated:', images);
         this.images = images;
         this.updateComparisonImages();
     }
@@ -118,7 +118,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
             if (this.images.length > 1) {
                 const imagesToRemove = this.images.slice(0, this.images.length - 1);
                 imagesToRemove.forEach(img => {
-                    console.log(`Removing image ID=${img.id} to maintain 'Pairs' mode`);
+                    //console.log(`Removing image ID=${img.id} to maintain 'Pairs' mode`);
                     this.canvasManager.emit('image:remove', { id: img.id });
                 });
             }
@@ -126,7 +126,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
             if (this.images.length > 2) {
                 const imagesToRemove = this.images.slice(0, this.images.length - 2);
                 imagesToRemove.forEach(img => {
-                    console.log(`Removing image ID=${img.id} to maintain 'Replace' mode`);
+                    //console.log(`Removing image ID=${img.id} to maintain 'Replace' mode`);
                     this.canvasManager.emit('image:remove', { id: img.id });
                 });
             }
@@ -144,7 +144,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
     }
 
     updateComparisonImages() {
-        console.log('Updating comparison images based on current mode:', this.options.mode);
+        //console.log('Updating comparison images based on current mode:', this.options.mode);
         if (this.images.length < 2) {
             this.destroySlider();
             return;
@@ -171,7 +171,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
     }
 
     setupSliderWithImages(id1, id2) {
-        console.log(`Setting up slider with images ID1=${id1}, ID2=${id2}`);
+        //console.log(`Setting up slider with images ID1=${id1}, ID2=${id2}`);
         const imageData1 = this.canvasManager.getImageById(id1);
         const imageData2 = this.canvasManager.getImageById(id2);
 
@@ -233,7 +233,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
             this.updateClipPath();
             this.isInitialized = true;
 
-            console.log('Slider initialized successfully');
+            //console.log('Slider initialized successfully');
             this.canvasManager.emit('slider:initialized', {
                 baseImage: this.baseImage,
                 comparisonImage: this.comparisonImage
@@ -285,7 +285,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
             });
 
             this.canvas.requestRenderAll();
-            console.log('Clip path updated');
+            //console.log('Clip path updated');
         } catch (error) {
             console.error('Error updating clip path:', error);
         }
@@ -316,7 +316,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
 
             event.e.preventDefault();
             event.e.stopPropagation();
-            console.log('Slider handle drag started');
+            //console.log('Slider handle drag started');
         }
     }
 
@@ -346,7 +346,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
         this.canvas.requestRenderAll();
         event.e.preventDefault();
         event.e.stopPropagation();
-        console.log(`Slider handle moved to (${newX}, ${this.sliderHandle.top})`);
+        //console.log(`Slider handle moved to (${newX}, ${this.sliderHandle.top})`);
     }
 
     onMouseUp(event) {
@@ -360,7 +360,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
                 event.e.preventDefault();
                 event.e.stopPropagation();
             }
-            console.log('Slider handle drag ended');
+            //console.log('Slider handle drag ended');
         }
     }
 
@@ -378,12 +378,12 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
         if (distance <= handleRadius * 1.5) {
             this.sliderLine.visible = !this.sliderLine.visible;
             this.canvas.requestRenderAll();
-            console.log(`Slider line visibility toggled to ${this.sliderLine.visible}`);
+            //console.log(`Slider line visibility toggled to ${this.sliderLine.visible}`);
         } else if (!this.animating) {
             this.animateSlider();
         } else {
             this.animating = false;
-            console.log('Slider animation stopped');
+            //console.log('Slider animation stopped');
         }
     }
 
@@ -400,7 +400,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
         const distance = Math.abs(endValue - startPosition);
         const duration = (distance / (rightEdge - leftEdge)) * 1500;
 
-        console.log(`Animating slider from ${startPosition} to ${endValue} over ${duration}ms`);
+        //console.log(`Animating slider from ${startPosition} to ${endValue} over ${duration}ms`);
 
         fabric.util.animate({
             startValue: startPosition,
@@ -414,7 +414,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
                 this.updateClipPath();
                 this.ensureSliderOnTop();
                 this.canvas.requestRenderAll();
-                console.log(`Slider handle animating to (${adjustedValue}, ${this.sliderHandle.top})`);
+                //console.log(`Slider handle animating to (${adjustedValue}, ${this.sliderHandle.top})`);
             },
             onComplete: () => {
                 if (this.pingPong && this.animating && this.isReady()) {
@@ -424,7 +424,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
                     this.animating = false;
                     this.updateClipPath();
                     this.ensureSliderOnTop();
-                    console.log('Slider animation completed');
+                    //console.log('Slider animation completed');
                 }
             }
         });
@@ -434,23 +434,23 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
         if (this.sliderLine) {
             this.canvas.remove(this.sliderLine);
             this.sliderLine = null;
-            console.log('Slider line removed');
+            //console.log('Slider line removed');
         }
         if (this.sliderHandle) {
             this.canvas.remove(this.sliderHandle);
             this.sliderHandle = null;
-            console.log('Slider handle removed');
+            //console.log('Slider handle removed');
         }
         if (this.comparisonImage && this.comparisonImage.clipPath) {
             this.comparisonImage.clipPath = null;
-            console.log('Clip path removed from comparison image');
+            //console.log('Clip path removed from comparison image');
         }
         this.isInitialized = false;
         this.isDragging = false;
     }
 
     destroySlider() {
-        console.log('Destroying slider');
+        //console.log('Destroying slider');
         this.cleanupSliderElements();
 
         if (this.options.mode === 'Multi') {
@@ -485,7 +485,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
         this.images = [];
 
         this.canvas.requestRenderAll();
-        console.log('ImageCompareSliderPlugin destroyed');
+        //console.log('ImageCompareSliderPlugin destroyed');
     }
 
 
@@ -531,7 +531,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
                 .map(input => input.value);
             if (selectedIds.length === 2) {
                 this.setupSliderWithImages(selectedIds[0], selectedIds[1]);
-                console.log(`Comparing images: ${selectedIds[0]} and ${selectedIds[1]}`);
+                //console.log(`Comparing images: ${selectedIds[0]} and ${selectedIds[1]}`);
             }
         });
 

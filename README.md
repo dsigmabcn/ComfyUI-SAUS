@@ -20,6 +20,8 @@
 *** 
 ***  
 ***  <p align="center">
+    <a href="USER_GUIDE.md"><strong>User Guide</strong></a>
+    <br />
     <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/issues">Report Bug</a>
   </p>
 </div>
@@ -112,7 +114,7 @@ In [ComfyUI](https://github.com/comfyanonymous/ComfyUI) root folder, navigate to
 Open the terminal, or in the address bar type CMD to open a command prompt, then run the following command:
 
 ```bash
-git clone https://github.com/diStyApps/ComfyUI-disty-Flow
+git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 ```
 
 # New installation - Windows [modified ]
@@ -191,30 +193,9 @@ http://127.0.0.1:8188/flow
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
-## Contact
-
-distty@gmail.com
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MY OTHER PROJECTS -->
-## My Other Projects
 
-[SEAIT](https://github.com/diStyApps/seait)
-
-[ComfyUI_FrameMaker](https://github.com/diStyApps/ComfyUI_FrameMaker)
-
-[VisionCrafter](https://github.com/diStyApps/VisionCrafter)
-
-[FaceSwapSuite](https://github.com/diStyApps/FaceSwapSuite)
-
-[VisualClipPicker](https://github.com/diStyApps/VisualClipPicker)
-
-[Stable-Diffusion-Pickle-Scanner-GUI](https://github.com/diStyApps/Stable-Diffusion-Pickle-Scanner-GUI)
-
-[Safe-and-Stable-Ckpt2Safetensors-Conversion-Tool-GUI](https://github.com/diStyApps/Safe-and-Stable-Ckpt2Safetensors-Conversion-Tool-GUI)
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

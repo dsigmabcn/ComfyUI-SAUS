@@ -18,7 +18,7 @@ def find_destination_path(item_name: str) -> Path:
             return p
     return FLOWS_PATH / item_name
 
-def download_update_flows() -> None:
+def download_update_flows(raise_on_error: bool = False) -> None:
     # Remove deprecated flows
     try:
         for flow in FLOWS_TO_REMOVE:
@@ -50,7 +50,8 @@ def download_update_flows() -> None:
                 _download_repo(auth_url, "Private")
         except Exception as e:
             logger.error(f"{FLOWMSG}: Error checking private flows: {e}")
-            raise e # Re-raise to notify caller
+            if raise_on_error:
+                raise e # Re-raise to notify caller
 
 def _download_repo(repo_url: str, repo_type: str) -> None:
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -151,7 +152,7 @@ def refresh_flows(app: web.Application) -> None:
 
 async def sync_flows_handler(request: web.Request) -> web.Response:
     try:
-        await asyncio.to_thread(download_update_flows)
+        await asyncio.to_thread(download_update_flows, True)
         
         # Dynamically refresh flows in the app without requiring a restart
         refresh_flows(request.app)

@@ -5,7 +5,6 @@ import re
 #APP_NAME = "Flow"#
 APP_NAME = "SAUS"
 APP_VERSION = "0.2.0" 
-#FLOWMSG = f"\033[38;5;129mSAUS App - {APP_VERSION}\033[0m"
 FLOWMSG = f"\033[38;5;208mSAUS App - {APP_VERSION}\033[0m"
 APP_CONFIGS = []
 
@@ -16,7 +15,7 @@ CORE_PATH = WEBROOT / "core"
 FLOW_PATH = WEBROOT / "flow"
 FLOWS_PATH = WEBROOT / "flows"
 LINKER_PATH = WEBROOT / "linker"
-#Added to access the new model manager app
+#Added to access the new model manager app - NOT ACTIVE, TO BE REPLACED BY LORA MANAGER IN FUTURE VERSIONS
 MODEL_MANAGER_PATH = WEBROOT / "model_manager"
 FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
 CUSTOM_THEMES_DIR = WEBROOT / 'custom-themes'

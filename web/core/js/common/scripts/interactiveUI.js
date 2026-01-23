@@ -40,7 +40,7 @@ function moveLeftElementsToControls() {
             leftElementPlaceholders.set(element.id, { placeholder, parent: sideWorkflowControls });
 
             controlsDiv.appendChild(element);
-            console.log(`Moved "${element.id}" to #controls.`);
+            //console.log(`Moved "${element.id}" to #controls.`);
             // updateElementsWithIcons("controls", iconList, true, "add");
         }
     });

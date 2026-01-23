@@ -19,7 +19,7 @@ class ToggleComponent {
             ? (this.config.defaultValue ? 1 : 0) 
             : (this.config.defaultValue === "true" ? 1 : 0);
 
-        console.log("ToggleComponent", this.value, this.config.id, this.config.defaultValue);
+        //console.log("ToggleComponent", this.value, this.config.id, this.config.defaultValue);
 
         this.buildUI();
         this.initializeUI();

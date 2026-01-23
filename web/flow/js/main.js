@@ -163,7 +163,7 @@ function createFlowCard(flow) {
     imageContainer.className = 'flow-image-container';
     imageContainer.innerHTML = `
         <img src="${sanitizeHTML(thumbnailUrl)}" alt="${sanitizeHTML(flow.name)} Thumbnail" onerror="this.onerror=null; this.src='${sanitizeHTML(defaultThumbnail)}';" class="thumbnail-image">
-        <div class="play-overlay" title="Open Flow"><i class="fas fa-play"></i></div>
+        <div class="play-overlay" title="Open App"><i class="fas fa-play"></i></div>
     `;
     imageContainer.addEventListener('click', (event) => {
         event.preventDefault();
@@ -427,7 +427,7 @@ async function showFlowDetails(flow) {
             <div class="details-arch">Architecture: ${flow.architecture || 'Unknown'}</div>
             <p class="details-description">${flow.description}</p>
             <div style="margin-top:10px;">
-                <button class="btn-action" onclick="window.open('flow/${flow.url}', '_blank')"><i class="fas fa-play"></i> Open Flow</button>
+                <button class="btn-action" onclick="window.open('flow/${flow.url}', '_blank')"><i class="fas fa-play"></i> Open App</button>
             </div>
         </div>
     `;
@@ -1366,7 +1366,7 @@ function setFloatingCharacter(currentVersion, latestVersion) {
 async function checkForUpdate() {
     try {
         const currentVersion = await getVersion();
-        const rawURL = 'https://raw.githubusercontent.com/diStyApps/ComfyUI-disty-Flow/main/pyproject.toml';
+        const rawURL = 'https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/pyproject.toml';
         
         const response = await fetch(rawURL);
         if (!response.ok) {

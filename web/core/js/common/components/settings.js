@@ -117,6 +117,9 @@ export class SettingsComponent {
         view.innerHTML = `
             <div class="settings-content">
                 <h1>Settings</h1>
+                <p style="color:rgb(255, 0, 0); font-size: 0.9em; margin-bottom: 20px; border: 1px solid rgb(255, 0, 0); padding: 10px; border-radius: 4px; background: rgba(255, 152, 0, 0.1);">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> The software encrypts your keys locally, but you are responsible for ensuring the security of your system. If you are not comfortable storing them here, please do not save them.
+                </p>
                 <div class="settings-form">
                     <div class="form-group">
                         <label for="civitai_api_key">Civitai API Key</label>

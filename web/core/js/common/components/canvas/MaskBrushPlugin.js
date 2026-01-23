@@ -106,7 +106,7 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
     onToggleEraser() {
         if(this.drawingMode){
             this.isEraserActive = !this.isEraserActive;
-            console.log('Eraser Active:', this.isEraserActive);
+            //console.log('Eraser Active:', this.isEraserActive);
             if (this.isEraserActive) {
                 this.eraserBtn.classList.add('active');
                 this.cursorFill = '#FF0000';
@@ -845,7 +845,7 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
             this.onToggleEraser();
         }
         if (e.key === 'q' || e.key === 'Q') {
-            console.log('q pressed', e.key);
+            //console.log('q pressed', e.key);
             this.onToggleHideMaskKey();
         }        
     }

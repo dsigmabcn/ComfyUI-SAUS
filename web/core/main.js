@@ -65,7 +65,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
                     const url = new URL(script.src, window.location.origin);
                     const flowParam = url.searchParams.get('flow');
                     if (flowParam) {
-                        console.log('Flow name from script src:', flowParam);
+                        //console.log('Flow name from script src:', flowParam);
                         return flowParam;
                     }
                 } catch (e) {
@@ -75,10 +75,10 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         }
         const paths = window.location.pathname.split('/').filter(Boolean);
         if (paths[0] === 'flow' && paths[1]) {
-            console.log('Flow name:', paths[1]);
+            //console.log('Flow name:', paths[1]);
             return paths[1];
         }
-        console.log('Default flow name: linker');
+        //console.log('Default flow name: linker');
         return 'linker';
     }
 
@@ -95,66 +95,11 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     injectStylesheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'font-awesome');
     /*injectStylesheet('/core/css/themes.css', 'themes-stylesheet');*/
 
-    console.log("flowConfig", flowConfig);
-    console.log("workflow", workflow);
+    //console.log("flowConfig", flowConfig);
+    //console.log("workflow", workflow);
 
 
-    /*function generateWorkflowControls(config) {
-        const container = document.getElementById('side-workflow-controls');
-        if (config.dropdowns && Array.isArray(config.dropdowns)) {
-            config.dropdowns.forEach(dropdown => {
-                const div = document.createElement('div');
-                div.id = dropdown.id;
-                div.classList.add('loader');
-                container.appendChild(div);
-            });
-        }
-        if (config.steppers && Array.isArray(config.steppers)) {
-            config.steppers.forEach(stepper => {
-                const div = document.createElement('div');
-                div.id = stepper.id;
-                div.classList.add('stepper-container');
-                container.appendChild(div);
-            });
-        }
-
-        if (config.dimensionSelectors) {
-            config.dimensionSelectors.forEach(selector => {
-                const div = document.createElement('div');
-                div.id = selector.id;
-                div.classList.add('dimension-selector-container');
-                container.appendChild(div);
-            });
-        }
-        if (config.inputs && Array.isArray(config.inputs)) {
-            config.inputs.forEach(input => {
-                const div = document.createElement('div');
-                div.id = input.id;
-                div.classList.add('input-container');
-                container.appendChild(div);
-            });
-        }
-
-        if (config.toggles && Array.isArray(config.toggles)) {
-            config.toggles.forEach(toggle => {
-                const div = document.createElement('div');
-                div.id = toggle.id;
-                div.classList.add('toggle-container');
-                container.appendChild(div);
-            });
-        }
-
-        if (config.seeders && Array.isArray(config.seeders)) {
-            config.seeders.forEach(seeder => {
-                const div = document.createElement('div');
-                div.id = seeder.id;
-                div.classList.add('seeder-container');
-                container.appendChild(div);
-            });
-        }
-    }*/
-
-    // ----------------------------------------------------------------------
+        // ----------------------------------------------------------------------
     // MODIFIED: Refactored generateWorkflowControls to use Basic/Advanced containers
     function generateWorkflowControls(config) {
         // Get the new destination containers
@@ -378,14 +323,14 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         await canvasLoader.initPromise;
     
         if (canvasLoader.isInitialized) {
-            console.log("Canvas initialized successfully.");
+            //console.log("Canvas initialized successfully.");
 
             const container = document.getElementById('pluginUIContainer');
             const quickControls = document.getElementById('quick-controls');
             container.append(quickControls);
 
         } else {
-            console.log("Canvas was not initialized due to missing flowConfig fields.");
+            //console.log("Canvas was not initialized due to missing flowConfig fields.");
         }
     };
     
