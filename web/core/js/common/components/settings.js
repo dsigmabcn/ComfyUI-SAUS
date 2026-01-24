@@ -34,7 +34,7 @@ export class SettingsComponent {
 
     async loadSettings() {
         try {
-            const response = await fetch('/flow/api/settings');
+            const response = await fetch('/saus/api/settings');
             if (response.ok) {
                 this.settings = await response.json();
             }
@@ -45,7 +45,7 @@ export class SettingsComponent {
 
     async saveSettings(newSettings) {
         try {
-            const response = await fetch('/flow/api/settings', {
+            const response = await fetch('/saus/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newSettings)
@@ -63,23 +63,23 @@ export class SettingsComponent {
         }
     }
 
-    async syncFlows(btn) {
+    async syncApps(btn) {
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
         
         try {
-            const response = await fetch('/flow/api/sync-flows', { method: 'POST' });
+            const response = await fetch('/saus/api/sync-apps', { method: 'POST' });
             const result = await response.json();
             if (response.ok) {
-                alert(result.message || 'Flows synced successfully.');
-                window.dispatchEvent(new CustomEvent('flowsSynced'));
+                alert(result.message || 'Apps synced successfully.');
+                window.dispatchEvent(new CustomEvent('appsSynced'));
             } else {
-                alert('Error syncing flows: ' + (result.message || response.statusText));
+                alert('Error syncing apps: ' + (result.message || response.statusText));
             }
         } catch (e) {
             console.error("Sync error:", e);
-            alert('Error syncing flows.');
+            alert('Error syncing apps.');
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
@@ -94,7 +94,7 @@ export class SettingsComponent {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
         
         try {
-            const response = await fetch('/flow/api/restart', { method: 'POST' });
+            const response = await fetch('/saus/api/restart', { method: 'POST' });
             if (response.ok) {
                 alert('Server is restarting. Please refresh the page in a few moments.');
             } else {
@@ -130,7 +130,7 @@ export class SettingsComponent {
                         <input type="password" id="huggingface_api_key" value="${this.settings.huggingface_api_key || ''}" placeholder="Enter API Key">
                     </div>
                     <div class="form-group">
-                        <label for="saus_token">SAUS Token (Private Flows)</label>
+                        <label for="saus_token">SAUS Token (Private Apps)</label>
                         <input type="password" id="saus_token" value="${this.settings.saus_token || ''}" placeholder="Enter Token">
                     </div>
                     <div class="form-actions" style="margin-top: 20px;">
@@ -138,8 +138,8 @@ export class SettingsComponent {
                     </div>
                     ${showSyncButton ? `
                     <div class="form-actions" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
-                        <button id="sync-flows-btn" class="btn-action" style="width: 100%; background-color: var(--color-accent); border-color: var(--color-accent);">
-                            <i class="fas fa-sync"></i> Sync Private Flows
+                        <button id="sync-apps-btn" class="btn-action" style="width: 100%; background-color: var(--color-accent); border-color: var(--color-accent);">
+                            <i class="fas fa-sync"></i> Sync Private Apps
                         </button>
                     </div>
                     ` : ''}
@@ -163,8 +163,8 @@ export class SettingsComponent {
         });
 
         if (showSyncButton) {
-            const syncBtn = view.querySelector('#sync-flows-btn');
-            syncBtn.addEventListener('click', () => this.syncFlows(syncBtn));
+            const syncBtn = view.querySelector('#sync-apps-btn');
+            syncBtn.addEventListener('click', () => this.syncApps(syncBtn));
         }
         
         const restartBtn = view.querySelector('#restart-server-btn');

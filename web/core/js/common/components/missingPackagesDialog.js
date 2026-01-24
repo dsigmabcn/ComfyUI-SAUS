@@ -1,5 +1,5 @@
-async function checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, flowConfig) {
-    const combinedMissingCustomPackages = enrichMissingCustomPackages(missingCustomPackages, flowConfig);
+async function checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, appConfig) {
+    const combinedMissingCustomPackages = enrichMissingCustomPackages(missingCustomPackages, appConfig);
     const filteredMissingCustomPackages = combinedMissingCustomPackages;
 
     if (filteredMissingCustomPackages.length === 0 && missingNodes.length === 0) {
@@ -9,13 +9,13 @@ async function checkAndShowMissingPackagesDialog(missingCustomPackages, missingN
     showMissingPackagesDialog(filteredMissingCustomPackages, missingNodes);
 }
 
-function enrichMissingCustomPackages(missingCustomPackages, flowConfig) {
-    if (!flowConfig.configCustomNodes) {
+function enrichMissingCustomPackages(missingCustomPackages, appConfig) {
+    if (!appConfig.configCustomNodes) {
         return missingCustomPackages;
     }
 
     const customNodesByTitle = {};
-    for (const nodeConfig of flowConfig.configCustomNodes) {
+    for (const nodeConfig of appConfig.configCustomNodes) {
         customNodesByTitle[nodeConfig.title] = nodeConfig;
     }
 
@@ -39,7 +39,7 @@ function enrichMissingCustomPackages(missingCustomPackages, flowConfig) {
         }
     });
 
-    for (const nodeConfig of flowConfig.configCustomNodes) {
+    for (const nodeConfig of appConfig.configCustomNodes) {
         if (!enrichedPackages.some(pkg => pkg.title === nodeConfig.title)) {
             enrichedPackages.push({
                 title: nodeConfig.title,
@@ -63,7 +63,7 @@ function enrichMissingCustomPackages(missingCustomPackages, flowConfig) {
 
 async function fetchInstalledCustomNodes() {
     try {
-        const response = await fetch('/flow/api/installed-custom-nodes');
+        const response = await fetch('/saus/api/installed-custom-nodes');
         if (response.ok) {
             const data = await response.json();
             return data.installedNodes || [];
@@ -213,7 +213,7 @@ function showMissingPackagesDialog(missingCustomPackages, missingNodes) {
     }
     content += `
         <div style="text-align: center; margin-top: 20px;">
-            <a href="/flow" style="
+            <a href="/saus" style="
                 display: inline-block;
                 padding: 10px 20px;
                 background-color: #121212;
@@ -311,7 +311,7 @@ function handleButtonClick(button, requestFunction) {
 
 function sendInstallRequest(packageUrl, downloadModal, statusMessageElement) {
     statusMessageElement.textContent = 'Installing...';
-    return fetch('/flow/api/install-package', {
+    return fetch('/saus/api/install-package', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageUrl, downloadModal })
@@ -334,7 +334,7 @@ function sendInstallRequest(packageUrl, downloadModal, statusMessageElement) {
 
 function sendUpdateRequest(packageUrl, downloadModal, statusMessageElement) {
     statusMessageElement.textContent = 'Updating...';
-    return fetch('/flow/api/update-package', {
+    return fetch('/saus/api/update-package', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageUrl })
@@ -357,7 +357,7 @@ function sendUpdateRequest(packageUrl, downloadModal, statusMessageElement) {
 
 function sendUninstallRequest(packageUrl, downloadModal, statusMessageElement) {
     statusMessageElement.textContent = 'Uninstalling...';
-    return fetch('/flow/api/uninstall-package', {
+    return fetch('/saus/api/uninstall-package', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageUrl })

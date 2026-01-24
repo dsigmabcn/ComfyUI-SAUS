@@ -1,8 +1,8 @@
-const appName = "Flow";
+const appName = "SAUS";
 const headerHTML = `
     <div id="logo">
       <div id="img-logo">
-        <img src="/core/media/ui/flow_logo.png" alt="N/A">
+        <img src="/core/media/ui/saus_logo.png" alt="N/A">
       </div>
       <div class="logo-text">
         <span class="left">{</span>
@@ -10,7 +10,7 @@ const headerHTML = `
         <span class="text"><strong>${appName}</strong></span>
       </div>
     </div>
-  <div class="appName"><h2>Linker</h2></div>
+  <div class="appName"><h2>Builder</h2></div>
   <div id="mid"></div>
   <div id="right-header">
     <div id="kofi">

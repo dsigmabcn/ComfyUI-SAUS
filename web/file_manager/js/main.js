@@ -30,7 +30,7 @@ async function initTokenUI() {
 
     // Fetch settings to check for stored tokens
     try {
-        const response = await fetch('/flow/api/settings');
+        const response = await fetch('/saus/api/settings');
         if (response.ok) {
             const settings = await response.json();
             
@@ -198,7 +198,7 @@ window.startDownload = async function () {
     button.style.display = 'none';
 
     try {
-        const response = await fetch('/flow/api/download', {
+        const response = await fetch('/saus/api/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url, targetPath: currentDirectory, apiToken, tokenSource })
@@ -250,7 +250,7 @@ window.handleChunkedUpload = function (file) {
             formData.append('chunkIndex', chunkCount);
             
             // Use fetch for simpler async control flow
-            const response = await fetch('/flow/api/upload-chunk', {
+            const response = await fetch('/saus/api/upload-chunk', {
                 method: 'POST',
                 body: formData 
             });
@@ -324,7 +324,7 @@ window.triggerFileUpload = function () {
 
 async function loadDirectory(path) {
     try {
-        const response = await fetch(`/flow/api/directory?path=${encodeURIComponent(path)}`);
+        const response = await fetch(`/saus/api/directory?path=${encodeURIComponent(path)}`);
         if (!response.ok) {
             throw new Error(`Failed to load directory: ${response.statusText}`);
         }
@@ -475,7 +475,7 @@ function createFileItem(name, type, path) {
         // Download link
         const downloadLink = document.createElement('a');
         //downloadLink.href = path;
-        downloadLink.href = `/flow/api/download-file?filePath=${encodeURIComponent(path)}`;
+        downloadLink.href = `/saus/api/download-file?filePath=${encodeURIComponent(path)}`;
         downloadLink.download = name; // tells the browser to download instead of open
         downloadLink.innerHTML = '<i class="fas fa-download"></i>';
         downloadLink.title = 'Download';
@@ -537,7 +537,7 @@ async function showSettings() {
 
 async function renameFile(currentPath, newName) {
     try {
-        const response = await fetch('/flow/api/rename-file', {
+        const response = await fetch('/saus/api/rename-file', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ currentPath, newName })
@@ -554,7 +554,7 @@ async function renameFile(currentPath, newName) {
 
 async function deleteFile(filePath) {
     try {
-        const response = await fetch('/flow/api/delete-file', {
+        const response = await fetch('/saus/api/delete-file', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filePath })
@@ -583,7 +583,7 @@ window.showPreview = function(path, type, fileName) {
 
     if (isImage || isVideo) {
         // Use the same server endpoint pattern used for downloading files
-        const fileUrl = `/flow/api/download-file?filePath=${encodeURIComponent(path)}`;
+        const fileUrl = `/saus/api/download-file?filePath=${encodeURIComponent(path)}`;
 
         previewCol.classList.remove('hidden');
         previewCol.style.flex = '1'; // Make the preview column visible and take space

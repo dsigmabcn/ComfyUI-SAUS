@@ -44,7 +44,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     themeManager.init();
 
 
-    function getFlowName() {
+    function getappName() {
         const scripts = document.getElementsByTagName('script');
         for (let script of scripts) {
             if (script.src && script.src.includes('main.js')) {
@@ -69,10 +69,10 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         return 'linker';
     }
 
-    const flowName = getFlowName();
+    const appName = getappName();
     const client_id = uuidv4();
-    const flowConfig = await fetchflowConfig(flowName);
-    let workflow = await fetchWorkflow(flowName);
+    const flowConfig = await fetchflowConfig(appName);
+    let workflow = await fetchWorkflow(appName);
     let canvasLoader;
 
     const seeders = [];

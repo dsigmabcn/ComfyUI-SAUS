@@ -4,10 +4,10 @@
 
 # Ignore Python cache
 __pycache__/
-flow/__pycache__/
+saus/__pycache__/
 # other
-web/flows/
+web/apps/
 .ipynb_checkpoints/
-flow/data/settings.json
-flow/data/.secret.key
+saus/data/settings.json
+saus/data/.secret.key
 *.py[cod]

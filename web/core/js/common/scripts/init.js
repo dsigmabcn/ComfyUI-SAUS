@@ -1,7 +1,7 @@
 export class ConfigurationLoader {
     constructor() {
-        this.basePath = window.location.pathname.split('/flow/')[1];
-        this.configPath = `/flow/${this.basePath}/flowConfig.json`;
+        this.basePath = window.location.pathname.split('/saus/')[1];
+        this.configPath = `/saus/${this.basePath}/appConfig.json`;
     }
     async load() {
         try {
@@ -31,7 +31,7 @@ export class UIUpdater {
 }
 
 (async function initApp() {
-    if (!window.location.pathname.includes('/flow/')) return;
+    if (!window.location.pathname.includes('/saus/')) return;
     try {
         const configLoader = new ConfigurationLoader();
         const config = await configLoader.load();

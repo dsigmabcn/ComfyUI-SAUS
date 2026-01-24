@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Fetch Architectures Data
     try {
-        const response = await fetch('/flow/api/architectures');
+        const response = await fetch('/saus/api/architectures');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Set copyright year
     const copyrightEl = document.getElementById('copyright');
     if (copyrightEl) {
-        copyrightEl.textContent = `© ${new Date().getFullYear()} Flow.`;
+        copyrightEl.textContent = `© ${new Date().getFullYear()} SAUS.`;
     }
 
     // 3. Initialize the Model Manager UI

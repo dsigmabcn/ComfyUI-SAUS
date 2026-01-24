@@ -15,11 +15,10 @@ import { initializeWebSocket } from './js/common/components/messageHandler.js';
 import { updateWorkflowValue } from './js/common/components/workflowManager.js';
 import { processWorkflowNodes } from './js/common/scripts/nodesscanner.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
-import { fetchflowConfig } from './js/common/scripts/fetchflowConfig.js'; 
+import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
 import { setFaviconStatus } from './js/common/scripts/favicon.js'; 
 import { PreferencesManager } from './js/common/scripts/preferences.js';
 import { initialize } from './js/common/scripts/interactiveUI.js';
-import ThemeManager from './js/common/scripts/ThemeManager.js';
 import injectStylesheet from './js/common/scripts/injectStylesheet.js';
 import LoraWorkflowManager from './js/common/components/LoraWorkflowManager.js';
 import { CanvasLoader } from './js/common/components/canvas/CanvasLoader.js';
@@ -29,19 +28,8 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
 
 (async (window, document, undefined) => {
 
-    const defaultPreferences = {
-        selectedCategories: [],
-        favoritesFilterActive: false,
-        hideDescriptions: false,
-        hideTitles: false,
-        sortValue: 'nameAsc',
-        selectedTheme: null 
-    };
-    const preferencesManager = new PreferencesManager(defaultPreferences);
-    /*ThemeManager.applyInitialTheme(preferencesManager);*/
-    /*const themeManager = new ThemeManager(preferencesManager);*/
-    /*themeManager.init();*/
 
+    
     // ----------------------------------------------------------------------
     // NEW: Define the labels for components that should appear in the 'Basic' section.
     // Prompts are handled separately by setPromptComponents, so they are excluded here.
@@ -57,16 +45,16 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     
 
 
-    function getFlowName() {
+    function getAppName() {
         const scripts = document.getElementsByTagName('script');
         for (let script of scripts) {
             if (script.src && script.src.includes('main.js')) {
                 try {
                     const url = new URL(script.src, window.location.origin);
-                    const flowParam = url.searchParams.get('flow');
-                    if (flowParam) {
-                        //console.log('Flow name from script src:', flowParam);
-                        return flowParam;
+                    const appParam = url.searchParams.get('app');
+                    if (appParam) {
+                        
+                        return appParam;
                     }
                 } catch (e) {
                     console.error('Error parsing script src URL:', e);
@@ -74,18 +62,21 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             }
         }
         const paths = window.location.pathname.split('/').filter(Boolean);
-        if (paths[0] === 'flow' && paths[1]) {
-            //console.log('Flow name:', paths[1]);
+        if ((paths[0] === 'flow' || paths[0] === 'saus') && paths[1]) {
             return paths[1];
         }
-        //console.log('Default flow name: linker');
-        return 'linker';
+
+        if (paths.length > 0) {
+            return paths[0];
+        }
+        
+        return 'builder';
     }
 
-    const flowName = getFlowName();
+    const appName = getAppName();
     const client_id = uuidv4();
-    const flowConfig = await fetchflowConfig(flowName);
-    let workflow = await fetchWorkflow(flowName);
+    const appConfig = await fetchappConfig(appName);
+    let workflow = await fetchWorkflow(appName);
     let canvasLoader;
 
     const seeders = [];
@@ -93,9 +84,9 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     setFaviconStatus.Default();
     injectStylesheet('/core/css/main.css', 'main');
     injectStylesheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'font-awesome');
-    /*injectStylesheet('/core/css/themes.css', 'themes-stylesheet');*/
+    
 
-    //console.log("flowConfig", flowConfig);
+    //console.log("appConfig", appConfig);
     //console.log("workflow", workflow);
 
 
@@ -165,34 +156,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             });
         }
     }
-    // ----------------------------------------------------------------------
 
-    /*function setPromptComponents(config, options = { clearInputs: false }) {
-        if (!config.prompts || !Array.isArray(config.prompts)) {
-            return;
-        }
-        const promptsContainer = document.getElementById('prompts');
-        config.prompts.forEach((input, index) => {
-            const titleDiv = document.createElement('div');
-            titleDiv.id = 'prompt';
-    
-            const labelDiv = document.createElement('div');
-            labelDiv.id = 'title-text';
-            labelDiv.textContent = input.label;
-    
-            const textArea = document.createElement('textarea');
-            textArea.id = input.id;
-    
-            if (options.clearInputs) {
-                textArea.value = '';
-            } else {
-                textArea.value = input.default || generateDynamicScriptDefault(index);
-            }
-            titleDiv.appendChild(labelDiv);
-            titleDiv.appendChild(textArea);
-            promptsContainer.appendChild(titleDiv);
-        });
-    }*/
 function setPromptComponents(config, options = { clearInputs: false }) {
     if (!config.prompts || !Array.isArray(config.prompts)) {
         return;
@@ -251,10 +215,10 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         return defaultsPrompts[index] || ''; 
     }
 
-    generateWorkflowControls(flowConfig); 
-    setPromptComponents(flowConfig, true);
+    generateWorkflowControls(appConfig); 
+    setPromptComponents(appConfig, true);
 
-    const loraWorkflowManager = new LoraWorkflowManager(workflow, flowConfig);
+    const loraWorkflowManager = new LoraWorkflowManager(workflow, appConfig);
 
     workflow = loraWorkflowManager.getWorkflow();
     
@@ -263,63 +227,63 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
         console.log("Missing Nodes:", missingNodes);
         console.log("Missing Custom Packages:", missingCustomPackages);
-        checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, flowConfig);
+        checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, appConfig);
     });
 
-    if (flowConfig.dropdowns) {
-        flowConfig.dropdowns.forEach(config => {
+    if (appConfig.dropdowns) {
+        appConfig.dropdowns.forEach(config => {
             new Dropdown(config, workflow);
         });
     }
 
-    if (flowConfig.steppers) {
-        flowConfig.steppers.forEach(config => {
+    if (appConfig.steppers) {
+        appConfig.steppers.forEach(config => {
             new Stepper(config, workflow);
         });
     }
 
-    if (flowConfig.dimensionSelectors) {
-        flowConfig.dimensionSelectors.forEach(config => {
+    if (appConfig.dimensionSelectors) {
+        appConfig.dimensionSelectors.forEach(config => {
             new DimensionSelector(config, workflow);
         });
     }
 
-    if (flowConfig.inputs) {
-        flowConfig.inputs.forEach(config => {
+    if (appConfig.inputs) {
+        appConfig.inputs.forEach(config => {
             new InputComponent(config, workflow);
         });
     }
 
-    if (flowConfig.toggles) {
-        flowConfig.toggles.forEach(config => {
+    if (appConfig.toggles) {
+        appConfig.toggles.forEach(config => {
             new ToggleComponent(config, workflow);
         });
     }
 
-    if (flowConfig.seeders) {
-        flowConfig.seeders.forEach(config => {
+    if (appConfig.seeders) {
+        appConfig.seeders.forEach(config => {
             const seeder = new Seeder(config, workflow);
             seeders.push(seeder);
         });
     }
 
-    if (flowConfig.multiComponents && Array.isArray(flowConfig.multiComponents)) {
-        flowConfig.multiComponents.forEach(config => {
+    if (appConfig.multiComponents && Array.isArray(appConfig.multiComponents)) {
+        appConfig.multiComponents.forEach(config => {
             new MultiComponent(config, workflow);
         });
     }
 
-    if (flowConfig.dataComponents && Array.isArray(flowConfig.dataComponents)) {
-        flowConfig.dataComponents.forEach(config => {
+    if (appConfig.dataComponents && Array.isArray(appConfig.dataComponents)) {
+        appConfig.dataComponents.forEach(config => {
             new DataComponent(config, workflow);
         });
     }
 
 
-    imageLoaderComp(flowConfig, workflow);
+    imageLoaderComp(appConfig, workflow);
     
     const initCanvas = async () => {
-        canvasLoader = new CanvasLoader('imageCanvas', flowConfig);
+        canvasLoader = new CanvasLoader('imageCanvas', appConfig);
         await canvasLoader.initPromise;
     
         if (canvasLoader.isInitialized) {
@@ -330,7 +294,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             container.append(quickControls);
 
         } else {
-            //console.log("Canvas was not initialized due to missing flowConfig fields.");
+            //console.log("Canvas was not initialized due to missing appConfig fields.");
         }
     };
     
@@ -341,20 +305,20 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         console.log("Queueing new job");
 
         if (canvasLoader && canvasLoader.isInitialized) {
-            await CanvasComponent(flowConfig, workflow, canvasLoader);
+            await CanvasComponent(appConfig, workflow, canvasLoader);
         } else {
             console.log("Canvas is not initialized. Skipping CanvasComponent.");
         }
 
         console.log("Queueing workflow:", workflow);        
 
-        if (flowConfig.prompts) {
-            flowConfig.prompts.forEach(pathConfig => {
+        if (appConfig.prompts) {
+            appConfig.prompts.forEach(pathConfig => {
                 const { id } = pathConfig;
                 const element = document.getElementById(id);
                 if (element) {
                     const value = element.value.replace(/(\r\n|\n|\r)/gm, " ");
-                    updateWorkflowValue(workflow, id, value, flowConfig);
+                    updateWorkflowValue(workflow, id, value, appConfig);
                 } else {
                     console.warn(`Element not found for ID: ${id}`);
                 }

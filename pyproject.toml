@@ -2,7 +2,7 @@
 name = "ComfyUI-SAUS"
 author = "dsigmabcn"
 description = "SAUS: Simple App U See. A simple alternative User Interface for Image and Video Generation using ComfyUI as backend. It is not a replacement for workflow creation.\n Workflows are presented as mini-apps 'ready-to-go' that only require filling in the main parameters. No need to handle the nodes and spaghetti connections ."
-version = "0.2.0"
+version = "0.2.1"
 license = {file = "LICENSE"}
 
 [project.urls]

@@ -1,16 +1,16 @@
 import { coreScriptsPath } from '/core/js/common/scripts/corePathLinker.js';
 
 const urlParams = new URLSearchParams(window.location.search);
-const flowName = urlParams.get('flow');
+const appName = urlParams.get('flow');
 
-const isLinker = flowName !== undefined && flowName !== null;
+const isLinker = appName !== undefined && appName !== null;
 
 const config = {
     scripts: ['/core/main.js'],
     coreScripts: isLinker
         ? coreScriptsPath.filter(src => !src.includes('init.js'))
         : coreScriptsPath,
-    flowName: flowName
+    appName: appName
 };
 
 const loadScript = (src) => {
@@ -18,7 +18,7 @@ const loadScript = (src) => {
         const script = document.createElement('script');
         script.type = 'module';
         if (src.includes('main.js')) {
-            script.src = `${src}${config.flowName ? '?flow=' + encodeURIComponent(config.flowName) : ''}`;
+            script.src = `${src}${config.appName ? '?flow=' + encodeURIComponent(config.appName) : ''}`;
         } else {
             script.src = src;
         }

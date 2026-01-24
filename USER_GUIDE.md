@@ -4,10 +4,12 @@ Welcome to the SAUS UI user guide. This document provides instructions on how to
 
 ## Accessing the Interface
 
-Once ComfyUI is running, you can access SAUS via your web browser at:
+### 1. Direct Link
+
+To run SAUS, simply navigate to this address in your web browser:
 
 ```
-http://127.0.0.1:8188/flow
+http://127.0.0.1:8188/saus
 ```
 
 or by clicking on the SAUS icon on the menu bar in ComfyUI.
@@ -61,7 +63,7 @@ A simple File Manager to access and perform basic management of the files in you
 ### Settings
 - **Civitai/Hugging Face API Tokens**: Securely store your API tokens for services like Civitai and Hugging Face. These tokens are used when downloading models that require authentication.
 - **SAUS Token**: Required to access the 'Gold' and 'Beta' Apps/workflows.
-- **Sync Private Flows**: When the SAUS token is saved, this button appears. Use it to download the 'Gold' and 'Beta' Apps. A restart is required after downloading.
+- **Sync Private Apps**: When the SAUS token is saved, this button appears. Use it to download the 'Gold' and 'Beta' Apps. A restart is required after downloading.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).
 
 **Disclaimer**: API tokens are stored encrypted in your local installation. However, you are responsible for ensuring their security. If you are unsure about the security of your system, do not use the API token functionality or save your keys.

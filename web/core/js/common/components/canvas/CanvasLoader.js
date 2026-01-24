@@ -69,9 +69,9 @@ function setView(viewType) {
 }
 
 export class CanvasLoader {
-    constructor(canvasId, flowConfig) {
+    constructor(canvasId, appConfig) {
         this.canvasId = canvasId;
-        this.flowConfig = flowConfig;
+        this.appConfig = appConfig;
         this.isInitialized = false;
         this.initPromise = this.init();
 
@@ -79,10 +79,10 @@ export class CanvasLoader {
             setView(state.viewType);
         });
 
-        setView(this.flowConfig.initialView || store.getState().viewType);
+        setView(this.appConfig.initialView || store.getState().viewType);
     }
 
-    determineCanvasOptions(flowConfig) {
+    determineCanvasOptions(appConfig) {
         const options = {
             canvasControls: true,
             imageLoader: false, 
@@ -97,7 +97,7 @@ export class CanvasLoader {
 
         //img2img
         // **Case 1**: Load customBrush if canvasOutputs are present
-        if (flowConfig.canvasOutputs && Array.isArray(flowConfig.canvasOutputs) && flowConfig.canvasOutputs.length > 0) {
+        if (appConfig.canvasOutputs && Array.isArray(appConfig.canvasOutputs) && appConfig.canvasOutputs.length > 0) {
             options.customBrush = true;
             options.imageLoader = true;
             options.canvasScaleForSave = true;
@@ -114,8 +114,8 @@ export class CanvasLoader {
         
         //full alpha mask inpaint
         // **Case 2**: Load maskBrush if canvasLoadedImages and canvasAlphaOutputs are present
-        if (flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages) && flowConfig.canvasLoadedImages.length > 0 &&
-            flowConfig.canvasAlphaOutputs && Array.isArray(flowConfig.canvasAlphaOutputs) && flowConfig.canvasAlphaOutputs.length > 0) {
+        if (appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages) && appConfig.canvasLoadedImages.length > 0 &&
+            appConfig.canvasAlphaOutputs && Array.isArray(appConfig.canvasAlphaOutputs) && appConfig.canvasAlphaOutputs.length > 0) {
             options.maskBrush = true;
             options.imageLoader = true;
             options.switchViewToggleButton = true; // Enable toggle button
@@ -132,9 +132,9 @@ export class CanvasLoader {
 
         //cropped bw mask inpaint
         // **Case 4**: Load canvasCroppedImageOutputs and canvasCroppedMaskOutputs and canvasLoadedImages are present
-        if (flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs) && flowConfig.canvasCroppedImageOutputs.length > 0 &&
-            flowConfig.canvasCroppedMaskOutputs && Array.isArray(flowConfig.canvasCroppedMaskOutputs) && flowConfig.canvasCroppedMaskOutputs.length > 0 &&
-            flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages) && flowConfig.canvasLoadedImages.length > 0) {
+        if (appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) && appConfig.canvasCroppedImageOutputs.length > 0 &&
+            appConfig.canvasCroppedMaskOutputs && Array.isArray(appConfig.canvasCroppedMaskOutputs) && appConfig.canvasCroppedMaskOutputs.length > 0 &&
+            appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages) && appConfig.canvasLoadedImages.length > 0) {
                 options.maskBrush = true;
                 options.imageLoader = true;
                 options.switchViewToggleButton = true; // Enable toggle button
@@ -152,9 +152,9 @@ export class CanvasLoader {
         //cropped alpha mask inpaint 
 
         // **Case 5**: Load canvasCroppedImageOutputs and canvasCroppedAlphaOnImageOutputs and canvasLoadedImages are present
-        if (flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs) && flowConfig.canvasCroppedImageOutputs.length > 0 &&
-            flowConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(flowConfig.canvasCroppedAlphaOnImageOutputs) && flowConfig.canvasCroppedAlphaOnImageOutputs.length > 0 &&
-            flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages) && flowConfig.canvasLoadedImages.length > 0) {
+        if (appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) && appConfig.canvasCroppedImageOutputs.length > 0 &&
+            appConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(appConfig.canvasCroppedAlphaOnImageOutputs) && appConfig.canvasCroppedAlphaOnImageOutputs.length > 0 &&
+            appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages) && appConfig.canvasLoadedImages.length > 0) {
                 options.maskBrush = true;
                 options.imageLoader = true;
                 options.imageCompareSlider= true;
@@ -174,10 +174,10 @@ export class CanvasLoader {
 
     async init() {
         try {
-            this.options = this.determineCanvasOptions(this.flowConfig);
+            this.options = this.determineCanvasOptions(this.appConfig);
 
             if (!this.options.maskBrush && !this.options.customBrush) {
-                console.warn("No relevant fields in flowConfig. Canvas will not be displayed or initialized.");
+                console.warn("No relevant fields in appConfig. Canvas will not be displayed or initialized.");
                 this.hideCanvasUI();
                 return;
             }

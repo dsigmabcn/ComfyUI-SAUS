@@ -30,7 +30,7 @@ class ImageLoader {
                 const filename = urlObj.searchParams.get('filename');
                 if (filename) {
                     //console.log(`[ImageLoader] Image failed. Attempting to find '${filename}' in subfolders...`);
-                    mediaElement.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                    mediaElement.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                     return;
                 }
             }
@@ -167,7 +167,7 @@ class HistoryManager {
                     const urlObj = new URL(src, window.location.href);
                     const filename = urlObj.searchParams.get('filename');
                     if (filename) {
-                        img.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                        img.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                         return;
                     }
                 } catch (err) {
@@ -194,7 +194,7 @@ class HistoryManager {
                     const urlObj = new URL(src, window.location.href);
                     const filename = urlObj.searchParams.get('filename');
                     if (filename) {
-                        video.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                        video.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                     }
                 } catch (err) {
                 }
@@ -665,7 +665,7 @@ class Lightbox {
                     const urlObj = new URL(mediaUrl, window.location.href);
                     const filename = urlObj.searchParams.get('filename');
                     if (filename) {
-                        this.mediaElement.src = `/flow/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
+                        this.mediaElement.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                         return;
                     }
                 } catch (err) {

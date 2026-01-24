@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAUS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="/core/media/ui/saus_logo.png" type="image/png">
+    <link rel="stylesheet" href="saus/css/styles.css">
+
+</head>
+<body>
+    <div class="container">
+        <header></header>
+        <div class="main-wrapper">
+            <div class="content-wrapper">
+                <nav class="sidebar">
+                    <div class="menu-category">
+                        <a href="#home" id="homeLink"><i class="fas fa-home"></i> Home</a>
+                        
+                    </div>
+                    <div class="menu-category" id="sidebarCategoriesContainer">
+                    </div>
+                    <!--<div id="theme-selector"></div>-->
+
+                </nav>
+                <div class="content">
+                    <div class="mid-col">
+                        <div id="homeContainer" class="home-container hidden">
+                            <div class="home-content">
+                                <h1>Welcome to SAUS</h1>
+                                <h3 style="text-align: center;" >A <strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
+                                <img src="/core/media/ui/Saus%20quick%20start%20card.png" alt="Quick Start" style="max-width: 100%; max-height: 70vh; height: auto; margin: 20px 0;">
+                                <h4 style="font-size: 1.2em; text-align: center;">See the detailed <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/USER_GUIDE.md" target="_blank">user guide here</a></h4>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div id="tagsContainer" class="tags-container">
+                                <!-- Tags will be dynamically added here -->
+                            </div>
+                            <div class="right-controls">
+                                <input type="text" id="searchInput" placeholder="Search apps...">
+                                <select id="sortSelect">
+                                    <option value="nameAsc">Name (A-Z)</option>
+                                    <option value="nameDesc">Name (Z-A)</option>
+                                    <!--<option value="categoryAsc">Category (A-Z)</option>
+                                    <option value="categoryDesc">Category (Z-A)</option>-->
+                                </select>
+                                <select id="typeFilterSelect">
+                                    <option value="all">All</option>
+                                    <option value="open">Open</option>
+                                    <option value="gold">Gold</option>
+                                    <option value="beta">Beta</option>
+                                    <option value="user">User</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="app-grid" id="appGrid">
+                            <!-- App cards will be dynamically added here -->
+                        </div> <!--app grid-->
+                    </div> <!--mid col-->
+                    <div id="app-details-col" class="preview-col hidden">
+                        <div id="app-details-content"></div>
+                    </div>
+                </div> <!-- content-->
+            </div> <!--content wrapper-->
+        </div><!--main wrapper -->
+        <footer>
+            <p id="copyright"></p>
+        </footer>
+    </div><!--container-->
+    <script type="module">
+        import { insertElement } from './core/js/common/components/header.js';
+        import { initializeUI } from '/saus/js/main.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeUI();
+            insertElement();
+        });
+    </script>
+</body>
+</html>

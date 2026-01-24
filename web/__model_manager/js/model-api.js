@@ -8,7 +8,7 @@ let _all_modelData = {}; // Global variable to store all models within this modu
 /** Fetches all component (model) metadata from the backend API. */
 export async function loadAllModelData() {
     try {
-        const response = await fetch('/flow/api/data-model-info');
+        const response = await fetch('/saus/api/data-model-info');
         if (!response.ok) {
             throw new Error('Failed to fetch model data');
         }
@@ -44,7 +44,7 @@ export async function checkModelStatus(fileId, modelPath) {
             model_path: modelPath
         }).toString();
 
-        const response = await fetch(`/flow/api/model-status?${query}`);
+        const response = await fetch(`/saus/api/model-status?${query}`);
 
         if (!response.ok) {
             console.error(`[API] Status check failed: ${response.statusText}`);
@@ -95,7 +95,7 @@ export async function downloadModel(componentType, urlModel, modelPath, event) {
     }
 
     try {
-        const response = await fetch('/flow/api/download-model', {
+        const response = await fetch('/saus/api/download-model', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -143,7 +143,7 @@ export async function deleteModel(fileId, modelPath) {
     }
 
     try {
-        const response = await fetch('/flow/api/delete-model', {
+        const response = await fetch('/saus/api/delete-model', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

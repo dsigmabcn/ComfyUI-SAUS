@@ -1,18 +1,18 @@
 import { loadWorkflow } from './workflowLoader.js';
 
-export async function fetchWorkflow(flowName) {
+export async function fetchWorkflow(appName) {
     try {
-        let flow = flowName;
-        if (!flow) {
+        let app = appName;
+        if (!app) {
             const paths = window.location.pathname.split('/').filter(Boolean);
-            if (paths[0] === 'flow' && paths[1]) {
-                flow = paths[1];
+            if (paths[0] === 'saus' && paths[1]) {
+                app = paths[1];
             } else {
-                throw new Error('Invalid path: Expected /flow/{name}');
+                throw new Error('Invalid path: Expected /saus/{name}');
             }
         }
-        const cacheBuster = `?cacheFlow=${Date.now()}`;
-        const wfpath_url = `/flow/${encodeURIComponent(flow)}/wf.json${cacheBuster}`;
+        const cacheBuster = `?cacheSaus=${Date.now()}`;
+        const wfpath_url = `/saus/${encodeURIComponent(app)}/wf.json${cacheBuster}`;
         const workflow = await loadWorkflow(wfpath_url);
         return workflow;
     } catch (error) {

@@ -21,11 +21,11 @@ const DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = [
 ];
 
 const DISPLAY_MODEL_NAME_ONLY = true;
-const basePath = window.location.pathname.split('/flow/')[1];
+const basePath = window.location.pathname.split('/saus/')[1];
 const DEFAULT_NESTING_TRIGGER_VALUE = 3;
 const modelImagePreviews = {};
 const DEFAULT_PREVIEW_THUMBNAIL = '/core/media/ui/top-view_30trans.png';
-const TOGGLE_STATE_STORAGE_KEY = 'FlowConfigDropdownExpandAllState';
+const TOGGLE_STATE_STORAGE_KEY = 'AppConfigDropdownExpandAllState';
 
 let scrollAnimationEnabled = false;
 
@@ -74,13 +74,13 @@ function applyPreviewImagesToList(parentUl) {
     });
 }
 
-function getFlowConfig() {
-    const storedConfig = localStorage.getItem('FlowConfig');
+function getAppConfig() {
+    const storedConfig = localStorage.getItem('AppConfig');
     return storedConfig ? JSON.parse(storedConfig) : {};
 }
 
-function setFlowConfig(config) {
-    localStorage.setItem('FlowConfig', JSON.stringify(config));
+function setAppConfig(config) {
+    localStorage.setItem('AppConfig', JSON.stringify(config));
 }
 
 function isAdvancedLayout(workflowPath) {
@@ -145,7 +145,7 @@ async function fetchThumbnailsForPaths(paths) {
 async function doPostRequestForSlice(pathsSlice) {
     try {
         const payload = { paths: pathsSlice.map(pathToKey) };
-        const resp = await fetch('/flow/api/model-previews', {
+        const resp = await fetch('/saus/api/model-previews', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -466,7 +466,7 @@ function openImageSelector(originalPath) {
 
 async function clearImageSelector(originalPath) {
     try {
-        const resp = await fetch(`/flow/api/model-preview?modelPath=${encodeURIComponent(pathToKey(originalPath))}`, {
+        const resp = await fetch(`/saus/api/model-preview?modelPath=${encodeURIComponent(pathToKey(originalPath))}`, {
             method: 'DELETE'
         });
         if (!resp.ok) {
@@ -509,7 +509,7 @@ function handleImageFile(file, originalPath) {
                 modelPath: pathToKey(originalPath),
                 base64Data: imageUrl
             };
-            const resp = await fetch('/flow/api/model-preview', {
+            const resp = await fetch('/saus/api/model-preview', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -596,11 +596,11 @@ export function populateDropdown(
     function applyInitialValue() {
         let initialValue = null;
         if (storeInLocalStorage) {
-            const flowConfig = getFlowConfig();
-            if (flowConfig[basePath]) {
-                const flowConfigItem = flowConfig[basePath].find(item => item.id === loaderId);
-                if (flowConfigItem) {
-                    initialValue = flowConfigItem.value;
+            const appConfig = getAppConfig();
+            if (appConfig[basePath]) {
+                const appConfigItem = appConfig[basePath].find(item => item.id === loaderId);
+                if (appConfigItem) {
+                    initialValue = appConfigItem.value;
                 }
             }
         }
@@ -620,7 +620,7 @@ export function populateDropdown(
         if (initialValue && initialValue !== '') {
             setSelection(initialValue);
             if (shouldShowPreview) {
-                fetch(`/flow/api/model-preview?modelPath=${encodeURIComponent(initialValue)}`)
+                fetch(`/saus/api/model-preview?modelPath=${encodeURIComponent(initialValue)}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Preview not found');
@@ -665,15 +665,15 @@ export function populateDropdown(
         if (value && value !== '') {
             updateWorkflow(workflow, workflowPath, value);
             if (storeInLocalStorage) {
-                const flowConfig = getFlowConfig();
-                flowConfig[basePath] = flowConfig[basePath] || [];
-                const existingConfig = flowConfig[basePath].find(item => item.id === loaderId);
+                const appConfig = getAppConfig();
+                appConfig[basePath] = appConfig[basePath] || [];
+                const existingConfig = appConfig[basePath].find(item => item.id === loaderId);
                 if (existingConfig) {
                     existingConfig.value = value;
                 } else {
-                    flowConfig[basePath].push({ id: loaderId, value });
+                    appConfig[basePath].push({ id: loaderId, value });
                 }
-                setFlowConfig(flowConfig);
+                setAppConfig(appConfig);
             }
 
             if (shouldShowPreview && previewImageElem) {

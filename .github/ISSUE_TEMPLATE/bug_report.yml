@@ -1,5 +1,5 @@
 name: Bug Report
-description: Something is not right with the Flow.
+description: Something is not right with SAUS.
 title: "[Bug]: "
 labels: ["bug-report"]
 
@@ -7,10 +7,10 @@ body:
   - type: checkboxes
     attributes:
       label: Where is the issue?
-      description: Is the issue in the "Custom Node 'Flow'" UI, or does it concern a specific flow?
+      description: Is the issue in the "Custom Node 'SAUS'" UI, or does it concern a specific app?
       options:
-        - label: The issue is with the "Custom Node 'Flow'"
-        - label: The issue is with a specific flow. Please refer to [Flows repository](https://github.com/diStyApps/flows_lib) if the problem lies with a specific flow.
+        - label: The issue is with the "Custom Node 'SAUS'"
+        - label: The issue is with a specific app. Please refer to which App if the problem lies with a specific app.
         - label: I’m not sure where the issue is
 
   - type: markdown
@@ -53,8 +53,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Flow Version or Commit
-      description: "Specify the version or commit of Flow you're using. Avoid 'Latest Version'—instead, provide the exact version (e.g., v1.0.1)."
+      label: SAIS Version or Commit
+      description: "Specify the version or commit of SAUS you're using. Avoid 'Latest Version'—instead, provide the exact version (e.g., v1.0.1)."
     validations:
       required: true
 

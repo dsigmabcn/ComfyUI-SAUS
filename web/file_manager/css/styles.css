@@ -280,14 +280,14 @@ footer {
     margin-top: auto;
 }
 
-.flow-grid {
+.app-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     justify-content: start;
 }
 
-.flow-card {
+.app-card {
     background-color: var(--color-background-secondary);
     border: 1px dashed var(--color-border);
     border-radius: var(--border-radius);
@@ -305,7 +305,7 @@ footer {
 
 }
 
-.flow-card-content {
+.app-card-content {
     position: relative;
     padding: 15px;
     flex: 1;
@@ -314,7 +314,7 @@ footer {
     justify-content: space-between;
 }
 
-.flow-card img {
+.app-card img {
     width: 100%;
     height: 150px;
     object-fit: contain;
@@ -322,19 +322,19 @@ footer {
     z-index: 1;
 }
 
-.flow-card h3 {
+.app-card h3 {
     margin-bottom: 10px;
     color: var(--color-primary-text);
     font-size: 1em;
 }
 
-.flow-card p {
+.app-card p {
     font-size: 0.8em;
     color: #a18aaf;
     margin: 0;
 }
 
-.flow-card:hover {
+.app-card:hover {
     transform: translateY(-5px);
 
     box-shadow: 0 5px 15px var(--shadow-hover);

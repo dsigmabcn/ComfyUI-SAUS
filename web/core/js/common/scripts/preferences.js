@@ -1,4 +1,4 @@
-const PREFS_KEY = 'FlowMenuPref';
+const PREFS_KEY = 'SausMenuPref';
 
 class PreferencesManager {
     constructor(defaultPrefs) {

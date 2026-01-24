@@ -4,9 +4,9 @@ import DropdownStepper from './DropdownStepper.js';
 
 class LoraWorkflowManager {
 
-    constructor(workflow, flowConfig) {
+    constructor(workflow, appConfig) {
         this.workflowManager = new WorkflowNodeAdder(workflow);
-        this.flowConfig = flowConfig;
+        this.appConfig = appConfig;
         this.container = document.getElementById('side-workflow-controls');
         this.addButton = null;
         this.initializeUI();

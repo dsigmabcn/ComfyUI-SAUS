@@ -5,8 +5,8 @@ let imageLoader = null;
 let isLoadMediaVisible = true;
 let destroyOnHide = false;
 
-export default function imageLoaderComp(flowConfig, workflow) {
-    if (!flowConfig.imageLoaders || flowConfig.imageLoaders.length === 0) {
+export default function imageLoaderComp(appConfig, workflow) {
+    if (!appConfig.imageLoaders || appConfig.imageLoaders.length === 0) {
         // console.log('No uploaded images, skipping initialization of imageLoader.');
         return; 
     }
@@ -31,7 +31,7 @@ export default function imageLoaderComp(flowConfig, workflow) {
         }
     }
 
-    flowConfig.imageLoaders.forEach((imageConfig, index) => {
+    appConfig.imageLoaders.forEach((imageConfig, index) => {
         const containerId = loadImageContainer.id;
         const imageDropAreaTitle = document.createElement('div');
         imageDropAreaTitle.classList.add('image-loader-title');
@@ -47,7 +47,7 @@ export default function imageLoaderComp(flowConfig, workflow) {
         }, (localSrc, serverResult) => {
             console.log(`Image ${index + 1} loaded:`, serverResult);
             if (serverResult && serverResult.name) {
-                console.log(flowConfig.imageLoaders[index].nodePath, imageConfig.nodePath);
+                console.log(appConfig.imageLoaders[index].nodePath, imageConfig.nodePath);
                 updateWorkflow(workflow, imageConfig.nodePath, serverResult.name);
             } else {
                 console.error("Server did not return a valid result");

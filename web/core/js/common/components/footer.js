@@ -1,7 +1,7 @@
 (function() {
   async function getVersion() {
       try {
-          const response = await fetch('/flow/api/flow-version');
+          const response = await fetch('/saus/api/saus-version');
           if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
           }

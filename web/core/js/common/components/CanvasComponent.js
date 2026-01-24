@@ -112,10 +112,10 @@ async function processAndUpload(
 }
 
 
-export default async function CanvasComponent(flowConfig, workflow, canvasLoader) {
-    if (flowConfig.canvasOutputs && Array.isArray(flowConfig.canvasOutputs)) {
+export default async function CanvasComponent(appConfig, workflow, canvasLoader) {
+    if (appConfig.canvasOutputs && Array.isArray(appConfig.canvasOutputs)) {
         await processAndUpload(
-            flowConfig.canvasOutputs,
+            appConfig.canvasOutputs,
             () => canvasLoader.getCanvasOutImage(),
             'Canvas Output Image',
             'Canvas upload failed.',
@@ -124,9 +124,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if (flowConfig.canvasMaskOutputs && Array.isArray(flowConfig.canvasMaskOutputs)) {
+    if (appConfig.canvasMaskOutputs && Array.isArray(appConfig.canvasMaskOutputs)) {
         await processAndUpload(
-            flowConfig.canvasMaskOutputs,
+            appConfig.canvasMaskOutputs,
             () => canvasLoader.getMaskImage(),
             'Mask Image',
             'Mask image upload failed.',
@@ -135,9 +135,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if (flowConfig.canvasAlphaOutputs && Array.isArray(flowConfig.canvasAlphaOutputs)) {
+    if (appConfig.canvasAlphaOutputs && Array.isArray(appConfig.canvasAlphaOutputs)) {
         await processAndUpload(
-            flowConfig.canvasAlphaOutputs,
+            appConfig.canvasAlphaOutputs,
             () => canvasLoader.getMaskAlphaOnImage(),
             'Mask Alpha Image',
             'Mask alpha image upload failed.',
@@ -146,9 +146,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if  (flowConfig.canvasCroppedMaskOutputs && Array.isArray(flowConfig.canvasCroppedMaskOutputs)) {
+    if  (appConfig.canvasCroppedMaskOutputs && Array.isArray(appConfig.canvasCroppedMaskOutputs)) {
         await processAndUpload(
-            flowConfig.canvasCroppedMaskOutputs,
+            appConfig.canvasCroppedMaskOutputs,
             () => canvasLoader.getCroppedMask(),
             'Cropped Mask Image',
             'Cropped mask image upload failed.',
@@ -157,9 +157,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if  (flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs)) {
+    if  (appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs)) {
         await processAndUpload(
-            flowConfig.canvasCroppedImageOutputs,
+            appConfig.canvasCroppedImageOutputs,
             () => canvasLoader.getCroppedImage(),
             'Cropped Image',
             'Cropped image upload failed.',
@@ -168,9 +168,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if  (flowConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(flowConfig.canvasCroppedAlphaOnImageOutputs)) {
+    if  (appConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(appConfig.canvasCroppedAlphaOnImageOutputs)) {
         await processAndUpload(
-            flowConfig.canvasCroppedAlphaOnImageOutputs,
+            appConfig.canvasCroppedAlphaOnImageOutputs,
             () => canvasLoader.getCroppedAlphaOnImage(),
             'Cropped Alpha Image',
             'Cropped alpha image upload failed.',
@@ -179,9 +179,9 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
     }
 
-    if (flowConfig.canvasSelectedMaskOutputs && Array.isArray(flowConfig.canvasSelectedMaskOutputs)) {
+    if (appConfig.canvasSelectedMaskOutputs && Array.isArray(appConfig.canvasSelectedMaskOutputs)) {
         await processAndUpload(
-            flowConfig.canvasSelectedMaskOutputs,
+            appConfig.canvasSelectedMaskOutputs,
             () => canvasLoader.getSelectedMaskAlphaOnImage(),
             'Selected Mask Alpha Image',
             'Selected mask alpha image upload failed.',
@@ -192,11 +192,11 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
 
     // ** ( Case 1 ) **
     if (
-        flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages) &&
-        flowConfig.canvasAlphaOutputs && Array.isArray(flowConfig.canvasAlphaOutputs)
+        appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages) &&
+        appConfig.canvasAlphaOutputs && Array.isArray(appConfig.canvasAlphaOutputs)
     ) {
         await processAndUpload(
-            flowConfig.canvasLoadedImages,
+            appConfig.canvasLoadedImages,
             () => canvasLoader.getOriginalImage(),
             'Original Image',
             'Original image upload failed.',
@@ -205,7 +205,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
 
         await processAndUpload(
-            flowConfig.canvasAlphaOutputs,
+            appConfig.canvasAlphaOutputs,
             () => canvasLoader.getMaskAlphaOnImage(),
             'Mask Alpha Image',
             'Mask alpha image upload failed.',
@@ -216,11 +216,11 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
 
     // ** ( Case 3 ) **
     // if (
-    //     flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs) &&
-    //     flowConfig.canvasCroppedMaskOutputs && Array.isArray(flowConfig.canvasCroppedMaskOutputs)
+    //     appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) &&
+    //     appConfig.canvasCroppedMaskOutputs && Array.isArray(appConfig.canvasCroppedMaskOutputs)
     // ) {
     //     await processAndUpload(
-    //         flowConfig.canvasCroppedImageOutputs,
+    //         appConfig.canvasCroppedImageOutputs,
     //         () => canvasLoader.getCroppedImage(),
     //         'Cropped Image',
     //         'Cropped image upload failed.',
@@ -229,7 +229,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
     //     );
 
     //     await processAndUpload(
-    //         flowConfig.canvasCroppedMaskOutputs,
+    //         appConfig.canvasCroppedMaskOutputs,
     //         () => canvasLoader.getCroppedMask(),
     //         'Cropped Mask Image',
     //         'Cropped mask image upload failed.',
@@ -240,12 +240,12 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
 
     // ** ( Case 4 ) **
     if (
-        flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs) &&
-        flowConfig.canvasCroppedMaskOutputs && Array.isArray(flowConfig.canvasCroppedMaskOutputs) &&
-        flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages)
+        appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) &&
+        appConfig.canvasCroppedMaskOutputs && Array.isArray(appConfig.canvasCroppedMaskOutputs) &&
+        appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages)
     ) {
         await processAndUpload(
-            flowConfig.canvasCroppedImageOutputs,
+            appConfig.canvasCroppedImageOutputs,
             () => canvasLoader.getCroppedImage(),
             'Cropped Image',
             'Cropped image upload failed.',
@@ -254,7 +254,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
 
         await processAndUpload(
-            flowConfig.canvasCroppedMaskOutputs,
+            appConfig.canvasCroppedMaskOutputs,
             () => canvasLoader.getCroppedMask(),
             'Cropped Mask Image',
             'Cropped mask image upload failed.',
@@ -263,7 +263,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
 
         await processAndUpload(
-            flowConfig.canvasLoadedImages,
+            appConfig.canvasLoadedImages,
             () => canvasLoader.getOriginalImage(),
             'Original Image',
             'Original image upload failed.',
@@ -274,12 +274,12 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
 
     // ** ( Case 5 ) **
     if (
-        flowConfig.canvasCroppedImageOutputs && Array.isArray(flowConfig.canvasCroppedImageOutputs) &&
-        flowConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(flowConfig.canvasCroppedAlphaOnImageOutputs) &&
-        flowConfig.canvasLoadedImages && Array.isArray(flowConfig.canvasLoadedImages)
+        appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) &&
+        appConfig.canvasCroppedAlphaOnImageOutputs && Array.isArray(appConfig.canvasCroppedAlphaOnImageOutputs) &&
+        appConfig.canvasLoadedImages && Array.isArray(appConfig.canvasLoadedImages)
     ) {
         await processAndUpload(
-            flowConfig.canvasCroppedImageOutputs,
+            appConfig.canvasCroppedImageOutputs,
             () => canvasLoader.getCroppedImage(),
             'Cropped Image',
             'Cropped image upload failed.',
@@ -288,7 +288,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
 
         await processAndUpload(
-            flowConfig.canvasCroppedAlphaOnImageOutputs,
+            appConfig.canvasCroppedAlphaOnImageOutputs,
             () => canvasLoader.getCroppedAlphaOnImage(),
             'Cropped Alpha Image',
             'Cropped alpha image upload failed.',
@@ -297,7 +297,7 @@ export default async function CanvasComponent(flowConfig, workflow, canvasLoader
         );
 
         await processAndUpload(
-            flowConfig.canvasLoadedImages,
+            appConfig.canvasLoadedImages,
             () => canvasLoader.getOriginalImage(),
             'Original Image',
             'Original image upload failed.',
