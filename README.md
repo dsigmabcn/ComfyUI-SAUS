@@ -7,9 +7,6 @@
 
 
 
-<!-- <img src="media/covers/cover.jpg"> -->
-
-  <h1 align="center">🌊 SAUS UI</h1>
   <img src="web/core/media/git/cover_SAUS.jpg">
   <h3 align="center"><strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
     <p align="center">
@@ -52,7 +49,10 @@ SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI 
 
 SAUS is a custom node for comfyui that works as a robust and simple User Interface to run different workflows, without messing and tinkering with all the spaghetti, parameters and options.
 
-ComfyUI is a great tool to understand how AI Image and Video Generation works, but managing complex workflows can be challenging.
+ComfyUI is powerful for designing and understanding AI generation, as it lets you see 'inside' the process and tweak every parameter. However, this flexibility can also lead to complex and challenging workflows. SAUS simplifies this by converting popular and powerful workflows into 'apps'. These apps provide a clean user interface, allowing you to focus on creativity by adjusting only the most important parameters.
+
+<img src="web/core/media/git/SAUS-app-example.png" width="800">
+
 
 ## How to use SAUS
 
@@ -150,3 +150,9 @@ After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is 
 Alternatively, open ComfyUI and click on the SAUS button
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+# Credits
+
+* [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
+* [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
+* [distyFlow](https://github.com/disty0/distyFlow)

@@ -408,8 +408,7 @@ async function showAppDetails(app) {
             <div class="details-arch">Architecture: ${app.architecture || 'Unknown'}</div>
             <p class="details-description">${app.description}</p>
             <div style="margin-top:10px;">
-                <button class="btn-action" onclick="window.open('saus/${app.url}', '_blank')"><i class="fas fa-play"></i> Open App</button>
-                <button class="btn-action" onclick="window.open('/${app.url}', '_blank')"><i class="fas fa-play"></i> Open App</button>
+                <button class="btn-action" onclick="window.open('saus/${app.url}', '_blank')"><i class="fas fa-play"></i> Open App</button>                
             </div>
         </div>
     `;
