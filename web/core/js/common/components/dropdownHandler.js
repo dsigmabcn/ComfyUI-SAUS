@@ -782,7 +782,7 @@ export function populateDropdown(
                 // NORMALIZE BEFORE FILTERING //
                 const normalizedItems = items.map(normalizePath);
                 const filteredItems = normalizedItems.filter(it => it.toLowerCase().includes(filter));
-                //console.log(filteredItems); // This will print the filtered array to the browser's console
+                
 
 
                 if (!useNesting) {

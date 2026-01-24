@@ -95,10 +95,12 @@ function toggleFavorite(appId, button) {
         favorites.delete(appId);
         button.classList.remove('favorited');
         button.innerHTML = '<i class="far fa-star"></i>';
+        button.title = 'Add to favorites';
     } else {
         favorites.add(appId);
         button.classList.add('favorited');
         button.innerHTML = '<i class="fas fa-star"></i>';
+        button.title = 'Remove from favorites';
     }
     saveFavorites();
     animateAppReorder();
@@ -124,6 +126,7 @@ function createAppCard(app) {
     const favoriteButton = document.createElement('button');
     favoriteButton.classList.add('favorite-button');
     favoriteButton.innerHTML = isFavorited(app.id) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+    favoriteButton.title = isFavorited(app.id) ? 'Remove from favorites' : 'Add to favorites';
     if (isFavorited(app.id)) {
         favoriteButton.classList.add('favorited');
     }

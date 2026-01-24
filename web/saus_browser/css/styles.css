@@ -627,9 +627,11 @@ footer {
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease;    
     backdrop-filter: blur(1px);
     cursor: pointer;
+    /* Safari 9+ support */
+    -webkit-backdrop-filter: blur(1px);
 
 }
 
@@ -862,6 +864,7 @@ footer {
     transition: background-color 0.3s, color 0.3s;
     border: 1px solid var(--color-border);
     user-select: none;
+    -webkit-user-select: none; /* Safari, Chrome, and Opera prefixes */
 }
 
 .tag-chip:hover,
@@ -1040,6 +1043,9 @@ footer {
     z-index: 2;
     opacity: 1;
     backdrop-filter: blur(4px);
+    /* Safari 9+ support */
+    -webkit-backdrop-filter: blur(4px);
+    
 }
 
 .app-card:hover .open-button {
@@ -1438,7 +1444,9 @@ footer {
     min-width: 420px;
     max-width: 600px;
     backdrop-filter: blur(10px);
-    border: 2px dashed var(--color-border)
+    border: 2px dashed var(--color-border);
+    /* Safari 9+ support */
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .update-content h2 {

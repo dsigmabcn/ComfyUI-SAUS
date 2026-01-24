@@ -704,7 +704,9 @@ footer {
     min-width: 420px;
     max-width: 600px;
     backdrop-filter: blur(10px);
-    border: 2px dashed var(--color-border)
+    border: 2px dashed var(--color-border);
+    /* Safari 9+ support */
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .update-content h2 {

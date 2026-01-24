@@ -10,7 +10,7 @@ class RouteManager:
 
         @routes.get(f"/{base_path}")
         async def serve_html(request: web.Request) -> web.FileResponse:
-            return web.FileResponse(index_html)
+            return web.FileResponse(index_html, headers={'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache'})
 
         for static_dir in ['css', 'js', 'media']:
             static_path = app_dir / static_dir

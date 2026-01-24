@@ -72,7 +72,7 @@ export class SettingsComponent {
             const response = await fetch('/saus/api/sync-apps', { method: 'POST' });
             const result = await response.json();
             if (response.ok) {
-                alert(result.message || 'Apps synced successfully.');
+                alert((result.message || 'Apps synced successfully.') + '\nRestart server to load new apps');
                 window.dispatchEvent(new CustomEvent('appsSynced'));
             } else {
                 alert('Error syncing apps: ' + (result.message || response.statusText));
