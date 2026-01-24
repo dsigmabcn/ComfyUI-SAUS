@@ -11,3 +11,4 @@ web/apps/
 saus/data/settings.json
 saus/data/.secret.key
 *.py[cod]
+node.zip
