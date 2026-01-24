@@ -19,8 +19,6 @@
   </p>
 </div>
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -64,15 +62,15 @@ For instructions on how to use the interface, check out the [User Guide](USER_GU
 
 # Installation
 
-## Requirements
+## Requirements - ComfyUI and ComfyUI-Manager
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
  - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
 
-Follow the instructions to install both [ComfyUI](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#installing) and [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#installing).
+For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please refer to [ComfyUI Installation Instructions](ComfyUI_install_instructions.md).
 
-Check there the general ComfyUI requirements, including pytorch and git.
+### Recommended Custom nodes
 
-I have tried that most of the apps work without other custom nodes, but some still use them. It is recommended to add the following custom nodes:
+I have tried that most of the apps work with native nodes only, but some use custom nodes. It is recommended to add the following custom nodes:
 - [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux): for to generate controlnet preprocessed video
 - [KJ Nodes](https://github.com/kijai/ComfyUI-KJNodes): quality of life nodes by kijai
 - [ComfyUI_essentials](https://github.com/cubiq/ComfyUI_essentials): quality of life nodes by cubiq (Matteo), currently in maintenance mode
@@ -88,6 +86,8 @@ Also search and install the custom nodes indicated in requirements.
 
 ## Manual Install
 
+It is required to you have git installed. 
+
 1. Navigate to the `custom_nodes` folder inside your ComfyUI installation.
 2. Open a terminal (or type `cmd` in the address bar on Windows).
 3. Run the following command:
@@ -101,12 +101,21 @@ Make also sure the custom nodes indicated in requirements (and their dependencie
 
 To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
 
+The SAUS installers consider you already have [ComfyUI and ComfyUI-Manager already installed](ComfyUI_install_instructions.md).
+
 ### Windows (Portable Version)
+
 1. Download the **[install-saus-windows.bat](install-saus-windows.bat)** script from this repository.
 2. Place the file in your **ComfyUI_windows_portable** directory (the folder containing `run_nvidia_gpu.bat` and the `ComfyUI` folder).
 3. Double-click `install-saus-windows.bat` to run it.
 
 ### Linux
+Git needs to be installed in your system. If you do not have it
+
+```bash
+sudo apt install git-all
+```
+
 1. Download the **[install-saus-linux.sh](install-saus-linux.sh)** script from this repository.
 2. Place the file in your **ComfyUI** root directory (the folder containing `custom_nodes`).
 3. Open a terminal in that directory.
