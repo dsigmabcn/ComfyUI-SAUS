@@ -13,6 +13,7 @@ http://127.0.0.1:8188/saus
 ```
 
 or by clicking on the SAUS icon on the menu bar in ComfyUI.
+<img src="web/core/media/git/Access-button-ComfyUI.png">
 
 ## Interface Overview
 

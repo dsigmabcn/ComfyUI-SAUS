@@ -14,9 +14,8 @@
   <h3 align="center"><strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
     <p align="center">
     <strong>Cut the spaghetti. Cook it with <i>Saus</i></strong>
-  </p>
-  
-
+  </p> 
+  <p>
     <a href="USER_GUIDE.md"><strong>User Guide</strong></a>
     <br />
     <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/issues">Report Bug</a>
@@ -108,7 +107,7 @@ To simplify installation, we provide scripts for Windows and Linux that install 
 3. Double-click `install-saus-windows.bat` to run it.
 
 ### Linux
-1. Download the **install-saus-linux.sh** script from this repository.
+1. Download the **[install-saus-linux.sh](install-saus-linux.sh)** script from this repository.
 2. Place the file in your **ComfyUI** root directory (the folder containing `custom_nodes`).
 3. Open a terminal in that directory.
 4. Make the script executable and run it:
@@ -122,13 +121,13 @@ Runpod offers rental of GPU's at a good price that can be used to run the latest
 
 After signing up in Runpod, create a Network Disk (with enough capacity to run the models) and use the ComfyUI SAUS template.
 
+<img src="web/core/media/git/RUNPOD-SAUS-template.png">
+
 > [!NOTE]
 > The template uses pytorch 2.8, the pod should have CUDA 12.8 or higher
 
 > [!WARNING]
 > If you already have ComfyUI in a Network Drive installed, the template will not install the custom node. Install it first via the manager, then later you can use the template to access the right ports.
-
-<img src="web/core/media/git/RUNPOD-SAUS-template.png">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
