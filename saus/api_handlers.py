@@ -179,8 +179,6 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                     continue
                 #rp = urllib.parse.unquote(rp)
                 rp = pathToKey(urllib.parse.unquote(rp).strip())
-                print("/////// rp from paths param statement  ///////")
-                print(rp)
                 pid = get_preview_id(rp)
                 _, image_folder = get_preview_paths(pid)
                 thumb = image_folder / "thumbnail.jpg"
@@ -189,8 +187,7 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                         b = tf.read()
                     b64 = base64.b64encode(b).decode("utf-8")
                     result_map[rp] = f"data:image/jpeg;base64,{b64}"
-                print("printing result map")
-                print(result_map)
+
             return web.json_response(result_map)
 
         for root, dirs, files in os.walk(PREVIEWS_REGISTRY_DIR):
@@ -212,8 +209,7 @@ async def list_model_previews_handler(request: web.Request) -> web.Response:
                                 b = tf.read()
                             b64 = base64.b64encode(b).decode("utf-8")
                             result_map[mp] = f"data:image/jpeg;base64,{b64}"
-                            print("!!!!!!! from thumb.exists:")
-                            print(result_map)
+
                     except Exception as ex:
                         logger.error(f"{SAUSMSG}: Error reading registry {regp}: {ex}")
                         continue
@@ -228,17 +224,14 @@ async def get_model_preview_handler(request: web.Request) -> web.Response:
     try:
         ensure_data_folders()
         rawPath = request.query.get("modelPath", None)
-        print("*************get_model_preview")
-        print(rawPath)
+
         if not rawPath:
             return web.Response(status=400, text="Missing 'modelPath'")
 
         rawPath = pathToKey(rawPath) # Add this line to normalize the path
-        print("********** after path to Key")
-        print(rawPath)
+
         pid = get_preview_id(rawPath)
-        print("////////pid")
-        print(pid)
+
         _, image_folder = get_preview_paths(pid)
 
         thumb = image_folder / "thumbnail.jpg"
@@ -247,10 +240,8 @@ async def get_model_preview_handler(request: web.Request) -> web.Response:
                 b = tf.read()
             b64 = base64.b64encode(b).decode("utf-8")
             data_url = f"data:image/jpeg;base64,{b64}"
-            print("rawPath:")
-            print(rawPath)
-            print("data_url")
-            print(data_url)
+
+
             return web.json_response({rawPath: data_url})
         else:
             return web.Response(status=404, text="Preview not found")
@@ -263,7 +254,7 @@ async def apps_handler(request: web.Request) -> web.Response:
     return web.json_response(APP_CONFIGS)
 
 async def saus_version_handler(request: web.Request) -> web.Response:
-    return web.json_response({'version': APP_VERSION})
+    return web.json_response({'version': APP_VERSION}, headers={'Cache-Control': 'no-cache'})
 
 async def extension_node_map_handler(request: web.Request) -> web.Response:
     if EXTENSION_NODE_MAP_PATH.exists():
@@ -398,7 +389,7 @@ async def get_theme_css_handler(request: web.Request) -> web.Response:
         raise web.HTTPNotFound()
     
     try:
-        return web.FileResponse(path=file_path)
+        return web.FileResponse(path=file_path, headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"})
     except Exception as e:
         logger.error(f"Error serving CSS file '{filename}': {e}")
         raise web.HTTPInternalServerError(text="Internal Server Error")
@@ -1013,7 +1004,7 @@ async def upload_file_handler(request: web.Request) -> web.Response:
 
 
 async def upload_file_handler(request: web.Request) -> web.Response:
-    print("\n--- UPLOAD STARTED (Simple Sequential Read) ---")
+
     
     try:
         reader = await request.multipart()
@@ -1025,17 +1016,14 @@ async def upload_file_handler(request: web.Request) -> web.Response:
     # ----------------------------------------------------
     file_field = await reader.next()
     if not file_field or file_field.name != 'file':
-        print(f"DEBUG: ERROR - Expected 'file' field first, got '{file_field.name if file_field else 'None'}'")
         return web.json_response({'error': 'Missing or incorrect first field: expected file'}, status=400)
     
     # Read the ENTIRE file content into memory immediately
     file_content = await file_field.read()
     bytes_to_write = len(file_content)
     
-    print(f"DEBUG: Read file content into memory. Size: {bytes_to_write} bytes")
     
     if bytes_to_write == 0:
-        print("DEBUG: FATAL ERROR - Content read from stream was 0 bytes. Stream consumed elsewhere?")
         # Consume the next field (targetPath) to ensure connection doesn't hang
         await reader.next() 
         return web.json_response({'error': 'File data stream empty (consumed by server).'}, status=500)
@@ -1047,11 +1035,9 @@ async def upload_file_handler(request: web.Request) -> web.Response:
     target_path_field = await reader.next()
     
     if not target_path_field or target_path_field.name != 'targetPath':
-        print(f"DEBUG: ERROR - Expected 'targetPath' field next, got '{target_path_field.name if target_path_field else 'None'}'")
         return web.json_response({'error': 'Missing or incorrect second field: expected targetPath'}, status=400)
 
     target_path = await target_path_field.text()
-    print(f"DEBUG: targetPath received: '{target_path}'")
     
     
     # ----------------------------------------------------
@@ -1061,16 +1047,14 @@ async def upload_file_handler(request: web.Request) -> web.Response:
     filename = file_field.filename
     os.makedirs(target_path, exist_ok=True)
     file_path = os.path.join(target_path, filename)
-    print(f"DEBUG: Full save path constructed: '{file_path}'")
 
     try:
         with open(file_path, 'wb') as f:
             f.write(file_content)
         
-        print(f"DEBUG: File close successful. Total bytes written: {bytes_to_write}")
+
 
     except Exception as e:
-        print(f"DEBUG: FATAL ERROR during file save: {e}", file=sys.stderr)
         return web.json_response({'error': f'Failed to save file: {e}'}, status=500)
 
     return web.json_response({'status': 'success', 'filename': filename})
@@ -1082,9 +1066,8 @@ async def get_apps_list_handler(request):
     """
     Handles GET requests for the app_list.json file.
     """
-    #print (SAUS_BROWSER_PATH)
     file_path = SAUS_BROWSER_PATH / "data/app_list.json"
-    #print(file_path)
+
     # Check if the file exists
     if not file_path.exists():
         return web.Response(text=json.dumps({"error": "File not found"}), status=404, content_type='application/json')
@@ -1137,7 +1120,9 @@ async def download_file_handler(request: web.Request) -> web.Response:
     try:
         # Use web.FileResponse to serve the file efficiently
         return web.FileResponse(file_path, headers={
-            'Content-Disposition': f'inline; filename="{file_name}"'
+            'Content-Disposition': f'inline; filename="{file_name}"',
+            'Cache-Control': 'no-cache',
+            'X-Content-Type-Options': 'nosniff'
         })
     except FileNotFoundError:
         return web.json_response({'error': 'File not found'}, status=404)
@@ -1237,7 +1222,7 @@ async def get_architectures_handler(request: web.Request) -> web.Response:
             data = json.load(f)
 
         # Return the JSON data with a 200 OK status.
-        return web.json_response(data, status=200)
+        return web.json_response(data, status=200, headers={'Cache-Control': 'no-cache'})
 
     except json.JSONDecodeError:
         # Handle cases where the JSON file is malformed.
@@ -1273,7 +1258,7 @@ async def get_model_data_handler(request: web.Request) -> web.Response:
             data = json.load(f)
 
         # Return the JSON data with a 200 OK status.
-        return web.json_response(data, status=200)
+        return web.json_response(data, status=200, headers={'Cache-Control': 'no-cache'})
 
     except json.JSONDecodeError:
         # Handle cases where the JSON file is malformed.
