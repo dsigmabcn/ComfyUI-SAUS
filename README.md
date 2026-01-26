@@ -7,6 +7,7 @@
 
 
 
+
   <img src="web/core/media/git/cover_SAUS.jpg">
   <h3 align="center"><strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
     <p align="center">

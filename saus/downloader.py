@@ -5,7 +5,8 @@ import json
 import asyncio
 from aiohttp import web
 from pathlib import Path
-from .constants import OPEN_APPS_ORIGIN, GOLD_BETA_APPS_ORIGIN, SAUS_APPS_PATH, APPS_TO_REMOVE, SAUSMSG, logger, DATA_DIR, APP_CONFIGS, APPS_CONFIG_FILE
+from packaging.version import parse as parse_version
+from .constants import OPEN_APPS_ORIGIN, GOLD_BETA_APPS_ORIGIN, SAUS_APPS_PATH, APPS_TO_REMOVE, SAUSMSG, logger, DATA_DIR, APP_CONFIGS, APPS_CONFIG_FILE, SAUS_BROWSER_PATH, SAUS_ORIGIN, APP_VERSION
 from .api_handlers import decrypt_value
 from .route_manager import RouteManager
 
@@ -27,6 +28,9 @@ def download_update_apps(raise_on_error: bool = False) -> None:
                 shutil.rmtree(SAUS_BROWSER_PATH)                
     except Exception as e:
         logger.error(f"{SAUSMSG}: Error removing deprecated apps: {e}")
+
+    # Update Data Files from SAUS Core
+    _update_data_files_from_saus()
 
     # Download Public Apps (Log errors but don't stop)
     try:
@@ -51,6 +55,77 @@ def download_update_apps(raise_on_error: bool = False) -> None:
             if raise_on_error:
                 raise e # Re-raise to notify caller
 
+def _check_and_update_data_file(filename: str, temp_repo_path: Path, repo_type: str, version_mismatch: bool = False) -> None:
+    src = temp_repo_path / filename
+    if not src.exists():
+        return
+
+    dest = SAUS_BROWSER_PATH / "data" / filename
+    should_update = False
+    reason = ""
+
+    if not dest.exists():
+        should_update = True
+        reason = "New file"
+    elif version_mismatch:
+        should_update = True
+        reason = "Version mismatch"
+
+    if should_update:
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dest)
+            logger.info(f"{SAUSMSG}: Updated {filename} from {repo_type} repository. ({reason})")
+        except Exception as e:
+            logger.error(f"{SAUSMSG}: Failed to update {filename}: {e}")
+
+def _update_data_files_from_saus() -> None:
+    try:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            temp_repo_path = Path(tmpdirname) / "SAUS_Core"
+            logger.info(f"{SAUSMSG}: Checking for data file updates from SAUS Core...")
+
+            result = subprocess.run(
+                ['git', 'clone', SAUS_ORIGIN, str(temp_repo_path)],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0:
+                logger.error(f"{SAUSMSG}: Failed to clone SAUS Core repository: {result.stderr}")
+                return
+
+            # Check version from pyproject.toml
+            remote_version = None
+            pyproject_path = temp_repo_path / "pyproject.toml"
+            if pyproject_path.exists():
+                try:
+                    with open(pyproject_path, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            if line.strip().startswith("version"):
+                                parts = line.split('=')
+                                if len(parts) > 1:
+                                    remote_version = parts[1].strip().strip('"\'')
+                                break
+                except Exception as e:
+                    logger.warning(f"{SAUSMSG}: Failed to parse version from remote pyproject.toml: {e}")
+
+            version_update_needed = False
+            if remote_version:
+                try:
+                    if parse_version(remote_version) > parse_version(APP_VERSION):
+                        version_update_needed = True
+                        logger.info(f"{SAUSMSG}: Newer version detected (Local: {APP_VERSION}, Remote: {remote_version}). Updating data files.")
+                except Exception as e:
+                    logger.warning(f"{SAUSMSG}: Could not compare versions ('{remote_version}' vs '{APP_VERSION}'): {e}")
+
+            source_dir = temp_repo_path / "web" / "saus_browser" / "data"
+            if source_dir.exists():
+                data_files = ["app_list.json", "architectures.json", "models_data.json"]
+                for df in data_files:
+                    _check_and_update_data_file(df, source_dir, "SAUS Core", version_update_needed)
+    except Exception as e:
+        logger.error(f"{SAUSMSG}: Failed to update data files from SAUS Core: {e}")
+
 def _download_repo(repo_url: str, repo_type: str) -> None:
     with tempfile.TemporaryDirectory() as tmpdirname:
         temp_repo_path = Path(tmpdirname) / "Apps"
@@ -70,8 +145,10 @@ def _download_repo(repo_url: str, repo_type: str) -> None:
         if not SAUS_APPS_PATH.exists():
             SAUS_APPS_PATH.mkdir(parents=True)
 
+        data_files = ["app_list.json", "architectures.json", "models_data.json"]
+
         for item in temp_repo_path.iterdir():
-            if item.name in ['.git', '.github']:
+            if item.name in ['.git', '.github'] + data_files:
                 continue
             dest_item = find_destination_path(item.name)
             if item.is_dir():

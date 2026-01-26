@@ -1175,16 +1175,16 @@ function initializeWebSocket() {
     });
 }
 
-function initializeHiddenApps() {
+/*function initializeHiddenApps() {
     loadHiddenApps();
-}
+}*/
 
 export function initializeUI() {
     // Initialize Settings Component
     settingsComponent = new SettingsComponent('.mid-col');
 
     loadFavorites();
-    initializeHiddenApps();
+    //initializeHiddenApps();
     initializeMenu();
     initializeSearch();
     initializeSorting();

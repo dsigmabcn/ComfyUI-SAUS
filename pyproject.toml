@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-SAUS"
 description = "A Simple App U See. A simple alternative User Interface for Image and Video Generation using ComfyUI as backend."
-version = "0.2.1"
+version = "0.2.2"
 license = {file = "LICENSE"} 
 classifiers = [
 #     # For OS-independent nodes (works on all operating systems)
@@ -25,12 +25,12 @@ dependencies = []
 [project.urls]
 Repository = "https://github.com/dsigmabcn/ComfyUI-SAUS"
 #  Used by Comfy Registry https://registry.comfy.org
-Documentation = "https://github.com/dsigmabcn/ComfyUI-SAUS/wiki"
-"Bug Tracker" = "https://github.com/dsigmabcn/ComfyUI-SAUS/issues"
+#Documentation = "https://github.com/dsigmabcn/ComfyUI-SAUS/wiki"
+#"Bug Tracker" = "https://github.com/dsigmabcn/ComfyUI-SAUS/issues"
 
 [tool.comfy]
 PublisherId = "koalanation"
-DisplayName = "KN-AI"
+DisplayName = "ComfyUI-SAUS"
 Icon = "https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/web/core/media/ui/saus_logo.png"
 Banner = "https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/web/core/media/git/cover_SAUS.jpg"
 includes = [] 

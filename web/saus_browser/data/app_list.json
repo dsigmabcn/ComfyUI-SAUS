@@ -33,6 +33,39 @@
     "architecture": "Z-IMAGE-TURBO"
   },
   {
+    "id": "dfpv9",
+    "name": "QWEN Image",
+    "url": "dfpv9-qwen-image-t2i",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base"],
+      "base_models": ["QWEN"]
+    },
+    "architecture": "QWEN"
+  },
+  {
+    "id": "p4j03",
+    "name": "FLUX 2 KLEIN 9B T2I",
+    "url": "p4j03-flux-klein-9B-t2i",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"]
+    },
+    "architecture": "FLUX2_KLEIN_9B"
+  },
+  {
+    "id": "g9oec",
+    "name": "FLUX 2 KLEIN 4B T2I",
+    "url": "g9oec-flux-klein-4b-t2i",
+    "category": "text-to-image",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"]
+    },
+    "architecture": "FLUX2_KLEIN_4B"
+  },
+  {
     "id": "ju12s",
     "name": "Flux Dev GGUF",
     "url": "ju12s-base-flux-dev-gguf",
@@ -222,6 +255,30 @@
       "other": []
     },
     "architecture": "LTX2_T2V_I2V"
+  },
+  {
+    "id": "xb4y7",
+    "name": "Wan 2.2 Text to Video",    
+    "url": "xb4y7-wan-22-text-to-video",
+    "category": "text-to-video",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["WAN 2.2"],
+      "other": []
+    },
+    "architecture": "WAN22_TEXT_TO_VIDEO"
+  },
+  {
+    "id": "kfifx",
+    "name": "Wan 2.2 Image to Video",    
+    "url": "kfifx-wan-2-2-image-to-video",
+    "category": "image-to-video",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["WAN 2.2"],
+      "other": []
+    },
+    "architecture": "WAN22_IMAGE_TO_VIDEO"
   },
   {
     "id": "b7o1t",

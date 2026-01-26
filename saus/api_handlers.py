@@ -465,7 +465,7 @@ async def preview_app_handler(request: web.Request) -> web.Response:
         if not app_id:
             return web.Response(status=400, text="Missing 'id' in request body")
 
-        if not SAFE_FOLDER_NAME_REGEX.match(appw_id):
+        if not SAFE_FOLDER_NAME_REGEX.match(app_id):
             return web.Response(status=400, text="Invalid 'app_id'. Only letters, numbers, dashes, and underscores are allowed.")
 
         SAUS_BROWSER_PATH = WEBROOT / app_id

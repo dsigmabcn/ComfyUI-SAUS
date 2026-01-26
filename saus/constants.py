@@ -4,12 +4,30 @@ from pathlib import Path
 import re
 
 APP_NAME = "SAUS"
-APP_VERSION = "0.2.1" 
-SAUSMSG = f"\033[38;5;208mSAUS App - {APP_VERSION}\033[0m"
-APP_CONFIGS = []
 
 CURRENT_DIR = Path(__file__).parent
 ROOT_DIR = CURRENT_DIR.parent
+
+def _get_app_version():
+    """Reads the version from the local pyproject.toml file."""
+    try:
+        pyproject_path = ROOT_DIR / "pyproject.toml"
+        if pyproject_path.exists():
+            with open(pyproject_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith("version"):
+                        parts = line.split('=')
+                        if len(parts) > 1:
+                            return parts[1].strip().strip('"\'')
+    except Exception:
+        # Fallback if something goes wrong, so the app doesn't crash on startup.
+        pass
+    return "0.0.0" # Fallback version
+
+APP_VERSION = _get_app_version()
+SAUSMSG = f"\033[38;5;208mSAUS App - {APP_VERSION}\033[0m"
+APP_CONFIGS = []
+
 WEBROOT = ROOT_DIR / "web"
 CORE_PATH = WEBROOT / "core"
 SAUS_BROWSER_PATH = WEBROOT / "saus_browser"
@@ -39,6 +57,7 @@ FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
 OPEN_APPS_ORIGIN = 'https://github.com/dsigmabcn/SAUS_open_WFs' #OPEN REPOS
 GOLD_BETA_APPS_ORIGIN = 'https://github.com/dsigmabcn/SAUS_private_WFs.git'
+SAUS_ORIGIN = 'https://github.com/dsigmabcn/ComfyUI-SAUS.git' # needs to check if the apps, models lists and architecture are up to date
 
 
 SAFE_FOLDER_NAME_REGEX = re.compile(r'^[\w\-]+$')

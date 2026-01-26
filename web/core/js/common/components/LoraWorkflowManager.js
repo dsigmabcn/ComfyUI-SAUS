@@ -13,21 +13,39 @@ class LoraWorkflowManager {
     }
 
     initializeUI() {
-        this.addButton = document.createElement('button');
-        this.addButton.textContent = '+LoRA';
-        this.addButton.classList.add('add-lora-button');
-        this.addButton.style.marginBottom = '5px';
-        this.container.appendChild(this.addButton);
-        this.addButton.addEventListener('click', () => this.handleAddLora());
+        const modelLoaders = this.workflowManager._findModelLoaders();
+
+        if (modelLoaders.length > 1) {
+            modelLoaders.forEach(loader => {
+                const btn = document.createElement('button');
+                const label = loader._meta?.title || loader.class_type || `ID: ${loader.id}`;
+                btn.textContent = `+LoRA (${label})`;
+                btn.classList.add('add-lora-button');
+                btn.style.marginBottom = '5px';
+                btn.style.marginRight = '5px';
+                this.container.appendChild(btn);
+                btn.addEventListener('click', () => this.handleAddLora(loader));
+            });
+        } else {
+            this.addButton = document.createElement('button');
+            this.addButton.textContent = '+LoRA';
+            this.addButton.classList.add('add-lora-button');
+            this.addButton.style.marginBottom = '5px';
+            this.container.appendChild(this.addButton);
+            this.addButton.addEventListener('click', () => this.handleAddLora(modelLoaders[0]));
+        }
     }
 
-    handleAddLora() {
+    handleAddLora(targetModelLoader) {
         try {
-            const modelLoaders = this.workflowManager._findModelLoaders();
-            if (modelLoaders.length === 0) {
-                throw new Error('No model loader found in the workflow to attach LoRA.');
+            if (!targetModelLoader) {
+                const modelLoaders = this.workflowManager._findModelLoaders();
+                if (modelLoaders.length === 0) {
+                    throw new Error('No model loader found in the workflow to attach LoRA.');
+                }
+                targetModelLoader = modelLoaders[0];
             }
-            const targetModelLoader = modelLoaders[0];
+
             const newNodeId = this.workflowManager.addLora(targetModelLoader.id);
             const updatedWorkflow = this.workflowManager.getWorkflow();
 

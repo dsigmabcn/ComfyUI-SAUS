@@ -87,6 +87,14 @@
     "model_path": "/diffusion_models/QWEN/",
     "thumbnail_path": ""
   },
+  "QWEN_IMAGE_2512_MODEL": {
+    "id": "qwen_image_2512_bf16.safetensors",
+    "name": "QWEN Image 2512 Core Model",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_2512_bf16.safetensors",
+    "model_path": "/diffusion_models/QWEN/",
+    "thumbnail_path": ""
+  },
   "WAN_VAE": {
     "id": "wan_2.1_vae.safetensors",
     "name": "VAE for WAN 2.1 and QWEN",
@@ -105,9 +113,17 @@
   },
   "QWEN_3_4B_VL_ENCODER": {
     "id": "qwen_3_4b.safetensors",
-    "name": "QWEN 3 text encoder",
+    "name": "QWEN 3 4B text encoder",
     "type": "TEXT_ENCODER",
     "url_model": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors",
+    "model_path": "/text_encoders/",
+    "thumbnail_path": ""
+  },
+  "QWEN_3_8B_VL_ENCODER": {
+    "id": "qwen_3_8b_fp8mixed.safetensors",
+    "name": "QWEN 3 8B mixed text encoder",
+    "type": "TEXT_ENCODER",
+    "url_model": "https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors",
     "model_path": "/text_encoders/",
     "thumbnail_path": ""
   },
@@ -119,6 +135,47 @@
     "model_path": "/diffusion_models/Z-Image/",
     "thumbnail_path": ""
   },
+  "FLUX2_VAE": {
+    "id": "flux2-vae.safetensors",
+    "name": "FLUX 2 VAE",
+    "type": "VAE",
+    "url_model": "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors",
+    "model_path": "/vae/",
+    "thumbnail_path": ""
+  },
+  "FLUX2_KLEIN_9B_DISTILLED": {
+    "id": "flux-2-klein-9b.safetensors",
+    "name": "FLUX 2 KLEIN 9B (distilled)",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/kp-forks/FLUX.2-klein-9B/resolve/main/flux-2-klein-9b.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "FLUX_2_KLEIN_9B_BASE": {
+    "id": "flux-2-klein-base-9b.safetensors",
+    "name": "FLUX 2 KLEIN 9B (base)",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/SassyDiffusion/FLUX.2-klein-base-9B-bf16/resolve/main/flux-2-klein-base-9b.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+    "FLUX2_KLEIN_4B_DISTILLED": {
+    "id": "flux-2-klein-4b.safetensors",
+    "name": "FLUX 2 KLEIN 4B (distilled)",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+  "FLUX_2_KLEIN_4B_BASE": {
+    "id": "flux-2-klein-base-4b.safetensors",
+    "name": "FLUX 2 KLEIN 4B (base)",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-base-4b.safetensors",
+    "model_path": "/diffusion_models/FLUX/",
+    "thumbnail_path": ""
+  },
+
     "ANIMATEDIFF MM V3": {
     "id": "v3_sd15_mm.ckpt",
     "name": "AnimateDiff V3 MM",
@@ -265,7 +322,7 @@
   },
     "LIGHT_4steps_t2v_high": {
     "id": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
-    "name": "WAN 2.2 T2V HIGH",
+    "name": "LIGHTX2V_LORA_2.2 I2V HIGH",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
     "model_path": "/loras/WAN22/",
@@ -273,7 +330,7 @@
   },
   "LIGHT_4steps_t2v_low": {
     "id": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
-    "name": "WAN 2.2 T2V LOW",
+    "name": "LIGHTX2V_LORA_2.2 I2V LOW",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
     "model_path": "/loras/WAN22/",
@@ -297,7 +354,7 @@
   },
     "LIGHT_4steps_i2v_high": {
     "id": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
-    "name": "WAN 2.2 T2V HIGH",
+    "name": "LIGHTX2V LORA_2.2 I2V HIGH",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
     "model_path": "/loras/WAN22/",
@@ -305,7 +362,7 @@
   },
   "LIGHT_4steps_i2v_low": {
     "id": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
-    "name": "WAN 2.2 I2V LOW",
+    "name": "LIGHTX2V LORA_2.2 I2V LOW",
     "type": "LORA",
     "url_model": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
     "model_path": "/loras/WAN22",

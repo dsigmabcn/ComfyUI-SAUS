@@ -24,8 +24,8 @@
     "description": "Core models required for QWEN IMAGE image generation.",
     "categories": ["Image Models"],
     "components": {
-      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER","QWEN_IMAGE_MODEL"],
-      "at_least_one": [],
+      "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
+      "at_least_one": ["QWEN_IMAGE_MODEL","QWEN_IMAGE_2512_MODEL"],
       "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
     }
   },
@@ -36,6 +36,26 @@
     "components": {      
       "compulsory": ["QWEN_3_4B_VL_ENCODER","Z_IMAGE_TURBO_BF16","AE_VAE"],
       "at_least_one": [],
+      "optional": []     
+    }
+  },
+  "FLUX2_KLEIN_4B": {
+    "title": "FLUX-2 KLEIN 4B",
+    "description": "Base and Distilled models of the FLUX-2 KLEIN 4B version, for image generation.",
+    "categories": ["Image Models"],
+    "components": {      
+      "compulsory": ["QWEN_3_4B_VL_ENCODER","FLUX2_VAE"],
+      "at_least_one": ["FLUX_2_KLEIN_4B_BASE","FLUX2_KLEIN_4B_DISTILLED"],
+      "optional": []     
+    }
+  },
+  "FLUX2_KLEIN_9B": {
+    "title": "FLUX-2 KLEIN 9B",
+    "description": "Base and Distilled models of the FLUX-2 KLEIN 9B version, for image generation.",
+    "categories": ["Image Models"],
+    "components": {      
+      "compulsory": ["QWEN_3_8B_VL_ENCODER","FLUX2_VAE"],
+      "at_least_one": ["FLUX_2_KLEIN_9B_BASE","FLUX2_KLEIN_9B_DISTILLED"],
       "optional": []     
     }
   },
@@ -99,7 +119,7 @@
       "optional": ["OPENPOSE","DEPTH"]
     }
   },
-  "WAN22 TEXT TO VIDEO": {
+  "WAN22_TEXT_TO_VIDEO": {
     "title": "Wan 2.2 T2V 14B",
     "description": "Wan 2.2 models (high and low noise), clip and VAE",
     "categories": ["Video Models"],
@@ -109,7 +129,7 @@
       "optional": ["LIGHT_4steps_t2v_low","LIGHT_4steps_t2v_high"]
     }
   },
-  "WAN22 IMAGE TO VIDEO": {
+  "WAN22_IMAGE_TO_VIDEO": {
     "title": "Wan 2.2 I2V 14B",
     "description": "Wan 2.2 models (high and low noise), clip and VAE",
     "categories": ["Video Models"],
