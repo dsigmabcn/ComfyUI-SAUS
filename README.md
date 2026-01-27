@@ -14,7 +14,7 @@
     <strong>Cut the spaghetti. Cook it with <i>Saus</i></strong>
   </p> 
   <p>
-    <a href="USER_GUIDE.md"><strong>User Guide</strong></a>
+    <a href="docs/USER_GUIDE.md"><strong>User Guide</strong></a>
     <br />
     <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/issues">Report Bug</a>
   </p>
@@ -55,7 +55,7 @@ ComfyUI is powerful for designing and understanding AI generation, as it lets yo
 
 ## How to use SAUS
 
-For instructions on how to use the interface, check out the [User Guide](USER_GUIDE.md).
+For instructions on how to use the interface, check out the [User Guide](docs/USER_GUIDE.md).
 
 <img src="web/core/media/ui/Saus quick start card.png" width="800">
 
