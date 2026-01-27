@@ -1,6 +1,23 @@
 # SAUS UI User Guide
 
-Welcome to the SAUS UI user guide. This document provides instructions on how to navigate and use the interface effectively.
+Welcome to the SAUS UI user guide. This document provides instructions on how to navigate and use the interface effectively. In this page you have a quick explanation of the main features and description of the interface. However, more details can be explained in the detailed readme files for each section.
+
+## Detailed guide
+
+For details of each step, look at:
+1. [Installation and Setup](../README.md#installation)
+2. [Accessing SAUS](ACCESSING.md)
+3. [General Navigation](NAVIGATION.md)
+4. [App Browsing](APP_BROWSING.md)
+5. [Installing and Uninstalling Models](MODELS.md)
+6. [Running an App](RUNNING_APPS.md)
+7. [The File Manager](FILE_MANAGER.md)
+8. [ComfyUI](COMFYUI.md)
+9. [Settings](SETTINGS.md)
+10. [Runpod guide](RUNPOD.md)
+
+
+Here we have a quick reference:
 
 ## Accessing the Interface
 
@@ -13,7 +30,7 @@ http://127.0.0.1:8188/saus
 ```
 
 or by clicking on the SAUS icon on the menu bar in ComfyUI.
-<img src="web/core/media/git/Access-button-ComfyUI.png">
+<img src="../web/core/media/git/Access-button-ComfyUI.png">
 
 ## Interface Overview
 
@@ -44,14 +61,14 @@ or by clicking on the SAUS icon on the menu bar in ComfyUI.
 7. **Recent**: See the images you have generated earlier (in the same session) by clicking on the images in the Recent panel.
 
 
-## Tools (Naviation Bar)
+## Tools (Navigation Bar)
 
 ## SAUS Apps
 Return to the App Browsing page.
 
 ### File Manager
 A simple File Manager to access and perform basic management of the files in your ComfyUI installation.
-- **Favorited Folders**: Shortcut access to the 'Input', 'Output', and 'Models' folders inside ComfyUI.
+- **Favorite Folders**: Shortcut access to the 'Input', 'Output', and 'Models' folders inside ComfyUI.
 - **Upload File**: Upload files and models to your local machine/ComfyUI installation.
 - **Download from URL**: Download using a link, with the possibility to use API tokens (e.g., for gated CivitAI or Hugging Face models).
 - **Folder Navigation**: Click on folders to navigate into them, and use 'Go Up' to move one level up in the directory structure. Access is limited to the ComfyUI folder.
