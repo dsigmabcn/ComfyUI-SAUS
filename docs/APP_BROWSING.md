@@ -1,18 +1,20 @@
 # App Browsing
 
+[Return to User Guide](USER_GUIDE.md)
+
 In your home page, you will see several options in your sidebar. These are used to navigate through the different apps of SAUS.
 
-If you are in the FileManager or Settings, you can return to the SAUS apps by clicking on it
+If you are in the File Manager or Settings, you can return to the SAUS apps by clicking on the "SAUS Apps" button in the top navigation bar.
 
 <img src="../web/core/media/git/navigation/app browsing start.png">
 
 ## Sidebar
 - Home: return to the home page
 - AI Image: click to unfold the apps for AI Image generation
-    - text-to-image: apps using text prompts to generate images
-    - image-to-image (editing): apps to modify existing images (I2I, inpainting, edit)
-    - image-to-image (reference): apps to create images from reference images (styling, IP Adapter, controlnet)
-- AI VIdeo: click to unfold the apps for AI Video generation
+    - Text-to-Image: apps using text prompts to generate images
+    - Image-to-Image (editing): apps to modify existing images (I2I, inpainting, edit)
+    - Image-to-Image (reference): apps to create images from reference images (styling, IP Adapter, controlnet)
+- AI Video: click to unfold the apps for AI Video generation
     - text-to-video: apps using text prompts to generate videos
     - image-to-video: apps using a reference image to create a video
     - video-to-video: apps using a reference video to create another video (styling, controlnet)
@@ -24,7 +26,7 @@ Click on each of the different categories for image or video AI generation and t
 
 ## App Browsing
 
-When a category is selected, the apps for that category appear in the screen. On the top of the apps, you wil see a series of filters that will help on screening the apps. Here an example for image-to-image apps
+When a category is selected, the apps for that category appear on the screen. Above the apps, you will see a series of filters that will help you screen the apps. Here is an example for image-to-image apps:
 
 <img src="../web/core/media/git/navigation/App browsing example.png">
 
@@ -32,7 +34,7 @@ When a category is selected, the apps for that category appear in the screen. On
 You can see a series of tags, that can be used to filter the different apps, depending on different subcategories:
 - base (model), quantized (model), distilled-fast (model)
 - model (FLUX, SD/SDXL, Qwen...)
-- type: image-to-image, inpaiting, (re-)styling, controlnet...
+- type: image-to-image, inpainting, (re-)styling, controlnet...
 
 
 ## Search
@@ -48,10 +50,10 @@ The apps are categorized by:
 - Beta (erlenmeyer)
 - User (person)
 
-All Open apps are available for free, and I will try to convert the 'standard' most common used workflows into easy apps to use.
+All Open apps are available for free, and I will try to convert the most common 'standard' workflows into easy-to-use apps.
 
-The gold and beta apps will be made available for subscribers in my ko-fi page (https://ko-fi.com/koalanation), still under development. Here, I will include more specific (but still useful) apps for people that specifically request it. Gold should be apps that are tested and do not require more specific/custom nodes. In Beta, the apps will not be fool-proof, as they might be still being tested/developed, or may require the installation of custom nodes.
-User category is, for the moment, a placeholder for special apps.
+The Gold and Beta apps, which are still under development, will be made available to subscribers on my [Ko-fi page](https://ko-fi.com/koalanation). Here, I will include more specific (but still useful) apps, often for people who specifically request them. Gold apps are tested and do not require more specific/custom nodes. Beta apps may not be fool-proof, as they might still be in testing/development or may require the installation of additional custom nodes.
+The User category is, for the moment, a placeholder for special apps.
 
 ### Favorites
 The star toggle can filter by favorites, which can be activated in the app card.
@@ -66,9 +68,7 @@ The app cards contain several elements that are here described:
 - tags: tags (used in the filters) with the main characteristics in relation to type/model/subcategories
 - Type of app and favorites: on the top right of the card, the type of app (open/gold/beta/user) and a toggle to select as favorite.
 - [Model (status)](MODELS.md): Indicates if the models to run the app need to be installed (Missing), only some of them are installed (Partially) or if all required models to run the app are installed (Installed).
-- Informatiom button: this button will open the information panel where the models can be installed/uninstalled.
+- Information button: this button will open the information panel where the models can be installed/uninstalled.
 
 
 [Return to User Guide](USER_GUIDE.md)
-
-
