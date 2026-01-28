@@ -1,14 +1,16 @@
 # Accessing SAUS
 
+[Return to User Guide](USER_GUIDE.md)
+
 ## 1. Direct Link (ComfyUI Portable)
-When you start ComfyUI Portable, in principle you access normally as with ComfyUI.
+When you start ComfyUI Portable, you will normally access it as you do with ComfyUI.
 
 <img src="../web/core/media/git/accessing/ComfyUI-folder.png">
 
 In the command window, you will see that ComfyUI-SAUS is downloading/updating the apps and initializing. 
 <img src="../web/core/media/git/accessing/CMD window comfyui.png">
 
-ComfyUI will open normally. You can access SAUS by writing down '/saus' after the ComfyUI address:
+ComfyUI will open normally. You can access SAUS by adding `/saus` to the end of the ComfyUI address:
 ```
 http://127.0.0.1:8188/saus
 ```

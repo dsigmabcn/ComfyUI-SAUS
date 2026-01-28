@@ -67,7 +67,7 @@ For instructions on how to use the interface, check out the [User Guide](docs/US
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
  - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
 
-For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please refer to [ComfyUI Installation Instructions](ComfyUI_install_instructions.md).
+For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please refer to [ComfyUI Installation Instructions](docs/ComfyUI_install_instructions.md).
 
 ### Recommended Custom nodes
 
@@ -102,7 +102,7 @@ Make also sure the custom nodes indicated in requirements (and their dependencie
 
 To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
 
-The SAUS installers consider you already have [ComfyUI and ComfyUI-Manager already installed](ComfyUI_install_instructions.md).
+The SAUS installers consider you already have [ComfyUI and ComfyUI-Manager already installed](docs/ComfyUI_install_instructions.md).
 
 ### Windows (Portable Version)
 

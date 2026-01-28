@@ -5,7 +5,7 @@ Welcome to the SAUS UI user guide. This document provides instructions on how to
 ## Detailed guide
 
 For details of each step, look at:
-1. [Installation and Setup](../README.md#installation)
+1. [Installation and Setup](INSTALLATION.md)
 2. [Accessing SAUS](ACCESSING.md)
 3. [General Navigation](NAVIGATION.md)
 4. [App Browsing](APP_BROWSING.md)
