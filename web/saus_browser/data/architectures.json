@@ -215,7 +215,7 @@
     "categories": ["Style, Edit, inpaint"],
     "components": {
       "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
-      "at_least_one": ["QWEN_EDIT_MODEL","QWEN_EDIT_2511_MODEL"],
+      "at_least_one": ["QWEN_EDIT_MODEL","QWEN_EDIT_2509_MODEL"],
       "optional": ["QWEN_EDIT_2509_LIGHTING","QWEN_EDIT_2511_LIGHTING"]
     }
   },
