@@ -23,14 +23,14 @@
   },
   {
     "id": "jj0qd",
-    "name": "Z-Image Turbo",
-    "url": "jj0qd-z-image-turbo-t2i",
+    "name": "Z-Image Base/Turbo",
+    "url": "jj0qd-z-image-t2i",
     "category": "text-to-image",
     "tags": {
       "type": ["base"],
       "base_models": ["Z-image"]
     },
-    "architecture": "Z-IMAGE-TURBO"
+    "architecture": "Z-IMAGE"
   },
   {
     "id": "dfpv9",
@@ -42,6 +42,17 @@
       "base_models": ["QWEN"]
     },
     "architecture": "QWEN"
+  },
+  {
+    "id": "fgkds",
+    "name": "QWEN Image",
+    "url": "fgkds-qwen-edit-1-image",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["QWEN"]
+    },
+    "architecture": "QWEN_EDIT"
   },
   {
     "id": "p4j03",
@@ -62,6 +73,54 @@
     "tags": {
       "type": ["base","distilled-fast"],
       "base_models": ["FLUX-2"]
+    },
+    "architecture": "FLUX2_KLEIN_4B"
+  },
+  {
+    "id": "th6ol",
+    "name": "FLUX 2 KLEIN 9B EDIT IMAGE",
+    "url": "th6ol-flux-klein-9b-edit-image",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"],
+      "other": ["edit"]
+    },
+    "architecture": "FLUX2_KLEIN_9B"
+  },
+  {
+    "id": "6c2yn",
+    "name": "FLUX 2 KLEIN 9B EDIT IMAGE AND REFERENCE (2 IMAGES)",
+    "url": "6c2yn-flux-klein-9b-edit-2-images",
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"],
+      "other": ["(re-)styling","try-on"]
+    },
+    "architecture": "FLUX2_KLEIN_9B"
+  },
+  {
+    "id": "uh6ol",
+    "name": "FLUX 2 KLEIN 4B EDIT IMAGE",
+    "url": "uh6ol-flux-klein-9b-edit-image",
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"],
+      "other": ["edit"]
+    },
+    "architecture": "FLUX2_KLEIN_4B"
+  },
+  {
+    "id": "7c2yn",
+    "name": "FLUX 2 KLEIN 4B EDIT IMAGE AND REFERENCE (2 IMAGES)",
+    "url": "7c2yn-flux-klein-9b-edit-2-images",
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": ["base","distilled-fast"],
+      "base_models": ["FLUX-2"],
+      "other": ["(re-)styling","try-on"]
     },
     "architecture": "FLUX2_KLEIN_4B"
   },

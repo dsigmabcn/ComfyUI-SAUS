@@ -29,13 +29,13 @@
       "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
     }
   },
-  "Z-IMAGE-TURBO": {
-    "title": "Z-Image Turbo",
-    "description": "Core models required to run Z-Image Turbo image generation.",
+  "Z-IMAGE": {
+    "title": "Z-Image",
+    "description": "Core models required to run Z-Image. BASE: CFG = 3-5, 30-50 steps. TURBO: CFG = 1, 4 steps",
     "categories": ["Image Models"],
     "components": {      
-      "compulsory": ["QWEN_3_4B_VL_ENCODER","Z_IMAGE_TURBO_BF16","AE_VAE"],
-      "at_least_one": [],
+      "compulsory": ["QWEN_3_4B_VL_ENCODER","AE_VAE"],
+      "at_least_one": ["Z_IMAGE_BASE","Z_IMAGE_TURBO"],
       "optional": []     
     }
   },
@@ -51,7 +51,7 @@
   },
   "FLUX2_KLEIN_9B": {
     "title": "FLUX-2 KLEIN 9B",
-    "description": "Base and Distilled models of the FLUX-2 KLEIN 9B version, for image generation.",
+    "description": "Base and Distilled models of the FLUX-2 KLEIN 9B version, for image generation and editing.",
     "categories": ["Image Models"],
     "components": {      
       "compulsory": ["QWEN_3_8B_VL_ENCODER","FLUX2_VAE"],
@@ -215,8 +215,8 @@
     "categories": ["Style, Edit, inpaint"],
     "components": {
       "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
-      "at_least_one": ["QWEN_EDIT_MODEL","QWEN_EDIT_2509_MODEL"],
-      "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
+      "at_least_one": ["QWEN_EDIT_MODEL","QWEN_EDIT_2511_MODEL"],
+      "optional": ["QWEN_EDIT_2509_LIGHTING","QWEN_EDIT_2511_LIGHTING"]
     }
   },
 
