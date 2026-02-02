@@ -39,7 +39,11 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         "Type",
         "Steps",
         "Seed",
-        "Dimension Selector" 
+        "Dimension Selector",
+        "Image Megapixels",
+        "Time (s)",
+        "FPS"
+ 
     ];
     // ----------------------------------------------------------------------
     

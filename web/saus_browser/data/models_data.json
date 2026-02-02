@@ -127,11 +127,19 @@
     "model_path": "/text_encoders/",
     "thumbnail_path": ""
   },
-  "Z_IMAGE_TURBO_BF16": {
+  "Z_IMAGE_TURBO": {
     "id": "z_image_turbo_bf16.safetensors",
     "name": "Z-IMAGE TURBO BF16",
     "type": "Diffusion model",
     "url_model": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors",
+    "model_path": "/diffusion_models/Z-Image/",
+    "thumbnail_path": ""
+  },
+  "Z_IMAGE_BASE": {
+    "id": "z_image_bf16.safetensors",
+    "name": "Z-IMAGE BF16",
+    "type": "Diffusion model",
+    "url_model": "https://huggingface.co/Comfy-Org/z_image/resolve/main/split_files/diffusion_models/z_image_bf16.safetensors",
     "model_path": "/diffusion_models/Z-Image/",
     "thumbnail_path": ""
   },
@@ -465,15 +473,15 @@
     "thumbnail_path": ""
   },
   "QWEN_EDIT_MODEL": {
-    "id": "qwen_image_edit_bf16.safetensors",
-    "name": "QWEN EDIT",
+    "id": "qwen_image_edit_2511_bf16.safetensors",
+    "name": "QWEN EDIT v2511",
     "type": "Diffusion model",
-    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_bf16.safetensors",
+    "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
     "model_path": "/diffusion_models/QWEN/",
     "thumbnail_path": ""
   },
   "QWEN_EDIT_2509_MODEL": {
-    "id": "qwen_image_edit_bf16.safetensors",
+    "id": "qwen_image_edit_2509_bf16.safetensors",
     "name": "QWEN EDIT v2509",
     "type": "Diffusion model",
     "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2509_bf16.safetensors",
@@ -495,7 +503,25 @@
     "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-8steps-V1.0.safetensors",
     "model_path": "/loras/QWEN/",
     "thumbnail_path": ""
-  },  
+  },
+  "QWEN_EDIT_2511_LIGHTING": {
+    "id": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+    "name": "QWEN EDIT 2511 LIGHTNING 4-steps LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+    "model_path": "/loras/QWEN/",
+    "thumbnail_path": ""
+  },
+    "QWEN_EDIT_2509_LIGHTING": {
+    "id": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
+    "name": "QWEN EDIT 2509 LIGHTNING 4-steps LORA",
+    "type": "LORA",
+    "url_model": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Edit-2509/Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
+    "model_path": "/loras/QWEN/",
+    "thumbnail_path": ""
+  },
+
+
   "FLUX GGUF Q8": {
     "id": "flux1-dev-Q8_0.gguf",
     "name": "GGUF Q8 FLUX-DEV",
