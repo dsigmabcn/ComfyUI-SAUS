@@ -473,7 +473,7 @@
     "thumbnail_path": ""
   },
   "QWEN_EDIT_MODEL": {
-    "id": "qwen_image_edit_bf16.safetensors",
+    "id": "qwen_image_edit_2511_bf16.safetensors",
     "name": "QWEN EDIT v2511",
     "type": "Diffusion model",
     "url_model": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
