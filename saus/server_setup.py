@@ -5,6 +5,29 @@ import os
 from .app_manager import AppManager
 from .downloader import download_update_apps
 from .constants import SAUSMSG, logger
+import folder_paths
+
+# Patch folder_paths on Windows to ensure forward slashes are used,
+# matching the paths sent by the web UI. This fixes validation errors
+# where ComfyUI expects backslashes but the UI sends forward slashes.
+if os.name == 'nt':
+    try:
+        _original_get_filename_list = folder_paths.get_filename_list
+        def _patched_get_filename_list(folder_name):
+            items = _original_get_filename_list(folder_name)
+            if items:
+                return [item.replace("\\", "/") for item in items]
+            return items
+        folder_paths.get_filename_list = _patched_get_filename_list
+
+        _original_get_full_path = folder_paths.get_full_path
+        def _patched_get_full_path(folder_name, filename):
+            if filename:
+                filename = filename.replace("/", "\\")
+            return _original_get_full_path(folder_name, filename)
+        folder_paths.get_full_path = _patched_get_full_path
+    except Exception as e:
+        logger.error(f"{SAUSMSG}: Failed to patch folder_paths for Windows: {e}")
 
 # Redirect handler for port 7771
 async def redirect_handler(request):    
