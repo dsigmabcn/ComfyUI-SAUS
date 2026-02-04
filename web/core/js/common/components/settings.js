@@ -87,26 +87,85 @@ export class SettingsComponent {
     }
 
     async restartServer(btn) {
-        if (!confirm("Are you sure you want to restart the server?")) return;
+        this.showConfirmationModal(
+            "Restart Server",
+            "Are you sure you want to restart the server? This will interrupt any active processes.",
+            async () => {
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
+                
+                try {
+                    const response = await fetch('/saus/api/restart', { method: 'POST' });
+                    if (response.ok) {
+                        alert('Server is restarting. Please refresh the page in a few moments.');
+                    } else {
+                        alert('Failed to trigger restart.');
+                    }
+                } catch (e) {
+                    console.error("Restart error:", e);
+                    alert('Server is restarting (connection lost). Please refresh shortly.');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            },
+            'restart'
+        );
+    }
+
+    showConfirmationModal(title, message, onConfirm, type = 'info') {
+        const existing = document.querySelector('.modal-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
         
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
-        
-        try {
-            const response = await fetch('/saus/api/restart', { method: 'POST' });
-            if (response.ok) {
-                alert('Server is restarting. Please refresh the page in a few moments.');
-            } else {
-                alert('Failed to trigger restart.');
-            }
-        } catch (e) {
-            console.error("Restart error:", e);
-            alert('Server is restarting (connection lost). Please refresh shortly.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+        let confirmBtnText = 'Confirm';
+        let icon = '<i class="fas fa-check"></i>';
+        let btnClass = '';
+
+        if (type === 'restart') {
+            confirmBtnText = 'Restart';
+            icon = '<i class="fas fa-power-off"></i>';
+            btnClass = 'delete';
         }
+
+        overlay.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>${message}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-secondary">Cancel</button>
+                    <button class="btn-modal-primary ${btnClass}">${icon} ${confirmBtnText}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const closeBtn = overlay.querySelector('.modal-close');
+        const cancelBtn = overlay.querySelector('.btn-modal-secondary');
+        const confirmBtn = overlay.querySelector('.btn-modal-primary');
+
+        const close = () => overlay.remove();
+
+        closeBtn.onclick = close;
+        cancelBtn.onclick = close;
+        
+        confirmBtn.onclick = () => {
+            onConfirm();
+            close();
+        };
+        
+        overlay.onclick = (e) => {
+            if (e.target === overlay) close();
+        };
     }
 
     render(view) {

@@ -1,0 +1,124 @@
+.preview-col {
+    width: 400px;
+    background-color: var(--color-background-secondary);
+    border-left: 1px dashed var(--color-border);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, padding 0.3s ease, border-left-width 0.3s ease;
+    flex-shrink: 0;
+    overflow-x: hidden;
+}
+
+.preview-col.hidden {
+    display: flex !important;
+    width: 0;
+    padding: 0;
+    border-left-width: 0;
+    overflow: hidden;
+}
+
+.details-header {
+    margin-bottom: 20px;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: 15px;
+}
+
+.details-title {
+    font-size: 1.5em;
+    color: var(--color-accent);
+    margin-bottom: 5px;
+}
+
+.details-arch {
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.details-description {
+    font-size: 0.95em;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    color: var(--color-primary-text);
+}
+
+.component-section { margin-bottom: 20px; }
+.component-section h4 { color: var(--color-primary-text); border-bottom: 1px solid var(--color-border); padding-bottom: 5px; margin-bottom: 10px; font-size: 1em; }
+
+.component-item {
+    background: var(--color-background);
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.component-info { flex: 1; margin-right: 10px; min-width: 0; }
+.component-name { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 4px; }
+.component-filename { font-size: 0.8em; color: #aaa; display: block; margin-bottom: 0; word-break: break-all; }
+
+.component-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 100px;
+}
+
+.status-badge { font-size: 0.85em; padding: 6px 12px; border-radius: 4px; text-align: center; }
+.status-badge.ready { background: #4caf50; color: white; }
+.status-badge.missing { background: #f44336; color: white; }
+.status-badge.downloading { background: #2196f3; color: white; }
+
+.btn-action {
+    background: var(--color-background);
+    color: white;
+    border: 1px solid #4caf50;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background 0.2s;
+}
+
+.btn-action:hover { background: #3c8b3e; }
+.btn-action.delete { background: var(--color-background); border: 1px solid var(--color-button-primary-active); color: white; }
+.btn-action.delete:hover { background: #b71c1c; }
+
+.progress-bar { width: 100%; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--color-accent); transition: width 0.3s ease; }
+
+.btn-action.open-app-btn.status-ready {
+    border-color: #4caf50;
+}
+.btn-action.open-app-btn.status-ready:hover {
+    background-color: #4caf50;
+}
+.btn-action.open-app-btn.status-partial {
+    border-color: #ff9800;
+}
+.btn-action.open-app-btn.status-partial:hover {
+    background-color: #ff9800;
+}
+.btn-action.open-app-btn.status-missing {
+    border-color: #f44336;
+}
+.btn-action.open-app-btn.status-missing:hover {
+    background-color: #f44336;
+}
+
+.component-item.required-missing {
+    background-color: rgba(244, 67, 54, 0.2);
+}
+
+.component-item.required-installed,
+.component-item.optional-installed {
+    background-color: rgba(76, 175, 80, 0.2);
+}

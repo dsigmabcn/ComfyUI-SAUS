@@ -21,7 +21,9 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
         requested_path = Path(path_param).resolve()
 
         # Ensure the requested path is within the allowed models directory
-        if not str(requested_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
+        try:
+            requested_path.relative_to(COMFYUI_DIRECTORY.resolve())
+        except ValueError:
             return web.json_response({"error": "Access denied"}, status=403)
 
 
@@ -54,8 +56,13 @@ async def rename_file_handler(request: web.Request) -> web.Response:
         if not new_name:
             return web.json_response({"error": "Missing newName"}, status=400)
 
+        if os.path.sep in new_name or (os.path.altsep and os.path.altsep in new_name) or new_name == '..':
+            return web.json_response({"error": "Invalid newName"}, status=400)
+
         # Ensure the file is within the allowed directory
-        if not str(current_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
+        try:
+            current_path.relative_to(COMFYUI_DIRECTORY.resolve())
+        except ValueError:
             return web.json_response({"error": "Access denied"}, status=403)
 
         new_path = current_path.parent / new_name
@@ -77,7 +84,9 @@ async def delete_file_handler(request: web.Request) -> web.Response:
             return web.json_response({"error": "File not found"}, status=404)
 
         # Ensure the file is within the allowed directory
-        if not str(file_path).startswith(str(COMFYUI_DIRECTORY.resolve())):
+        try:
+            file_path.relative_to(COMFYUI_DIRECTORY.resolve())
+        except ValueError:
             return web.json_response({"error": "Access denied"}, status=403)
 
         if file_path.is_dir():
@@ -113,10 +122,16 @@ async def upload_file_handler(request: web.Request) -> web.Response:
         return web.json_response({'error': 'Missing or incorrect second field: expected targetPath'}, status=400)
 
     target_path = await target_path_field.text()
+    resolved_target = Path(target_path).resolve()
     
-    filename = file_field.filename
-    os.makedirs(target_path, exist_ok=True)
-    file_path = os.path.join(target_path, filename)
+    try:
+        resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
+    except ValueError:
+        return web.json_response({'error': 'Access denied'}, status=403)
+    
+    filename = os.path.basename(file_field.filename)
+    os.makedirs(resolved_target, exist_ok=True)
+    file_path = resolved_target / filename
 
     try:
         with open(file_path, 'wb') as f:
@@ -140,12 +155,22 @@ async def download_file_handler(request: web.Request) -> web.Response:
                 break
 
     file_path = Path(file_path_str).resolve()
-    allowed_dirs = (
-        str(INPUT_FILES_DIRECTORY.resolve()),
-        str(OUTPUT_FILES_DIRECTORY.resolve()),
-        str(MODELS_DIRECTORY.resolve())
-    )
-    if not str(file_path).startswith(allowed_dirs):
+    allowed_dirs = [
+        INPUT_FILES_DIRECTORY.resolve(),
+        OUTPUT_FILES_DIRECTORY.resolve(),
+        MODELS_DIRECTORY.resolve()
+    ]
+    
+    is_allowed = False
+    for allowed_dir in allowed_dirs:
+        try:
+            file_path.relative_to(allowed_dir)
+            is_allowed = True
+            break
+        except ValueError:
+            continue
+            
+    if not is_allowed:
         return web.json_response({'error': 'Invalid file path'}, status=403)
 
     file_name = file_path.name
@@ -195,7 +220,13 @@ async def upload_chunk_handler(request: web.Request) -> web.Response:
         f.write(data['chunk'])
 
     if is_last:
-        final_file_path = Path(target_path) / data.get('fileName')
+        resolved_target = Path(target_path).resolve()
+        try:
+            resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
+        except ValueError:
+            return web.json_response({'error': 'Access denied'}, status=403)
+
+        final_file_path = resolved_target / os.path.basename(data.get('fileName'))
         final_file_path.parent.mkdir(parents=True, exist_ok=True)
         
         try:

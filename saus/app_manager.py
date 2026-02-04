@@ -1,3 +1,4 @@
+''' General routing of the apps '''
 import json
 from pathlib import Path
 from aiohttp import web

@@ -1,0 +1,22 @@
+.home-container {
+    padding: 40px;
+    text-align: center;
+    color: var(--color-primary-text);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: var(--color-accent);
+}
+
+.home-content p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    max-width: 600px;
+}

@@ -1,0 +1,224 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial;
+}
+
+html,
+body {
+    background-color: #131312;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+    background-size: 32px 32px;
+    background-image: radial-gradient(circle, var(--color-background-pattern) 1px, transparent 1px);
+    color: var(--color-primary-text);
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* --- HEADER --- */
+header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: var(--color-background-secondary);
+    padding: 10px 50px 0 0;
+    text-align: left;
+    color: var(--color-primary);
+    border-bottom: 1px dashed var(--color-background-pattern);
+    position: relative;
+}
+
+#right-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    margin-left: 0;
+    padding: 5px;
+}
+
+#Support {
+    color: var(--color-header-text);
+    margin: 10px;
+    font-size: 12px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-header-text);
+}
+
+header #logo {
+    width: 250px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding-left: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header #img-logo {
+    padding-right: 40px;
+}
+
+header .logo-text {
+    display: inline-block;
+    position: relative;
+    font-family: Arial;
+    cursor: pointer;
+    color: var(--color-header-logo-text);
+}
+
+header .logo-text .text {
+    overflow: hidden;
+    font-size: 30px;
+    text-align: center;
+    display: inline-block;
+    animation-name: animation-text;
+    animation-duration: 2s;
+}
+
+header .left {
+    position: absolute;
+    left: -30px;
+    font-size: 30px;
+    line-height: 30px;
+    animation-name: animation-left;
+    animation-duration: 1.5s;
+    font-weight: bold;
+}
+
+header .right {
+    position: absolute;
+    right: -30px;
+    font-size: 30px;
+    line-height: 30px;
+    animation-name: animation-right;
+    animation-duration: 1.5s;
+    font-weight: bold;
+}
+
+#img-logo img {
+    height: auto;
+    max-width: 100%;
+}
+
+#status {
+    font-size: 0.9em;
+}
+
+/* --- LAYOUT WRAPPERS --- */
+.main-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.mid-col {
+    padding: 10px;
+    flex: 1;
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+}
+
+.right-col {
+    width: 200px;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+footer {
+    background-color: var(--color-background-secondary);
+    color: var(--color-primary-text);
+    padding: 15px 50px;
+    text-align: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    border-top: 1px dashed var(--color-primary);
+    margin-top: auto;
+}
+
+/* --- UTILITIES --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- SCROLLBARS --- */
+.mid-col::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mid-col::-webkit-scrollbar-track {
+    background: var(--color-scrollbar-track);
+    border-radius: var(--border-radius);
+}
+
+.mid-col::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--color-scrollbar-track);
+}
+
+.mid-col::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-highlight);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes animation-text {
+    0% { opacity: 0; }
+    40% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes animation-left {
+    from { left: 30px; }
+    to { left: -30px; }
+}
+
+@keyframes animation-right {
+    from { right: 30px; }
+    to { right: -30px; }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1200px) {
+    .right-col {
+        width: 150px;
+    }
+}
+
+@media (max-width: 992px) {
+    .main-wrapper {
+        flex-direction: column;
+    }
+    .content {
+        padding: 10px 20px;
+    }
+}

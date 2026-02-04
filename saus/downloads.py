@@ -1,6 +1,8 @@
 import os
 import json
 import asyncio
+import ipaddress
+from urllib.parse import urlparse
 from pathlib import Path
 from aiohttp import web
 import aiohttp
@@ -26,6 +28,27 @@ async def _download_worker(
     retry_sleep=5
 ):
     logger.info(f"[Downloader] Background task started for URL: {url}")
+
+    # Validate URL to prevent Server Side Request Forgery (SSRF)
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https'):
+            raise ValueError(f"Invalid URL scheme: {parsed.scheme}. Only http and https are allowed.")
+        
+        hostname = parsed.hostname
+        if hostname:
+            if hostname.lower() == 'localhost':
+                raise ValueError("Access to localhost is denied")
+            try:
+                ip = ipaddress.ip_address(hostname)
+                if ip.is_private or ip.is_loopback or ip.is_link_local:
+                    raise ValueError(f"Access to private/local IP {hostname} is denied")
+            except ValueError:
+                pass
+    except Exception as e:
+        logger.error(f"[Downloader] Security validation failed for {url}: {e}")
+        error_sender(filename or "unknown", str(e))
+        return False
     
     timeout = aiohttp.ClientTimeout(total=total_timeout, connect=connect_timeout)
     save_path = None
@@ -133,7 +156,9 @@ async def download_generic_handler(request):
             return web.json_response({'error': 'Missing url or targetPath'}, status=400)
 
         resolved_target = Path(target_path).resolve()
-        if not str(resolved_target).startswith(str(COMFYUI_DIRECTORY.resolve())):
+        try:
+            resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
+        except ValueError:
              return web.json_response({"error": "Access denied: Target path outside allowed directories"}, status=403)
 
         headers = {}
@@ -207,7 +232,12 @@ async def download_model_handler(request: web.Request) -> web.Response:
                 'message': f'Missing model URL, destination path, or component type. Received: type={component_type}, url={url_model}, path={model_path}'
             }, status=400)
 
-        target_path = MODELS_DIRECTORY / model_path.strip('/\\')
+        target_path = (MODELS_DIRECTORY / model_path.strip('/\\')).resolve()
+        
+        try:
+            target_path.relative_to(MODELS_DIRECTORY.resolve())
+        except ValueError:
+            return web.json_response({'status': 'error', 'message': 'Invalid model path'}, status=403)
 
         def progress_sender(filename, downloaded, total, progress):
             PromptServer.instance.send_sync("model_download_progress", {

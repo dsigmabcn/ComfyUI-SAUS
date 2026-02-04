@@ -223,6 +223,7 @@ def refresh_apps(app: web.Application) -> None:
                 logger.info(f"{SAUSMSG}: Dynamically registered new app: {url}")
             except Exception as e:
                 logger.error(f"{SAUSMSG}: Error registering new app {url}: {e}")
+
 async def sync_apps_handler(request: web.Request) -> web.Response:
     try:
         await asyncio.to_thread(download_update_apps, True)

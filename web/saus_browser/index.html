@@ -39,20 +39,10 @@
                                 <!-- Tags will be dynamically added here -->
                             </div>
                             <div class="right-controls">
-                                <input type="text" id="searchInput" placeholder="Search apps...">
-                                <select id="sortSelect" aria-label="Sort apps by" >
-                                    <option value="nameAsc">Name (A-Z)</option>
-                                    <option value="nameDesc">Name (Z-A)</option>
-                                    <!--<option value="categoryAsc">Category (A-Z)</option>
-                                    <option value="categoryDesc">Category (Z-A)</option>-->
-                                </select>
-                                <select id="typeFilterSelect" aria-label="Filter apps by type">
-                                    <option value="all">All</option>
-                                    <option value="open">Open</option>
-                                    <option value="gold">Gold</option>
-                                    <option value="beta">Beta</option>
-                                    <option value="user">User</option>
-                                </select>
+                                <div id="search-container">
+                                    <input type="text" id="searchInput" placeholder="Search all apps..." autocomplete="off">
+                                    <i class="fas fa-times-circle clear-search"></i>
+                                </div>
                             </div>
                         </div>
                         <div class="app-grid" id="appGrid">
