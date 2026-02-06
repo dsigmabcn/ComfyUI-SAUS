@@ -14,13 +14,16 @@
     <div id="loading-area">
       <div id="spinner"></div>
       <div class="progress-container">
-        <progress id="main-progress" class="progress" value="0" max="100"></progress>
-        <div id="progress-text" class="hidden">
-          <span class="progress-percentage">0%</span>
-          <span id="progress-text-divider-1">|</span>
-          <span class="progress-steps">0/0</span>
-          <span id="progress-text-divider-2">|</span>
-          <span class="progress-times">00:00:00 / 00:00:00 &lt; 00:00:00</span> 
+        <div id="progress-status" class="hidden"></div>
+        <div class="bar-wrapper">
+          <progress id="main-progress" class="progress" value="0" max="100"></progress>
+          <div id="progress-text" class="hidden">
+            <span class="progress-percentage">0%</span>
+            <span id="progress-text-divider-1">|</span>
+            <span class="progress-steps">0/0</span>
+            <span id="progress-text-divider-2">|</span>
+            <span class="progress-times">00:00:00 / 00:00:00 &lt; 00:00:00</span> 
+          </div>
         </div>
       </div>
       <div id="queue-display"></div>
@@ -46,7 +49,42 @@
   function injectStyles() {
     const style = document.createElement('style');
     style.textContent = `
-
+      #progress-status {
+        text-align: center;
+        color: var(--color-accent, #888);
+        font-size: 0.9em;
+        margin-bottom: 5px;
+        min-height: 1.2em;
+      }
+      .bar-wrapper {
+        position: relative;
+        width: 100%;
+        height: 24px;
+      }
+      #main-progress {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      #progress-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.85em;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        pointer-events: none;
+        z-index: 10;
+      }
+      #progress-text.hidden {
+        display: none;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -110,6 +148,7 @@
     constructor(progressBarId, progressTextId) {
       this.progressBar = document.getElementById(progressBarId);
       this.progressText = document.getElementById(progressTextId);
+      this.statusText = document.getElementById('progress-status');
       this.timeTracker = new TimeTracker();
       this.initialized = false;
 
@@ -130,6 +169,7 @@
         if (progressBar && progressText) {
           this.progressBar = progressBar;
           this.progressText = progressText;
+          this.statusText = document.getElementById('progress-status');
           this.initialize();
           obs.disconnect();
         }
@@ -186,6 +226,17 @@
       }
     }
 
+    updateStatus(message) {
+      if (this.statusText) {
+        if (message) {
+          this.statusText.textContent = message;
+          this.statusText.classList.remove('hidden');
+        } else {
+          this.statusText.classList.add('hidden');
+        }
+      }
+    }
+
     showProgressText() {
       this.progressText.classList.remove('hidden');
       this.progressText.classList.add('active');
@@ -210,6 +261,7 @@
       if (timesSpan) timesSpan.textContent = `00:00:00 / 00:00:00 < 00:00:00`;
 
       this.hideProgressText();
+      this.updateStatus('');
       this.timeTracker = new TimeTracker();
     }
   }

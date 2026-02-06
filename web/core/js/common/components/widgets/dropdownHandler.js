@@ -1,4 +1,4 @@
-import { updateWorkflow, getValueFromWorkflow } from './workflowManager.js';
+import { updateWorkflow, getValueFromWorkflow } from '../workflowManager.js';
 
 const ADVANCED_WORKFLOW_PATHS = [
     'ckpt_name',
@@ -675,6 +675,13 @@ export function populateDropdown(
                 }
                 setAppConfig(appConfig);
             }
+           
+            window.dispatchEvent(new CustomEvent('workflowValueUpdate', {
+                detail: {
+                    path: workflowPath,
+                    value: value
+                }
+            }));
 
             if (shouldShowPreview && previewImageElem) {
                 const key = pathToKey(value);

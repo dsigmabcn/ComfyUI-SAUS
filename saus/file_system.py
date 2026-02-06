@@ -246,6 +246,19 @@ async def upload_chunk_handler(request: web.Request) -> web.Response:
     
     return web.json_response({'status': 'chunk_received', 'chunk': chunk_index})
 
+async def list_input_files_handler(request: web.Request) -> web.Response:
+    try:
+        files = []
+        if INPUT_FILES_DIRECTORY.exists():
+            for item in INPUT_FILES_DIRECTORY.iterdir():
+                if item.is_file() and not item.name.startswith('.'):
+                    if item.suffix.lower() in ['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif', '.mp4', '.webm', '.ogg', '.mov', '.mkv']:
+                        files.append(item.name)
+        return web.json_response(files)
+    except Exception as e:
+        logger.error(f"Error listing input files: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
 ''' async def list_themes_handler(request: web.Request) -> web.Response:
     themes_dir = CUSTOM_THEMES_DIR
     try:

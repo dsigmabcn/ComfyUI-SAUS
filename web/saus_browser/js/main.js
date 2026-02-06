@@ -1,6 +1,6 @@
 import { PromptServerClient } from './websocket.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
-import { state, loadFavorites, preferencesManager, noshowAppIds } from './state.js';
+import { state, loadFavorites, preferencesManager } from './state.js';
 import { checkForUpdate, showVersion } from './updates.js';
 import { updateComponentStatus } from './models.js';
 import { renderSidebarCategories, initializeStaticSidebarEvents } from './sidebar.js';
