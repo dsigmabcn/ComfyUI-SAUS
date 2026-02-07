@@ -6,7 +6,8 @@ from aiohttp import web
 
 from .constants import (
     logger, COMFYUI_DIRECTORY, CUSTOM_THEMES_DIR,
-    INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY
+    INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY,
+    COMFUI_LOGS_PATH
 )
 from .helpers import allowed_file
 
@@ -259,36 +260,13 @@ async def list_input_files_handler(request: web.Request) -> web.Response:
         logger.error(f"Error listing input files: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
-''' async def list_themes_handler(request: web.Request) -> web.Response:
-    themes_dir = CUSTOM_THEMES_DIR
+async def get_logs_handler(request: web.Request) -> web.Response:
     try:
-        if not themes_dir.exists():
-            logger.warning(f"Custom themes directory does not exist: {themes_dir}")
-            return web.json_response([], status=200)
-        
-        css_files = [file.name for file in themes_dir.iterdir() if file.is_file() and allowed_file(file.name)]
-        return web.json_response(css_files)
-    
+        if COMFUI_LOGS_PATH.exists():
+            with open(COMFUI_LOGS_PATH, 'r', encoding='utf-8', errors='replace') as f:
+                logs = f.read()
+            return web.json_response({"logs": logs})
+        else:
+            return web.json_response({"logs": "Log file not found."})
     except Exception as e:
-        logger.error(f"Error listing theme files: {e}")
-        return web.json_response({'error': 'Failed to list theme files.'}, status=500)
-'''
-'''async def get_theme_css_handler(request: web.Request) -> web.Response:
-    filename = request.match_info.get('filename')
-    
-    if not allowed_file(filename):
-        logger.warning(f"Attempt to access disallowed file type: {filename}")
-        raise web.HTTPNotFound()
-    
-    file_path = CUSTOM_THEMES_DIR / filename
-    
-    if not file_path.exists() or not file_path.is_file():
-        logger.warning(f"CSS file not found: {file_path}")
-        raise web.HTTPNotFound()
-    
-    try:
-        return web.FileResponse(path=file_path, headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"})
-    except Exception as e:
-        logger.error(f"Error serving CSS file '{filename}': {e}")
-        raise web.HTTPInternalServerError(text="Internal Server Error")
-'''
+        return web.json_response({"error": str(e)}, status=500)

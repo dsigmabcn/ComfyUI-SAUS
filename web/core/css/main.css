@@ -353,6 +353,14 @@ a {
     gap: 4px;
 }
 
+#progress-status {
+    text-align: center;
+    color: var(--color-accent);
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    min-height: 1.2em;
+}
+
 #progressbar {
     flex: 1;
     display: flex;
@@ -369,6 +377,12 @@ a {
     flex : 1;
 }
 
+.bar-wrapper {
+    position: relative;
+    width: 100%;
+    height: 24px;
+}
+
 .progress::-webkit-progress-value {
     transition: width 0.2s ease-in-out;
 }
@@ -379,18 +393,19 @@ a {
 
 #progress-text {
     position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: var(--color-primary-text);
-    pointer-events: none;
-    white-space: nowrap;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    padding: 6px;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 10;
 }
 
 #progress-text.active {
@@ -522,6 +537,9 @@ a {
     height: 20px;
     background-color: var(--color-progress-background);
     border: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 #main-progress::-moz-progress-bar {
@@ -546,6 +564,7 @@ a {
     transform-origin: left center;
     vertical-align: middle;
     --base-color: var(--color-background-secondary);
+    cursor: pointer;
 }
 
 #spinner::after {
@@ -3094,4 +3113,57 @@ html:not(.css-loading) body {
 #basic-controls-container > div,
 #advanced-controls-container > div {
     margin-bottom: 5px; /* Add separation between individual controls */
+}
+
+/* Log Modal Styles */
+.log-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 10000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; 
+    background-color: rgba(0,0,0,0.5); 
+}
+.log-modal-content {
+    background-color: var(--color-background-secondary);
+    margin: 5% auto; 
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    width: 80%; 
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    color: var(--color-primary-text);
+}
+.log-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    align-self: flex-end;
+    cursor: pointer;
+}
+.log-close:hover,
+.log-close:focus {
+    color: var(--color-accent);
+    text-decoration: none;
+    cursor: pointer;
+}
+#log-content {
+    flex: 1;
+    background-color: #111;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    border: 1px solid #333;
+    margin-top: 10px;
+    font-size: 12px;
+}
+.log-modal-header {
+    margin: 0;
 }

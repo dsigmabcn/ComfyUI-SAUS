@@ -34,6 +34,79 @@
     </div>
   `;
 
+  let logRefreshInterval = null;
+
+  async function fetchLogs() {
+    const logContent = document.getElementById('log-content');
+    if (!logContent) return;
+
+    const isScrolledToBottom = logContent.scrollHeight - logContent.scrollTop <= logContent.clientHeight + 50;
+
+    try {
+      const response = await fetch('/saus/api/logs');
+      if (response.ok) {
+        const data = await response.json();
+        const logs = data.logs || "No logs found.";
+        if (logContent.textContent !== logs) {
+            logContent.textContent = logs;
+            if (isScrolledToBottom) {
+                logContent.scrollTop = logContent.scrollHeight;
+            }
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching logs: " + e.message);
+    }
+  }
+
+  function openLogModal() {
+    let modal = document.getElementById('log-modal');
+    if (!modal) {
+      createLogModal();
+      modal = document.getElementById('log-modal');
+    }
+    modal.style.display = 'block';
+    const logContent = document.getElementById('log-content');
+    if (logContent && !logContent.textContent) {
+      logContent.textContent = "Loading logs...";
+    }
+    fetchLogs();
+    if (logRefreshInterval) clearInterval(logRefreshInterval);
+    logRefreshInterval = setInterval(fetchLogs, 1000);
+  }
+
+  function closeLogModal() {
+    const modal = document.getElementById('log-modal');
+    if (modal) {
+        modal.style.display = "none";
+    }
+    if (logRefreshInterval) {
+        clearInterval(logRefreshInterval);
+        logRefreshInterval = null;
+    }
+  }
+
+  function createLogModal() {
+    const modalHTML = `
+      <div id="log-modal" class="log-modal">
+        <div class="log-modal-content">
+          <span class="log-close">&times;</span>
+          <h2 class="log-modal-header">ComfyUI Logs</h2>
+          <div id="log-content"></div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('log-modal');
+    const closeBtn = modal.querySelector('.log-close');
+    closeBtn.onclick = closeLogModal;
+    window.addEventListener('click', (event) => {
+      if (event.target == modal) {
+        closeLogModal();
+      }
+    });
+  }
+
   function insertProgressBar() {
     let progressBar = document.querySelector('#progressbar');
     if (!progressBar) {
@@ -42,51 +115,12 @@
       document.body.appendChild(progressBar);
     }
     progressBar.innerHTML = progressBarHTML;
-    injectStyles();
+    const spinner = document.getElementById('spinner');
+    if (spinner) {
+        spinner.addEventListener('click', openLogModal);
+        spinner.title = "View Logs";
+    }
     // console.log('Progress bar content inserted');
-  }
-
-  function injectStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-      #progress-status {
-        text-align: center;
-        color: var(--color-accent, #888);
-        font-size: 0.9em;
-        margin-bottom: 5px;
-        min-height: 1.2em;
-      }
-      .bar-wrapper {
-        position: relative;
-        width: 100%;
-        height: 24px;
-      }
-      #main-progress {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-      #progress-text {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 0.85em;
-        font-weight: bold;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        pointer-events: none;
-        z-index: 10;
-      }
-      #progress-text.hidden {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
   }
 
   if (document.readyState === 'loading') {

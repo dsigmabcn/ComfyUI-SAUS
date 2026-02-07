@@ -11,7 +11,8 @@ from .downloader import sync_apps_handler
 from .file_system import (
     #list_themes_handler, get_theme_css_handler, 
     directory_listing_handler, rename_file_handler, delete_file_handler, upload_file_handler,
-    download_file_handler, upload_chunk_handler, list_input_files_handler
+    download_file_handler, upload_chunk_handler, list_input_files_handler,
+    get_logs_handler
 )
 from .management import (
     apps_handler, extension_node_map_handler,
@@ -117,6 +118,7 @@ class AppManager:
             (f'/saus/api/sync-apps', 'POST', sync_apps_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
             (f'/saus/api/files/input', 'GET', list_input_files_handler),
+            (f'/saus/api/logs', 'GET', get_logs_handler),
 
         ]
 
