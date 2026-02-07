@@ -46,6 +46,8 @@ MODELS_DIRECTORY = CUSTOM_NODES_DIR.parent / "models"
 INPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "input"
 OUTPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "output"
 COMFYUI_DIRECTORY = CUSTOM_NODES_DIR.parent
+COMFUI_LOGS_PATH = COMFYUI_DIRECTORY / "user" / "comfyui.log"
+
 #Previously in api_handlers
 DATA_DIR = Path(__file__).parent / "data"
 PREVIEWS_REGISTRY_DIR = DATA_DIR / "model_previews_registry"

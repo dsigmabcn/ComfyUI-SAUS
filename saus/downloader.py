@@ -7,7 +7,7 @@ from aiohttp import web
 from pathlib import Path
 from packaging.version import parse as parse_version
 from .constants import OPEN_APPS_ORIGIN, GOLD_BETA_APPS_ORIGIN, SAUS_APPS_PATH, APPS_TO_REMOVE, SAUSMSG, logger, DATA_DIR, APP_CONFIGS, APPS_CONFIG_FILE, SAUS_BROWSER_PATH, SAUS_ORIGIN, APP_VERSION
-from .api_handlers import decrypt_value
+from .helpers import decrypt_value
 from .route_manager import RouteManager
 
 def find_destination_path(item_name: str) -> Path:
@@ -223,6 +223,7 @@ def refresh_apps(app: web.Application) -> None:
                 logger.info(f"{SAUSMSG}: Dynamically registered new app: {url}")
             except Exception as e:
                 logger.error(f"{SAUSMSG}: Error registering new app {url}: {e}")
+
 async def sync_apps_handler(request: web.Request) -> web.Response:
     try:
         await asyncio.to_thread(download_update_apps, True)

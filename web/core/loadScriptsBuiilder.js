@@ -1,4 +1,5 @@
-import { coreScriptsPath } from '/core/js/common/scripts/corePathBuilder.js';
+/*import { coreScriptsPath } from '/core/js/common/scripts/corePathBuilder.js';*/
+import { coreScriptsPath } from '/core/js/common/scripts/corePath.js';
 
 const urlParams = new URLSearchParams(window.location.search);
 const appName = urlParams.get('app');

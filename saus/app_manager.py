@@ -1,3 +1,4 @@
+''' General routing of the apps '''
 import json
 from pathlib import Path
 from aiohttp import web
@@ -6,31 +7,29 @@ from .constants import (
     SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
 )
 from .route_manager import RouteManager
-from .api_handlers import (
-    list_themes_handler, get_theme_css_handler, saus_version_handler,
+from .downloader import sync_apps_handler
+from .file_system import (
+    #list_themes_handler, get_theme_css_handler, 
+    directory_listing_handler, rename_file_handler, delete_file_handler, upload_file_handler,
+    download_file_handler, upload_chunk_handler, list_input_files_handler,
+    get_logs_handler
+)
+from .management import (
     apps_handler, extension_node_map_handler,
     install_package_handler, update_package_handler, uninstall_package_handler,
     installed_custom_nodes_handler, preview_app_handler,
     reset_preview_handler, create_app_handler, update_app_handler, delete_app_handler,
-    set_model_preview_handler,
-    clear_model_preview_handler,
-    list_model_previews_handler,
-    get_model_preview_handler,
-    directory_listing_handler,
-    download_generic_handler,
-    download_model_handler,
-    rename_file_handler,
-    delete_file_handler,
-    upload_file_handler,
-    get_apps_list_handler,
-    download_file_handler,
-    upload_chunk_handler,
-    get_architectures_handler,
-    get_model_data_handler,
-    check_model_status_handler, delete_model_handler, download_model_handler,
-    get_settings_handler, save_settings_handler, restart_server_handler
+    get_apps_list_handler, get_architectures_handler, get_model_data_handler
 )
-from .downloader import sync_apps_handler
+from .downloads import (
+    download_generic_handler, download_model_handler, check_model_status_handler,
+    delete_model_handler
+)
+from .system import (
+    saus_version_handler, set_model_preview_handler, clear_model_preview_handler,
+    list_model_previews_handler, get_model_preview_handler, get_settings_handler,
+    save_settings_handler, restart_server_handler
+)
 
 class AppManager:
     @staticmethod
@@ -78,8 +77,8 @@ class AppManager:
     @staticmethod
     def _setup_core_routes(app: web.Application) -> None:
         if CORE_PATH.is_dir():
-            app.router.add_get('/core/css/themes/list', list_themes_handler)
-            app.router.add_get('/core/css/themes/{filename}', get_theme_css_handler)
+            #app.router.add_get('/core/css/themes/list', list_themes_handler)
+            #app.router.add_get('/core/css/themes/{filename}', get_theme_css_handler)
             app.router.add_static('/core/', path=CORE_PATH, name='core')
 
     @staticmethod
@@ -118,6 +117,8 @@ class AppManager:
             (f'/saus/api/settings', 'POST', save_settings_handler),
             (f'/saus/api/sync-apps', 'POST', sync_apps_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
+            (f'/saus/api/files/input', 'GET', list_input_files_handler),
+            (f'/saus/api/logs', 'GET', get_logs_handler),
 
         ]
 

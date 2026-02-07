@@ -1,0 +1,61 @@
+:root {
+    /* --- CORE BRANDING --- */
+    --color-primary: #ff4500;
+    /* Fire: Orange-Red */
+    --color-secondary: #00f2ff;
+    /* Ice: Electric Cyan */
+    --color-accent: #ff8c00;
+    /* Heat: Dark Orange */
+    --color-highlight: #00d4ff;
+    /* Glacial: Bright Blue */
+    --color-primary-text: #e0f7fa;
+    /* Frost: Very Pale Blue */
+    --color-border: #1e3f5a;
+    /* Deep Arctic Blue */
+
+    /* --- BACKGROUNDS --- */
+    --color-background: #0b1622;
+    /* Night: Deep Midnight Blue */
+    --color-background-secondary: #050a0f;
+    /* Absolute Zero: Darkest Blue */
+    --color-background-pattern: #162a3d;
+    /* Frozen Lake Texture */
+    --color-background-pattern-light: #1e3f5a;
+    /* Frozen Lake Texture */
+
+    /* --- HEADER & NAVIGATION --- */
+    --color-header-background: #050a0f;
+    --color-header-logo-text: #ff4500;
+    /* The logo glows like fire */
+    --color-header-text: #00f2ff;
+    /* Menu items are cool ice */
+    --color-social-icons: #00f2ff;
+
+    /* --- PRIMARY BUTTON (FIRE) --- */
+    --color-button-primary: #ff4500;
+    --color-button-primary-hover: #ff6347;
+    --color-button-primary-text: #8d9399;
+    --color-button-primary-text-hover: #ffffff;
+    --color-button-primary-active: #cc3700;
+    --color-button-primary-text-active: #ffffff;
+
+    /* --- SECONDARY BUTTON (ICE) --- */
+    --color-button-secondary: #131312;
+    --color-button-secondary-hover: #1e3f5a;
+    --color-button-secondary-text: #00f2ff;
+    --color-button-secondary-text-hover: #ffffff;
+    --color-button-secondary-active: #00d4ff;
+    --color-button-secondary-text-active: #f4b6ff;
+
+    /* --- UI FEEDBACK --- */
+    --color-progress-background: #102a43;
+    --color-progress-value: #ff4500;
+    --color-scrollbar-track: #050a0f;
+    --color-scrollbar-thumb: #1e3f5a;
+    --color-input-range-thumb: #ff4500;
+    --color-input-range-background: #1e3f5a;
+    --color-spinner: #00f2ff;
+    --color-spinner-highlight: #ff4500;
+    
+    --border-radius: 8px;
+}

@@ -1,23 +1,22 @@
 import StateManager from './js/common/scripts/stateManager.js';
-import MultiComponent from './js/common/components/MultiComponent.js';
-import InputComponent from "./js/common/components/InputComponent.js";
-import ToggleComponent from "./js/common/components/ToggleComponent.js";
+import MultiComponent from './js/common/components/widgets/MultiComponent.js';
+import InputComponent from "./js/common/components/widgets/InputComponent.js";
+import ToggleComponent from "./js/common/components/widgets/ToggleComponent.js";
 import DataComponent from "./js/common/components/DataComponent.js";
-import Seeder from "./js/common/components/Seeder.js";
-import Stepper from "./js/common/components/Stepper.js";
-import MultiStepper from "./js/common/components/MultiStepper.js";
-import DropdownStepper from "./js/common/components/DropdownStepper.js";
-import DimensionSelector from './js/common/components/DimSelector.js';
-import Dropdown from './js/common/components/Dropdown.js';
-import imageLoaderComp from './js/common/components/imageLoaderComp.js';
+import Seeder from "./js/common/components/widgets/Seeder.js";
+import Stepper from "./js/common/components/widgets/Stepper.js";
+import MultiStepper from "./js/common/components/widgets/MultiStepper.js";
+import DropdownStepper from "./js/common/components/widgets/DropdownStepper.js";
+import DimensionSelector from './js/common/components/widgets/DimSelector.js';
+import Dropdown from './js/common/components/widgets/Dropdown.js';
+import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
-import { initializeWebSocket } from './js/common/components/messageHandler.js';
+import { initializeWebSocket, messageHandler } from './js/common/components/messageHandler.js';
 import { updateWorkflowValue } from './js/common/components/workflowManager.js';
 import { processWorkflowNodes } from './js/common/scripts/nodesscanner.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
 import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
 import { setFaviconStatus } from './js/common/scripts/favicon.js'; 
-import { PreferencesManager } from './js/common/scripts/preferences.js';
 import { initialize } from './js/common/scripts/interactiveUI.js';
 import injectStylesheet from './js/common/scripts/injectStylesheet.js';
 import LoraWorkflowManager from './js/common/components/LoraWorkflowManager.js';
@@ -36,6 +35,8 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     const basicControlLabels = [
         "Checkpoint",
         "Model",
+        "Model high noise",
+        "Model low noise",
         "Type",
         "Steps",
         "Seed",
@@ -94,7 +95,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     //console.log("workflow", workflow);
 
 
-        // ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // MODIFIED: Refactored generateWorkflowControls to use Basic/Advanced containers
     function generateWorkflowControls(config) {
         // Get the new destination containers
@@ -171,13 +172,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         const container = document.createElement('div');
         container.className = 'prompt-container'; 
 
-        // 1. Create a top row for Label and Textarea
-        const topRow = document.createElement('div');
-        topRow.className = 'prompt-top-row';
-
         const labelDiv = document.createElement('div');
         labelDiv.className = 'title-text';
         labelDiv.textContent = input.label;
+
+        const inputWrapper = document.createElement('div');
+        inputWrapper.className = 'prompt-input-wrapper';
 
         const textArea = document.createElement('textarea');
         textArea.id = input.id;
@@ -189,11 +189,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             textArea.value = input.default || generateDynamicScriptDefault(index);
         }
 
-        // Assemble Top Row
-        topRow.appendChild(labelDiv);
-        topRow.appendChild(textArea);
-
-        // 2. Create the Arrow Button (now for the bottom)
         const expandBtn = document.createElement('div');
         expandBtn.className = 'expand-arrow-bottom';
         expandBtn.innerHTML = '▼'; 
@@ -203,9 +198,11 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             expandBtn.classList.toggle('rotated');
         };
 
-        // Final Assembly: Top Row first, then Arrow below it
-        container.appendChild(topRow);
-        container.appendChild(expandBtn); 
+        inputWrapper.appendChild(textArea);
+        inputWrapper.appendChild(expandBtn);
+
+        container.appendChild(labelDiv);
+        container.appendChild(inputWrapper);
         
         promptsContainer.appendChild(container);
     });
@@ -248,6 +245,28 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     if (appConfig.dimensionSelectors) {
         appConfig.dimensionSelectors.forEach(config => {
+            if (appConfig.tags && appConfig.tags.base_models) {
+                const baseModels = appConfig.tags.base_models;
+                if (baseModels.includes('FLUX-2')) {
+                    config.modelType = 'FLUX-2';
+                } else if (baseModels.includes('FLUX')) {
+                    config.modelType = 'FLUX';
+                } else if (baseModels.includes('WAN 2.2')) {
+                    config.modelType = 'WAN 2.2';
+                } else if (baseModels.includes('WAN')) {
+                    config.modelType = 'WAN';
+                } else if (baseModels.includes('QWEN')) {
+                    config.modelType = 'QWEN';
+                } else if (baseModels.includes('LTX-2')) {
+                    config.modelType = 'LTX-2';
+                } else if (baseModels.includes('Z-image')) {
+                    config.modelType = 'Z-image';
+                } else if (baseModels.includes('SDXL')) {
+                    config.modelType = 'SDXL';
+                } else if (baseModels.includes('SD1.5')) {
+                    config.modelType = 'SDXL';
+                }
+            }
             new DimensionSelector(config, workflow);
         });
     }
@@ -307,6 +326,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     async function queue() {   
         console.log("Queueing new job");
+        messageHandler.updateNodeMap(workflow);
 
         if (canvasLoader && canvasLoader.isInitialized) {
             await CanvasComponent(appConfig, workflow, canvasLoader);

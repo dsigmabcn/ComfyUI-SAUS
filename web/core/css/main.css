@@ -6,53 +6,6 @@
     font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial, sans-serif;
 }
 
-/*:root {
-    --control-height: 36px;
-    --color-primary: #430474;
-    --color-secondary: #f4b6ff;
-    --color-accent: #8621b7;
-    --color-highlight: #7d0ab6;
-    --color-primary-text: #cba3e5;
-    --color-border: #570d7b;
-    --color-background: #181b1d;
-    --color-background-secondary: #131312;
-    --color-background-pattern: #4d0f7c;
-    --color-header-background: #131312;
-    --color-header-logo-text: #570d7b;
-    --color-header-text:#570d7b;
-    --color-social-icons: #570d7b;
-    --color-button-primary: #570d7b; 
-    --color-button-primary-hover: #8621b7; 
-    --color-button-primary-text: #f4b6ff; 
-    --color-button-primary-text-hover: #131312; 
-    --color-button-primary-active: #8621b7; 
-    --color-button-primary-active-strong: #c96af8; 
-    --color-button-primary-text-active: #8621b7; 
-    --color-button-secondary: #131312; 
-    --color-button-secondary-hover: #8621b7; 
-    --color-button-secondary-text: #f4b6ff; 
-    --color-button-secondary-text-hover: #131312; 
-    --color-button-secondary-active: #8621b7; 
-    --color-button-secondary-text-active: #f4b6ff; 
-    --color-progress-background: #2c063f;
-    --color-progress-value:#7d0ab6;
-    --color-scrollbar-track: #1e1e1f;
-    --color-scrollbar-thumb: #570d7b;
-    --color-input-range-thumb: #f4b6ff;
-    --color-input-range-background: #570d7b;
-    --color-spinner:#570d7b;
-    --color-spinner-highlight:#7d0ab6;
-    --color-spinner-highlight: #7d0ab6;*/
-
-    /* --- ESSENTIAL MISSING THEME VARIABLES --- */
-    /*
-    --border-color: var(--color-border); /* Uses existing border color 
-    --background-color-panel: var(--color-background-secondary); /* Uses the dark secondary background for sidebars 
-    --background-color-hover: #2c063f; /* A darker, non-primary purple for hover state 
-    --background-color-panel-active: var(--color-progress-background); /* A distinct, slightly lighter dark purple 
-    --text-color: var(--color-primary-text); /* Primary text color
-    --text-color-faded: #8c8c8c; /* Standard gray for faded text 
-}*/
 :root {
     /* --- CORE BRANDING --- */
     --color-primary: #ff4500;            /* Fire: Orange-Red */
@@ -315,7 +268,7 @@ a {
 }
 
 .content .left-col {
-    width: 24%;
+    width: 25%;
     min-width: 10px;
     background-color: var(--color-background);
     position: relative;
@@ -400,6 +353,14 @@ a {
     gap: 4px;
 }
 
+#progress-status {
+    text-align: center;
+    color: var(--color-accent);
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    min-height: 1.2em;
+}
+
 #progressbar {
     flex: 1;
     display: flex;
@@ -416,6 +377,12 @@ a {
     flex : 1;
 }
 
+.bar-wrapper {
+    position: relative;
+    width: 100%;
+    height: 24px;
+}
+
 .progress::-webkit-progress-value {
     transition: width 0.2s ease-in-out;
 }
@@ -426,18 +393,19 @@ a {
 
 #progress-text {
     position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: var(--color-primary-text);
-    pointer-events: none;
-    white-space: nowrap;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    padding: 6px;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 10;
 }
 
 #progress-text.active {
@@ -466,32 +434,6 @@ a {
     margin-bottom: 15px;
 }
 
-/*#prompt{
-    align-items: center;
-    background-color: var(--color-background-secondary);
-    border-top: 1px dashed var(--color-border);
-    padding: 6px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-}
-
-#prompts textarea {
-    /*border:none;*/
-    /*border-bottom: 1px solid var(--color-border); 
-    transition: border-color 0.3s ease-in-out;
-    /* padding: 8px; */
-    /* background-color: var(--color-background-secondary); */
-    /*color: var(--color-primary-text);
-    /* margin:0 10px; */
-    /* width: 100%; */
-    /*flex:3;
-    
-}*/
-
 #prompt {
     display: flex;
     flex-direction: row;
@@ -505,67 +447,46 @@ a {
     z-index: 100;
 }
 
-#prompts textarea {
-    border: none;
-    border-bottom: 1px solid var(--color-border);
-    transition: all 0.3s ease-in-out;
-    color: var(--color-primary-text);
-    flex: 3;
-    resize: none;   /* Disables the manual dragging thing */
-    height: 40px;   /* Default height */
-    height: 75px;   /* Default height */
-    overflow-y: auto;
-}
-
-/* Class to be toggled via JS */
-#prompts textarea.expanded {
-    height: 200px;
-    height: 250px;
-}
-
 .prompt-container {
     display: flex;
-    flex-direction: column; /* Stacks topRow and Arrow vertically */
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     background-color: var(--color-background-secondary);
     border-bottom: 1px dashed var(--color-border);
-    padding: 24px 24px 8px 24px; /* Bottom padding reduced for the arrow */
-    padding: 12px 12px 4px 12px; /* Bottom padding reduced for the arrow */
+    padding: 12px;
     width: 100%;
     position: sticky;
     top: 0;
     z-index: 100;
+    gap: 10px;
 }
 
-/* This replaces the old horizontal layout */
-.prompt-top-row {
+.prompt-input-wrapper {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-    min-height: 80px;
+    flex-direction: column;
+    flex: 3;
 }
 
 .title-text {
     flex: 1;
     font-weight: bold;
+    margin-top: 6px;
 }
 
 .prompt-textarea {
-    flex: 3;
+    width: 100%;
     height: 100px;
-    height: 150px;
     resize: none;
     transition: height 0.3s ease-in-out;
     border: none;
     border-bottom: 1px solid var(--color-border);
-    background: transparent;
+    background-color: var(--color-background-pattern);
+    padding: 6px;
+    overflow-y: auto;
 }
 
 .prompt-textarea.expanded {
-    height: 200px;
-    height: 300px;
+    height: 250px;
 }
 
 /* Arrow now sits centered at the bottom */
@@ -577,7 +498,11 @@ a {
     padding: 4px 0;
     font-size: 12px;
     user-select: none;
-    transition: transform 0.3s ease;
+    margin-top: 6px;
+ 
+    /*transition: transform 0.3s ease;*/
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 4px 4px;
 }
 
 .expand-arrow-bottom.rotated {
@@ -589,6 +514,7 @@ a {
     padding: 0 10px;
     transition: transform 0.3s;
     user-select: none;
+
 }
 
 /* Rotates the arrow when expanded */
@@ -611,6 +537,9 @@ a {
     height: 20px;
     background-color: var(--color-progress-background);
     border: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 #main-progress::-moz-progress-bar {
@@ -626,25 +555,62 @@ a {
 }
 
 #spinner {
-    height: 20px;
-    width: 20px;
-    border-radius: 10%;
-    border: 4px dashed var(--color-spinner);
-    margin-right: 10px;
+    width: 60px;
+    height: 40px;
+    position: relative;
+    display: inline-block;
+    margin-right: -20px;
+    transform: scale(0.5);
+    transform-origin: left center;
+    vertical-align: middle;
+    --base-color: var(--color-background-secondary);
+    cursor: pointer;
 }
 
-.spin {
-    animation: spin 1s infinite ease-out;
-    border-color: var(--color-spinner) var(--color-spinner-highlight) !important;
+#spinner::after {
+  content: '';
+  left: 35px;
+  top: 15px;
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-spinner-highlight);
+  background-image: radial-gradient(circle 5px at 12px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 0px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 24px 12px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 12px 24px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 3px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 20px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 20px, var(--base-color) 100%, transparent 0), radial-gradient(circle 2.5px at 3px 3px, var(--base-color) 100%, transparent 0);
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+  
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+#spinner::before {
+  content: '';
+  left: 0;
+  top: 0;
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-spinner);
+  background-image: radial-gradient(circle 8px at 18px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 0px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 0px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 36px 18px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 18px 36px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 5px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 30px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 30px, var(--base-color) 100%, transparent 0), radial-gradient(circle 4px at 5px 5px, var(--base-color) 100%, transparent 0);
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+
+#spinner.spin::before {
+  animation: rotationBack 3s linear infinite;
+}
+
+#spinner.spin::after {
+  animation: rotationBack 4s linear infinite reverse;
+}
+
+@keyframes rotationBack {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
 }
 
 #loading-area {
@@ -875,6 +841,56 @@ input[type="number"] {
     padding: 5px;
 }
 
+.dim-model-select {
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.dim-model-select select {
+    width: 100%;
+    padding: 6px;
+    background-color: var(--color-background-secondary);
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    outline: none;
+}
+
+.dim-icons-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dim-icon-btn {
+    flex: 1;
+    padding: 8px;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-primary-text);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dim-icon-btn.active {
+    background-color: var(--color-background-pattern-light);
+    color: var(--color-primary-text);
+    border-color: var(--color-background-pattern-light);
+}
+
+.dim-icon-label {
+    font-size: 10px;
+    margin-top: 4px;
+    text-align: center;
+    line-height: 1.1;
+}
+
 #dimension-selector {
     display: flex;
     width: 100%;
@@ -933,7 +949,7 @@ input[type="number"] {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     justify-content: space-around;
     background-color: var(--color-background-secondary);
     padding: 2px;
@@ -1049,7 +1065,7 @@ select option:hover {
 }
 .add-lora-button {
     background-color: var(--color-button-secondary);
-    color: var(--color-button-secondary-text);
+    color: var(--color-primary-text);
     padding: 0px;
     /* margin: 0 10px; */
     border: none;
@@ -1424,13 +1440,15 @@ button:hover {
 
 .add-lora-button {
     background-color: var(--color-button-secondary);
-    color: var(--color-button-secondary-text);
+    color: var(--color-button-primary-text-active);
     /* padding: 10px; */
     /* margin: 0 10px; */
-    border: none;
+    border: 1px solid var(--color-background-pattern-light);
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
     width: 100%;
+    /*font-size: 24px;*/
+    margin: 2px;
 }
 
 /* Large Tablets and Desktops */
@@ -2386,10 +2404,10 @@ html:not(.css-loading) body {
         justify-content: center;
         padding: 0.5rem;
         /* border: 1px solid var(--mbp-border); */
-        background: var(--color-button-primary) ;
+        background: var(--color-accent) ;
         cursor: pointer;
         transition: all 0.2s;
-        color: var(--color-button-secondary-text);
+        color: var(--color-background);
         min-width: 36px;
         height: 36px;
         width: 100%;
@@ -3030,8 +3048,8 @@ html:not(.css-loading) body {
     justify-content: space-around; /* Distribute buttons evenly */
     align-items: center;
     border-bottom: 1px solid var(--border-color); /* Separator line below tabs */
-    padding: 0 0 10px 0; /* Space below the tabs */
-    margin-bottom: 10px; /* Space between tabs and content */
+    padding: 0 0 5px 0; /* Space below the tabs */
+    margin-bottom: 5px; /* Space between tabs and content */
     background-color: var(--background-color-panel);
     position: sticky; /* Keep tabs visible when scrolling control panel */
     top: 0;
@@ -3043,7 +3061,7 @@ html:not(.css-loading) body {
     flex-grow: 1; /* Make buttons fill the width */
     padding: 8px 5px;
     margin: 0 2px;
-    border: none;
+    border: 1px var(--color-border);
     background-color: transparent; /* Default state: transparent */
     color: var(--text-color-faded);
     cursor: pointer;
@@ -3062,9 +3080,9 @@ html:not(.css-loading) body {
 
 /* Active (selected) tab button style */
 .tab-button.active {
-    color: var(--color-button-primary-text); /* Highlight color */
+    color: var(--color-primary-text); /* Highlight color */
     /* border-bottom: 2px solid var(--color-primary); */
-    background-color: var(--color-background-pattern); /* Subtle background for active tab */
+    background-color: var(--color-background-pattern-light); /* Subtle background for active tab */
     font-weight: 600;
 }
 
@@ -3094,5 +3112,58 @@ html:not(.css-loading) body {
 /* Styling for the control groups to maintain consistency */
 #basic-controls-container > div,
 #advanced-controls-container > div {
-    margin-bottom: 15px; /* Add separation between individual controls */
+    margin-bottom: 5px; /* Add separation between individual controls */
+}
+
+/* Log Modal Styles */
+.log-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 10000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; 
+    background-color: rgba(0,0,0,0.5); 
+}
+.log-modal-content {
+    background-color: var(--color-background-secondary);
+    margin: 5% auto; 
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    width: 80%; 
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    color: var(--color-primary-text);
+}
+.log-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    align-self: flex-end;
+    cursor: pointer;
+}
+.log-close:hover,
+.log-close:focus {
+    color: var(--color-accent);
+    text-decoration: none;
+    cursor: pointer;
+}
+#log-content {
+    flex: 1;
+    background-color: #111;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    border: 1px solid #333;
+    margin-top: 10px;
+    font-size: 12px;
+}
+.log-modal-header {
+    margin: 0;
 }

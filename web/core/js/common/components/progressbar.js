@@ -14,13 +14,16 @@
     <div id="loading-area">
       <div id="spinner"></div>
       <div class="progress-container">
-        <progress id="main-progress" class="progress" value="0" max="100"></progress>
-        <div id="progress-text" class="hidden">
-          <span class="progress-percentage">0%</span>
-          <span id="progress-text-divider-1">|</span>
-          <span class="progress-steps">0/0</span>
-          <span id="progress-text-divider-2">|</span>
-          <span class="progress-times">00:00:00 / 00:00:00 &lt; 00:00:00</span> 
+        <div id="progress-status" class="hidden"></div>
+        <div class="bar-wrapper">
+          <progress id="main-progress" class="progress" value="0" max="100"></progress>
+          <div id="progress-text" class="hidden">
+            <span class="progress-percentage">0%</span>
+            <span id="progress-text-divider-1">|</span>
+            <span class="progress-steps">0/0</span>
+            <span id="progress-text-divider-2">|</span>
+            <span class="progress-times">00:00:00 / 00:00:00 &lt; 00:00:00</span> 
+          </div>
         </div>
       </div>
       <div id="queue-display"></div>
@@ -31,6 +34,79 @@
     </div>
   `;
 
+  let logRefreshInterval = null;
+
+  async function fetchLogs() {
+    const logContent = document.getElementById('log-content');
+    if (!logContent) return;
+
+    const isScrolledToBottom = logContent.scrollHeight - logContent.scrollTop <= logContent.clientHeight + 50;
+
+    try {
+      const response = await fetch('/saus/api/logs');
+      if (response.ok) {
+        const data = await response.json();
+        const logs = data.logs || "No logs found.";
+        if (logContent.textContent !== logs) {
+            logContent.textContent = logs;
+            if (isScrolledToBottom) {
+                logContent.scrollTop = logContent.scrollHeight;
+            }
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching logs: " + e.message);
+    }
+  }
+
+  function openLogModal() {
+    let modal = document.getElementById('log-modal');
+    if (!modal) {
+      createLogModal();
+      modal = document.getElementById('log-modal');
+    }
+    modal.style.display = 'block';
+    const logContent = document.getElementById('log-content');
+    if (logContent && !logContent.textContent) {
+      logContent.textContent = "Loading logs...";
+    }
+    fetchLogs();
+    if (logRefreshInterval) clearInterval(logRefreshInterval);
+    logRefreshInterval = setInterval(fetchLogs, 1000);
+  }
+
+  function closeLogModal() {
+    const modal = document.getElementById('log-modal');
+    if (modal) {
+        modal.style.display = "none";
+    }
+    if (logRefreshInterval) {
+        clearInterval(logRefreshInterval);
+        logRefreshInterval = null;
+    }
+  }
+
+  function createLogModal() {
+    const modalHTML = `
+      <div id="log-modal" class="log-modal">
+        <div class="log-modal-content">
+          <span class="log-close">&times;</span>
+          <h2 class="log-modal-header">ComfyUI Logs</h2>
+          <div id="log-content"></div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('log-modal');
+    const closeBtn = modal.querySelector('.log-close');
+    closeBtn.onclick = closeLogModal;
+    window.addEventListener('click', (event) => {
+      if (event.target == modal) {
+        closeLogModal();
+      }
+    });
+  }
+
   function insertProgressBar() {
     let progressBar = document.querySelector('#progressbar');
     if (!progressBar) {
@@ -39,16 +115,12 @@
       document.body.appendChild(progressBar);
     }
     progressBar.innerHTML = progressBarHTML;
-    injectStyles();
+    const spinner = document.getElementById('spinner');
+    if (spinner) {
+        spinner.addEventListener('click', openLogModal);
+        spinner.title = "View Logs";
+    }
     // console.log('Progress bar content inserted');
-  }
-
-  function injectStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-
-    `;
-    document.head.appendChild(style);
   }
 
   if (document.readyState === 'loading') {
@@ -110,6 +182,7 @@
     constructor(progressBarId, progressTextId) {
       this.progressBar = document.getElementById(progressBarId);
       this.progressText = document.getElementById(progressTextId);
+      this.statusText = document.getElementById('progress-status');
       this.timeTracker = new TimeTracker();
       this.initialized = false;
 
@@ -130,6 +203,7 @@
         if (progressBar && progressText) {
           this.progressBar = progressBar;
           this.progressText = progressText;
+          this.statusText = document.getElementById('progress-status');
           this.initialize();
           obs.disconnect();
         }
@@ -186,6 +260,17 @@
       }
     }
 
+    updateStatus(message) {
+      if (this.statusText) {
+        if (message) {
+          this.statusText.textContent = message;
+          this.statusText.classList.remove('hidden');
+        } else {
+          this.statusText.classList.add('hidden');
+        }
+      }
+    }
+
     showProgressText() {
       this.progressText.classList.remove('hidden');
       this.progressText.classList.add('active');
@@ -210,6 +295,7 @@
       if (timesSpan) timesSpan.textContent = `00:00:00 / 00:00:00 < 00:00:00`;
 
       this.hideProgressText();
+      this.updateStatus('');
       this.timeTracker = new TimeTracker();
     }
   }
