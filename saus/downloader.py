@@ -51,6 +51,28 @@ def download_update_apps(raise_on_error: bool = False) -> None:
             
             token = decrypt_value(settings.get('saus_token'))
             if token:
+                # Check token validity first
+                try:
+                    validate_url = "https://saus-gatekeeper.vercel.app/api/validate-token"
+                    v_req = urllib.request.Request(
+                        validate_url,
+                        data=json.dumps({"token": token}).encode('utf-8'),
+                        headers={'Content-Type': 'application/json', 'User-Agent': 'ComfyUI-SAUS'}
+                    )
+                    with urllib.request.urlopen(v_req) as v_res:
+                        if v_res.status == 200:
+                            logger.info(f"{SAUSMSG}: Token validated successfully.")
+                except urllib.error.HTTPError as e:
+                    if e.code == 403:
+                        msg = "Token validation failed: Invalid or expired token. Private apps were not downloaded."
+                        logger.error(f"{SAUSMSG}: {msg}")
+                        if raise_on_error:
+                            raise Exception(msg)
+                        return
+                    logger.warning(f"{SAUSMSG}: Token validation check failed with status {e.code}. Proceeding with download...")
+                except Exception as e:
+                    logger.warning(f"{SAUSMSG}: Token validation check error: {e}. Proceeding with download...")
+
                 # Securely download private apps via the gatekeeper proxy
                 try:
                     gatekeeper_url = "https://saus-gatekeeper.vercel.app/api/download-private-apps"
@@ -289,6 +311,11 @@ def refresh_apps(app: web.Application) -> None:
             try:
                 # Note: Adding routes dynamically works, but removing them is not supported by aiohttp.
                 # Stale routes will remain active until restart, but they won't appear in the UI list.
+
+                # Unfreeze router to allow dynamic registration
+                if hasattr(app.router, '_frozen'):
+                    app.router._frozen = False
+
                 app.add_routes(RouteManager.create_routes(f"{url}", app_dir))
                 APP_CONFIGS.append(conf)
                 logger.info(f"{SAUSMSG}: Dynamically registered new app: {url}")

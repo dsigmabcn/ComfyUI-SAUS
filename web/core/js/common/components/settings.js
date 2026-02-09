@@ -72,18 +72,99 @@ export class SettingsComponent {
             const response = await fetch('/saus/api/sync-apps', { method: 'POST' });
             const result = await response.json();
             if (response.ok) {
-                alert((result.message || 'Apps synced successfully.') + '\nRestart server to load new apps');
+                this.showSyncResultModal(
+                    "Sync Successful",
+                    (result.message || 'Apps synced successfully.') /* + '<br><br>A server restart is required to load the new apps.' */,
+                    true
+                );
                 window.dispatchEvent(new CustomEvent('appsSynced'));
             } else {
-                alert('Error syncing apps: ' + (result.message || response.statusText));
+                this.showSyncResultModal("Sync Failed", 'Error syncing apps: ' + (result.message || response.statusText), false);
             }
         } catch (e) {
             console.error("Sync error:", e);
-            alert('Error syncing apps.');
+            this.showSyncResultModal("Sync Error", "An unexpected error occurred while syncing apps.", false);
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
         }
+    }
+
+    showSyncResultModal(title, message, isSuccess) {
+        const existing = document.querySelector('.modal-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        let buttonsHtml = '';
+        if (isSuccess) {
+            buttonsHtml = `
+                <button class="btn-modal-secondary">Close</button>
+                <!-- <button class="btn-modal-primary restart-btn" style="background-color: #d32f2f; border-color: #d32f2f;"><i class="fas fa-power-off"></i> Restart Server</button> -->
+            `;
+        } else {
+            buttonsHtml = `
+                <button class="btn-modal-primary close-btn">Close</button>
+            `;
+        }
+
+        overlay.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>${message}</p>
+                </div>
+                <div class="modal-footer">
+                    ${buttonsHtml}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const close = () => overlay.remove();
+
+        const closeBtn = overlay.querySelector('.modal-close');
+        if (closeBtn) closeBtn.onclick = close;
+
+        const secondaryBtn = overlay.querySelector('.btn-modal-secondary');
+        if (secondaryBtn) secondaryBtn.onclick = close;
+
+        const primaryCloseBtn = overlay.querySelector('.close-btn');
+        if (primaryCloseBtn) primaryCloseBtn.onclick = close;
+        
+        const restartBtn = overlay.querySelector('.restart-btn');
+        if (restartBtn) {
+            restartBtn.onclick = async () => {
+                const originalText = restartBtn.innerHTML;
+                restartBtn.disabled = true;
+                restartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
+                
+                try {
+                    const response = await fetch('/saus/api/restart', { method: 'POST' });
+                    if (response.ok) {
+                        alert('Server is restarting. Please refresh the page in a few moments.');
+                        close();
+                    } else {
+                        alert('Failed to trigger restart.');
+                        restartBtn.disabled = false;
+                        restartBtn.innerHTML = originalText;
+                    }
+                } catch (e) {
+                    console.error("Restart error:", e);
+                    alert('Server is restarting (connection lost). Please refresh shortly.');
+                    close();
+                }
+            };
+        }
+        
+        overlay.onclick = (e) => {
+            if (e.target === overlay) close();
+        };
     }
 
     async restartServer(btn) {
@@ -198,7 +279,7 @@ export class SettingsComponent {
                     ${showSyncButton ? `
                     <div class="form-actions" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
                         <button id="sync-apps-btn" class="btn-action" style="width: 100%; background-color: var(--color-accent); border-color: var(--color-accent);">
-                            <i class="fas fa-sync"></i> Sync Private Apps
+                            <i class="fas fa-sync"></i> Validate SAUS token and Sync Private Apps
                         </button>
                     </div>
                     ` : ''}
