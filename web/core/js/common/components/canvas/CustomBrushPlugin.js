@@ -160,26 +160,67 @@ export class CustomBrushPlugin extends CanvasPlugin {
         this.uiContainer = document.createElement('div');
         this.uiContainer.className = 'cbp-brush-ui-container cbp-brush-ui-full';
 
-        this.uiContainer.innerHTML = `
-            <div class="cbp-brush-ui-header">
-                <span class="cbp-brush-ui-title">Brush Settings</span>
-                <button class="cbp-brush-ui-minimize-btn" title="Minimize" >−</button>
-            </div>
-            <div class="cbp-brush-ui-content">
-                <label for="cbp-brush-size-input">Brush Size:
-                    <input type="range" id="cbp-brush-size-input" min="${this.minBrushSize}" max="${this.maxBrushSize}" value="${this.brushSize}">
-                </label>
-                <label for="cbp-brush-opacity-input">Brush Opacity:
-                    <input type="range" id="cbp-brush-opacity-input" min="0" max="100" value="${this.brushOpacity * 100}">
-                </label>
-                <div class="cbp-brush-ui-color-picker"> 
-                    <button id="cbp-toggle-drawing-mode-btn" class="cbp-brush-ui-toggle-btn">
-                        <img id="cbp-toggle-btn-icon" src=${this.brushIcon}  alt="Toggle Drawing Mode" width="24" height="24">
-                    </button>
-                    <input type="color" id="cbp-color-picker" value="${this.brushColor}">
-                </div>
-            </div>
-        `;
+        const header = document.createElement('div');
+        header.className = 'cbp-brush-ui-header';
+        const title = document.createElement('span');
+        title.className = 'cbp-brush-ui-title';
+        title.textContent = 'Brush Settings';
+        header.appendChild(title);
+        const minimizeBtn = document.createElement('button');
+        minimizeBtn.className = 'cbp-brush-ui-minimize-btn';
+        minimizeBtn.title = 'Minimize';
+        minimizeBtn.textContent = '−';
+        header.appendChild(minimizeBtn);
+        this.uiContainer.appendChild(header);
+
+        const content = document.createElement('div');
+        content.className = 'cbp-brush-ui-content';
+
+        const sizeLabel = document.createElement('label');
+        sizeLabel.htmlFor = 'cbp-brush-size-input';
+        sizeLabel.textContent = 'Brush Size: ';
+        const sizeInput = document.createElement('input');
+        sizeInput.type = 'range';
+        sizeInput.id = 'cbp-brush-size-input';
+        sizeInput.min = this.minBrushSize;
+        sizeInput.max = this.maxBrushSize;
+        sizeInput.value = this.brushSize;
+        sizeLabel.appendChild(sizeInput);
+        content.appendChild(sizeLabel);
+
+        const opacityLabel = document.createElement('label');
+        opacityLabel.htmlFor = 'cbp-brush-opacity-input';
+        opacityLabel.textContent = 'Brush Opacity: ';
+        const opacityInput = document.createElement('input');
+        opacityInput.type = 'range';
+        opacityInput.id = 'cbp-brush-opacity-input';
+        opacityInput.min = '0';
+        opacityInput.max = '100';
+        opacityInput.value = this.brushOpacity * 100;
+        opacityLabel.appendChild(opacityInput);
+        content.appendChild(opacityLabel);
+
+        const colorPickerDiv = document.createElement('div');
+        colorPickerDiv.className = 'cbp-brush-ui-color-picker';
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'cbp-toggle-drawing-mode-btn';
+        toggleBtn.className = 'cbp-brush-ui-toggle-btn';
+        const toggleIcon = document.createElement('img');
+        toggleIcon.id = 'cbp-toggle-btn-icon';
+        toggleIcon.src = this.brushIcon;
+        toggleIcon.alt = 'Toggle Drawing Mode';
+        toggleIcon.width = 24;
+        toggleIcon.height = 24;
+        toggleBtn.appendChild(toggleIcon);
+        colorPickerDiv.appendChild(toggleBtn);
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.id = 'cbp-color-picker';
+        colorInput.value = this.brushColor;
+        colorPickerDiv.appendChild(colorInput);
+        content.appendChild(colorPickerDiv);
+
+        this.uiContainer.appendChild(content);
 
         document.body.appendChild(this.uiContainer);
         this.brushSizeInput = this.uiContainer.querySelector('#cbp-brush-size-input');
@@ -845,37 +886,101 @@ export class CustomBrushPlugin extends CanvasPlugin {
 
     updateUIForMode() {
         const content = this.uiContainer.querySelector('.cbp-brush-ui-content');
+        content.innerHTML = '';
 
         if (this.currentMode === 'full') {
-            content.innerHTML = `
-                <label for="cbp-brush-size-input">Brush Size:
-                    <input type="range" id="cbp-brush-size-input" min="${this.minBrushSize}" max="${this.maxBrushSize}" value="${this.brushSize}">
-                </label>
-                <label for="cbp-brush-opacity-input">Brush Opacity:
-                    <input type="range" id="cbp-brush-opacity-input" min="0" max="100" value="${this.brushOpacity * 100}">
-                </label>
-                <label for="cbp-color-picker">Brush Color:
-                    <input type="color" id="cbp-color-picker" value="${this.brushColor}">
-                </label>
-                <button id="cbp-toggle-drawing-mode-btn" class="${this.drawingMode ? 'cbp-brush-ui-toggle-btn active' : 'cbp-brush-ui-toggle-btn'}">
-                    <img id="cbp-toggle-btn-icon" src="${this.brushIcon}"  alt="Toggle Drawing Mode" width="24" height="24">
-                </button>
-            `;
+            const sizeLabel = document.createElement('label');
+            sizeLabel.htmlFor = 'cbp-brush-size-input';
+            sizeLabel.textContent = 'Brush Size: ';
+            const sizeInput = document.createElement('input');
+            sizeInput.type = 'range';
+            sizeInput.id = 'cbp-brush-size-input';
+            sizeInput.min = this.minBrushSize;
+            sizeInput.max = this.maxBrushSize;
+            sizeInput.value = this.brushSize;
+            sizeLabel.appendChild(sizeInput);
+            content.appendChild(sizeLabel);
+
+            const opacityLabel = document.createElement('label');
+            opacityLabel.htmlFor = 'cbp-brush-opacity-input';
+            opacityLabel.textContent = 'Brush Opacity: ';
+            const opacityInput = document.createElement('input');
+            opacityInput.type = 'range';
+            opacityInput.id = 'cbp-brush-opacity-input';
+            opacityInput.min = '0';
+            opacityInput.max = '100';
+            opacityInput.value = this.brushOpacity * 100;
+            opacityLabel.appendChild(opacityInput);
+            content.appendChild(opacityLabel);
+
+            const colorLabel = document.createElement('label');
+            colorLabel.htmlFor = 'cbp-color-picker';
+            colorLabel.textContent = 'Brush Color: ';
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.id = 'cbp-color-picker';
+            colorInput.value = this.brushColor;
+            colorLabel.appendChild(colorInput);
+            content.appendChild(colorLabel);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'cbp-toggle-drawing-mode-btn';
+            toggleBtn.className = this.drawingMode ? 'cbp-brush-ui-toggle-btn active' : 'cbp-brush-ui-toggle-btn';
+            const toggleIcon = document.createElement('img');
+            toggleIcon.id = 'cbp-toggle-btn-icon';
+            toggleIcon.src = this.brushIcon;
+            toggleIcon.alt = 'Toggle Drawing Mode';
+            toggleIcon.width = 24;
+            toggleIcon.height = 24;
+            toggleBtn.appendChild(toggleIcon);
+            content.appendChild(toggleBtn);
+
         } else if (this.currentMode === 'mini') {
-            content.innerHTML = `
-                <div class="cbp-brush-ui-input-group">
-                    <input type="number" id="cbp-brush-size-input" min="${this.minBrushSize}" max="${this.maxBrushSize}" value="${this.brushSize}" title="Brush Size">
-                </div>
-                <div class="cbp-brush-ui-input-group">
-                    <input type="number" id="cbp-brush-opacity-input" min="0" max="100" value="${this.brushOpacity * 100}" title="Brush Opacity">
-                </div>
-                <div class="cbp-brush-ui-input-group">
-                    <input type="color" id="cbp-color-picker" value="${this.brushColor}" title="Brush Color">
-                </div>
-                <button id="cbp-toggle-drawing-mode-btn" class="${this.drawingMode ? 'cbp-brush-ui-toggle-btn active' : 'cbp-brush-ui-toggle-btn'}">
-                    <img id="cbp-toggle-btn-icon" src="${this.brushIcon}"  alt="Toggle Drawing Mode" width="24" height="24">
-                </button>
-            `;
+            const sizeGroup = document.createElement('div');
+            sizeGroup.className = 'cbp-brush-ui-input-group';
+            const sizeInput = document.createElement('input');
+            sizeInput.type = 'number';
+            sizeInput.id = 'cbp-brush-size-input';
+            sizeInput.min = this.minBrushSize;
+            sizeInput.max = this.maxBrushSize;
+            sizeInput.value = this.brushSize;
+            sizeInput.title = 'Brush Size';
+            sizeGroup.appendChild(sizeInput);
+            content.appendChild(sizeGroup);
+
+            const opacityGroup = document.createElement('div');
+            opacityGroup.className = 'cbp-brush-ui-input-group';
+            const opacityInput = document.createElement('input');
+            opacityInput.type = 'number';
+            opacityInput.id = 'cbp-brush-opacity-input';
+            opacityInput.min = '0';
+            opacityInput.max = '100';
+            opacityInput.value = this.brushOpacity * 100;
+            opacityInput.title = 'Brush Opacity';
+            opacityGroup.appendChild(opacityInput);
+            content.appendChild(opacityGroup);
+
+            const colorGroup = document.createElement('div');
+            colorGroup.className = 'cbp-brush-ui-input-group';
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.id = 'cbp-color-picker';
+            colorInput.value = this.brushColor;
+            colorInput.title = 'Brush Color';
+            colorGroup.appendChild(colorInput);
+            content.appendChild(colorGroup);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'cbp-toggle-drawing-mode-btn';
+            toggleBtn.className = this.drawingMode ? 'cbp-brush-ui-toggle-btn active' : 'cbp-brush-ui-toggle-btn';
+            const toggleIcon = document.createElement('img');
+            toggleIcon.id = 'cbp-toggle-btn-icon';
+            toggleIcon.src = this.brushIcon;
+            toggleIcon.alt = 'Toggle Drawing Mode';
+            toggleIcon.width = 24;
+            toggleIcon.height = 24;
+            toggleBtn.appendChild(toggleIcon);
+            content.appendChild(toggleBtn);
         }
         this.brushSizeInput = this.uiContainer.querySelector('#cbp-brush-size-input');
         this.brushOpacityInput = this.uiContainer.querySelector('#cbp-brush-opacity-input');
