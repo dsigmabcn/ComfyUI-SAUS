@@ -3,6 +3,10 @@ import tempfile
 import shutil
 import json
 import asyncio
+import urllib.request
+import urllib.error
+import zipfile
+import os
 from aiohttp import web
 from pathlib import Path
 from packaging.version import parse as parse_version
@@ -47,9 +51,76 @@ def download_update_apps(raise_on_error: bool = False) -> None:
             
             token = decrypt_value(settings.get('saus_token'))
             if token:
-                # Insert token into URL
-                auth_url = GOLD_BETA_APPS_ORIGIN.replace("https://github.com", f"https://oauth2:{token}@github.com")
-                _download_repo(auth_url, "Private")
+                # Securely download private apps via the gatekeeper proxy
+                try:
+                    gatekeeper_url = "https://saus-gatekeeper.vercel.app/api/download-private-apps"
+                    
+                    req = urllib.request.Request(
+                        gatekeeper_url,
+                        data=json.dumps({"token": token}).encode('utf-8'),
+                        headers={'Content-Type': 'application/json', 'User-Agent': 'ComfyUI-SAUS'}
+                    )
+
+                    with urllib.request.urlopen(req) as response:
+                        if response.status == 200:
+                            with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_zip:
+                                shutil.copyfileobj(response, tmp_zip)
+                                tmp_zip_path = tmp_zip.name
+
+                            with zipfile.ZipFile(tmp_zip_path, 'r') as zip_ref:
+                                root_dir = ""
+                                if zip_ref.namelist():
+                                    root_dir = Path(zip_ref.namelist()[0]).parts[0]
+
+                                # Cache for app locations to avoid repeated rglob calls
+                                app_locations = {}
+                                excluded_items = ['.git', '.github', 'app_list.json', 'architectures.json', 'models_data.json']
+
+                                for member in zip_ref.infolist():
+                                    if not root_dir or member.filename.startswith('__MACOSX'):
+                                        continue
+                                    
+                                    try:
+                                        relative_path = Path(member.filename).relative_to(root_dir)
+                                    except ValueError:
+                                        continue
+
+                                    if not str(relative_path) or str(relative_path) == ".":
+                                        continue
+
+                                    parts = relative_path.parts
+                                    if not parts:
+                                        continue
+                                    
+                                    app_name = parts[0]
+                                    if app_name in excluded_items:
+                                        continue
+                                        
+                                    if app_name not in app_locations:
+                                        app_locations[app_name] = find_destination_path(app_name)
+                                    
+                                    dest_root = app_locations[app_name]
+                                    target_path = dest_root.joinpath(*parts[1:]) if len(parts) > 1 else dest_root
+                                    
+                                    try:
+                                        target_path.resolve().relative_to(SAUS_APPS_PATH.resolve())
+                                    except ValueError:
+                                        logger.warning(f"{SAUSMSG}: Skipped unsafe path in zip: {member.filename}")
+                                        continue
+
+                                    if member.is_dir():
+                                        target_path.mkdir(parents=True, exist_ok=True)
+                                    else:
+                                        target_path.parent.mkdir(parents=True, exist_ok=True)
+                                        with zip_ref.open(member) as source, open(target_path, "wb") as target:
+                                            shutil.copyfileobj(source, target)
+                            logger.info(f"{SAUSMSG}: Private apps downloaded and extracted successfully.")
+                            os.remove(tmp_zip_path)
+                        else:
+                            error_body = response.read().decode('utf-8', 'ignore')
+                            logger.error(f"{SAUSMSG}: Gatekeeper returned status {response.status}: {error_body}")
+                except Exception as e:
+                    logger.error(f"{SAUSMSG}: Error downloading private apps: {e}")
         except Exception as e:
             logger.error(f"{SAUSMSG}: Error checking private apps: {e}")
             if raise_on_error:
