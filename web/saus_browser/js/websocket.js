@@ -56,8 +56,7 @@ export class PromptServerClient {
                 try {
                     listener({ detail });
                 } catch (e) {
-                    console.error(`[WS] Error in listener for ${eventType}:`, e);
-                }
+                    console.error("[WS] Error in listener for %s:", eventType, e);                }
             });
         }
     }
