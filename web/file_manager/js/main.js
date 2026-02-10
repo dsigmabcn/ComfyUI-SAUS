@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize WebSocket for Progress
     setupWebSocket();
+
+    // Initialize Upload Modal
+    createUploadModal();
 });
 
 async function initTokenUI() {
@@ -220,6 +223,24 @@ window.startDownload = async function () {
     }
 };
 
+function createUploadModal() {
+    if (document.getElementById('upload-modal')) return;
+    
+    const modalHTML = `
+    <div id="upload-modal" class="modal hidden">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Uploading File...</h3>
+            <div class="progress-container" style="margin-top: 20px;">
+                <div class="progress-bar-base" style="background: var(--color-progress-background); height: 24px; border-radius: 12px; overflow: hidden; position: relative;">
+                    <div id="upload-progress-bar-modal" class="progress-bar-value" style="width: 0%; background: var(--color-progress-value); height: 100%; transition: width 0.2s;"></div>
+                    <div id="upload-progress-text-modal" class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-weight: bold; text-shadow: 1px 1px 2px black;">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
 
 /* Function to workaround issues with uploading large files - connection timeout problem*/
 
@@ -231,8 +252,9 @@ window.handleChunkedUpload = function (file) {
     // 💥 ADDED: Record the start time 
     const startTime = Date.now(); 
 
-    const progressBar = document.getElementById('upload-progress-bar');
-    const progressText = document.getElementById('upload-progress-text');
+    const progressBar = document.getElementById('upload-progress-bar-modal');
+    const progressText = document.getElementById('upload-progress-text-modal');
+    const uploadModal = document.getElementById('upload-modal');
 
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     const fileId = file.name + '-' + file.size + '-' + Date.now(); 
@@ -258,6 +280,7 @@ window.handleChunkedUpload = function (file) {
             if (!response.ok) {
                 // Handle failure (maybe retry or alert user)
                 alert(`Upload failed at chunk ${chunkCount}.`);
+                if (uploadModal) uploadModal.classList.add('hidden');
                 return;
             }
 
@@ -289,8 +312,19 @@ window.handleChunkedUpload = function (file) {
             await sendChunk(); 
         } else {
             // All chunks sent successfully
-            alert("Chunked Upload successful!");
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressText) progressText.textContent = '100%';
+
+            if (uploadModal) {
+                const modalTitle = uploadModal.querySelector('h3');
+                if (modalTitle) modalTitle.textContent = 'File Upload Successful!';
+            }
+
             displayDirectory(currentDirectory);
+
+            setTimeout(() => {
+                if (uploadModal) uploadModal.classList.add('hidden');
+            }, 1500);
         }
     };
 
@@ -300,15 +334,19 @@ window.handleChunkedUpload = function (file) {
 // You'd call this from window.handleFileUpload instead of the XHR method.
 window.handleFileUpload = function () {
     const fileInput = document.getElementById('hidden-upload');
-    const progressContainer = document.getElementById('upload-progress-container');
-    const progressBar = document.getElementById('upload-progress-bar');
-    const progressText = document.getElementById('upload-progress-text');
+    const uploadModal = document.getElementById('upload-modal');
+    const progressBar = document.getElementById('upload-progress-bar-modal');
+    const progressText = document.getElementById('upload-progress-text-modal');
 
     if (fileInput.files.length) {
         // 💥 ADDED: Make the progress UI visible and reset it 💥
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        progressText.textContent = '0%';
+        if (uploadModal) {
+            uploadModal.classList.remove('hidden');
+            const modalTitle = uploadModal.querySelector('h3');
+            if (modalTitle) modalTitle.textContent = 'Uploading File...';
+        }
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = '0%';
         
         window.handleChunkedUpload(fileInput.files[0]);
     }
