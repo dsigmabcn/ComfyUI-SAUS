@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-SAUS"
 description = "A Simple App U See. A simple alternative User Interface for Image and Video Generation using ComfyUI as backend."
-version = "0.2.4"
+version = "0.2.5"
 license = {file = "LICENSE"} 
 classifiers = [
 #     # For OS-independent nodes (works on all operating systems)
