@@ -31,7 +31,7 @@ export function createAppCard(app) {
 
     const card = createElement('div', 'app-card');
     
-    const cacheBuster = `?t=${Date.now()}`;
+    const cacheBuster = `?t=${state.sessionTimestamp}`;
     let thumbnailUrl = `saus/${app.url}/media/thumbnail.jpg${cacheBuster}`;
     let defaultThumbnail = `/core/media/ui/saus_logo.png`;
     

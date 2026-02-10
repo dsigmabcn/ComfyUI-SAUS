@@ -13,7 +13,8 @@ export const state = {
     MODELS_DATA: {},
     settingsComponent: null,
     hideDescriptions: false,
-    hideTitles: false
+    hideTitles: false,
+    sessionTimestamp: Date.now()
 };
 
 export const noshowAppIds = [
