@@ -29,32 +29,22 @@ const headerHTML = `
   
   <div id="right-header">
       <div id="help">
-      <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
-        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 504.36 504.36">
-          <title>User Guide</title>
-          
-          <defs>
-            <mask id="question-cutout">
-              <rect width="100%" height="100%" fill="white" />
-              <g transform="translate(-60, -65) scale(26)">
-                <path 
-                  d="M10.125 8.875C10.125 7.83947 10.9645 7 12 7C13.0355 7 13.875 7.83947 13.875 8.875C13.875 9.56245 13.505 10.1635 12.9534 10.4899C12.478 10.7711 12 11.75V13" 
-                  stroke="black" 
-                  stroke-width="2.8" 
-                  stroke-linecap="round" 
-                  fill="none" />
-                <circle cx="12" cy="16" r="1.7" fill="black" />
-              </g>
-            </mask>
-          </defs>
-
-          <circle 
-            cx="252.18" 
-            cy="252.18" 
-            r="252.18" 
-            fill="var(--color-header-text)" 
-            mask="url(#question-cutout)" />
-        </svg>
+      <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;" >
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <mask id="question-mask">
+      <rect width="24" height="24" fill="white" />
+      
+      <g transform="translate(0, 0.5)">
+        <path d="M9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9C15 11 12 12 12 13.5" 
+              stroke="black" stroke-width="2.5" stroke-linecap="round" fill="none" />
+        <circle cx="12" cy="17" r="1.5" fill="black" />
+      </g>
+    </mask>
+  </defs>
+  
+  <circle cx="12" cy="12" r="12" fill="var(--color-header-text)" mask="url(#question-mask)" />
+</svg>
       </a>
     </div>
     <div id="kofi">
