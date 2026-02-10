@@ -22,7 +22,10 @@ I have tried to ensure that most apps work with native nodes only, but some requ
 
 If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager.
 
-Also search and install the custom nodes indicated in requirements.
+<img src="web/core/media/git/Manager button.png">
+<img src="web/core/media/git/custom nodes manager.png">
+
+Search for ComfyUI-SAUS, and install it together with the recommended custom nodes indicated above
 
 ## Manual Install
 

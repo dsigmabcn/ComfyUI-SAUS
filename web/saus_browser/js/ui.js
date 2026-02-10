@@ -31,8 +31,9 @@ export function createAppCard(app) {
 
     const card = createElement('div', 'app-card');
     
-    let thumbnailUrl = `saus/${app.url}/media/thumbnail.jpg`;
-    let defaultThumbnail = '/core/media/ui/saus_logo.png';
+    const cacheBuster = `?t=${state.sessionTimestamp}`;
+    let thumbnailUrl = `saus/${app.url}/media/thumbnail.jpg${cacheBuster}`;
+    let defaultThumbnail = `/core/media/ui/saus_logo.png`;
     
     const favoriteButton = document.createElement('button');
     favoriteButton.classList.add('favorite-button');

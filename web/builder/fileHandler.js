@@ -195,7 +195,8 @@ async function handleUrlLoad(event, state, displayNodes) {
 }
 
 async function loadThumbnailFromappUrl(appUrl, state) {
-    const thumbnailPath = `/saus/${encodeURIComponent(appUrl)}/media/thumbnail.jpg`;
+    const cacheBuster = `?t=${Date.now()}`;
+    const thumbnailPath = `/saus/${encodeURIComponent(appUrl)}/media/thumbnail.jpg${cacheBuster}`;
 
     try {
         const response = await fetch(thumbnailPath, { cache: 'no-cache' });

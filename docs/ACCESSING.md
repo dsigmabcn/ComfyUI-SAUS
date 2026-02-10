@@ -28,9 +28,9 @@ When the pod starts, Runpod automatically opens the panel, where you just need t
 <img src="../web/core/media/git/accessing/Runpod panel.png">
 
 During installation it may take a while. In second and subsequent runs it will take much shorter. Nevertheless, it is always good to check on the logs to see where the process is:
+
 <img src="../web/core/media/git/accessing/runpod log.png">
 
 And in case that you navigate away, just click over the pod you have created and the panel will show up again:
-<img src="../web/core/media/git/accessing/Runpod panel.png">
 
 [Return to User Guide](USER_GUIDE.md)

@@ -7,6 +7,7 @@ import { renderSidebarCategories, initializeStaticSidebarEvents } from './sideba
 import { renderApps, filterCurrentApps, renderTagsFilter, showHome, showApps, showSettings } from './ui.js';
 
 export async function loadApps() {
+    state.sessionTimestamp = Date.now();
     try {
         // Fetch Architectures and Model Data first
         const [archResponse, modelsResponse] = await Promise.all([

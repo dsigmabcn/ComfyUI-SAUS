@@ -21,8 +21,6 @@ Here we have a quick reference:
 
 ## Accessing the Interface
 
-### 1. Direct Link
-
 To run SAUS, simply navigate to this address in your web browser:
 
 ```
@@ -32,7 +30,13 @@ http://127.0.0.1:8188/saus
 or by clicking on the SAUS icon on the menu bar in ComfyUI.
 <img src="../web/core/media/git/Access-button-ComfyUI.png">
 
+
+If you are accessing via [Runpod](RUNPOD.md), open the pod panel and click over the SAUS port (7771)
+<img src="../web/core/media/git/port 7771.png">
+
 ## Interface Overview
+
+Check out the table of contents for detailed instructions. This is a summary overview:
 
 ### Home & Sidebar
 - **Home**: The landing page where you can see an overview of how to generate AI images or videos.
@@ -63,7 +67,7 @@ or by clicking on the SAUS icon on the menu bar in ComfyUI.
 
 ## Tools (Navigation Bar)
 
-## SAUS Apps
+### SAUS Apps
 Return to the App Browsing page.
 
 ### File Manager
@@ -81,7 +85,7 @@ A simple File Manager to access and perform basic management of the files in you
 ### Settings
 - **Civitai/Hugging Face API Tokens**: Securely store your API tokens for services like Civitai and Hugging Face. These tokens are used when downloading models that require authentication.
 - **SAUS Token**: Required to access the 'Gold' and 'Beta' Apps/workflows.
-- **Sync Private Apps**: When the SAUS token is saved, this button appears. Use it to download the 'Gold' and 'Beta' Apps. A restart is required after downloading.
+- **Sync Private Apps**: When the SAUS token is saved, this button appears. Use it to download the 'Gold' and 'Beta' Apps.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).
 
 **Disclaimer**: API tokens are stored encrypted in your local installation. However, you are responsible for ensuring their security. If you are unsure about the security of your system, do not use the API token functionality or save your keys.
