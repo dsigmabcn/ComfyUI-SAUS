@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Upload Modal
     createUploadModal();
+
+    // Initialize Delete Modal
+    createDeleteModal();
+
+    // Initialize Rename Modal
+    createRenameModal();
 });
 
 async function initTokenUI() {
@@ -240,6 +246,168 @@ function createUploadModal() {
     </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function createDeleteModal() {
+    if (document.getElementById('delete-modal')) return;
+    
+    const modalHTML = `
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Delete File</h3>
+            <p id="delete-modal-message">Are you sure you want to delete this file?</p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                <button id="delete-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
+                <button id="delete-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: #d32f2f; color: white; border: none; border-radius: 4px;">Delete</button>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const cancelBtn = document.getElementById('delete-cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.onclick = closeDeleteModal;
+    }
+}
+
+let fileToDeletePath = null;
+
+function showDeleteModal(path, name) {
+    const modal = document.getElementById('delete-modal');
+    const message = document.getElementById('delete-modal-message');
+    const confirmBtn = document.getElementById('delete-confirm-btn');
+    
+    if (modal && message && confirmBtn) {
+        message.textContent = `Are you sure you want to delete "${name}"?`;
+        fileToDeletePath = path;
+        
+        confirmBtn.onclick = async () => {
+            if (fileToDeletePath) {
+                await deleteFile(fileToDeletePath);
+                closeDeleteModal();
+            }
+        };
+        
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    if (modal) modal.classList.add('hidden');
+    fileToDeletePath = null;
+}
+
+function createRenameModal() {
+    if (document.getElementById('rename-modal')) return;
+    
+    const modalHTML = `
+    <div id="rename-modal" class="modal hidden">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Rename File</h3>
+            <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="rename-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
+                <button id="rename-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: var(--color-accent, #007bff); color: white; border: none; border-radius: 4px;">Rename</button>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const cancelBtn = document.getElementById('rename-cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.onclick = closeRenameModal;
+    }
+}
+
+let fileToRenamePath = null;
+let currentRenameName = null;
+
+function showRenameModal(path, currentName) {
+    const modal = document.getElementById('rename-modal');
+    const input = document.getElementById('rename-input');
+    const confirmBtn = document.getElementById('rename-confirm-btn');
+    
+    if (modal && input && confirmBtn) {
+        input.value = currentName;
+        fileToRenamePath = path;
+        currentRenameName = currentName;
+        
+        confirmBtn.onclick = async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== currentRenameName) {
+                await renameFile(fileToRenamePath, newName);
+                closeRenameModal();
+            } else if (newName === currentRenameName) {
+                closeRenameModal();
+            }
+        };
+        
+        modal.classList.remove('hidden');
+        input.focus();
+    }
+}
+
+function closeRenameModal() {
+    const modal = document.getElementById('rename-modal');
+    if (modal) modal.classList.add('hidden');
+    fileToRenamePath = null;
+    currentRenameName = null;
+}
+
+function showToast(message, type = 'info') {
+    if (!document.getElementById('saus-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'saus-toast-styles';
+        style.innerHTML = `
+            .saus-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #333;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                font-family: sans-serif;
+                font-size: 1em;
+                display: flex;
+                align-items: center;
+            }
+            .saus-toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .saus-toast.toast-success {
+                background-color: #28a745;
+            }
+            .saus-toast.toast-error {
+                background-color: #dc3545;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `saus-toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+    }, 3000);
 }
 
 /* Function to workaround issues with uploading large files - connection timeout problem*/
@@ -503,12 +671,9 @@ function createFileItem(name, type, path) {
         const renameBtn = document.createElement('button');
         renameBtn.innerHTML = '<i class="fas fa-pen"></i>';
         renameBtn.title = 'Rename';
-        renameBtn.onclick = async (e) => {
+        renameBtn.onclick = (e) => {
             e.stopPropagation();
-            const newName = prompt("Enter new name:", name);
-            if (newName && newName !== name) {
-                await renameFile(path, newName);
-            }
+            showRenameModal(path, name);
         };
         // Download link
         const downloadLink = document.createElement('a');
@@ -522,11 +687,9 @@ function createFileItem(name, type, path) {
         const deleteBtn = document.createElement('button');
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
         deleteBtn.title = 'Delete';
-        deleteBtn.onclick = async (e) => {
+        deleteBtn.onclick = (e) => {
             e.stopPropagation();
-            if (confirm(`Are you sure you want to delete "${name}"?`)) {
-                await deleteFile(path);
-            }
+            showDeleteModal(path, name);
         };
 
         actions.appendChild(renameBtn);
@@ -584,9 +747,10 @@ async function renameFile(currentPath, newName) {
             throw new Error(`Rename failed: ${response.statusText}`);
         }
         await displayDirectory(currentDirectory);
+        showToast('File renamed successfully', 'success');
     } catch (error) {
         console.error("Rename error:", error);
-        alert("Failed to rename file.");
+        showToast("Failed to rename file.", 'error');
     }
 }
 
@@ -601,9 +765,10 @@ async function deleteFile(filePath) {
             throw new Error(`Delete failed: ${response.statusText}`);
         }
         await displayDirectory(currentDirectory);
+        showToast('File deleted successfully', 'success');
     } catch (error) {
         console.error("Delete error:", error);
-        alert("Failed to delete file.");
+        showToast("Failed to delete file.", 'error');
     }
 };
 
