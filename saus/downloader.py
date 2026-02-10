@@ -277,7 +277,7 @@ def _load_config(conf_file: Path) -> dict:
         logger.error(f"{SAUSMSG}: Error loading config from {conf_file}: {e}")
         return {}
 
-def refresh_apps(app: web.Application) -> None:
+'''def refresh_apps(app: web.Application) -> None:
     """
     Scans for new apps that are not yet in APP_CONFIGS and registers them.
     Also removes apps from APP_CONFIGS that no longer exist on disk.
@@ -322,12 +322,11 @@ def refresh_apps(app: web.Application) -> None:
             except Exception as e:
                 logger.error(f"{SAUSMSG}: Error registering new app {url}: {e}")
 
+'''
+
 async def sync_apps_handler(request: web.Request) -> web.Response:
     try:
         await asyncio.to_thread(download_update_apps, True)
-        
-        # Dynamically refresh apps in the app without requiring a restart
-        refresh_apps(request.app)
         
         return web.json_response({"status": "success", "message": "Apps synced successfully."})
     except Exception as e:

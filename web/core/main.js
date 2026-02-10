@@ -210,8 +210,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     function generateDynamicScriptDefault(index) {
         const defaultsPrompts = [
-            'An astronaut surfing in the space, between colorful neon planets and stars',
-            'ugly, blur, jpeg artifacts, low quality, lowres, child',
+            'A funny bunny playing in a laboratory  between colorful neon glassware',
+            'low quality, bad quality, ugly, blur, jpeg artifacts, lowres, child',
         ];
         return defaultsPrompts[index] || ''; 
     }

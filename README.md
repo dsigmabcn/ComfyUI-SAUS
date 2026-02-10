@@ -83,7 +83,11 @@ I have tried that most of the apps work with native nodes only, but some use cus
 
 If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager.
 
-Also search and install the custom nodes indicated in requirements.
+<img src="web/core/media/git/Manager button.png">
+<img src="web/core/media/git/custom nodes manager.png">
+
+
+Search for ComfyUI-SAUS, and install it together with the recommended custom nodes indicated above
 
 ## Manual Install
 
@@ -157,7 +161,9 @@ Click over the SAUS button in the action bar of ComfyUI
 ## 3. in Runpod
 After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is accessible in port 7771. This is visible in the HTTP services in the Pod control panel, and can be accessed by clicking there.
 
-Alternatively, open ComfyUI and click on the SAUS button
+<img src ="web/core/media/git/port 7771.png">
+
+Alternatively, open ComfyUI and click on the SAUS button as idnicated in <a href="#2-in-comfyui">2. in ComfyUI</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

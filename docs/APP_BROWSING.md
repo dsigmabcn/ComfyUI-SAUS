@@ -6,7 +6,7 @@ In your home page, you will see several options in your sidebar. These are used 
 
 If you are in the File Manager or Settings, you can return to the SAUS apps by clicking on the "SAUS Apps" button in the top navigation bar.
 
-<img src="../web/core/media/git/navigation/app browsing start.png">
+<img src="../web/core/media/git/app_browsing/app browsing start.png">
 
 ## Sidebar
 - Home: return to the home page
@@ -20,7 +20,7 @@ If you are in the File Manager or Settings, you can return to the SAUS apps by c
     - video-to-video: apps using a reference video to create another video (styling, controlnet)
 - Other: collection of other and tools (remove background, generate controlnet reference videos, cropping...)
 
-<img src="../web/core/media/git/navigation/sidebar full.png">
+<img src="../web/core/media/git/app_browsing/sidebar full.png">
 
 Click on each of the different categories for image or video AI generation and the selected apps for that category will appear in the main content of the page.
 
@@ -28,47 +28,44 @@ Click on each of the different categories for image or video AI generation and t
 
 When a category is selected, the apps for that category appear on the screen. Above the apps, you will see a series of filters that will help you screen the apps. Here is an example for image-to-image apps:
 
-<img src="../web/core/media/git/navigation/App browsing example.png">
+<img src="../web/core/media/git/app_browsing/App browsing example.png">
 
-### Tag filtering
+### Filtering by tags
 You can see a series of tags, that can be used to filter the different apps, depending on different subcategories:
 - base (model), quantized (model), distilled-fast (model)
 - model (FLUX, SD/SDXL, Qwen...)
 - type: image-to-image, inpainting, (re-)styling, controlnet...
 
-
-## Search
-Use the search bar to find specific Apps by name.
-
-## Sorting
-You can also sort the apps by name.
+## Search bar
+Simply type there any text to find specific Apps.
 
 ### App type
-The apps are categorized by:
+Apps are categorized by:
 - Open (box)
 - Gold (crown)
 - Beta (erlenmeyer)
 - User (person)
 
-All Open apps are available for free, and I will try to convert the most common 'standard' workflows into easy-to-use apps.
+All **Open** apps are free. I will try to convert into easy-to-use apps the most popular and commonly used ComfyUI workflows. But ComfyUI provides endless possibilities, so more complex or 'niche' workflows will be available as 'gold' or 'beta' Apps via my [ko-fi](https://ko-fi.com/s/f242d26788). 
 
-The Gold and Beta apps, which are still under development, will be made available to subscribers on my [Ko-fi page](https://ko-fi.com/koalanation). Here, I will include more specific (but still useful) apps, often for people who specifically request them. Gold apps are tested and do not require more specific/custom nodes. Beta apps may not be fool-proof, as they might still be in testing/development or may require the installation of additional custom nodes.
+The Gold apps are generally specific Apps with some extra features and generally do not require extra custom nodes. Beta apps are still under development, are not fool-proof and may require additional custom nodes. They are also available to subscribers on my [Ko-fi page](https://ko-fi.com/koalanation). As a subscriber, you can suggest that some comfyui workflows are converted into Apps.
+
 The User category is, for the moment, a placeholder for special apps.
 
 ### Favorites
-The star toggle can filter by favorites, which can be activated in the app card.
+Use the star toggle can filter by favorites, which can be activated in the app card.
 
 ## App cards
 The app cards contain several elements that are here described:
 
-<img src="../web/core/media/git/navigation/app cards.png">
+<img src="../web/core/media/git/app_browsing/app cards.png">
 
 - [Thumbnail](RUNNING_APPS.md): I have tried to use as much as possible the ComfyUI thumbnail for easy identification. Click on it to open the app.
 - Title: the title of the App (hopefully descriptive enough)
-- tags: tags (used in the filters) with the main characteristics in relation to type/model/subcategories
+- Tags: tags (used in the filters) with the main characteristics in relation to type/model/subcategories
 - Type of app and favorites: on the top right of the card, the type of app (open/gold/beta/user) and a toggle to select as favorite.
-- [Model (status)](MODELS.md): Indicates if the models to run the app need to be installed (Missing), only some of them are installed (Partially) or if all required models to run the app are installed (Installed).
-- Information button: this button will open the information panel where the models can be installed/uninstalled.
+- [Model (status)](MODELS.md): It shows how many of the required models to run the app are installed. If none are installed, it will be shown in <span style="color:red">Red</span>.If all requried models are installed, in <span style="color:green">Green</span>. If only some of the required models are installed, in <span style="color:orange">Orange</span>.
+- Information button: this button will open the information panel where the models can be [installed/uninstalled](MODELS.md).
 
 
 [Return to User Guide](USER_GUIDE.md)

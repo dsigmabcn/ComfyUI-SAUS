@@ -12,10 +12,5 @@ class RouteManager:
         async def serve_html(request: web.Request) -> web.FileResponse:
             return web.FileResponse(index_html, headers={'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache'})
 
-        for static_dir in ['css', 'js', 'media']:
-            static_path = app_dir / static_dir
-            if static_path.is_dir():
-                routes.static(f"/{static_dir}/", path=static_path)
-
         routes.static(f"/{base_path}/", path=app_dir, show_index=False)
         return routes

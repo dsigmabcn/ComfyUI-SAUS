@@ -14,7 +14,7 @@ const headerHTML = `
   <div id="mid"></div>
   <div id="right-header">
     <div id="kofi">
-      <a href="https://ko-fi.com/koalanation" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
+      <a href="https://ko-fi.com/s/f242d26788" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
         <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 504.36 504.36" fill="var(--color-header-text)">
           <title>ko-fi</title>
           <circle cx="252.18" cy="252.18" r="252.18" opacity="0.2" /> 

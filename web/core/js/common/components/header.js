@@ -28,8 +28,37 @@ const headerHTML = `
   <div class="appName"><h2>${appName} Apps</h2></div>
   
   <div id="right-header">
+      <div id="help">
+      <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
+        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 504.36 504.36">
+          <title>User Guide</title>
+          
+          <defs>
+            <mask id="question-cutout">
+              <rect width="100%" height="100%" fill="white" />
+              <g transform="translate(-60, -65) scale(26)">
+                <path 
+                  d="M10.125 8.875C10.125 7.83947 10.9645 7 12 7C13.0355 7 13.875 7.83947 13.875 8.875C13.875 9.56245 13.505 10.1635 12.9534 10.4899C12.478 10.7711 12 11.75V13" 
+                  stroke="black" 
+                  stroke-width="2.8" 
+                  stroke-linecap="round" 
+                  fill="none" />
+                <circle cx="12" cy="16" r="1.7" fill="black" />
+              </g>
+            </mask>
+          </defs>
+
+          <circle 
+            cx="252.18" 
+            cy="252.18" 
+            r="252.18" 
+            fill="var(--color-header-text)" 
+            mask="url(#question-cutout)" />
+        </svg>
+      </a>
+    </div>
     <div id="kofi">
-      <a href="https://ko-fi.com/koalanation" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
+      <a href="https://ko-fi.com/s/f242d26788" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;">
         <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 504.36 504.36" fill="var(--color-header-text)">
           <title>ko-fi</title>
           <circle cx="252.18" cy="252.18" r="252.18" opacity="0.2" /> 

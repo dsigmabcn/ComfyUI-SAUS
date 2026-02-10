@@ -51,18 +51,90 @@ export class SettingsComponent {
                 body: JSON.stringify(newSettings)
             });
             if (response.ok) {
-                alert('Settings saved successfully.');
+                this.showToast('Settings saved successfully.', 'success');
                 await this.loadSettings();
                 this.render(document.getElementById('settings-view'));
             } else {
-                alert('Failed to save settings.');
+                this.showToast('Failed to save settings.', 'error');
             }
         } catch (e) {
             console.error("Error saving settings:", e);
-            alert('Error saving settings.');
+            this.showToast('An error occurred while saving settings.', 'error');
         }
     }
 
+    showToast(message, type = 'info', duration = 3000) {
+        this.injectToastStyles();
+
+        const toast = document.createElement('div');
+        toast.className = `saus-toast toast-${type}`;
+        
+        let icon = '';
+        if (type === 'success') {
+            icon = '<i class="fas fa-check-circle"></i> ';
+        } else if (type === 'error') {
+            icon = '<i class="fas fa-times-circle"></i> ';
+        }
+
+        toast.innerHTML = icon + message;
+
+        document.body.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        // Animate out and remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, duration);
+    }
+
+    injectToastStyles() {
+        if (document.getElementById('saus-toast-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'saus-toast-styles';
+        style.innerHTML = `
+            .saus-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #333;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                font-family: sans-serif;
+                font-size: 1em;
+                display: flex;
+                align-items: center;
+            }
+            .saus-toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .saus-toast.toast-success {
+                background-color: #28a745;
+                color: white;
+            }
+            .saus-toast.toast-error {
+                background-color: #dc3545;
+                color: white;
+            }
+            .saus-toast i {
+                margin-right: 8px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     async syncApps(btn) {
         const originalText = btn.innerHTML;
         btn.disabled = true;
@@ -74,10 +146,9 @@ export class SettingsComponent {
             if (response.ok) {
                 this.showSyncResultModal(
                     "Sync Successful",
-                    (result.message || 'Apps synced successfully.') /* + '<br><br>A server restart is required to load the new apps.' */,
+                    (result.message || 'Apps synced successfully.') + '<br><br>A server restart is required to load the new apps.',
                     true
                 );
-                window.dispatchEvent(new CustomEvent('appsSynced'));
             } else {
                 this.showSyncResultModal("Sync Failed", 'Error syncing apps: ' + (result.message || response.statusText), false);
             }
@@ -101,7 +172,7 @@ export class SettingsComponent {
         if (isSuccess) {
             buttonsHtml = `
                 <button class="btn-modal-secondary">Close</button>
-                <!-- <button class="btn-modal-primary restart-btn" style="background-color: #d32f2f; border-color: #d32f2f;"><i class="fas fa-power-off"></i> Restart Server</button> -->
+                <button class="btn-modal-primary restart-btn" style="background-color: #d32f2f; border-color: #d32f2f;"><i class="fas fa-power-off"></i> Restart Server</button>
             `;
         } else {
             buttonsHtml = `
