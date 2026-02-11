@@ -470,7 +470,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             const result = await response.json();
             //console.log('Interrupted:', result);
         } catch (error) {
-            //console.error('Error during interrupt:', error);
+            console.error('Error during interrupt:', error);
             hideSpinner();
         } finally {
             hideSpinner();

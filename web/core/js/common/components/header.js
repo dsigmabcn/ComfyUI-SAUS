@@ -32,7 +32,7 @@ const headerHTML = `
       <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" style="margin-right: 10px;" >
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
   <defs>
-    <mask id="question-mask">
+    <mask id="saus-question-mask">
       <rect width="24" height="24" fill="white" />
       
       <g transform="translate(0, 0.5)">
@@ -43,7 +43,7 @@ const headerHTML = `
     </mask>
   </defs>
   
-  <circle cx="12" cy="12" r="12" fill="var(--color-header-text)" mask="url(#question-mask)" />
+  <circle cx="12" cy="12" r="12" fill="var(--color-header-text)" mask="url(#saus-question-mask)" />
 </svg>
       </a>
     </div>
