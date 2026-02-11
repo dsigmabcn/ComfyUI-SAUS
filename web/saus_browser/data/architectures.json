@@ -27,6 +27,20 @@
       "compulsory": ["WAN_VAE","QWEN_2.5VL_ENCODER"],
       "at_least_one": ["QWEN_IMAGE_MODEL","QWEN_IMAGE_2512_MODEL"],
       "optional": ["QWEN_LIGHT_4steps","QWEN_LIGHT_8steps"]
+       },
+    "base_settings":{
+      "name":"BASE",
+      "model":["QWEN_IMAGE_2512_MODEL"],
+      "steps":"25",
+      "cfg":"7.5",
+      "lora":[]
+    },
+    "turbo_settings":{
+      "name":"LIGHTNING",
+      "model":["QWEN_IMAGE_2512_MODEL"],
+      "steps":"4",
+      "cfg":"1.0",
+      "lora":["QWEN_LIGHT_4steps"]     
     }
   },
   "Z-IMAGE": {
@@ -36,7 +50,21 @@
     "components": {      
       "compulsory": ["QWEN_3_4B_VL_ENCODER","AE_VAE"],
       "at_least_one": ["Z_IMAGE_BASE","Z_IMAGE_TURBO"],
-      "optional": []     
+      "optional": []
+      },
+    "base_settings":{
+      "name":"BASE",
+      "model":["Z_IMAGE_BASE"],
+      "steps":"30",
+      "cfg":"4.0",
+      "lora":[]
+    },
+    "turbo_settings":{
+      "name":"TURBO",
+      "model":["Z_IMAGE_TURBO"],
+      "steps":"4",
+      "cfg":"1.0",
+      "lora":[]     
     }
   },
   "FLUX2_KLEIN_4B": {
@@ -47,6 +75,20 @@
       "compulsory": ["QWEN_3_4B_VL_ENCODER","FLUX2_VAE"],
       "at_least_one": ["FLUX_2_KLEIN_4B_BASE","FLUX2_KLEIN_4B_DISTILLED"],
       "optional": []     
+    },
+    "base_settings":{
+      "name":"BASE",
+      "model":["FLUX_2_KLEIN_4B_BASE"],
+      "steps":"20",
+      "cfg":"5",
+      "lora":[]
+    },
+    "turbo_settings":{
+      "name":"DISTILLED",
+      "model":["FLUX2_KLEIN_4B_DISTILLED"],
+      "steps":"4",
+      "cfg":"1",
+      "lora":[]
     }
   },
   "FLUX2_KLEIN_9B": {
@@ -56,7 +98,21 @@
     "components": {      
       "compulsory": ["QWEN_3_8B_VL_ENCODER","FLUX2_VAE"],
       "at_least_one": ["FLUX_2_KLEIN_9B_BASE","FLUX2_KLEIN_9B_DISTILLED"],
-      "optional": []     
+      "optional": []
+            },
+    "base_settings":{
+      "name":"BASE",
+      "model":["FLUX_2_KLEIN_9B_BASE"],
+      "steps":"20",
+      "cfg":"5",
+      "lora":[]
+    },
+    "turbo_settings":{
+      "name":"DISTILLED",
+      "model":["FLUX2_KLEIN_9B_DISTILLED"],
+      "steps":"4",
+      "cfg":"1",
+      "lora":[]     
     }
   },
     "FLUX_DEV_GGUF": {

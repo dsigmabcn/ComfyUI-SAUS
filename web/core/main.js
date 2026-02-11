@@ -12,7 +12,7 @@ import Dropdown from './js/common/components/widgets/Dropdown.js';
 import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
 import { initializeWebSocket, messageHandler } from './js/common/components/messageHandler.js';
-import { updateWorkflowValue } from './js/common/components/workflowManager.js';
+import { updateWorkflowValue, updateWorkflow } from './js/common/components/workflowManager.js';
 import { processWorkflowNodes } from './js/common/scripts/nodesscanner.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
 import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
@@ -81,8 +81,24 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     const appName = getAppName();
     const client_id = uuidv4();
     const appConfig = await fetchappConfig(appName);
+    const appList = await fetch('/saus/api/apps-list').then(res => res.json());
+    const architectures = await fetch('/saus/api/architectures').then(res => res.json());
+    const modelsData = await fetch('/saus/api/data-model-info').then(res => res.json());
+
+    const currentApp = appList.find(app => app.url === appName);
+    const architectureName = currentApp ? currentApp.architecture : null;
+    
     let workflow = await fetchWorkflow(appName);
     let canvasLoader;
+    
+    const widgetInstances = {}; // To store all widget instances
+    let typeWidgetId = null;
+    if (appConfig.dropdowns) {
+        const typeDropdown = appConfig.dropdowns.find(d => d.label === 'Type');
+        if (typeDropdown) {
+            typeWidgetId = typeDropdown.id;
+        }
+    }
 
     const seeders = [];
     initializeWebSocket(client_id);
@@ -121,7 +137,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             container.appendChild(div);
         }
 
-        if (config.dropdowns && Array.isArray(config.dropdowns)) {
+        if (config.dropdowns && Array.isArray(config.dropdowns)) {            
             config.dropdowns.forEach(dropdown => {
                 appendControl(dropdown, 'loader');
             });
@@ -218,28 +234,310 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     generateWorkflowControls(appConfig); 
     setPromptComponents(appConfig, true);
+    
+    async function setupModeSelector() {
+        const modeSelectorContainer = document.getElementById('mode-selector-container');
+        const hdButton = modeSelectorContainer.querySelector('[data-mode="hd"]');
+        const turboButton = modeSelectorContainer.querySelector('[data-mode="turbo"]');
+    
+        const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
+        let availableModels = [];
+        if (modelWidgetConfig) {
+            try {
+                const url = `${window.location.origin}/object_info/${modelWidgetConfig.url}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                const firstKey = Object.keys(data)[0];
+                const loaderData = data[firstKey];
+                const key = modelWidgetConfig.key || 'ckpt_name';
+                availableModels = loaderData.input.required[key][0];
+            } catch (error) {
+                console.error("Could not fetch available models list:", error);
+            }
+        }
+    
+        const checkModels = (settings) => {
+            if (!settings || !settings.model || settings.model.length === 0) {
+                return true; 
+            }
+            for (const modelId of settings.model) {
+                const modelInfo = modelsData[modelId];
+                if (!modelInfo) {
+                    console.warn(`Model identifier "${modelId}" not found in models_data.json`);
+                    return false;
+                }
+                let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
+                const fullModelPath = path ? `${path}/${modelInfo.id}` : modelInfo.id;
+                
+                if (!availableModels.includes(fullModelPath)) {
+                    console.warn(`Required model "${fullModelPath}" is not installed.`);
+                    return false;
+                }
+            }
+            return true;
+        };
+    
+        if (architectureName && architectures[architectureName]) {
+            const arch = architectures[architectureName];
+    
+            if (arch.base_settings) {
+                hdButton.textContent = arch.base_settings.name;
+                if (!checkModels(arch.base_settings)) {
+                    hdButton.disabled = true;
+                    hdButton.classList.add('disabled-saus');
+                    hdButton.title = 'Required models for this mode are not installed.';
+                }
+            } else {
+                hdButton.disabled = true;
+            }
+    
+            if (arch.turbo_settings) {
+                turboButton.textContent = arch.turbo_settings.name;
+                if (!checkModels(arch.turbo_settings)) {
+                    turboButton.disabled = true;
+                    turboButton.classList.add('disabled-saus');
+                    turboButton.title = 'Required models for this mode are not installed.';
+                }
+            } else {
+                turboButton.disabled = true;
+            }
+        } else {
+            hdButton.disabled = true;
+            turboButton.disabled = true;
+        }
+    
+        if (!modeSelectorContainer) {
+            console.warn("Mode selector container not found.");
+            return;
+        }
+    
+        modeSelectorContainer.addEventListener('click', async (event) => {
+            const clickedButton = event.target.closest('.mode-button');
+            if (!clickedButton || clickedButton.disabled) {
+                return; 
+            }
+    
+            if (clickedButton.classList.contains('exclusive-mode')) {
+                if (clickedButton.classList.contains('active')) {
+                    return;
+                }
+    
+                const exclusiveButtons = modeSelectorContainer.querySelectorAll('.exclusive-mode');
+                exclusiveButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+    
+                clickedButton.classList.add('active');
+
+                const mode = clickedButton.dataset.mode;
+
+                const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
+                const modelWidgetElement = modelWidgetConfig ? document.getElementById(modelWidgetConfig.id) : null;
+                const typeWidgetElement = typeWidgetId ? document.getElementById(typeWidgetId) : null;
+                const loraWidgetElement = document.querySelector('.lora-component-container');
+                const dynamicLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+                
+                if (mode === 'custom') {
+                    if (modelWidgetElement) modelWidgetElement.style.display = '';
+                    if (typeWidgetElement) typeWidgetElement.style.display = '';
+                    if (loraWidgetElement) loraWidgetElement.style.display = '';
+                    dynamicLoraWidgets.forEach(w => w.style.display = '');
+                } else { // for 'hd' and 'turbo'
+                    if (modelWidgetElement) modelWidgetElement.style.display = 'none';
+                    if (typeWidgetElement) typeWidgetElement.style.display = 'none';
+                    if (loraWidgetElement) loraWidgetElement.style.display = 'none';
+                    dynamicLoraWidgets.forEach(w => w.style.display = 'none');
+                }
+
+
+                if (architectureName && architectures[architectureName]) {
+                    const arch = architectures[architectureName];
+                    let newSteps = null;
+                    let newCfg = null;
+                    let modelIdentifier = null;
+                    let loraIdentifier = null;
+
+                    if (mode === 'hd' && arch.base_settings) {
+                        newSteps = arch.base_settings.steps;
+                        newCfg = arch.base_settings.cfg;
+                        if (arch.base_settings.model && arch.base_settings.model.length > 0) {
+                            modelIdentifier = arch.base_settings.model[0];
+                        }
+                        if (arch.base_settings.lora && arch.base_settings.lora.length > 0) {
+                            loraIdentifier = arch.base_settings.lora[0];
+                        } else if (arch.base_settings.lora) {
+                            loraIdentifier = ''; 
+                        }
+                    } else if (mode === 'turbo' && arch.turbo_settings) {
+                        newSteps = arch.turbo_settings.steps;
+                        newCfg = arch.turbo_settings.cfg;
+                        if (arch.turbo_settings.model && arch.turbo_settings.model.length > 0) {
+                            modelIdentifier = arch.turbo_settings.model[0];
+                        }
+                        if (arch.turbo_settings.lora && arch.turbo_settings.lora.length > 0) {
+                            loraIdentifier = arch.turbo_settings.lora[0];
+                        } else if (arch.turbo_settings.lora) {
+                            loraIdentifier = '';
+                        }
+                    }
+
+                    if (newSteps !== null) {
+                        const stepsWidgetConfig = appConfig.steppers.find(s => s.label === 'Steps');
+                        if (stepsWidgetConfig) {
+                            const stepsWidgetInstance = widgetInstances[stepsWidgetConfig.id];
+                            if (stepsWidgetInstance) {
+                                stepsWidgetInstance.updateValue(newSteps);
+                            }
+                        }
+                    }
+
+                    if (newCfg !== null) {
+                        const cfgWidgetConfig = appConfig.steppers.find(s => s.label === 'CFG');
+                        if (cfgWidgetConfig) {
+                            const cfgWidgetInstance = widgetInstances[cfgWidgetConfig.id];
+                            if (cfgWidgetInstance) {
+                                cfgWidgetInstance.updateValue(newCfg);
+                            }
+                        }
+                    }
+                    
+                    if (modelIdentifier && modelsData[modelIdentifier]) {
+                        const modelInfo = modelsData[modelIdentifier];
+                        let path = modelInfo.model_path;
+                        path = path.replace('/diffusion_models/', '');
+                        path = path.replace('/checkpoints/', '');
+                        path = path.replace(/^\/|\/$/g, '');
+                        
+                        const newModelValue = `${path}/${modelInfo.id}`;
+
+                        const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
+                        if (modelWidgetConfig) {
+                            updateWorkflow(workflow, modelWidgetConfig.nodePath, newModelValue);
+
+                            const dropdownElement = document.getElementById(modelWidgetConfig.id);
+                            if (dropdownElement) {
+                                const input = dropdownElement.querySelector('input');
+                                if (input) {
+                                    const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                    input.value = getDisplayName(newModelValue);
+                                    input.title = newModelValue;
+                                }
+                            }
+                        }
+                    }
+
+                    const addLoraButton = document.querySelector('.add-lora-button');
+                    const getLoraContainer = () => document.querySelector('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+
+                    if (loraIdentifier) { 
+                        let loraContainer = getLoraContainer();
+                        if (!loraContainer && addLoraButton) {
+                            addLoraButton.click();
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            loraContainer = getLoraContainer();
+                        }
+
+                        if (loraContainer) {
+                            const containerId = loraContainer.id;
+                            const nodeId = containerId.split('_')[1];
+                            const loraInfo = modelsData[loraIdentifier];
+
+                            if (loraInfo) {
+                                let path = loraInfo.model_path.replace('/loras/', '');
+                                path = path.replace(/^\/|\/$/g, '');
+                                const newLoraValue = path ? `${path}/${loraInfo.id}` : loraInfo.id;
+                                
+                                const nodePath = `${nodeId}.inputs.lora_name`;
+                                updateWorkflow(workflow, nodePath, newLoraValue);
+        
+                                const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
+                                if (dropdownContainer) {
+                                    const input = dropdownContainer.querySelector('input');
+                                    if (input) {
+                                        const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                        input.value = getDisplayName(newLoraValue);
+                                        input.title = newLoraValue;
+                                    }
+                                }
+                            }
+
+                            if (mode !== 'custom') {
+                                loraContainer.style.display = 'none';
+                            }
+                        }
+                    } else if (loraIdentifier === '') { 
+                        const loraContainer = getLoraContainer();
+                        if (loraContainer) {
+                            const removeBtn = loraContainer.querySelector('button[title="Remove LoRA"]');
+                            if (removeBtn) {
+                                removeBtn.click();
+                            }
+                        }
+                    }
+                }
+            } else {
+                clickedButton.classList.toggle('active');
+
+                if (clickedButton.dataset.mode === 'fp8' && typeWidgetId) {
+                    const typeDropdownConfig = appConfig.dropdowns.find(d => d.id === typeWidgetId);
+                    const typeInput = document.querySelector(`#${typeWidgetId} input[type="text"]`);
+
+                    if (typeDropdownConfig && typeDropdownConfig.nodePath && typeInput) {
+                        const newValue = clickedButton.classList.contains('active') ? 'fp8_e4m3fn' : 'default';
+
+                        typeInput.value = newValue;
+                        typeInput.title = newValue;
+
+                        updateWorkflow(workflow, typeDropdownConfig.nodePath, newValue);
+                    } else {
+                        if (!typeInput) {
+                            console.warn(`Could not find the <input> element for the Type widget (ID: ${typeWidgetId}). UI might not update.`);
+                        }
+                        if (!typeDropdownConfig || !typeDropdownConfig.nodePath) {
+                            console.warn(`Could not find config or nodePath for widget ID: ${typeWidgetId}`);
+                        }
+                    }
+                }
+            }
+    
+            const activeButtons = modeSelectorContainer.querySelectorAll('.mode-button.active');
+            const modes = Array.from(activeButtons).map(btn => btn.dataset.mode);
+            console.log('Active modes:', modes);
+        });
+
+        const customButton = modeSelectorContainer.querySelector('[data-mode="custom"]');
+        if (hdButton && !hdButton.disabled) {
+            hdButton.click();
+        } else if (turboButton && !turboButton.disabled) {
+            turboButton.click();
+        } else if (customButton) {
+            customButton.click();
+        }
+    }
 
     const loraWorkflowManager = new LoraWorkflowManager(workflow, appConfig);
 
     workflow = loraWorkflowManager.getWorkflow();
     
     processWorkflowNodes(workflow).then(({ nodeToCustomNodeMap, uniqueCustomNodesArray, missingNodes, missingCustomPackages }) => {
-        console.log("Node to Custom Node Mapping:", nodeToCustomNodeMap);
-        console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
-        console.log("Missing Nodes:", missingNodes);
-        console.log("Missing Custom Packages:", missingCustomPackages);
+        //console.log("Node to Custom Node Mapping:", nodeToCustomNodeMap);
+        //console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
+        //console.log("Missing Nodes:", missingNodes);
+        //console.log("Missing Custom Packages:", missingCustomPackages);
         checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, appConfig);
     });
 
     if (appConfig.dropdowns) {
         appConfig.dropdowns.forEach(config => {
-            new Dropdown(config, workflow);
+            const instance = new Dropdown(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.steppers) {
         appConfig.steppers.forEach(config => {
-            new Stepper(config, workflow);
+            const instance = new Stepper(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
@@ -267,19 +565,22 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                     config.modelType = 'SDXL';
                 }
             }
-            new DimensionSelector(config, workflow);
+            const instance = new DimensionSelector(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.inputs) {
         appConfig.inputs.forEach(config => {
-            new InputComponent(config, workflow);
+            const instance = new InputComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.toggles) {
         appConfig.toggles.forEach(config => {
-            new ToggleComponent(config, workflow);
+            const instance = new ToggleComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
@@ -287,24 +588,30 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         appConfig.seeders.forEach(config => {
             const seeder = new Seeder(config, workflow);
             seeders.push(seeder);
+            widgetInstances[config.id] = seeder;
         });
     }
 
     if (appConfig.multiComponents && Array.isArray(appConfig.multiComponents)) {
         appConfig.multiComponents.forEach(config => {
-            new MultiComponent(config, workflow);
+            const instance = new MultiComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.dataComponents && Array.isArray(appConfig.dataComponents)) {
         appConfig.dataComponents.forEach(config => {
-            new DataComponent(config, workflow);
+            const instance = new DataComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
 
     imageLoaderComp(appConfig, workflow);
     
+    // Now that all widgets are created and instances stored, setup the mode selector
+    await setupModeSelector();
+
     const initCanvas = async () => {
         canvasLoader = new CanvasLoader('imageCanvas', appConfig);
         await canvasLoader.initPromise;
