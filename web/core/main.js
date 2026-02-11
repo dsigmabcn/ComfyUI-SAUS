@@ -325,7 +325,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
 
     async function queue() {   
-        console.log("Queueing new job");
+        //console.log("Queueing new job");
         messageHandler.updateNodeMap(workflow);
 
         if (canvasLoader && canvasLoader.isInitialized) {
@@ -334,7 +334,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             console.log("Canvas is not initialized. Skipping CanvasComponent.");
         }
 
-        console.log("Queueing workflow:", workflow);        
+        //console.log("Queueing workflow:", workflow);        
 
         if (appConfig.prompts) {
             appConfig.prompts.forEach(pathConfig => {
@@ -352,9 +352,9 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         const jobId = StateManager.incrementJobId();
         const job = { id: jobId, workflow: { ...workflow } };
         StateManager.addJob(job);
-        console.log(`Added job to queue. Job ID: ${jobId}`);
-        console.log("Current queue:", StateManager.getJobQueue());
-        console.log("queued workflow:", workflow);        
+        //console.log(`Added job to queue. Job ID: ${jobId}`);
+        //console.log("Current queue:", StateManager.getJobQueue());
+        //console.log("queued workflow:", workflow);        
         store.dispatch({
             type: 'SET_QUEUE_RUNNING',
             payload: true
@@ -384,7 +384,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         StateManager.setProcessing(true);
 
         const job = StateManager.getNextJob();
-        console.log(`Processing job ${job.id}`);
+        //console.log(`Processing job ${job.id}`);
         try {
             await queue_prompt(job.workflow);
         } catch (error) {
@@ -434,29 +434,25 @@ function setPromptComponents(config, options = { clearInputs: false }) {
          } else {
             queueDisplay.textContent = '';
         }
-
-        // if (jobQueue.length > 0) {
-        //     const jobIds = jobQueue.map(job => job.id).join(', ');
-        //     queueDisplay.textContent += ` (Job IDs: ${jobIds})`;
-        // }
+        
     }
 
     async function interrupt() {
         await queue_interrupt();
         if (StateManager.isProcessing()) {
-            console.log("Interrupting current job");
+            //console.log("Interrupting current job");
         } else if (StateManager.getJobQueue().length > 0) {
             const removedJob = StateManager.getJobQueue().pop();
-            console.log(`Removed job from queue. Job ID: ${removedJob.id}`);
-            console.log("Remaining queue:", StateManager.getJobQueue());
+            //console.log(`Removed job from queue. Job ID: ${removedJob.id}`);
+            //console.log("Remaining queue:", StateManager.getJobQueue());
             updateQueueDisplay(StateManager.getJobQueue());
         } else {
-            console.log("No jobs in queue to interrupt.");
+            //console.log("No jobs in queue to interrupt.");
         }
     }
 
     async function queue_interrupt() {
-        console.log("Interrupting last job");
+        //console.log("Interrupting last job");
         const data = { 'client_id': client_id };
         try {
             showSpinner();
@@ -472,34 +468,34 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 throw new Error('Failed to interrupt the process.');
             }
             const result = await response.json();
-            console.log('Interrupted:', result);
+            //console.log('Interrupted:', result);
         } catch (error) {
-            console.error('Error during interrupt:', error);
+            //console.error('Error during interrupt:', error);
             hideSpinner();
         } finally {
             hideSpinner();
         }
     }
 
-    // ----------------------------------------------------------------------
-    // NEW: Function to handle tab switching logic
-    // In main.js
+
+
+    //Function to handle tab switching logic  
 
 function setupTabSwitching() {
     const tabButtons = document.querySelectorAll('.control-tabs-header .tab-button');
     const tabPanels = document.querySelectorAll('.control-tabs-content .tab-panel');
 
-    console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
+    //console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
     
     if (tabButtons.length === 0 || tabPanels.length === 0) {
-        console.error("FINAL TEST: Tab elements not found.");
+        //console.error("FINAL TEST: Tab elements not found.");
         return; 
     }
     
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
-            console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
+            //console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
 
             // 1. Deactivate all buttons and panels
             tabButtons.forEach(btn => btn.classList.remove('active'));

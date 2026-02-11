@@ -23,7 +23,7 @@ export async function loadApps() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         state.allApps = await response.json();
-        console.log("[SAUS] Loaded apps data:", state.allApps);
+        //console.log("[SAUS] Loaded apps data:", state.allApps);
 
         // Step 2: Fetch the separate list of categories (your app_list.json)
         // You will need to replace this URL with the correct path to app_list.json
@@ -82,7 +82,7 @@ export async function loadApps() {
         
         
         state.categories = Array.from(uniqueCategories);
-        console.log(state.categories);
+        //console.log(state.categories);
 
         const uiCallbacks = {
             showApps,
@@ -256,7 +256,7 @@ function initializeWebSocket() {
     const client = new PromptServerClient();
     
     client.on('model_download_progress', (e) => {
-        console.log('[SAUS] WS Progress:', e.detail);
+        //console.log('[SAUS] WS Progress:', e.detail);
         const { file_name, progress } = e.detail;
         updateComponentStatus(file_name, 'downloading', progress);
     });
@@ -292,7 +292,7 @@ export function initializeUI() {
     checkForUpdate();
     
     window.addEventListener('appsSynced', () => {
-        console.log('[SAUS] Apps synced, reloading...');
+        //console.log('[SAUS] Apps synced, reloading...');
         loadApps();
     });
 
