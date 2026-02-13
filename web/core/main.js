@@ -332,8 +332,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 const mode = clickedButton.dataset.mode;
 
-                const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
-                const modelWidgetElement = modelWidgetConfig ? document.getElementById(modelWidgetConfig.id) : null;
+                const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
+                const modelWidgetElements = modelWidgetConfigs.map(c => document.getElementById(c.id)).filter(el => el);
                 const typeWidgetElements = appConfig.dropdowns
                     .filter(d => d.label === 'Type')
                     .map(d => document.getElementById(d.id))
@@ -342,12 +342,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 const dynamicLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
                 
                 if (mode === 'custom') {
-                    if (modelWidgetElement) modelWidgetElement.style.display = '';
+                    modelWidgetElements.forEach(el => el.style.display = '');
                     typeWidgetElements.forEach(el => el.style.display = '');
                     if (loraWidgetElement) loraWidgetElement.style.display = '';
                     dynamicLoraWidgets.forEach(w => w.style.display = '');
                 } else { // for 'hd' and 'turbo'
-                    if (modelWidgetElement) modelWidgetElement.style.display = 'none';
+                    modelWidgetElements.forEach(el => el.style.display = 'none');
                     typeWidgetElements.forEach(el => el.style.display = 'none');
                     if (loraWidgetElement) loraWidgetElement.style.display = 'none';
                     dynamicLoraWidgets.forEach(w => w.style.display = 'none');
@@ -356,125 +356,100 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 if (architectureName && architectures[architectureName]) {
                     const arch = architectures[architectureName];
-                    let newSteps = null;
-                    let newCfg = null;
-                    let modelIdentifier = null;
-                    let loraIdentifier = null;
+                    const settings = (mode === 'hd' && arch.base_settings) ? arch.base_settings :
+                                     (mode === 'turbo' && arch.turbo_settings) ? arch.turbo_settings : null;
 
-                    if (mode === 'hd' && arch.base_settings) {
-                        newSteps = arch.base_settings.steps;
-                        newCfg = arch.base_settings.cfg;
-                        if (arch.base_settings.model && arch.base_settings.model.length > 0) {
-                            modelIdentifier = arch.base_settings.model[0];
-                        }
-                        if (arch.base_settings.lora && arch.base_settings.lora.length > 0) {
-                            loraIdentifier = arch.base_settings.lora[0];
-                        } else if (arch.base_settings.lora) {
-                            loraIdentifier = ''; 
-                        }
-                    } else if (mode === 'turbo' && arch.turbo_settings) {
-                        newSteps = arch.turbo_settings.steps;
-                        newCfg = arch.turbo_settings.cfg;
-                        if (arch.turbo_settings.model && arch.turbo_settings.model.length > 0) {
-                            modelIdentifier = arch.turbo_settings.model[0];
-                        }
-                        if (arch.turbo_settings.lora && arch.turbo_settings.lora.length > 0) {
-                            loraIdentifier = arch.turbo_settings.lora[0];
-                        } else if (arch.turbo_settings.lora) {
-                            loraIdentifier = '';
-                        }
-                    }
+                    if (settings) {
+                        // --- Models ---
+                        if (settings.model && Array.isArray(settings.model)) {
+                            const modelIdentifiers = settings.model;
+                            const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
+                            
+                            modelIdentifiers.forEach((modelIdentifier, index) => {
+                                if (modelWidgetConfigs[index] && modelsData[modelIdentifier]) {
+                                    const modelWidgetConfig = modelWidgetConfigs[index];
+                                    const modelInfo = modelsData[modelIdentifier];
+                                    let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
+                                    const newModelValue = path ? `${path}/${modelInfo.id}` : modelInfo.id;
+                                    
+                                    updateWorkflow(workflow, modelWidgetConfig.nodePath, newModelValue);
 
-                    if (newSteps !== null) {
-                        const stepsWidgetConfig = appConfig.steppers.find(s => s.label === 'Steps');
-                        if (stepsWidgetConfig) {
-                            const stepsWidgetInstance = widgetInstances[stepsWidgetConfig.id];
-                            if (stepsWidgetInstance) {
-                                stepsWidgetInstance.updateValue(newSteps);
-                            }
-                        }
-                    }
-
-                    if (newCfg !== null) {
-                        const cfgWidgetConfig = appConfig.steppers.find(s => s.label === 'CFG');
-                        if (cfgWidgetConfig) {
-                            const cfgWidgetInstance = widgetInstances[cfgWidgetConfig.id];
-                            if (cfgWidgetInstance) {
-                                cfgWidgetInstance.updateValue(newCfg);
-                            }
-                        }
-                    }
-                    
-                    if (modelIdentifier && modelsData[modelIdentifier]) {
-                        const modelInfo = modelsData[modelIdentifier];
-                        let path = modelInfo.model_path;
-                        path = path.replace('/diffusion_models/', '');
-                        path = path.replace('/checkpoints/', '');
-                        path = path.replace(/^\/|\/$/g, '');
-                        
-                        const newModelValue = `${path}/${modelInfo.id}`;
-
-                        const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
-                        if (modelWidgetConfig) {
-                            updateWorkflow(workflow, modelWidgetConfig.nodePath, newModelValue);
-
-                            const dropdownElement = document.getElementById(modelWidgetConfig.id);
-                            if (dropdownElement) {
-                                const input = dropdownElement.querySelector('input');
-                                if (input) {
-                                    const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
-                                    input.value = getDisplayName(newModelValue);
-                                    input.title = newModelValue;
+                                    const dropdownElement = document.getElementById(modelWidgetConfig.id);
+                                    if (dropdownElement) {
+                                        const input = dropdownElement.querySelector('input');
+                                        if (input) {
+                                            const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                            input.value = getDisplayName(newModelValue);
+                                            input.title = newModelValue;
+                                        }
+                                    }
                                 }
+                            });
+                        }
+
+                        // --- LoRAs ---
+                        const existingLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+                        existingLoraWidgets.forEach(widget => {
+                            const removeBtn = widget.querySelector('button[title="Remove LoRA"]');
+                            if (removeBtn) {
+                                removeBtn.click();
                             }
-                        }
-                    }
+                        });
 
-                    const addLoraButton = document.querySelector('.add-lora-button');
-                    const getLoraContainer = () => document.querySelector('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+                        if (settings.lora && Array.isArray(settings.lora) && settings.lora.length > 0) {
+                            const loraIdentifiers = settings.lora;
+                            const addLoraButtons = document.querySelectorAll('.add-lora-button');
+                            
+                            for (const loraIdentifier of loraIdentifiers) {
+                                if (addLoraButtons.length > 0) {
+                                    // Assuming chaining loras on the first model loader
+                                    addLoraButtons[0].click();
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                    
+                                    const newLoraWidget = Array.from(document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]')).pop();
 
-                    if (loraIdentifier) { 
-                        let loraContainer = getLoraContainer();
-                        if (!loraContainer && addLoraButton) {
-                            addLoraButton.click();
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                            loraContainer = getLoraContainer();
-                        }
+                                    if (newLoraWidget && modelsData[loraIdentifier]) {
+                                        const loraInfo = modelsData[loraIdentifier];
+                                        let path = (loraInfo.model_path || '').replace('/loras/', '');
+                                        path = path.replace(/^\/|\/$/g, '');
+                                        const newLoraValue = path ? `${path}/${loraInfo.id}` : loraInfo.id;
+                                        
+                                        const containerId = newLoraWidget.id;
+                                        const nodeId = containerId.split('_')[1];
+                                        const nodePath = `${nodeId}.inputs.lora_name`;
+                                        updateWorkflow(workflow, nodePath, newLoraValue);
 
-                        if (loraContainer) {
-                            const containerId = loraContainer.id;
-                            const nodeId = containerId.split('_')[1];
-                            const loraInfo = modelsData[loraIdentifier];
+                                        const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
+                                        if (dropdownContainer) {
+                                            const input = dropdownContainer.querySelector('input');
+                                            if (input) {
+                                                const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                                input.value = getDisplayName(newLoraValue);
+                                                input.title = newLoraValue;
+                                            }
+                                        }
 
-                            if (loraInfo) {
-                                let path = loraInfo.model_path.replace('/loras/', '');
-                                path = path.replace(/^\/|\/$/g, '');
-                                const newLoraValue = path ? `${path}/${loraInfo.id}` : loraInfo.id;
-                                
-                                const nodePath = `${nodeId}.inputs.lora_name`;
-                                updateWorkflow(workflow, nodePath, newLoraValue);
-        
-                                const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
-                                if (dropdownContainer) {
-                                    const input = dropdownContainer.querySelector('input');
-                                    if (input) {
-                                        const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
-                                        input.value = getDisplayName(newLoraValue);
-                                        input.title = newLoraValue;
+                                        if (mode !== 'custom') {
+                                            newLoraWidget.style.display = 'none';
+                                        }
                                     }
                                 }
                             }
-
-                            if (mode !== 'custom') {
-                                loraContainer.style.display = 'none';
-                            }
                         }
-                    } else if (loraIdentifier === '') { 
-                        const loraContainer = getLoraContainer();
-                        if (loraContainer) {
-                            const removeBtn = loraContainer.querySelector('button[title="Remove LoRA"]');
-                            if (removeBtn) {
-                                removeBtn.click();
+
+                        // --- Other Steppers (CFG, Steps, etc.) ---
+                        for (const key in settings) {
+                            if (Object.prototype.hasOwnProperty.call(settings, key) && key !== 'model' && key !== 'lora' && key !== 'name') {
+                                const widgetConfig = appConfig.steppers.find(s => s.label.toLowerCase() === key.toLowerCase());
+                                if (widgetConfig) {
+                                    const widgetInstance = widgetInstances[widgetConfig.id];
+                                    if (widgetInstance) {
+                                        const value = settings[key];
+                                        if (value !== null && value !== undefined) {
+                                            widgetInstance.updateValue(Number(value));
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

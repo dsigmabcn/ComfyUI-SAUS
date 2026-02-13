@@ -30,14 +30,14 @@
        },
     "base_settings":{
       "name":"BASE",
-      "model":["QWEN_IMAGE_2512_MODEL"],
+      "model":["QWEN_IMAGE_MODEL"],
       "steps":"25",
       "cfg":"7.5",
       "lora":[]
     },
     "turbo_settings":{
       "name":"LIGHTNING",
-      "model":["QWEN_IMAGE_2512_MODEL"],
+      "model":["QWEN_IMAGE_MODEL"],
       "steps":"4",
       "cfg":"1.0",
       "lora":["QWEN_LIGHT_4steps"]     
@@ -197,15 +197,15 @@
     "base_settings":{
       "name":"BASE",
       "model":["WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
-      "Total steps":"20",
-      "Steps change high to low":"",
+      "Total Steps":"20",
+      "Steps change high to low":"10",
       "cfg":"3.5",
       "lora":[]
     },
     "turbo_settings":{
       "name":"LIGHTX2V",
       "model":["WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
-      "Total steps":"4",
+      "Total Steps":"4",
       "Steps change high to low":"2",
       "cfg":"1.0",
       "lora":["LIGHT_4steps_i2v_low","LIGHT_4steps_i2v_high"]     
