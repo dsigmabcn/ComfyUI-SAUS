@@ -193,6 +193,22 @@
       "compulsory": ["WAN_VAE","UMT5_XXL_ENCODER","WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
       "at_least_one": [],
       "optional": ["LIGHT_4steps_i2v_low","LIGHT_4steps_i2v_high"]
+      },
+    "base_settings":{
+      "name":"BASE",
+      "model":["WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
+      "Total steps":"20",
+      "Steps change high to low":"",
+      "cfg":"3.5",
+      "lora":[]
+    },
+    "turbo_settings":{
+      "name":"LIGHTX2V",
+      "model":["WAN2.2_I2V_HIGH","WAN2.2_I2V_LOW"],
+      "Total steps":"4",
+      "Steps change high to low":"2",
+      "cfg":"1.0",
+      "lora":["LIGHT_4steps_i2v_low","LIGHT_4steps_i2v_high"]     
     }
   },
   "WAN22 TEXT AND IMAGE TO VIDEO": {

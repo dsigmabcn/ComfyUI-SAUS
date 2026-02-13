@@ -92,13 +92,6 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     let canvasLoader;
     
     const widgetInstances = {}; // To store all widget instances
-    let typeWidgetId = null;
-    if (appConfig.dropdowns) {
-        const typeDropdown = appConfig.dropdowns.find(d => d.label === 'Type');
-        if (typeDropdown) {
-            typeWidgetId = typeDropdown.id;
-        }
-    }
 
     const seeders = [];
     initializeWebSocket(client_id);
@@ -289,6 +282,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 }
             } else {
                 hdButton.disabled = true;
+                hdButton.classList.add('disabled-saus');
+                hdButton.title = 'This mode is not configured for this architecture.';
             }
     
             if (arch.turbo_settings) {
@@ -300,10 +295,16 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 }
             } else {
                 turboButton.disabled = true;
+                turboButton.classList.add('disabled-saus');
+                turboButton.title = 'This mode is not configured for this architecture.';
             }
         } else {
             hdButton.disabled = true;
+            hdButton.classList.add('disabled-saus');
+            hdButton.title = 'Architecture not found.';
             turboButton.disabled = true;
+            turboButton.classList.add('disabled-saus');
+            turboButton.title = 'Architecture not found.';
         }
     
         if (!modeSelectorContainer) {
@@ -333,18 +334,21 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
                 const modelWidgetElement = modelWidgetConfig ? document.getElementById(modelWidgetConfig.id) : null;
-                const typeWidgetElement = typeWidgetId ? document.getElementById(typeWidgetId) : null;
+                const typeWidgetElements = appConfig.dropdowns
+                    .filter(d => d.label === 'Type')
+                    .map(d => document.getElementById(d.id))
+                    .filter(el => el);
                 const loraWidgetElement = document.querySelector('.lora-component-container');
                 const dynamicLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
                 
                 if (mode === 'custom') {
                     if (modelWidgetElement) modelWidgetElement.style.display = '';
-                    if (typeWidgetElement) typeWidgetElement.style.display = '';
+                    typeWidgetElements.forEach(el => el.style.display = '');
                     if (loraWidgetElement) loraWidgetElement.style.display = '';
                     dynamicLoraWidgets.forEach(w => w.style.display = '');
                 } else { // for 'hd' and 'turbo'
                     if (modelWidgetElement) modelWidgetElement.style.display = 'none';
-                    if (typeWidgetElement) typeWidgetElement.style.display = 'none';
+                    typeWidgetElements.forEach(el => el.style.display = 'none');
                     if (loraWidgetElement) loraWidgetElement.style.display = 'none';
                     dynamicLoraWidgets.forEach(w => w.style.display = 'none');
                 }
@@ -478,25 +482,24 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             } else {
                 clickedButton.classList.toggle('active');
 
-                if (clickedButton.dataset.mode === 'fp8' && typeWidgetId) {
-                    const typeDropdownConfig = appConfig.dropdowns.find(d => d.id === typeWidgetId);
-                    const typeInput = document.querySelector(`#${typeWidgetId} input[type="text"]`);
+                if (clickedButton.dataset.mode === 'fp8') {
+                    const typeDropdownConfigs = appConfig.dropdowns.filter(d => d.label === 'Type');
+                    const newValue = clickedButton.classList.contains('active') ? 'fp8_e4m3fn' : 'default';
 
-                    if (typeDropdownConfig && typeDropdownConfig.nodePath && typeInput) {
-                        const newValue = clickedButton.classList.contains('active') ? 'fp8_e4m3fn' : 'default';
-
-                        typeInput.value = newValue;
-                        typeInput.title = newValue;
-
-                        updateWorkflow(workflow, typeDropdownConfig.nodePath, newValue);
-                    } else {
-                        if (!typeInput) {
-                            console.warn(`Could not find the <input> element for the Type widget (ID: ${typeWidgetId}). UI might not update.`);
+                    typeDropdownConfigs.forEach(typeDropdownConfig => {
+                        if (typeDropdownConfig && typeDropdownConfig.nodePath) {
+                            const typeInput = document.querySelector(`#${typeDropdownConfig.id} input[type="text"]`);
+                            if (typeInput) {
+                                typeInput.value = newValue;
+                                typeInput.title = newValue;
+                                updateWorkflow(workflow, typeDropdownConfig.nodePath, newValue);
+                            } else {
+                                console.warn(`Could not find the <input> element for the Type widget (ID: ${typeDropdownConfig.id}). UI might not update.`);
+                            }
+                        } else {
+                            console.warn(`Could not find config or nodePath for a Type widget with id: ${typeDropdownConfig ? typeDropdownConfig.id : 'undefined'}`);
                         }
-                        if (!typeDropdownConfig || !typeDropdownConfig.nodePath) {
-                            console.warn(`Could not find config or nodePath for widget ID: ${typeWidgetId}`);
-                        }
-                    }
+                    });
                 }
             }
     
