@@ -27,7 +27,7 @@ function generateComponentFormHTML(nodeInfo, existingComponent) {
     const componentOptions = generateComponentOptions(existingComponent);
     const inputPathOptions = generateInputPathOptions(nodeInfo, existingComponent);
     const templateOptions = generateTemplateOptions(nodeInfo); 
-    console.log('nodeInfo:', nodeInfo);
+    //console.log('nodeInfo:', nodeInfo);
     return `
         ${nodeInfo.classType ? `<h3>Node Type: ${nodeInfo.classType}</h3>` : ''}
 

@@ -113,7 +113,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
     }
 
     onImageLoaded({ image, id }) {
-        console.log(`Image loaded: ID=${id}`);
+        //console.log(`Image loaded: ID=${id}`);
         if (this.options.mode === 'Pairs') {
             if (this.images.length > 1) {
                 const imagesToRemove = this.images.slice(0, this.images.length - 1);
@@ -134,7 +134,7 @@ export class ImageCompareSliderPlugin extends CanvasPlugin {
     }
 
     onImageRemoved({ id }) {
-        console.log(`Image removed: ID=${id}`);
+        //console.log(`Image removed: ID=${id}`);
         this.images = this.images.filter(img => img.id !== id);
         if (this.images.length < 2) {
             this.destroySlider();

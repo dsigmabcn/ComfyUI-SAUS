@@ -102,7 +102,7 @@ export class CanvasManager extends EventEmitter {
 
     onScaleChanged(data) {
         this.scaleMultiplier = data.scale;
-        console.log(`CanvasManager: Scale multiplier set to ${this.scaleMultiplier}`);
+        //console.log(`CanvasManager: Scale multiplier set to ${this.scaleMultiplier}`);
     }
 
     destroy() {

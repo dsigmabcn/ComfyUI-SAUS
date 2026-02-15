@@ -5,8 +5,13 @@
     "url": "2m1x4-base-stable-diffusion",
     "category": "text-to-image",
     "tags": {
-      "type": ["base"],
-      "base_models": ["SD1.5", "SDXL"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ]
     },
     "architecture": "SD15"
   },
@@ -16,8 +21,12 @@
     "url": "30kk2-base-flux-dev",
     "category": "text-to-image",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ]
     },
     "architecture": "FLUX_DEV"
   },
@@ -27,8 +36,12 @@
     "url": "jj0qd-z-image-t2i",
     "category": "text-to-image",
     "tags": {
-      "type": ["base"],
-      "base_models": ["Z-image"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "Z-image"
+      ]
     },
     "architecture": "Z-IMAGE"
   },
@@ -38,8 +51,12 @@
     "url": "dfpv9-qwen-image-t2i",
     "category": "text-to-image",
     "tags": {
-      "type": ["base"],
-      "base_models": ["QWEN"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "QWEN"
+      ]
     },
     "architecture": "QWEN"
   },
@@ -49,8 +66,13 @@
     "url": "fgkds-qwen-edit-1-image",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["QWEN"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "QWEN"
+      ]
     },
     "architecture": "QWEN_EDIT"
   },
@@ -60,8 +82,13 @@
     "url": "p4j03-flux-klein-9B-t2i",
     "category": "text-to-image",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ]
     },
     "architecture": "FLUX2_KLEIN_9B"
   },
@@ -71,8 +98,13 @@
     "url": "g9oec-flux-klein-4b-t2i",
     "category": "text-to-image",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ]
     },
     "architecture": "FLUX2_KLEIN_4B"
   },
@@ -82,9 +114,16 @@
     "url": "th6ol-flux-klein-9b-edit-image",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"],
-      "other": ["edit"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": [
+        "edit"
+      ]
     },
     "architecture": "FLUX2_KLEIN_9B"
   },
@@ -94,9 +133,17 @@
     "url": "6c2yn-flux-klein-9b-edit-2-images",
     "category": "image-to-image (reference)",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"],
-      "other": ["(re-)styling","try-on"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": [
+        "(re-)styling",
+        "try-on"
+      ]
     },
     "architecture": "FLUX2_KLEIN_9B"
   },
@@ -106,9 +153,16 @@
     "url": "uh6ol-flux-klein-9b-edit-image",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"],
-      "other": ["edit"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": [
+        "edit"
+      ]
     },
     "architecture": "FLUX2_KLEIN_4B"
   },
@@ -118,9 +172,17 @@
     "url": "7c2yn-flux-klein-9b-edit-2-images",
     "category": "image-to-image (reference)",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["FLUX-2"],
-      "other": ["(re-)styling","try-on"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": [
+        "(re-)styling",
+        "try-on"
+      ]
     },
     "architecture": "FLUX2_KLEIN_4B"
   },
@@ -130,8 +192,12 @@
     "url": "ju12s-base-flux-dev-gguf",
     "category": "text-to-image",
     "tags": {
-      "type": ["quantized"],
-      "base_models": ["FLUX"]
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ]
     },
     "architecture": "FLUX_DEV_GGUF"
   },
@@ -141,9 +207,15 @@
     "url": "9w957-base-flux-dev-image-to-image-gguf",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["quantized"],
-      "base_models": ["FLUX"],
-      "other": ["image-to-image"]
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "image-to-image"
+      ]
     },
     "architecture": "FLUX_DEV_GGUF"
   },
@@ -153,9 +225,16 @@
     "url": "afoye-base-stable-diffusion-image-to-image",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["SD1.5","SDXL"],
-      "other": ["image-to-image"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": [
+        "image-to-image"
+      ]
     },
     "architecture": "SD15"
   },
@@ -165,9 +244,15 @@
     "url": "bf3ea-flux-dev-fill-gguf-inpainting",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["quantized"],
-      "base_models": ["FLUX"],
-      "other": ["inpainting"]
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "inpainting"
+      ]
     },
     "architecture": "FLUX_INPAINT_GGUF"
   },
@@ -177,9 +262,16 @@
     "url": "k5ttn-stable-diffusion-inpainting",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["SD1.5","SDXL"],
-      "other": ["inpainting"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": [
+        "inpainting"
+      ]
     },
     "architecture": "SD15"
   },
@@ -189,9 +281,15 @@
     "url": "n0y8e-base-flux-dev-image-to-image",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"],
-      "other": ["image-to-image"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "image-to-image"
+      ]
     },
     "architecture": "FLUX_DEV"
   },
@@ -201,9 +299,15 @@
     "url": "y2gic-flux-dev-fill-inpainting",
     "category": "image-to-image (editing)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"],
-      "other": ["inpainting"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "inpainting"
+      ]
     },
     "architecture": "FLUX_INPAINT"
   },
@@ -213,9 +317,15 @@
     "url": "7bxez-flux-redux",
     "category": "image-to-image (reference)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"],
-      "other": ["(re-)styling"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "(re-)styling"
+      ]
     },
     "architecture": "FLUX_REDUX"
   },
@@ -225,9 +335,15 @@
     "url": "94lhm-flux-redux-2-images",
     "category": "image-to-image (reference)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"],
-      "other": ["(re-)styling"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "(re-)styling"
+      ]
     },
     "architecture": "FLUX_REDUX"
   },
@@ -237,9 +353,15 @@
     "url": "ppfxh-flux-depth",
     "category": "image-to-image (reference)",
     "tags": {
-      "type": ["base"],
-      "base_models": ["FLUX"],
-      "other": ["controlnet"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "controlnet"
+      ]
     },
     "architecture": "CONTROLNET FLUX"
   },
@@ -249,9 +371,15 @@
     "url": "7lm54-basic-animatediff",
     "category": "text-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["SD1.5"],
-      "other": ["animatediff"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5"
+      ],
+      "other": [
+        "animatediff"
+      ]
     },
     "architecture": "ANIMATE_DIFF_SD1.5"
   },
@@ -261,9 +389,16 @@
     "url": "b82lw-basic-animatediff-lcm",
     "category": "text-to-video",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["SD1.5"],
-      "other": ["animatediff"]
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "SD1.5"
+      ],
+      "other": [
+        "animatediff"
+      ]
     },
     "architecture": "ANIMATE_DIFF_LCM"
   },
@@ -273,9 +408,15 @@
     "url": "hqj80-wan-vace-image-reference",
     "category": "image-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["WAN"],
-      "other":["VACE" ]     
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "WAN"
+      ],
+      "other": [
+        "VACE"
+      ]
     },
     "architecture": "WAN2.1 VACE"
   },
@@ -285,9 +426,15 @@
     "url": "j5mss-wan-vace-preprocessed-control-video",
     "category": "video-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["WAN"],
-      "other": ["VACE"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "WAN"
+      ],
+      "other": [
+        "VACE"
+      ]
     },
     "architecture": "WAN2.1 VACE"
   },
@@ -297,9 +444,15 @@
     "url": "ovlxj-wan-vace-control-video",
     "category": "video-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["WAN"],
-      "other": ["VACE"]
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "WAN"
+      ],
+      "other": [
+        "VACE"
+      ]
     },
     "architecture": "WAN2.1 VACE"
   },
@@ -309,32 +462,46 @@
     "url": "jzhqq-ltx2-text-to-video",
     "category": "text-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["LTX-2"],
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "LTX-2"
+      ],
       "other": []
     },
     "architecture": "LTX2_T2V_I2V"
   },
   {
     "id": "xb4y7",
-    "name": "Wan 2.2 Text to Video",    
+    "name": "Wan 2.2 Text to Video",
     "url": "xb4y7-wan-22-text-to-video",
     "category": "text-to-video",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["WAN 2.2"],
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
       "other": []
     },
     "architecture": "WAN22_TEXT_TO_VIDEO"
   },
   {
     "id": "kfifx",
-    "name": "Wan 2.2 Image to Video",    
+    "name": "Wan 2.2 Image to Video",
     "url": "kfifx-wan-2-2-image-to-video",
     "category": "image-to-video",
     "tags": {
-      "type": ["base","distilled-fast"],
-      "base_models": ["WAN 2.2"],
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
       "other": []
     },
     "architecture": "WAN22_IMAGE_TO_VIDEO"
@@ -345,8 +512,12 @@
     "url": "b7o1t-ltx2-image-to-video",
     "category": "image-to-video",
     "tags": {
-      "type": ["base"],
-      "base_models": ["LTX-2"],
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "LTX-2"
+      ],
       "other": []
     },
     "architecture": "LTX2_T2V_I2V"
@@ -357,7 +528,9 @@
     "url": "lrml1-openpose-controlnet-video",
     "category": "tools",
     "tags": {
-      "type": ["controlnet" ]           
+      "type": [
+        "controlnet"
+      ]
     },
     "architecture": "OTHER"
   },
@@ -367,7 +540,9 @@
     "url": "vlcfl-crop-and-pad",
     "category": "tools",
     "tags": {
-      "type": ["layout"],
+      "type": [
+        "layout"
+      ],
       "base_models": []
     },
     "architecture": "OTHER"
@@ -378,8 +553,10 @@
     "url": "z1xtb-depth-controlnet-video",
     "category": "tools",
     "tags": {
-      "type": ["controlnet"],
-      "base_models": []      
+      "type": [
+        "controlnet"
+      ],
+      "base_models": []
     },
     "architecture": "OTHER"
   },
@@ -389,7 +566,9 @@
     "url": "65j5u-background-remover",
     "category": "tools",
     "tags": {
-      "type": ["remove"],
+      "type": [
+        "remove"
+      ],
       "base_models": []
     },
     "architecture": "OTHER"
@@ -400,7 +579,9 @@
     "url": "9m3bo-crop-pad-2-images-side-by-side",
     "category": "tools",
     "tags": {
-      "type": ["layout"],
+      "type": [
+        "layout"
+      ],
       "base_models": []
     },
     "architecture": "OTHER"

@@ -3167,3 +3167,59 @@ html:not(.css-loading) body {
 .log-modal-header {
     margin: 0;
 }
+/* Mode Selector Styles */
+.mode-selector-container {
+    display: flex;
+    justify-content: flex-start; /* Align groups to the start */
+    align-items: center;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    background-color: var(--color-background-secondary);
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.mode-group-left, .mode-group-right {
+    display: flex;
+    gap: 5px;
+}
+
+.mode-group-right {
+    margin-left: 15px;
+    padding-left: 15px;
+    border-left: 1px solid var(--color-border);
+}
+
+.mode-button {
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    color: var(--color-primary-text);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+}
+
+.mode-button:hover {
+    background-color: var(--color-background-pattern-light);
+}
+
+.mode-button.active {
+    background-color: var(--color-accent);
+    color: var(--color-background-secondary);
+    border-color: var(--color-accent);
+    font-weight: bold;
+}
+
+.mode-button.disabled-saus {
+    background-color: #2a4d3e !important;
+    color: #8fbc8f !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.mode-button.disabled-saus:hover {
+    background-color: #2a4d3e !important;
+    color: #8fbc8f !important;
+}
+

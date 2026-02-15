@@ -126,7 +126,7 @@ function initializeSidebarFilters(callbacks) {
     sidebarLinks.forEach(link => {
         link.addEventListener('click', () => {
             const categoryName = link.dataset.category;
-            console.log(`Filtering by sidebar category: ${categoryName}`);
+            //console.log(`Filtering by sidebar category: ${categoryName}`);
             
             if (callbacks.showApps) callbacks.showApps();
 

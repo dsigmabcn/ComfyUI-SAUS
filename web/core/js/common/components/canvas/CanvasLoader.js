@@ -273,7 +273,7 @@ export class CanvasLoader {
                 this.canvasManager.registerPlugin(imageAdderPlugin);
             }
 
-            console.log('All canvas plugins registered successfully');
+            //console.log('All canvas plugins registered successfully');
 
             this.canvasManager.on('switchView', (newView) => {
                 // console.log(`Switching viewType to: ${newView}`);
@@ -288,7 +288,7 @@ export class CanvasLoader {
 
             });
             this.canvasManager.on('switchMaskingPreviewType', (PreviewType) => {
-                console.log(`Switching switchMaskingPreviewType to: ${PreviewType}`);
+                //console.log(`Switching switchMaskingPreviewType to: ${PreviewType}`);
                 // setView(PreviewType);
 
                 store.dispatch({

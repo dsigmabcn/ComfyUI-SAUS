@@ -4,12 +4,11 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH, ARC_MANAGER_PATH
 )
 from .route_manager import RouteManager
 from .downloader import sync_apps_handler
 from .file_system import (
-    #list_themes_handler, get_theme_css_handler, 
     directory_listing_handler, rename_file_handler, delete_file_handler, upload_file_handler,
     download_file_handler, upload_chunk_handler, list_input_files_handler,
     get_logs_handler
@@ -30,6 +29,7 @@ from .system import (
     list_model_previews_handler, get_model_preview_handler, get_settings_handler,
     save_settings_handler, restart_server_handler
 )
+from .arc_manager_handler import get_all_arc_data_handler, save_all_arc_data_handler, get_available_apps_handler
 
 class AppManager:
     @staticmethod
@@ -77,8 +77,6 @@ class AppManager:
     @staticmethod
     def _setup_core_routes(app: web.Application) -> None:
         if CORE_PATH.is_dir():
-            #app.router.add_get('/core/css/themes/list', list_themes_handler)
-            #app.router.add_get('/core/css/themes/{filename}', get_theme_css_handler)
             app.router.add_static('/core/', path=CORE_PATH, name='core')
 
     @staticmethod
@@ -118,7 +116,10 @@ class AppManager:
             (f'/saus/api/sync-apps', 'POST', sync_apps_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
             (f'/saus/api/files/input', 'GET', list_input_files_handler),
-            (f'/saus/api/logs', 'GET', get_logs_handler),
+            (f'/saus/api/logs', 'GET', get_logs_handler),          
+            (f'/saus/api/arc-manager/data', 'GET', get_all_arc_data_handler),
+            (f'/saus/api/arc-manager/data', 'POST', save_all_arc_data_handler),
+            (f'/saus/api/arc-manager/available-apps', 'GET', get_available_apps_handler),
 
         ]
 
@@ -136,8 +137,12 @@ class AppManager:
             app.add_routes(RouteManager.create_routes('saus/builder', BUILDER_PATH))
         if SAUS_BROWSER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus', SAUS_BROWSER_PATH))
+        else:
+            logger.error(f"{SAUSMSG}: SAUS Browser path not found at {SAUS_BROWSER_PATH}")
         if MODEL_MANAGER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus/model_manager', MODEL_MANAGER_PATH))
+        if ARC_MANAGER_PATH.is_dir():
+            app.add_routes(RouteManager.create_routes('saus/arc_manager', ARC_MANAGER_PATH))
         if FILE_MANAGER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH)) #Added for FILE_MANAGER
 

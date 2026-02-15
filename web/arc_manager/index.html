@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Manager</title>
+    <link rel="stylesheet" href="arc_manager/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <h1>Architecture Manager</h1>
+            <button id="relationships-btn" class="save-button" style="background-color: #17a2b8;">Relationships & Cleanup</button>
+        </header>
+
+        <div class="manager-body">
+            <!-- Apps Section -->
+            <div id="apps-section" class="section">
+                <h2>Apps</h2>
+                <div id="apps-list" class="item-list"></div>
+                <button class="add-button" data-type="app">+ Add App</button>
+            </div>
+
+            <!-- Architectures Section -->
+            <div id="architectures-section" class="section">
+                <h2>Architectures</h2>
+                <div id="architectures-list" class="item-list"></div>
+                <button class="add-button" data-type="architecture">+ Add Architecture</button>
+            </div>
+
+            <!-- Models Section -->
+            <div id="models-section" class="section">
+                <h2>Models</h2>
+                <div id="models-list" class="item-list"></div>
+                <button class="add-button" data-type="model">+ Add Model</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Modal -->
+    <div id="app-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-target="app-modal">&times;</span>
+            <h3 id="app-modal-title">App</h3>
+            <div id="app-modal-content"></div>
+            <button id="app-save-btn" class="save-button">Save App</button>
+        </div>
+    </div>
+
+    <!-- Architecture Modal -->
+    <div id="arch-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-target="arch-modal">&times;</span>
+            <h3 id="arch-modal-title">Architecture</h3>
+            <div id="arch-modal-content"></div>
+            <button id="arch-save-btn" class="save-button">Save Architecture</button>
+        </div>
+    </div>
+
+    <!-- Model Modal -->
+    <div id="model-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-target="model-modal">&times;</span>
+            <h3 id="model-modal-title">Model</h3>
+            <div id="model-modal-content"></div>
+            <button id="model-save-btn" class="save-button">Save Model</button>
+        </div>
+    </div>
+
+    <!-- Relationships Modal -->
+    <div id="relationships-modal" class="modal">
+        <div class="modal-content" style="width: 90%; max-width: 1000px;">
+            <span class="close-button" data-target="relationships-modal">&times;</span>
+            <h3 id="relationships-modal-title">Relationships & Cleanup</h3>
+            <div id="relationships-content"></div>
+        </div>
+    </div>
+
+    <script src="arc_manager/main.js"></script>
+</body>
+</html>

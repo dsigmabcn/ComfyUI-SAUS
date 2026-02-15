@@ -266,7 +266,7 @@ export function updateComponentStatus(fileId, status, progress = 0) {
         console.warn("[SAUS] Received update without fileId. Please restart your ComfyUI server to apply backend changes.");
         return;
     }
-    console.log(`[SAUS] updateComponentStatus: ${fileId} -> ${status} (${progress}%)`);
+    //console.log(`[SAUS] updateComponentStatus: ${fileId} -> ${status} (${progress}%)`);
 
     if (status === 'ready' || status === 'missing') {
         const AppCards = document.querySelectorAll('.app-card');
