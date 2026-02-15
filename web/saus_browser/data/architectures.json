@@ -1,7 +1,7 @@
 {
   "SD15": {
     "title": "SD 1.5 / SDXL",
-    "description": "Models for Stable Diffusion 1.5 and SDXL",
+    "description": "Models for Stable Diffusion 1.5 and SDXL. Choose between Realistic vision and Epic Realist (change resolution to 512x512). Or bring your SD/SDXL models using Custom.",
     "categories": [
       "Image Models"
     ],
@@ -9,10 +9,7 @@
       "compulsory": [],
       "at_least_one": [
         "EPIC REALISM",
-        "REV ANIMATED",
-        "JUGGERNAUT XL",
-        "REALISTIC VISION XL",
-        "DREAMSHAPER XL"
+        "REALISTIC VISION XL"
       ],
       "optional": []
     },
@@ -20,14 +17,18 @@
       "name": "RealVisXL",
       "steps": "20",
       "cfg": "7.5",
-      "model": [],
+      "model": [
+        "REALISTIC VISION XL"
+      ],
       "lora": []
     },
     "turbo_settings": {
       "name": "EPIC-SD1.5",
       "steps": "20",
       "cfg": "7.5",
-      "model": [],
+      "model": [
+        "EPIC REALISM"
+      ],
       "lora": []
     }
   },
@@ -48,6 +49,24 @@
         "FLUX_KREA"
       ],
       "optional": []
+    },
+    "base_settings": {
+      "name": "FLUX-DEV",
+      "steps": "30",
+      "cfg": "3.5",
+      "model": [
+        "FLUX_DEV_MODEL"
+      ],
+      "lora": []
+    },
+    "turbo_settings": {
+      "name": "FLUX-KREA",
+      "steps": "30",
+      "cfg": "3.5",
+      "model": [
+        "FLUX_KREA"
+      ],
+      "lora": []
     }
   },
   "QWEN": {
@@ -59,33 +78,30 @@
     "components": {
       "compulsory": [
         "WAN_VAE",
-        "QWEN_2.5VL_ENCODER"
+        "QWEN_2.5VL_ENCODER",
+        "QWEN_IMAGE_MODEL"
       ],
-      "at_least_one": [
-        "QWEN_IMAGE_MODEL",
-        "QWEN_IMAGE_2512_MODEL"
-      ],
+      "at_least_one": [],
       "optional": [
-        "QWEN_LIGHT_4steps",
-        "QWEN_LIGHT_8steps"
+        "QWEN_LIGHT_4steps"
       ]
     },
     "base_settings": {
       "name": "BASE",
+      "steps": "25",
+      "cfg": "7.5",
       "model": [
         "QWEN_IMAGE_MODEL"
       ],
-      "steps": "25",
-      "cfg": "7.5",
       "lora": []
     },
     "turbo_settings": {
       "name": "LIGHTNING",
+      "steps": "4",
+      "cfg": "1.0",
       "model": [
         "QWEN_IMAGE_MODEL"
       ],
-      "steps": "4",
-      "cfg": "1.0",
       "lora": [
         "QWEN_LIGHT_4steps"
       ]
@@ -93,7 +109,7 @@
   },
   "Z-IMAGE": {
     "title": "Z-Image",
-    "description": "Core models required to run Z-Image. BASE: CFG = 3-5, 30-50 steps. TURBO: CFG = 1, 4 steps",
+    "description": "Core models required to run Z-Image. Choose between the BASE and TURBO models",
     "categories": [
       "Image Models"
     ],
@@ -110,20 +126,20 @@
     },
     "base_settings": {
       "name": "BASE",
+      "steps": "30",
+      "cfg": "4.0",
       "model": [
         "Z_IMAGE_BASE"
       ],
-      "steps": "30",
-      "cfg": "4.0",
       "lora": []
     },
     "turbo_settings": {
       "name": "TURBO",
+      "steps": "4",
+      "cfg": "1.0",
       "model": [
         "Z_IMAGE_TURBO"
       ],
-      "steps": "4",
-      "cfg": "1.0",
       "lora": []
     }
   },
@@ -216,6 +232,24 @@
         "FLUX GGUF Q6"
       ],
       "optional": []
+    },
+    "base_settings": {
+      "name": "Q8",
+      "steps": "20",
+      "cfg": "3.5",
+      "model": [
+        "FLUX GGUF Q8"
+      ],
+      "lora": []
+    },
+    "turbo_settings": {
+      "name": "Q6",
+      "steps": "20",
+      "cfg": "3.5",
+      "model": [
+        "FLUX GGUF Q6"
+      ],
+      "lora": []
     }
   },
   "ANIMATE_DIFF_SD1.5": {
@@ -295,6 +329,31 @@
         "LIGHT_4steps_t2v_low",
         "LIGHT_4steps_t2v_high"
       ]
+    },
+    "base_settings": {
+      "name": "BASE",
+      "Total Steps": "20",
+      "Steps change high to low": "10",
+      "cfg": "3.5",
+      "model": [
+        "WAN2.2_T2V_HIGH",
+        "WAN2.2_T2V_LOW"
+      ],
+      "lora": []
+    },
+    "turbo_settings": {
+      "name": "LIGHTX2V",
+      "Total Steps": "4",
+      "Steps change high to low": "2",
+      "cfg": "1.0",
+      "model": [
+        "WAN2.2_T2V_HIGH",
+        "WAN2.2_T2V_LOW"
+      ],
+      "lora": [
+        "LIGHT_4steps_t2v_high",
+        "LIGHT_4steps_t2v_low"
+      ]
     }
   },
   "WAN22_IMAGE_TO_VIDEO": {
@@ -357,7 +416,17 @@
       ],
       "at_least_one": [],
       "optional": []
+    },
+    "base_settings": {
+      "name": "BASE",
+      "steps": "20",
+      "cfg": "4.0",
+      "model": [
+        "LTX2_BASE"
+      ],
+      "lora": []
     }
+
   },
   "FLUX_REDUX": {
     "title": "FLUX REDUX",
@@ -418,7 +487,9 @@
     "title": "QWEN EDIT",
     "description": "Assets for image prompt guidance and style transfer.",
     "categories": [
-      "Style, Edit, inpaint"
+      "Style",
+      "Edit",
+      "inpaint"
     ],
     "components": {
       "compulsory": [
@@ -426,13 +497,29 @@
         "QWEN_2.5VL_ENCODER"
       ],
       "at_least_one": [
-        "QWEN_EDIT_MODEL",
-        "QWEN_EDIT_2509_MODEL"
+        "QWEN_EDIT_MODEL"
       ],
       "optional": [
-        "QWEN_EDIT_2509_LIGHTING",
-        "QWEN_EDIT_2511_LIGHTING"
+        "QWEN_EDIT_2509_LIGHTING"
       ]
+    },
+    "base_settings": {
+      "name": "BASE",
+      "steps": "20",
+      "cfg": "4.0",
+      "model": [
+        "QWEN_EDIT_2509_MODEL"
+      ],
+      "lora": []
+    },
+    "turbo_settings": {
+      "name": "LIGHTNING",
+      "steps": "4",
+      "cfg": "1.0",
+      "model": [
+        "QWEN_EDIT_2509_LIGHTING"
+      ],
+      "lora": []
     }
   },
   "CONTROLNET FLUX": {
