@@ -521,8 +521,9 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     if (appConfig.dimensionSelectors) {
         appConfig.dimensionSelectors.forEach(config => {
-            if (appConfig.tags && appConfig.tags.base_models) {
-                const baseModels = appConfig.tags.base_models;
+            const tags = currentApp?.tags || appConfig.tags;
+            if (tags && tags.base_models) {
+                const baseModels = tags.base_models;
                 if (baseModels.includes('FLUX-2')) {
                     config.modelType = 'FLUX-2';
                 } else if (baseModels.includes('FLUX')) {

@@ -37,7 +37,8 @@
     "category": "text-to-image",
     "tags": {
       "type": [
-        "base"
+        "base",
+        "distilled-fast"
       ],
       "base_models": [
         "Z-image"
@@ -52,7 +53,8 @@
     "category": "text-to-image",
     "tags": {
       "type": [
-        "base"
+        "base",
+        "distilled-fast"
       ],
       "base_models": [
         "QWEN"
