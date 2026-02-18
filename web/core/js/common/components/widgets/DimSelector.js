@@ -44,9 +44,9 @@ class DimensionSelector {
                 'Portrait': { width: 720, height: 1280 }
             },
             'Z-image': {
-                'Square': { width: 512, height: 512 },
-                'Landscape': { width: 768, height: 512 },
-                'Portrait': { width: 512, height: 768 }
+                'Square': { width: 1024, height: 1024 },
+                'Landscape': { width: 1248, height: 832 },
+                'Portrait': { width: 832, height: 1248 }
             }            
         };
 

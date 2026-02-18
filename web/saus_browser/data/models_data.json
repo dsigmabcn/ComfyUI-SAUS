@@ -31,7 +31,7 @@
     "model_path": "/checkpoints/SD15",
     "thumbnail_path": ""
   },
-    "REV ANIMATED": {
+  "REV ANIMATED": {
     "id": "rev-animated-v1-2-2.safetensors",
     "name": "REV Animated V2 Rebirth",
     "type": "CHECKPOINT",
@@ -47,7 +47,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "FLUX_KREA": {
+  "FLUX_KREA": {
     "id": "flux1-krea-dev.safetensors",
     "name": "FLUX-KREA-DEV",
     "type": "Diffusion model",
@@ -167,7 +167,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "FLUX2_KLEIN_4B_DISTILLED": {
+  "FLUX2_KLEIN_4B_DISTILLED": {
     "id": "flux-2-klein-4b.safetensors",
     "name": "FLUX 2 KLEIN 4B (distilled)",
     "type": "Diffusion model",
@@ -183,8 +183,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-
-    "ANIMATEDIFF MM V3": {
+  "ANIMATEDIFF MM V3": {
     "id": "v3_sd15_mm.ckpt",
     "name": "AnimateDiff V3 MM",
     "type": "MOTION_MODULE",
@@ -240,7 +239,7 @@
     "model_path": "/diffusion_models/WAN21/",
     "thumbnail_path": ""
   },
-    "LTX2_BASE": {
+  "LTX2_BASE": {
     "id": "ltx-2-19b-dev-fp8.safetensors",
     "name": "LTX-2 19B DEV FP8",
     "type": "CHECKPOINT",
@@ -248,7 +247,7 @@
     "model_path": "/checkpoints/LTX2/",
     "thumbnail_path": ""
   },
-    "LTX2_DISTILLED_LORA": {
+  "LTX2_DISTILLED_LORA": {
     "id": "ltx-2-19b-distilled-lora-384.safetensors",
     "name": "LTX-2 19B DISTILLED LORA",
     "type": "LORA",
@@ -256,15 +255,15 @@
     "model_path": "/loras/LTX2/",
     "thumbnail_path": ""
   },
-    "LTX2_VIDEO_UPSCALER": {
+  "LTX2_VIDEO_UPSCALER": {
     "id": "ltx-2-spatial-upscaler-x2-1.0.safetensors",
     "name": "LTX-2 Spatial Upscaler",
-    "type": "Laten Upscaler",
+    "type": "Latent Upscaler",
     "url_model": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors",
     "model_path": "/latent_upscale_models/",
     "thumbnail_path": ""
   },
-    "GEMMA_3_12B_ENCODER": {
+  "GEMMA_3_12B_ENCODER": {
     "id": "gemma_3_12B_it_fp4_mixed.safetensors",
     "name": "GEMMA 3 12B FP4 ENCODER",
     "type": "TEXT ENCODER",
@@ -280,7 +279,7 @@
     "model_path": "/clip_vision/",
     "thumbnail_path": ""
   },
-    "CAUSVID 1.3B": {
+  "CAUSVID 1.3B": {
     "id": "Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors",
     "name": "CAUSVID 1.3B LORA",
     "type": "LORA",
@@ -328,7 +327,7 @@
     "model_path": "/diffusion_models/WAN22/",
     "thumbnail_path": ""
   },
-    "LIGHT_4steps_t2v_high": {
+  "LIGHT_4steps_t2v_high": {
     "id": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
     "name": "LIGHTX2V_LORA_2.2 I2V HIGH",
     "type": "LORA",
@@ -360,7 +359,7 @@
     "model_path": "/diffusion_models/WAN22/",
     "thumbnail_path": ""
   },
-    "LIGHT_4steps_i2v_high": {
+  "LIGHT_4steps_i2v_high": {
     "id": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
     "name": "LIGHTX2V LORA_2.2 I2V HIGH",
     "type": "LORA",
@@ -376,7 +375,7 @@
     "model_path": "/loras/WAN22",
     "thumbnail_path": ""
   },
-    "WAN_VAE_2.2": {
+  "WAN_VAE_2.2": {
     "id": "wan2.2_vae.safetensors",
     "name": "VAE for WAN 2.2 TI2V (5B)",
     "type": "VAE",
@@ -384,7 +383,7 @@
     "model_path": "/vae/",
     "thumbnail_path": ""
   },
-    "WAN 2.2 TI2V 5B MODEL": {
+  "WAN 2.2 TI2V 5B MODEL": {
     "id": "wan2.1_t2v_1.3B_fp16.safetensors",
     "name": "WAN 2.2 TI2V 5B",
     "type": "Diffusion model",
@@ -448,7 +447,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "FLUX_FILL_DEV_MODEL": {
+  "FLUX_FILL_DEV_MODEL": {
     "id": "flux1-fill-dev.safetensors",
     "name": "FLUX-DEV-FILL",
     "type": "Diffusion model",
@@ -512,7 +511,7 @@
     "model_path": "/loras/QWEN/",
     "thumbnail_path": ""
   },
-    "QWEN_EDIT_2509_LIGHTING": {
+  "QWEN_EDIT_2509_LIGHTING": {
     "id": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
     "name": "QWEN EDIT 2509 LIGHTNING 4-steps LORA",
     "type": "LORA",
@@ -520,8 +519,6 @@
     "model_path": "/loras/QWEN/",
     "thumbnail_path": ""
   },
-
-
   "FLUX GGUF Q8": {
     "id": "flux1-dev-Q8_0.gguf",
     "name": "GGUF Q8 FLUX-DEV",
@@ -530,7 +527,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "FLUX GGUF Q6": {
+  "FLUX GGUF Q6": {
     "id": "flux1-dev-Q6_K.gguf",
     "name": "GGUF Q6_K FLUX-DEV",
     "type": "Diffusion model",
@@ -538,7 +535,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "FLUX GGUF Q4": {
+  "FLUX GGUF Q4": {
     "id": "flux1-dev-Q4_K_S.gguf",
     "name": "GGUF Q4_K_S FLUX-DEV",
     "type": "Diffusion model",
@@ -546,7 +543,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "KONTEXT GGUF Q8": {
+  "KONTEXT GGUF Q8": {
     "id": "flux1-kontext-dev-Q8_0.gguf",
     "name": "GGUF Q8 KONTEXT",
     "type": "Diffusion model",
@@ -554,7 +551,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "KONTEXT GGUF Q6": {
+  "KONTEXT GGUF Q6": {
     "id": "flux1-kontext-dev-Q6_K.gguf",
     "name": "GGUF Q6_K KONTEXT",
     "type": "Diffusion model",
@@ -562,7 +559,7 @@
     "model_path": "/diffusion_models/FLUX/",
     "thumbnail_path": ""
   },
-    "KONTEXT GGUF Q4": {
+  "KONTEXT GGUF Q4": {
     "id": "flux1-kontext-dev-Q4_K_S.gguf",
     "name": "GGUF Q4_K_S KONTEXT",
     "type": "Diffusion model",
@@ -642,7 +639,7 @@
     "model_path": "/diffusion_models/WAN21/",
     "thumbnail_path": ""
   },
-    "WAN2.1_I2V_GGUF Q8": {
+  "WAN2.1_I2V_GGUF Q8": {
     "id": "wan2.1-i2v-14b-480p-Q8_0.gguf",
     "name": "WAN 2.1 I2V GGUF Q8",
     "type": "Diffusion model",
@@ -666,7 +663,7 @@
     "model_path": "/diffusion_models/WAN21/",
     "thumbnail_path": ""
   },
-    "WAN2.1_VACE_GGUF Q8": {
+  "WAN2.1_VACE_GGUF Q8": {
     "id": "Wan2.1_14B_VACE-Q8_0.gguf",
     "name": "WAN 2.1 VACE GGUF Q8",
     "type": "Diffusion model",
@@ -834,12 +831,12 @@
     "model_path": "/text_encoders/",
     "thumbnail_path": ""
   },
-    "CONTROLNET": {
-    "id": "controlnet_base",
+  "CONTROLNET": {
+    "id": "controlnet_1",
     "name": "ControlNet Base Asset",
     "type": "CONTROLNET",
     "url_model": "",
-    "model_path": "",
+    "model_path": "/controlnet/",
     "thumbnail_path": ""
   }
 }

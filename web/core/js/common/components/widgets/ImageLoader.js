@@ -204,8 +204,8 @@ export default class ImageLoader {
     }
   }*/
   displayMedia(file, src) {
-    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const safeVideos = ['video/mp4', 'video/webm', 'video/ogg'];
+    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+    const safeVideos = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'];
 
     if (safeImages.includes(file.type)) {
       this.displayImage(src);
@@ -214,7 +214,9 @@ export default class ImageLoader {
     } else {
       console.error("Untrusted or unsupported file type:", file.type);
       // Optionally revoke the URL if you don't use it
-      URL.revokeObjectURL(src);
+      if (src && src.startsWith('blob:')) {
+        URL.revokeObjectURL(src);
+      }
     }
   }
 
@@ -226,7 +228,11 @@ export default class ImageLoader {
       this.imageDropArea.replaceChild(newImgElement, this.imgElement);
       this.imgElement = newImgElement;
     }
-    this.imgElement.onload = () => URL.revokeObjectURL(src);
+    this.imgElement.onload = () => {
+      if (src && src.startsWith('blob:')) {
+        URL.revokeObjectURL(src);
+      }
+    };
     this.imgElement.src = src;
     this.imgElement.alt = 'Loaded Image';
   }
@@ -241,8 +247,16 @@ export default class ImageLoader {
       this.imgElement = videoElement;
     }
   // Use onloadedmetadata for video elements
-    this.imgElement.onloadedmetadata = () => URL.revokeObjectURL(src);
-    this.imgElement.onerror = () => URL.revokeObjectURL(src);
+    this.imgElement.onloadedmetadata = () => {
+      if (src && src.startsWith('blob:')) {
+        URL.revokeObjectURL(src);
+      }
+    };
+    this.imgElement.onerror = () => {
+      if (src && src.startsWith('blob:')) {
+        URL.revokeObjectURL(src);
+      }
+    };
     this.imgElement.src = src;
 
   }
@@ -388,8 +402,11 @@ export default class ImageLoader {
 
   guessMimeType(filename) {
     const ext = filename.split('.').pop().toLowerCase();
-    if (['png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
-    if (['mp4', 'webm', 'ogg', 'mov', 'mkv'].includes(ext)) return 'video/' + ext;
+    if (ext === 'jpg') return 'image/jpeg';
+    if (['png', 'jpeg', 'webp', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
+    if (ext === 'mov') return 'video/quicktime';
+    if (ext === 'mkv') return 'video/x-matroska';
+    if (['mp4', 'webm', 'ogg'].includes(ext)) return 'video/' + ext;
     return 'application/octet-stream';
   }
 }

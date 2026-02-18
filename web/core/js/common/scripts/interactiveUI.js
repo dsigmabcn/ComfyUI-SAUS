@@ -90,7 +90,7 @@ function moveRightElementsBack() {
         const element = document.getElementById(elementId);
         if (element) {
             parent.replaceChild(element, placeholder);
-            console.log(`Moved "${elementId}" back to its original parent.`);
+            //console.log(`Moved "${elementId}" back to its original parent.`);
         } else {
             console.warn(`Element with ID "${elementId}" not found.`);
         }

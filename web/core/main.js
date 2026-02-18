@@ -12,7 +12,7 @@ import Dropdown from './js/common/components/widgets/Dropdown.js';
 import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
 import { initializeWebSocket, messageHandler } from './js/common/components/messageHandler.js';
-import { updateWorkflowValue } from './js/common/components/workflowManager.js';
+import { updateWorkflowValue, updateWorkflow } from './js/common/components/workflowManager.js';
 import { processWorkflowNodes } from './js/common/scripts/nodesscanner.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
 import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
@@ -81,8 +81,17 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     const appName = getAppName();
     const client_id = uuidv4();
     const appConfig = await fetchappConfig(appName);
+    const appList = await fetch('/saus/api/apps-list').then(res => res.json());
+    const architectures = await fetch('/saus/api/architectures').then(res => res.json());
+    const modelsData = await fetch('/saus/api/data-model-info').then(res => res.json());
+
+    const currentApp = appList.find(app => app.url === appName);
+    const architectureName = currentApp ? currentApp.architecture : null;
+    
     let workflow = await fetchWorkflow(appName);
     let canvasLoader;
+    
+    const widgetInstances = {}; // To store all widget instances
 
     const seeders = [];
     initializeWebSocket(client_id);
@@ -121,7 +130,7 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             container.appendChild(div);
         }
 
-        if (config.dropdowns && Array.isArray(config.dropdowns)) {
+        if (config.dropdowns && Array.isArray(config.dropdowns)) {            
             config.dropdowns.forEach(dropdown => {
                 appendControl(dropdown, 'loader');
             });
@@ -218,35 +227,303 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     generateWorkflowControls(appConfig); 
     setPromptComponents(appConfig, true);
+    
+    async function setupModeSelector() {
+        const modeSelectorContainer = document.getElementById('mode-selector-container');
+        const hdButton = modeSelectorContainer.querySelector('[data-mode="hd"]');
+        const turboButton = modeSelectorContainer.querySelector('[data-mode="turbo"]');
+    
+        const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
+        let availableModels = [];
+        if (modelWidgetConfig) {
+            try {
+                const url = `${window.location.origin}/object_info/${modelWidgetConfig.url}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                const firstKey = Object.keys(data)[0];
+                const loaderData = data[firstKey];
+                const key = modelWidgetConfig.key || 'ckpt_name';
+                availableModels = loaderData.input.required[key][0];
+            } catch (error) {
+                console.error("Could not fetch available models list:", error);
+            }
+        }
+    
+        const checkModels = (settings) => {
+            if (!settings || !settings.model || settings.model.length === 0) {
+                return true; 
+            }
+            for (const modelId of settings.model) {
+                const modelInfo = modelsData[modelId];
+                if (!modelInfo) {
+                    console.warn(`Model identifier "${modelId}" not found in models_data.json`);
+                    return false;
+                }
+                let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
+                const fullModelPath = path ? `${path}/${modelInfo.id}` : modelInfo.id;
+                
+                if (!availableModels.includes(fullModelPath)) {
+                    console.warn(`Required model "${fullModelPath}" is not installed.`);
+                    return false;
+                }
+            }
+            return true;
+        };
+    
+        if (architectureName && architectures[architectureName]) {
+            const arch = architectures[architectureName];
+    
+            if (arch.base_settings) {
+                hdButton.textContent = arch.base_settings.name;
+                if (!checkModels(arch.base_settings)) {
+                    hdButton.disabled = true;
+                    hdButton.classList.add('disabled-saus');
+                    hdButton.title = 'Required models for this mode are not installed.';
+                }
+            } else {
+                hdButton.disabled = true;
+                hdButton.classList.add('disabled-saus');
+                hdButton.title = 'This mode is not configured for this architecture.';
+            }
+    
+            if (arch.turbo_settings) {
+                turboButton.textContent = arch.turbo_settings.name;
+                if (!checkModels(arch.turbo_settings)) {
+                    turboButton.disabled = true;
+                    turboButton.classList.add('disabled-saus');
+                    turboButton.title = 'Required models for this mode are not installed.';
+                }
+            } else {
+                turboButton.disabled = true;
+                turboButton.classList.add('disabled-saus');
+                turboButton.title = 'This mode is not configured for this architecture.';
+            }
+        } else {
+            hdButton.disabled = true;
+            hdButton.classList.add('disabled-saus');
+            hdButton.title = 'Architecture not found.';
+            turboButton.disabled = true;
+            turboButton.classList.add('disabled-saus');
+            turboButton.title = 'Architecture not found.';
+        }
+    
+        if (!modeSelectorContainer) {
+            console.warn("Mode selector container not found.");
+            return;
+        }
+    
+        modeSelectorContainer.addEventListener('click', async (event) => {
+            const clickedButton = event.target.closest('.mode-button');
+            if (!clickedButton || clickedButton.disabled) {
+                return; 
+            }
+    
+            if (clickedButton.classList.contains('exclusive-mode')) {
+                if (clickedButton.classList.contains('active')) {
+                    return;
+                }
+    
+                const exclusiveButtons = modeSelectorContainer.querySelectorAll('.exclusive-mode');
+                exclusiveButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+    
+                clickedButton.classList.add('active');
+
+                const mode = clickedButton.dataset.mode;
+
+                const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
+                const modelWidgetElements = modelWidgetConfigs.map(c => document.getElementById(c.id)).filter(el => el);
+                const typeWidgetElements = appConfig.dropdowns
+                    .filter(d => d.label === 'Type')
+                    .map(d => document.getElementById(d.id))
+                    .filter(el => el);
+                const loraWidgetElement = document.querySelector('.lora-component-container');
+                const dynamicLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+                
+                if (mode === 'custom') {
+                    modelWidgetElements.forEach(el => el.style.display = '');
+                    typeWidgetElements.forEach(el => el.style.display = '');
+                    if (loraWidgetElement) loraWidgetElement.style.display = '';
+                    dynamicLoraWidgets.forEach(w => w.style.display = '');
+                } else { // for 'hd' and 'turbo'
+                    modelWidgetElements.forEach(el => el.style.display = 'none');
+                    typeWidgetElements.forEach(el => el.style.display = 'none');
+                    if (loraWidgetElement) loraWidgetElement.style.display = 'none';
+                    dynamicLoraWidgets.forEach(w => w.style.display = 'none');
+                }
+
+
+                if (architectureName && architectures[architectureName]) {
+                    const arch = architectures[architectureName];
+                    const settings = (mode === 'hd' && arch.base_settings) ? arch.base_settings :
+                                     (mode === 'turbo' && arch.turbo_settings) ? arch.turbo_settings : null;
+
+                    if (settings) {
+                        // --- Models ---
+                        if (settings.model && Array.isArray(settings.model)) {
+                            const modelIdentifiers = settings.model;
+                            const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
+                            
+                            modelIdentifiers.forEach((modelIdentifier, index) => {
+                                if (modelWidgetConfigs[index] && modelsData[modelIdentifier]) {
+                                    const modelWidgetConfig = modelWidgetConfigs[index];
+                                    const modelInfo = modelsData[modelIdentifier];
+                                    let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
+                                    const newModelValue = path ? `${path}/${modelInfo.id}` : modelInfo.id;
+                                    
+                                    updateWorkflow(workflow, modelWidgetConfig.nodePath, newModelValue);
+
+                                    const dropdownElement = document.getElementById(modelWidgetConfig.id);
+                                    if (dropdownElement) {
+                                        const input = dropdownElement.querySelector('input');
+                                        if (input) {
+                                            const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                            input.value = getDisplayName(newModelValue);
+                                            input.title = newModelValue;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // --- LoRAs ---
+                        const existingLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
+                        existingLoraWidgets.forEach(widget => {
+                            const removeBtn = widget.querySelector('button[title="Remove LoRA"]');
+                            if (removeBtn) {
+                                removeBtn.click();
+                            }
+                        });
+
+                        if (settings.lora && Array.isArray(settings.lora) && settings.lora.length > 0) {
+                            const loraIdentifiers = settings.lora;
+                            const addLoraButtons = document.querySelectorAll('.add-lora-button');
+                            
+                            for (const loraIdentifier of loraIdentifiers) {
+                                if (addLoraButtons.length > 0) {
+                                    // Assuming chaining loras on the first model loader
+                                    addLoraButtons[0].click();
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                    
+                                    const newLoraWidget = Array.from(document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]')).pop();
+
+                                    if (newLoraWidget && modelsData[loraIdentifier]) {
+                                        const loraInfo = modelsData[loraIdentifier];
+                                        let path = (loraInfo.model_path || '').replace('/loras/', '');
+                                        path = path.replace(/^\/|\/$/g, '');
+                                        const newLoraValue = path ? `${path}/${loraInfo.id}` : loraInfo.id;
+                                        
+                                        const containerId = newLoraWidget.id;
+                                        const nodeId = containerId.split('_')[1];
+                                        const nodePath = `${nodeId}.inputs.lora_name`;
+                                        updateWorkflow(workflow, nodePath, newLoraValue);
+
+                                        const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
+                                        if (dropdownContainer) {
+                                            const input = dropdownContainer.querySelector('input');
+                                            if (input) {
+                                                const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                                input.value = getDisplayName(newLoraValue);
+                                                input.title = newLoraValue;
+                                            }
+                                        }
+
+                                        if (mode !== 'custom') {
+                                            newLoraWidget.style.display = 'none';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // --- Other Steppers (CFG, Steps, etc.) ---
+                        for (const key in settings) {
+                            if (Object.prototype.hasOwnProperty.call(settings, key) && key !== 'model' && key !== 'lora' && key !== 'name') {
+                                const widgetConfig = appConfig.steppers.find(s => s.label.toLowerCase() === key.toLowerCase());
+                                if (widgetConfig) {
+                                    const widgetInstance = widgetInstances[widgetConfig.id];
+                                    if (widgetInstance) {
+                                        const value = settings[key];
+                                        if (value !== null && value !== undefined) {
+                                            widgetInstance.updateValue(Number(value));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                clickedButton.classList.toggle('active');
+
+                if (clickedButton.dataset.mode === 'fp8') {
+                    const typeDropdownConfigs = appConfig.dropdowns.filter(d => d.label === 'Type');
+                    const newValue = clickedButton.classList.contains('active') ? 'fp8_e4m3fn' : 'default';
+
+                    typeDropdownConfigs.forEach(typeDropdownConfig => {
+                        if (typeDropdownConfig && typeDropdownConfig.nodePath) {
+                            const typeInput = document.querySelector(`#${typeDropdownConfig.id} input[type="text"]`);
+                            if (typeInput) {
+                                typeInput.value = newValue;
+                                typeInput.title = newValue;
+                                updateWorkflow(workflow, typeDropdownConfig.nodePath, newValue);
+                            } else {
+                                console.warn(`Could not find the <input> element for the Type widget (ID: ${typeDropdownConfig.id}). UI might not update.`);
+                            }
+                        } else {
+                            console.warn(`Could not find config or nodePath for a Type widget with id: ${typeDropdownConfig ? typeDropdownConfig.id : 'undefined'}`);
+                        }
+                    });
+                }
+            }
+    
+            const activeButtons = modeSelectorContainer.querySelectorAll('.mode-button.active');
+            const modes = Array.from(activeButtons).map(btn => btn.dataset.mode);
+            console.log('Active modes:', modes);
+        });
+
+        const customButton = modeSelectorContainer.querySelector('[data-mode="custom"]');
+        if (hdButton && !hdButton.disabled) {
+            hdButton.click();
+        } else if (turboButton && !turboButton.disabled) {
+            turboButton.click();
+        } else if (customButton) {
+            customButton.click();
+        }
+    }
 
     const loraWorkflowManager = new LoraWorkflowManager(workflow, appConfig);
 
     workflow = loraWorkflowManager.getWorkflow();
     
     processWorkflowNodes(workflow).then(({ nodeToCustomNodeMap, uniqueCustomNodesArray, missingNodes, missingCustomPackages }) => {
-        console.log("Node to Custom Node Mapping:", nodeToCustomNodeMap);
-        console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
-        console.log("Missing Nodes:", missingNodes);
-        console.log("Missing Custom Packages:", missingCustomPackages);
+        //console.log("Node to Custom Node Mapping:", nodeToCustomNodeMap);
+        //console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
+        //console.log("Missing Nodes:", missingNodes);
+        //console.log("Missing Custom Packages:", missingCustomPackages);
         checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, appConfig);
     });
 
     if (appConfig.dropdowns) {
         appConfig.dropdowns.forEach(config => {
-            new Dropdown(config, workflow);
+            const instance = new Dropdown(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.steppers) {
         appConfig.steppers.forEach(config => {
-            new Stepper(config, workflow);
+            const instance = new Stepper(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.dimensionSelectors) {
         appConfig.dimensionSelectors.forEach(config => {
-            if (appConfig.tags && appConfig.tags.base_models) {
-                const baseModels = appConfig.tags.base_models;
+            const tags = currentApp?.tags || appConfig.tags;
+            if (tags && tags.base_models) {
+                const baseModels = tags.base_models;
                 if (baseModels.includes('FLUX-2')) {
                     config.modelType = 'FLUX-2';
                 } else if (baseModels.includes('FLUX')) {
@@ -267,19 +544,22 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                     config.modelType = 'SDXL';
                 }
             }
-            new DimensionSelector(config, workflow);
+            const instance = new DimensionSelector(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.inputs) {
         appConfig.inputs.forEach(config => {
-            new InputComponent(config, workflow);
+            const instance = new InputComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.toggles) {
         appConfig.toggles.forEach(config => {
-            new ToggleComponent(config, workflow);
+            const instance = new ToggleComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
@@ -287,24 +567,30 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         appConfig.seeders.forEach(config => {
             const seeder = new Seeder(config, workflow);
             seeders.push(seeder);
+            widgetInstances[config.id] = seeder;
         });
     }
 
     if (appConfig.multiComponents && Array.isArray(appConfig.multiComponents)) {
         appConfig.multiComponents.forEach(config => {
-            new MultiComponent(config, workflow);
+            const instance = new MultiComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
     if (appConfig.dataComponents && Array.isArray(appConfig.dataComponents)) {
         appConfig.dataComponents.forEach(config => {
-            new DataComponent(config, workflow);
+            const instance = new DataComponent(config, workflow);
+            widgetInstances[config.id] = instance;
         });
     }
 
 
     imageLoaderComp(appConfig, workflow);
     
+    // Now that all widgets are created and instances stored, setup the mode selector
+    await setupModeSelector();
+
     const initCanvas = async () => {
         canvasLoader = new CanvasLoader('imageCanvas', appConfig);
         await canvasLoader.initPromise;
@@ -325,7 +611,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
 
     async function queue() {   
-        console.log("Queueing new job");
+        //console.log("Queueing new job");
         messageHandler.updateNodeMap(workflow);
 
         if (canvasLoader && canvasLoader.isInitialized) {
@@ -334,7 +620,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             console.log("Canvas is not initialized. Skipping CanvasComponent.");
         }
 
-        console.log("Queueing workflow:", workflow);        
+        //console.log("Queueing workflow:", workflow);        
 
         if (appConfig.prompts) {
             appConfig.prompts.forEach(pathConfig => {
@@ -352,9 +638,9 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         const jobId = StateManager.incrementJobId();
         const job = { id: jobId, workflow: { ...workflow } };
         StateManager.addJob(job);
-        console.log(`Added job to queue. Job ID: ${jobId}`);
-        console.log("Current queue:", StateManager.getJobQueue());
-        console.log("queued workflow:", workflow);        
+        //console.log(`Added job to queue. Job ID: ${jobId}`);
+        //console.log("Current queue:", StateManager.getJobQueue());
+        //console.log("queued workflow:", workflow);        
         store.dispatch({
             type: 'SET_QUEUE_RUNNING',
             payload: true
@@ -384,7 +670,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         StateManager.setProcessing(true);
 
         const job = StateManager.getNextJob();
-        console.log(`Processing job ${job.id}`);
+        //console.log(`Processing job ${job.id}`);
         try {
             await queue_prompt(job.workflow);
         } catch (error) {
@@ -434,29 +720,25 @@ function setPromptComponents(config, options = { clearInputs: false }) {
          } else {
             queueDisplay.textContent = '';
         }
-
-        // if (jobQueue.length > 0) {
-        //     const jobIds = jobQueue.map(job => job.id).join(', ');
-        //     queueDisplay.textContent += ` (Job IDs: ${jobIds})`;
-        // }
+        
     }
 
     async function interrupt() {
         await queue_interrupt();
         if (StateManager.isProcessing()) {
-            console.log("Interrupting current job");
+            //console.log("Interrupting current job");
         } else if (StateManager.getJobQueue().length > 0) {
             const removedJob = StateManager.getJobQueue().pop();
-            console.log(`Removed job from queue. Job ID: ${removedJob.id}`);
-            console.log("Remaining queue:", StateManager.getJobQueue());
+            //console.log(`Removed job from queue. Job ID: ${removedJob.id}`);
+            //console.log("Remaining queue:", StateManager.getJobQueue());
             updateQueueDisplay(StateManager.getJobQueue());
         } else {
-            console.log("No jobs in queue to interrupt.");
+            //console.log("No jobs in queue to interrupt.");
         }
     }
 
     async function queue_interrupt() {
-        console.log("Interrupting last job");
+        //console.log("Interrupting last job");
         const data = { 'client_id': client_id };
         try {
             showSpinner();
@@ -472,7 +754,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 throw new Error('Failed to interrupt the process.');
             }
             const result = await response.json();
-            console.log('Interrupted:', result);
+            //console.log('Interrupted:', result);
         } catch (error) {
             console.error('Error during interrupt:', error);
             hideSpinner();
@@ -481,25 +763,25 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         }
     }
 
-    // ----------------------------------------------------------------------
-    // NEW: Function to handle tab switching logic
-    // In main.js
+
+
+    //Function to handle tab switching logic  
 
 function setupTabSwitching() {
     const tabButtons = document.querySelectorAll('.control-tabs-header .tab-button');
     const tabPanels = document.querySelectorAll('.control-tabs-content .tab-panel');
 
-    console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
+    //console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
     
     if (tabButtons.length === 0 || tabPanels.length === 0) {
-        console.error("FINAL TEST: Tab elements not found.");
+        //console.error("FINAL TEST: Tab elements not found.");
         return; 
     }
     
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
-            console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
+            //console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
 
             // 1. Deactivate all buttons and panels
             tabButtons.forEach(btn => btn.classList.remove('active'));
