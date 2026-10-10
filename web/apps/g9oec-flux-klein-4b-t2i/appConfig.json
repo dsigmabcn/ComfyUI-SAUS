@@ -1,0 +1,83 @@
+{
+  "id": "g9oec",
+  "name": "FLUX KLEIN 4B T2I",
+  "url": "g9oec-flux-klein-4b-t2i",
+  "description": "Create images from text using the 4B version of the Flux 2 KLEIN models. \nDISTILLED MODEL USE 4 STEPS, CFG 1",
+  "prompts": [
+    {
+      "id": "prompt8lnik3",
+      "label": "Prompt",
+      "default": "A hedgehog wearing a tiny party hat surrounded by confetti, early digital camera style, slight noise, flash photography, candid moment, 2000s digicam aesthetic, festive birthday celebration atmosphere",
+      "nodePath": "97.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownt459gk",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "94.inputs.unet_name"
+    },
+    {
+      "id": "dropdownfrjmlq",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "94.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdownwkv35h",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "label": "CLIP",
+      "nodePath": "95.inputs.clip_name"
+    },
+    {
+      "id": "dropdownpfxfdw",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "84.inputs.sampler_name"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperhcq8ty",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "85.inputs.steps"
+    },
+    {
+      "id": "stepper0il91v",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "86.inputs.cfg"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederpyyvzt",
+      "label": "Seed",
+      "nodePath": "93.inputs.noise_seed"
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimensionSelector7jb65s",
+      "defaultWidth": 1024,
+      "defaultHeight": 1024,
+      "nodePath": "99.inputs"
+    }
+  ]
+}

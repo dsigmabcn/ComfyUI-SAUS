@@ -1,0 +1,90 @@
+{
+  "id": "afoye",
+  "name": "Base - Stable Diffusion - Image to Image",
+  "url": "afoye-base-stable-diffusion-image-to-image",
+  "description": "Basic image to image SD and SDXL",
+  "prompts": [
+    {
+      "id": "prompt7bope1",
+      "label": "Prompt",
+      "nodePath": "6.inputs.text"
+    },
+    {
+      "id": "promptithps6",
+      "label": "Negative Prompt",
+      "nodePath": "7.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownibkz82",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "label": "Checkpoint",
+      "nodePath": "4.inputs.ckpt_name"
+    },
+    {
+      "id": "dropdown1ed2vn",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "3.inputs.sampler_name"
+    },
+    {
+      "id": "dropdownwjes63",
+      "url": "KSampler",
+      "key": "scheduler",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "cfg",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 7.5,
+      "precision": 1,
+      "scaleFactor": 10,
+      "nodePath": "3.inputs.cfg"
+    },
+    {
+      "id": "steps",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "3.inputs.steps"
+    },
+    {
+      "id": "denoise",
+      "label": "Denoise",
+      "minValue": 0,
+      "maxValue": 1,
+      "step": 0.01,
+      "defValue": 0.55,
+      "precision": 2,
+      "scaleFactor": 100,
+      "nodePath": "3.inputs.denoise"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seed",
+      "label": "Seed",
+      "nodePath": "3.inputs.seed"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "loadimage1",
+      "label": "loadimage1",
+      "nodePath": "12.inputs.image"
+    }
+  ]
+}

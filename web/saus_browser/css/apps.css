@@ -124,27 +124,6 @@
 .status-text.status-partial { background-color: #ff9800; color: white; }
 .status-text.status-loading { background-color: #6c757d; color: white; }
 
-.app-type-badge {
-    position: absolute;
-    top: 1px;
-    right: 30px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    z-index: 5;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    pointer-events: auto;
-    font-size: 1.2em;
-}
-
-.type-gold i { color: transparent; -webkit-text-stroke: 1px #FFD700; filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-.type-beta i { color: transparent; -webkit-text-stroke: 1px #FF9F43; filter: drop-shadow(0 0 2px rgba(255, 159, 67, 0.5)); }
-.type-user i { color: transparent; -webkit-text-stroke: 1px #54A0FF; filter: drop-shadow(0 0 2px rgba(84, 160, 255, 0.5)); }
-.type-open i { color: transparent; -webkit-text-stroke: 1px #1DD1A1; filter: drop-shadow(0 0 2px rgba(29, 209, 161, 0.5)); }
 
 .appName {
     padding: 10px;

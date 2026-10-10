@@ -1,0 +1,387 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 410165367022783,
+      "steps": 12,
+      "cfg": 4,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1,
+      "model": [
+        "66",
+        0
+      ],
+      "positive": [
+        "86",
+        0
+      ],
+      "negative": [
+        "86",
+        1
+      ],
+      "latent_image": [
+        "86",
+        2
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "An ancient Greek soldier soldier is preparing for battle.\n\nThe soldier wears his outfit and the weapons, ready for the battle. He is excited to start the battle. \n\nThe scene is located in somewhere in the mediterranean. The bacgkround is an arid area with some plants. The sky is blue with a few white clouds scattered. The horizon is visible with a mountain range",
+      "clip": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards, bad face",
+      "clip": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "38": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "39": {
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "65": {
+    "inputs": {
+      "double_layers": "9,10",
+      "single_layers": "9,10",
+      "scale": 3,
+      "start_percent": 0.01,
+      "end_percent": 0.8000000000000002,
+      "rescaling_scale": 0,
+      "model": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "SkipLayerGuidanceDiT",
+    "_meta": {
+      "title": "SkipLayerGuidanceDiT"
+    }
+  },
+  "66": {
+    "inputs": {
+      "model": [
+        "68",
+        0
+      ]
+    },
+    "class_type": "CFGZeroStar",
+    "_meta": {
+      "title": "CFGZeroStar"
+    }
+  },
+  "67": {
+    "inputs": {
+      "shift": 5.000000000000001,
+      "model": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "ModelSamplingSD3"
+    }
+  },
+  "68": {
+    "inputs": {
+      "self_structural": 1,
+      "self_temporal": 1,
+      "cross_structural": 1.2,
+      "cross_temporal": 1.3,
+      "model": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "UNetTemporalAttentionMultiply",
+    "_meta": {
+      "title": "UNetTemporalAttentionMultiply"
+    }
+  },
+  "79": {
+    "inputs": {
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "WAN21/VACE_control_video",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "116",
+        2
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video"
+    }
+  },
+  "86": {
+    "inputs": {
+      "width": 832,
+      "height": 480,
+      "length": [
+        "227",
+        3
+      ],
+      "batch_size": 1,
+      "strength": 0.9000000000000001,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "control_video": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "WanVaceToVideo",
+    "_meta": {
+      "title": "WanVaceToVideo"
+    }
+  },
+  "87": {
+    "inputs": {
+      "video": "Base_video_00001.mp4",
+      "force_rate": 0,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 81,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "AnimateDiff"
+    },
+    "class_type": "VHS_LoadVideo",
+    "_meta": {
+      "title": "Load Video (Upload) 🎥🅥🅗🅢"
+    }
+  },
+  "88": {
+    "inputs": {
+      "width": 1280,
+      "height": 720,
+      "upscale_method": "nearest-exact",
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "crop": "center",
+      "image": [
+        "87",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image (deprecated)"
+    }
+  },
+  "98": {
+    "inputs": {
+      "backend": "inductor",
+      "fullgraph": false,
+      "mode": "default",
+      "dynamic": false,
+      "dynamo_cache_size_limit": 128,
+      "compile_transformer_blocks_only": true,
+      "model": [
+        "257",
+        0
+      ]
+    },
+    "class_type": "TorchCompileModelWanVideo",
+    "_meta": {
+      "title": "TorchCompileModelWanVideo"
+    }
+  },
+  "113": {
+    "inputs": {
+      "amount": 4,
+      "image": [
+        "218",
+        0
+      ]
+    },
+    "class_type": "RepeatImageBatch",
+    "_meta": {
+      "title": "RepeatImageBatch"
+    }
+  },
+  "114": {
+    "inputs": {
+      "image1": [
+        "113",
+        0
+      ],
+      "image2": [
+        "278",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "116": {
+    "inputs": {
+      "split_index": 8,
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "VHS_SplitImages",
+    "_meta": {
+      "title": "Split Images 🎥🅥🅗🅢"
+    }
+  },
+  "218": {
+    "inputs": {
+      "start_index": 0,
+      "num_frames": 1,
+      "images": [
+        "278",
+        0
+      ]
+    },
+    "class_type": "GetImageRangeFromBatch",
+    "_meta": {
+      "title": "Get Image or Mask Range From Batch"
+    }
+  },
+  "227": {
+    "inputs": {
+      "image": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "257": {
+    "inputs": {
+      "unet_name": "wan2.1_vace_14B_fp16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "276": {
+    "inputs": {
+      "image": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "277": {
+    "inputs": {
+      "image_gen_width": [
+        "276",
+        1
+      ],
+      "image_gen_height": [
+        "276",
+        2
+      ],
+      "resize_mode": "Just Resize",
+      "original_image": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "PixelPerfectResolution",
+    "_meta": {
+      "title": "Pixel Perfect Resolution"
+    }
+  },
+  "278": {
+    "inputs": {
+      "preprocessor": "DWPreprocessor",
+      "resolution": [
+        "277",
+        0
+      ],
+      "image": [
+        "276",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "AIO Aux Preprocessor"
+    }
+  }
+}

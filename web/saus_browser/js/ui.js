@@ -100,22 +100,6 @@ export function createAppCard(app) {
     card.appendChild(infoButton);
     card.appendChild(favoriteButton);
 
-    if (app.app_type) {
-        const badge = document.createElement('div');
-        badge.className = `app-type-badge type-${app.app_type}`;
-        badge.title = `${app.app_type} workflow`;
-        
-        let iconClass = 'fa-layer-group';
-        switch(app.app_type) {
-            case 'gold': iconClass = 'fa-crown'; break;
-            case 'beta': iconClass = 'fa-flask'; break;
-            case 'user': iconClass = 'fa-user'; break;
-            case 'open': iconClass = 'fa-box-open'; break;
-        }
-        
-        badge.innerHTML = `<i class="fas ${iconClass}"></i>`;
-        card.appendChild(badge);
-    }
 
     card.dataset.appId = app.id;
 
@@ -238,7 +222,6 @@ export function sortApps(apps, sortValue) {
 export function filterCurrentApps() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const sortValue = preferencesManager.get('sortValue') || 'nameAsc';
-    const activeTypeFilters = preferencesManager.get('activeTypeFilters') || [];
     let filteredApps = state.allApps;
     
     filteredApps = filteredApps.filter(app => 
@@ -259,12 +242,6 @@ export function filterCurrentApps() {
         });
     }
 
-    if (activeTypeFilters.length > 0) {
-        filteredApps = filteredApps.filter(app => activeTypeFilters.includes(app.app_type));
-    } else {
-        // If no type filters are active, show no apps.
-        filteredApps = [];
-    }
 
     if (state.favoritesFilterActive) {
         filteredApps = filteredApps.filter(app => isFavorited(app.id));

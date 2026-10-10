@@ -1,0 +1,112 @@
+{
+  "id": "7lm54",
+  "name": "Basic AnimateDiff",
+  "url": "7lm54-basic-animatediff",
+  "description": "Basic AnimateDiff text to video.",
+  "prompts": [
+    {
+      "id": "promptarpxqh",
+      "label": "Prompt",
+      "nodePath": "3.inputs.text"
+    },
+    {
+      "id": "promptkec2kn",
+      "label": "Negative Prompt",
+      "nodePath": "4.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdown9peqv0",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "label": "Model",
+      "nodePath": "1.inputs.ckpt_name"
+    },
+    {
+      "id": "dropdownp2kwf1",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "label": "VAE",
+      "nodePath": "10.inputs.vae_name"
+    },
+    {
+      "id": "dropdownzkq38z",
+      "url": "ADE_AnimateDiffLoaderWithContext",
+      "key": "model_name",
+      "label": "AnimateDiff Model",
+      "nodePath": "7.inputs.model_name"
+    },
+    {
+      "id": "dropdownuvwv7a",
+      "url": "ADE_AnimateDiffLoaderWithContext",
+      "key": "beta_schedule",
+      "label": "AnimateDiff Schedule",
+      "nodePath": "7.inputs.beta_schedule"
+    },
+    {
+      "id": "dropdowna6yrjx",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "5.inputs.sampler_name"
+    },
+    {
+      "id": "dropdownca1mhh",
+      "url": "KSampler",
+      "key": "scheduler",
+      "label": "Scheduler",
+      "nodePath": "5.inputs.scheduler"
+    }   
+  ],
+  "steppers": [
+    {
+      "id": "cfg",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 8,
+      "precision": 1,
+      "scaleFactor": 10,
+      "nodePath": "5.inputs.cfg"
+    },
+    {
+      "id": "steps",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 10,
+      "nodePath": "5.inputs.steps"
+    },
+    {
+      "id": "frames_count",
+      "label": "Frame count",
+      "minValue": 1,
+      "maxValue": 1024,
+      "step": 1,
+      "defValue": 96,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "6.inputs.batch_size"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seed",
+      "label": "Seed",
+      "nodePath": "5.inputs.seed"
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "basesdimension-selector-container",
+      "defaultWidth": 512,
+      "defaultHeight": 512,
+      "nodePath": "6.inputs"
+    }
+  ]
+}

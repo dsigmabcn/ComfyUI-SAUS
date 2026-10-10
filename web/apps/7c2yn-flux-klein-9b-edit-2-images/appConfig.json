@@ -1,0 +1,98 @@
+{
+  "id": "7c2yn",
+  "name": "FLUX KLEIN 4B EDIT 2 IMAGES",
+  "url": "7c2yn-flux-klein-9b-edit-2-images",
+  "description": "Edit an image with another reference image with FLUX KLEIN 4B. BASE: CFG 5, 20 steps. DISTILLED: CFG 1, 4 steps",
+  "prompts": [
+    {
+      "id": "promptkeb2wf",
+      "label": "Prompt",
+      "default": "Apply the yellow \"C\" logo to the center hub of the steering wheel, and change the steering wheel color to royal blue matching the logo background, while maintaining the same interior style, lighting, camera angle, and all other elements unchanged",
+      "nodePath": "113.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownyh3i89",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "104.inputs.unet_name"
+    },
+    {
+      "id": "dropdown3hy1xs",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "104.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdownsiaiai",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "label": "CLIP",
+      "nodePath": "111.inputs.clip_name"
+    },
+    {
+      "id": "dropdownp2yohj",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "label": "VAE",
+      "nodePath": "105.inputs.vae_name"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperw8hje2",
+      "label": "Image Megapixels",
+      "minValue": 0.5,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "108.inputs.megapixels"
+    },
+    {
+      "id": "stepper78ln84",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 10,
+      "step": 0.1,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "115.inputs.cfg"
+    },
+    {
+      "id": "steppervnnsdq",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "116.inputs.steps"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederjo3nqp",
+      "label": "Seed",
+      "nodePath": "103.inputs.noise_seed"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderfpjpkb",
+      "label": "ImageLoader",
+      "nodePath": "76.inputs.image"
+    },
+    {
+      "id": "imageLoaderwyehjd",
+      "label": "ImageLoader",
+      "nodePath": "81.inputs.image"
+    }
+  ]
+}

@@ -33,6 +33,7 @@ CORE_PATH = WEBROOT / "core"
 SAUS_BROWSER_PATH = WEBROOT / "saus_browser"
 SAUS_APPS_PATH = WEBROOT / "apps"
 BUILDER_PATH = WEBROOT / "builder"
+BUILDER_V2_PATH = WEBROOT / "builder_v2"
 
 MODEL_MANAGER_PATH = WEBROOT / "model_manager"#Added to access the new model manager app - NOT ACTIVE, TO BE REPLACED BY LORA MANAGER IN FUTURE VERSIONS
 ARC_MANAGER_PATH = WEBROOT / "arc_manager" #Added to create the architecture manager
@@ -58,49 +59,12 @@ FILE_REGISTRY_DIR = DATA_DIR / "file_registry"
 FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
 
-OPEN_APPS_ORIGIN = 'https://github.com/dsigmabcn/SAUS_open_WFs' #OPEN REPOS
-GOLD_BETA_APPS_ORIGIN = 'https://github.com/dsigmabcn/SAUS_private_WFs.git'
-SAUS_ORIGIN = 'https://github.com/dsigmabcn/ComfyUI-SAUS.git' # needs to check if the apps, models lists and architecture are up to date
-
-
 SAFE_FOLDER_NAME_REGEX = re.compile(r'^[\w\-]+$')
 ALLOWED_EXTENSIONS = {'css'}
 mimetypes.add_type('application/javascript', '.js')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 APPS_CONFIG_FILE = 'appConfig.json'
-APPS_TO_REMOVE = [
-    "afl_CogVideoX-Fun-i2v-es",
-    "afl_CogVideoX-Fun-i2v",
-    "afl_MimicMotioni2v",
-    "afl_abase",
-    "afl_abasei2i",
-    "afl_abasesd35t3v",
-    "afl_abasevea",
-    "afl_abaseveai2i",
-    "afl_base-fluxd_at2i",
-    "afl_base-fluxdggufi2i",
-    "afl_base-fluxdgguft2i",
-    "afl_base-fluxdi2i",
-    "afl_base-fluxs_ai2t",
-    "afl_base-fluxsi2i",
-    "afl_baseAD",
-    "afl_baseAdLcm",
-    "afl_cogvidx_at2v",
-    "afl_cogvidxi2v",
-    "afl_cogvidxinteri2v",
-    "afl_flowup",
-    "afl_flux_dev",
-    "afl_flux_dev_lora",
-    "afl_genfill",
-    "afl_ipivsMorph",
-    "afl_mochi2v",
-    "afl_pulid_flux",
-    "afl_pulid_flux_GGUF",
-    "afl_reactor",
-    "5otvy-cogvideox-orbit-left-lora",
-    "umbi9-hunyuan-text-to-video",
-]
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}

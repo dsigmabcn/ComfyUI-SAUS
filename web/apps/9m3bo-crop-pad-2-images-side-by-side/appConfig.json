@@ -1,0 +1,199 @@
+{
+  "id": "9m3bo",
+  "name": "Crop, pad 2 images side by side",
+  "url": "9m3bo-crop-pad-2-images-side-by-side",
+  "description": "Crop and padding of 2 images concatenated for Wan VACE.",
+  "imageLoaders": [
+    {
+      "id": "imageLoaderhd90ud",
+      "label": "ImageLoader 1",
+      "nodePath": "123.inputs.image"
+    },
+    {
+      "id": "imageLoaderg4mr5u",
+      "label": "ImageLoader2",
+      "nodePath": "287.inputs.image"
+    }
+  ],
+  "multiComponents": [
+    {
+      "id": "multiComponentblrayi",
+      "label": "Image 1 settings",
+      "dropdowns": [
+        {
+          "id": "dropdownj2lo6t",
+          "url": "LoadImage",
+          "key": "image",
+          "label": "File Image 1",
+          "nodePath": "123.inputs.image"
+        }
+      ],
+      "steppers": [
+        {
+          "id": "stepperi2sa11",
+          "label": "Scale Image 1 by",
+          "minValue": 0.1,
+          "maxValue": 4,
+          "step": 0.1,
+          "defValue": 1,
+          "precision": 1,
+          "scaleFactor": 1,
+          "nodePath": "285.inputs.scale_by"
+        },
+        {
+          "id": "stepperjb861u",
+          "label": "Crop Image 1 Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 640,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.width"
+        },
+        {
+          "id": "stepper8e173g",
+          "label": "Crop Image 1 Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.height"
+        },
+        {
+          "id": "stepperrpwajq",
+          "label": "X-offset Image 1",
+          "minValue": 0,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.x"
+        },
+        {
+          "id": "stepper3vbdmd",
+          "label": "Y-offset Image 1",
+          "minValue": 0,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.y"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentfwr9w8",
+      "label": "Image 2 settings",
+      "dropdowns": [
+        {
+          "id": "dropdowns8atei",
+          "url": "LoadImage",
+          "key": "image",
+          "label": "File Image 2",
+          "nodePath": "287.inputs.image"
+        }
+      ],
+      "steppers": [
+        {
+          "id": "stepper2tmoid",
+          "label": "Scale Image 2 by",
+          "minValue": 0.1,
+          "maxValue": 4,
+          "step": 0.1,
+          "defValue": 1,
+          "precision": 1,
+          "scaleFactor": 1,
+          "nodePath": "288.inputs.scale_by"
+        },
+        {
+          "id": "stepperfwr8e8",
+          "label": "Crop Image 2 Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 640,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "289.inputs.width"
+        },
+        {
+          "id": "stepperpyhoyq",
+          "label": "Crop Imag 2 Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 640,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "289.inputs.height"
+        },
+        {
+          "id": "stepperdeydaw",
+          "label": "X-offset Image 2",
+          "minValue": 0.1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "289.inputs.x"
+        },
+        {
+          "id": "stepperakdftu",
+          "label": "Y-offset Image 2",
+          "minValue": 0.1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "289.inputs.y"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentw2fd8x",
+      "label": "Final Image",
+      "steppers": [
+        {
+          "id": "stepperc8k7t3",
+          "label": "Result Width",
+          "minValue": 320,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 1280,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "294.inputs.value"
+        },
+        {
+          "id": "stepper97uugj",
+          "label": "Result Height",
+          "minValue": 320,
+          "maxValue": 1024,
+          "step": 16,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "260.inputs.value"
+        },
+        {
+          "id": "stepperi30mye",
+          "label": "Extra padding",
+          "minValue": 0,
+          "maxValue": 512,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "250.inputs.extra_padding"
+        }
+      ]
+    }
+  ]
+}

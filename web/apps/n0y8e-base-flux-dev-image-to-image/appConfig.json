@@ -1,0 +1,113 @@
+{
+  "id": "n0y8e",
+  "name": "Base - Flux Dev Image to Image",
+  "url": "n0y8e-base-flux-dev-image-to-image",
+  "description": "Basic image to image with Flux Dev",
+  "prompts": [
+    {
+      "id": "promptfkpo91",
+      "label": "Prompt",
+      "nodePath": "16.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdown1jpmbu",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "1.inputs.unet_name"
+    },
+    {
+      "id": "dropdownckqoqb",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "1.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdownl712kg",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "label": "VAE",
+      "nodePath": "13.inputs.vae_name"
+    },
+    {
+      "id": "dropdownhqm5ob",
+      "url": "DualCLIPLoader",
+      "key": "clip_name1",
+      "label": "CLIP1",
+      "nodePath": "4.inputs.clip_name1"
+    },
+    {
+      "id": "dropdownxdi9wu",
+      "url": "DualCLIPLoader",
+      "key": "clip_name2",
+      "label": "CLIP2",
+      "nodePath": "4.inputs.clip_name2"
+    },
+    {
+      "id": "dropdownwkan0o",
+      "url": "KSampler",
+      "key": "scheduler",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler"
+    },
+    {
+      "id": "dropdownao0rm9",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "9.inputs.sampler_name"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperekmn66",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 3.5,
+      "precision": 1,
+      "scaleFactor": 10,
+      "nodePath": "17.inputs.guidance"
+    },
+    {
+      "id": "steppervmw5jy",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "3.inputs.steps"
+    },
+    {
+      "id": "denoise",
+      "label": "Denoise",
+      "minValue": 0,
+      "maxValue": 1,
+      "step": 0.01,
+      "defValue": 0.7,
+      "precision": 2,
+      "scaleFactor": 10,
+      "nodePath": "3.inputs.denoise"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seed",
+      "label": "Seed",
+      "nodePath": "8.inputs.noise_seed"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderttahyr",
+      "label": "Load Image",
+      "nodePath": "15.inputs.image"
+    }
+  ]
+}

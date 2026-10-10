@@ -34,7 +34,6 @@ const defaultPreferences = {
     sortValue: 'nameAsc',
     showHiddenOnly: false, 
     selectedTheme: null,
-    activeTypeFilters: ['open', 'gold']
 };
 
 export const preferencesManager = new PreferencesManager(defaultPreferences);

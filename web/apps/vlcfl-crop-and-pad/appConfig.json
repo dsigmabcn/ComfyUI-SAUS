@@ -1,0 +1,119 @@
+{
+  "id": "vlcfl",
+  "name": "Crop and Pad",
+  "url": "vlcfl-crop-and-pad",
+  "description": "Tool to crop and pad images for reference image Wan Vace Videos",
+  "dropdowns": [
+    {
+      "id": "dropdownghiluk",
+      "url": "LoadImage",
+      "key": "image",
+      "label": "File Image",
+      "nodePath": "123.inputs.image"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderhcv2gc",
+      "label": "ImageLoader",
+      "nodePath": "123.inputs.image"
+    }
+  ],
+  "multiComponents": [
+    {
+      "id": "multiComponentp0qz3y",
+      "label": "Resolution",
+      "steppers": [
+        {
+          "id": "stepperbbaktr",
+          "label": "Width",
+          "minValue": 32,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 1280,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "259.inputs.value"
+        },
+        {
+          "id": "stepperdahbpf",
+          "label": "Height",
+          "minValue": 32,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "260.inputs.value"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentocqtoi",
+      "label": "Crop",
+      "steppers": [
+        {
+          "id": "stepperdeqrbb",
+          "label": "Crop Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 1280,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.width"
+        },
+        {
+          "id": "stepper1l045k",
+          "label": "Crop Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.height"
+        },
+        {
+          "id": "steppergtd90a",
+          "label": "X-offset",
+          "minValue": 0,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.x"
+        },
+        {
+          "id": "stepperjgzgbt",
+          "label": "Y-offset",
+          "minValue": 0,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "196.inputs.y"
+        }
+      ]
+    },
+    {
+      "id": "multiComponent0ppolt",
+      "label": "Padding",
+      "steppers": [
+        {
+          "id": "stepper7n7dcn",
+          "label": "Extra padding",
+          "minValue": 0,
+          "maxValue": 1024,
+          "step": 16,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "250.inputs.extra_padding"
+        }
+      ]
+    }
+  ]
+}

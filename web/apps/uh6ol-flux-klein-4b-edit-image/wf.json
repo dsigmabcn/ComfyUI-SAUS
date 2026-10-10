@@ -1,0 +1,272 @@
+{
+    "9": {
+        "inputs": {
+            "filename_prefix": "FLUX/Flux2-Klein_4B_Edit",
+            "images": [
+                "104",
+                0
+            ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+            "title": "Save Image"
+        }
+    },
+    "76": {
+        "inputs": {
+            "image": "car_interior_white.jpeg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+            "title": "Load Image"
+        }
+    },
+    "100": {
+        "inputs": {
+            "sampler_name": "euler"
+        },
+        "class_type": "KSamplerSelect",
+        "_meta": {
+            "title": "KSamplerSelect"
+        }
+    },
+    "101": {
+        "inputs": {
+            "steps": 20,
+            "width": [
+                "114",
+                0
+            ],
+            "height": [
+                "114",
+                1
+            ]
+        },
+        "class_type": "Flux2Scheduler",
+        "_meta": {
+            "title": "Flux2Scheduler"
+        }
+    },
+    "102": {
+        "inputs": {
+            "cfg": 5,
+            "model": [
+                "106",
+                0
+            ],
+            "positive": [
+                "117",
+                0
+            ],
+            "negative": [
+                "115",
+                0
+            ]
+        },
+        "class_type": "CFGGuider",
+        "_meta": {
+            "title": "CFGGuider"
+        }
+    },
+    "103": {
+        "inputs": {
+            "noise": [
+                "105",
+                0
+            ],
+            "guider": [
+                "102",
+                0
+            ],
+            "sampler": [
+                "100",
+                0
+            ],
+            "sigmas": [
+                "101",
+                0
+            ],
+            "latent_image": [
+                "111",
+                0
+            ]
+        },
+        "class_type": "SamplerCustomAdvanced",
+        "_meta": {
+            "title": "SamplerCustomAdvanced"
+        }
+    },
+    "104": {
+        "inputs": {
+            "samples": [
+                "103",
+                0
+            ],
+            "vae": [
+                "110",
+                0
+            ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+            "title": "VAE Decode"
+        }
+    },
+    "105": {
+        "inputs": {
+            "noise_seed": 0
+        },
+        "class_type": "RandomNoise",
+        "_meta": {
+            "title": "RandomNoise"
+        }
+    },
+    "106": {
+        "inputs": {
+            "unet_name": "FLUX/flux-2-klein-base-4b.safetensors",
+            "weight_dtype": "default"
+        },
+        "class_type": "UNETLoader",
+        "_meta": {
+            "title": "Load Diffusion Model"
+        }
+    },
+    "107": {
+        "inputs": {
+            "clip_name": "qwen_3_4b.safetensors",
+            "type": "flux2",
+            "device": "default"
+        },
+        "class_type": "CLIPLoader",
+        "_meta": {
+            "title": "Load CLIP"
+        }
+    },
+    "108": {
+        "inputs": {
+            "text": "Change the camera angle to a first-person driver's perspective looking through the steering wheel at the dashboard and windshield, maintaining the same white minimalist interior style and lighting\n",
+            "clip": [
+                "107",
+                0
+            ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+            "title": "CLIP Text Encode (Positive Prompt)"
+        }
+    },
+    "109": {
+        "inputs": {
+            "text": "",
+            "clip": [
+                "107",
+                0
+            ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+            "title": "CLIP Text Encode (Negative Prompt)"
+        }
+    },
+    "110": {
+        "inputs": {
+            "vae_name": "flux2-vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+            "title": "Load VAE"
+        }
+    },
+    "111": {
+        "inputs": {
+            "width": [
+                "114",
+                0
+            ],
+            "height": [
+                "114",
+                1
+            ],
+            "batch_size": 1
+        },
+        "class_type": "EmptyFlux2LatentImage",
+        "_meta": {
+            "title": "Empty Flux 2 Latent"
+        }
+    },
+    "112": {
+        "inputs": {
+            "upscale_method": "nearest-exact",
+            "megapixels": 1,
+            "resolution_steps": 1,
+            "image": [
+                "76",
+                0
+            ]
+        },
+        "class_type": "ImageScaleToTotalPixels",
+        "_meta": {
+            "title": "ImageScaleToTotalPixels"
+        }
+    },
+    "114": {
+        "inputs": {
+            "image": [
+                "112",
+                0
+            ]
+        },
+        "class_type": "GetImageSize",
+        "_meta": {
+            "title": "Get Image Size"
+        }
+    },
+    "115": {
+        "inputs": {
+            "conditioning": [
+                "109",
+                0
+            ],
+            "latent": [
+                "116",
+                0
+            ]
+        },
+        "class_type": "ReferenceLatent",
+        "_meta": {
+            "title": "ReferenceLatent"
+        }
+    },
+    "116": {
+        "inputs": {
+            "pixels": [
+                "112",
+                0
+            ],
+            "vae": [
+                "110",
+                0
+            ]
+        },
+        "class_type": "VAEEncode",
+        "_meta": {
+            "title": "VAE Encode"
+        }
+    },
+    "117": {
+        "inputs": {
+            "conditioning": [
+                "108",
+                0
+            ],
+            "latent": [
+                "116",
+                0
+            ]
+        },
+        "class_type": "ReferenceLatent",
+        "_meta": {
+            "title": "ReferenceLatent"
+        }
+    }
+}

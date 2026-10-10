@@ -1,0 +1,212 @@
+{
+    "9": {
+        "inputs": {
+            "filename_prefix": "FLUX/Flux2-Klein_T2I_",
+            "images": [
+                "88",
+                0
+            ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+            "title": "Save Image"
+        }
+    },
+    "84": {
+        "inputs": {
+            "sampler_name": "euler"
+        },
+        "class_type": "KSamplerSelect",
+        "_meta": {
+            "title": "KSamplerSelect"
+        }
+    },
+    "85": {
+        "inputs": {
+            "steps": 20,
+            "width": [
+                "98",
+                0
+            ],
+            "height": [
+                "98",
+                1
+            ]
+        },
+        "class_type": "Flux2Scheduler",
+        "_meta": {
+            "title": "Flux2Scheduler"
+        }
+    },
+    "86": {
+        "inputs": {
+            "cfg": 5,
+            "model": [
+                "94",
+                0
+            ],
+            "positive": [
+                "97",
+                0
+            ],
+            "negative": [
+                "90",
+                0
+            ]
+        },
+        "class_type": "CFGGuider",
+        "_meta": {
+            "title": "CFGGuider"
+        }
+    },
+    "87": {
+        "inputs": {
+            "noise": [
+                "93",
+                0
+            ],
+            "guider": [
+                "86",
+                0
+            ],
+            "sampler": [
+                "84",
+                0
+            ],
+            "sigmas": [
+                "85",
+                0
+            ],
+            "latent_image": [
+                "89",
+                0
+            ]
+        },
+        "class_type": "SamplerCustomAdvanced",
+        "_meta": {
+            "title": "SamplerCustomAdvanced"
+        }
+    },
+    "88": {
+        "inputs": {
+            "samples": [
+                "87",
+                0
+            ],
+            "vae": [
+                "96",
+                0
+            ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+            "title": "VAE Decode"
+        }
+    },
+    "89": {
+        "inputs": {
+            "width": [
+                "98",
+                0
+            ],
+            "height": [
+                "98",
+                1
+            ],
+            "batch_size": 1
+        },
+        "class_type": "EmptyFlux2LatentImage",
+        "_meta": {
+            "title": "Empty Flux 2 Latent"
+        }
+    },
+    "90": {
+        "inputs": {
+            "text": "",
+            "clip": [
+                "95",
+                0
+            ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+            "title": "CLIP Text Encode (Negative Prompt)"
+        }
+    },
+    "93": {
+        "inputs": {
+            "noise_seed": 1100506096477045
+        },
+        "class_type": "RandomNoise",
+        "_meta": {
+            "title": "RandomNoise"
+        }
+    },
+    "94": {
+        "inputs": {
+            "unet_name": "FLUX/flux-2-klein-base-4b.safetensors",
+            "weight_dtype": "default"
+        },
+        "class_type": "UNETLoader",
+        "_meta": {
+            "title": "Load Diffusion Model"
+        }
+    },
+    "95": {
+        "inputs": {
+            "clip_name": "qwen_3_4b.safetensors",
+            "type": "flux2",
+            "device": "default"
+        },
+        "class_type": "CLIPLoader",
+        "_meta": {
+            "title": "Load CLIP"
+        }
+    },
+    "96": {
+        "inputs": {
+            "vae_name": "flux2-vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+            "title": "Load VAE"
+        }
+    },
+    "97": {
+        "inputs": {
+            "text": "A hedgehog wearing a tiny party hat surrounded by confetti, early digital camera style, slight noise, flash photography, candid moment, 2000s digicam aesthetic, festive birthday celebration atmosphere",
+            "clip": [
+                "95",
+                0
+            ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+            "title": "CLIP Text Encode (Positive Prompt)"
+        }
+    },
+    "98": {
+        "inputs": {
+            "image": [
+                "99",
+                0
+            ]
+        },
+        "class_type": "GetImageSize",
+        "_meta": {
+            "title": "Get Image Size"
+        }
+    },
+    "99": {
+        "inputs": {
+            "width": 1024,
+            "height": 1024,
+            "batch_size": 1,
+            "color": 0
+        },
+        "class_type": "EmptyImage",
+        "_meta": {
+            "title": "EmptyImage"
+        }
+    }
+}

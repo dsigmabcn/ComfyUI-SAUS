@@ -1,4 +1,8 @@
 import { populateDropdown } from './dropdownHandler.js';
+import { extractComboOptions } from './comboOptions.js';
+
+// Re-exported for backwards compatibility (the helper now lives in its own module).
+export { extractComboOptions };
 
 export default class Dropdown {
   constructor(config, workflow) {
@@ -49,9 +53,15 @@ export default class Dropdown {
       return;
     }
 
+    const options = extractComboOptions(inputData);
+    if (!options) {
+      this.displayMissingComponentMessage();
+      return;
+    }
+
     populateDropdown(
       this.config.id,
-      inputData[0],
+      options,
       this.config.label,
       this.config.nodePath,
       this.workflow
@@ -67,7 +77,8 @@ export default class Dropdown {
       messageElement.style.display = 'block';
       this.loaderContainer.style.display = 'block';
       this.loaderContainer.style.textAlign = 'left';
-      messageElement.textContent = `Missing custom node: ${this.config.id}`;
+      messageElement.textContent =
+        `Missing input "${this.config.key}" on ${this.config.url}`;
       this.loaderContainer.appendChild(messageElement);
     }
   }

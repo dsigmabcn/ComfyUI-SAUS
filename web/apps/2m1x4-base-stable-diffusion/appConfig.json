@@ -1,0 +1,156 @@
+{
+  "id": "2m1x4",
+  "name": "Base - Stable Diffusion",
+  "url": "2m1x4-base-stable-diffusion",
+  "description": "Basic image generation SD and SDXL",
+  "prompts": [
+    {
+      "id": "prompth8hjw8",
+      "label": "Prompt",
+      "nodePath": "6.inputs.text",
+      "default": "",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    },
+    {
+      "id": "prompti5wz1v",
+      "label": "Negative Prompt",
+      "nodePath": "7.inputs.text",
+      "default": "",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "compfoj32a",
+      "label": "Megapixels",
+      "nodePath": "10.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 16,
+      "step": 1,
+      "defValue": 1,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepperxy5u8h",
+      "label": "Steps",
+      "nodePath": "3.inputs.steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    },
+    {
+      "id": "stepperh23s7q",
+      "label": "CFG",
+      "nodePath": "3.inputs.cfg",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 7.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdown1cou44",
+      "label": "Checkpoint",
+      "nodePath": "4.inputs.ckpt_name",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "dropdownwryxn7",
+      "label": "Sampler",
+      "nodePath": "3.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownd4p3i4",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederghf90s",
+      "label": "Seed",
+      "nodePath": "3.inputs.seed",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "comp8c8uih",
+      "label": "Aspect Ratio",
+      "nodePath": "10.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output9",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

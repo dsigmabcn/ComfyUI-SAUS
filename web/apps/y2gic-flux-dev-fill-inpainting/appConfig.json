@@ -1,0 +1,109 @@
+{
+  "id": "y2gic",
+  "name": "Flux Dev Fill (Inpainting)",
+  "url": "y2gic-flux-dev-fill-inpainting",
+  "description": "FLUX.1 Fill [dev] is a 12 billion parameter rectified flow transformer capable of filling areas in existing images based on a text description.",
+  "prompts": [
+    {
+      "id": "promptnhe8dh",
+      "label": "Prompt",
+      "nodePath": "23.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownirqtgl",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "49.inputs.unet_name"
+    },
+    {
+      "id": "dropdownrd7bea",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "49.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdown4t47fl",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "label": "VAE",
+      "nodePath": "32.inputs.vae_name"
+    },
+    {
+      "id": "dropdownevzu9l",
+      "url": "DualCLIPLoader",
+      "key": "clip_name1",
+      "label": "CLIP 1",
+      "nodePath": "34.inputs.clip_name1"
+    },
+    {
+      "id": "dropdownhcr321",
+      "url": "DualCLIPLoader",
+      "key": "clip_name2",
+      "label": "CLIP 2",
+      "nodePath": "34.inputs.clip_name2"
+    },
+    {
+      "id": "dropdownwh6yyt",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "3.inputs.sampler_name"
+    },
+    {
+      "id": "dropdownj6p5m2",
+      "url": "KSampler",
+      "key": "scheduler",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperfgpldm",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 30,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "26.inputs.guidance"
+    },
+    {
+      "id": "steppercdqklc",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "3.inputs.steps"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seeder0dozra",
+      "label": "Seed",
+      "nodePath": "3.inputs.seed"
+    }
+  ],
+  "canvasLoadedImages": [
+    {
+      "id": "canvasLoadedImagewx7omi",
+      "label": "ImageLoader",
+      "nodePath": "17.inputs.image"
+    }
+  ],
+  "canvasAlphaOutputs": [
+    {
+      "id": "canvasAlphaOutputm1f0a3",
+      "label": "ImageLoader",
+      "nodePath": "45.inputs.image"
+    }
+  ]
+}

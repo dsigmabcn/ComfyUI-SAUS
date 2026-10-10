@@ -183,47 +183,6 @@ function initializeSearch() {
     }
 }
 
-function createTypeToggles() {
-    const controlsDiv = document.querySelector('.right-controls');
-    const types = [
-        { id: 'open', icon: 'fa-box-open', label: 'Open' },
-        { id: 'gold', icon: 'fa-crown', label: 'Gold' },
-        { id: 'beta', icon: 'fa-flask', label: 'Beta' },
-        { id: 'user', icon: 'fa-user', label: 'User' }
-    ];
-
-    let activeFilters = preferencesManager.get('activeTypeFilters') || [];
-    if (!Array.isArray(activeFilters)) activeFilters = [];
-
-    types.forEach(type => {
-        const btn = document.createElement('button');
-        btn.className = `toggle-button type-toggle type-${type.id}`;
-        btn.innerHTML = `<i class="fas ${type.icon}"></i>`;
-        btn.title = `Toggle ${type.label}`;
-        
-        if (activeFilters.includes(type.id)) {
-            btn.classList.add('active');
-        }
-
-        btn.addEventListener('click', () => {
-            const currentFilters = preferencesManager.get('activeTypeFilters') || [];
-            const index = currentFilters.indexOf(type.id);
-            
-            if (index === -1) {
-                currentFilters.push(type.id);
-                btn.classList.add('active');
-            } else {
-                currentFilters.splice(index, 1);
-                btn.classList.remove('active');
-            }
-            
-            preferencesManager.set('activeTypeFilters', currentFilters);
-            renderApps(filterCurrentApps());
-        });
-
-        controlsDiv.appendChild(btn);
-    });
-}
 
 function createToggleButtons() {
     const controlsDiv = document.querySelector('.right-controls');
@@ -274,7 +233,6 @@ export function initializeUI() {
     loadFavorites();
     initializeMenu();
     initializeSearch();
-    createTypeToggles();
     createToggleButtons();    
     
     const uiCallbacks = {

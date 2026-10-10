@@ -1,0 +1,13 @@
+{
+  "id": "65j5u",
+  "name": "Background Remover",
+  "url": "65j5u-background-remover",
+  "description": "Background Remover - Rembg",
+  "imageLoaders": [
+    {
+      "id": "imageLoadersyjv2a",
+      "label": "ImageLoader",
+      "nodePath": "2.inputs.image"
+    }
+  ]
+}

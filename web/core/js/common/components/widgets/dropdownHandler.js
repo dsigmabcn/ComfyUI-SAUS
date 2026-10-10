@@ -163,19 +163,50 @@ async function doPostRequestForSlice(pathsSlice) {
     }
 }
 
+/**
+ * Nearest scrollable ancestor that is *not* the page itself. Returns null when
+ * only the document could scroll, so we never move the whole app.
+ */
+function findScrollableAncestor(element) {
+    let node = element;
+    while (node && node !== document.body && node !== document.documentElement) {
+        const overflowY = window.getComputedStyle(node).overflowY;
+        if (/(auto|scroll)/.test(String(overflowY)) && node.scrollHeight > node.clientHeight + 1) {
+            return node;
+        }
+        node = node.parentElement;
+    }
+    return null;
+}
+
 function scrollToSelectedItem(listContainer, selectedValue) {
     if (!selectedValue) return;
     const selectedItem = listContainer.querySelector(`li[data-model-path="${selectedValue}"]`);
-    if (selectedItem) {
-        selectedItem.scrollIntoView({ behavior: scrollAnimationEnabled ? 'smooth' : 'auto', block: 'center' });
-        
-        if (scrollAnimationEnabled) {
-            // Add a temporary highlight effect
-            selectedItem.classList.add('selected-item-scroll');
-            setTimeout(() => {
-                selectedItem.classList.remove('selected-item-scroll');
-            }, 1000);
+    if (!selectedItem) return;
+
+    // Scroll the list itself instead of calling scrollIntoView(), which also
+    // scrolls the page -- that yanks the whole app to the top when the dropdown
+    // is opened near the bottom of the screen.
+    const scroller = findScrollableAncestor(listContainer);
+    if (scroller) {
+        const scrollerRect = scroller.getBoundingClientRect();
+        const itemRect = selectedItem.getBoundingClientRect();
+        const delta = (itemRect.top - scrollerRect.top) - (scrollerRect.height - itemRect.height) / 2;
+        const maxTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+        const top = Math.max(0, Math.min(scroller.scrollTop + delta, maxTop));
+        if (typeof scroller.scrollTo === 'function') {
+            scroller.scrollTo({ top, behavior: scrollAnimationEnabled ? 'smooth' : 'auto' });
+        } else {
+            scroller.scrollTop = top;
         }
+    }
+
+    if (scrollAnimationEnabled) {
+        // Add a temporary highlight effect
+        selectedItem.classList.add('selected-item-scroll');
+        setTimeout(() => {
+            selectedItem.classList.remove('selected-item-scroll');
+        }, 1000);
     }
 }
 
@@ -348,22 +379,49 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
         scrollToSelectedItem(parentUl, selectedValue);
     });
 
-    if (dialogContainer) {
-        const itemCount = items.filter(it => it.toLowerCase().includes(filterTerm.toLowerCase())).length;
-        const itemHeight = 40; 
-        const maxHeight = 600; 
-        const calculatedHeight = Math.min(itemCount * itemHeight + 100, maxHeight); 
-        dialogContainer.style.height = `${calculatedHeight}px`;
+    positionDialogNearPointer(dialogContainer, mousePosition);
+}
 
-        dialogContainer.style.width = 'auto';
-        dialogContainer.style.maxWidth = '300px'; 
+/**
+ * Size and place the dropdown list so it always fits on screen: it opens
+ * downwards, flips upwards when there is no room below, and stays inside the
+ * viewport (it must never end up above the top of the canvas).
+ */
+function positionDialogNearPointer(dialogContainer, mousePosition) {
+    if (!dialogContainer) return;
 
-        if (mousePosition) {
-            dialogContainer.style.top = `${mousePosition.y}px`;
-            dialogContainer.style.left = `${mousePosition.x}px`;
-            dialogContainer.style.transform = 'translate(0, 0)'; 
-        }
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+    const margin = 8;
+    const gap = 6;
+
+    dialogContainer.style.width = 'auto';
+    dialogContainer.style.maxWidth = '300px';
+
+    // Measure the real content rather than estimating a per-item height.
+    const contentHeight = dialogContainer.scrollHeight || 0;
+    const anchorY = mousePosition ? mousePosition.y : viewportHeight / 2;
+    const roomBelow = viewportHeight - anchorY - margin - gap;
+    const roomAbove = anchorY - margin - gap;
+    const available = Math.max(160, Math.max(roomBelow, roomAbove));
+    const height = Math.min(contentHeight || available, available);
+    dialogContainer.style.height = `${height}px`;
+
+    if (!mousePosition) return;
+
+    let top;
+    if (height + gap <= roomBelow) {
+        top = mousePosition.y + gap;                 // opens downwards
+    } else if (height + gap <= roomAbove) {
+        top = mousePosition.y - height - gap;        // flips upwards
+    } else {
+        // Fits neither way: pin it inside the viewport -- the list scrolls in.
+        top = Math.max(margin, Math.min(mousePosition.y + gap, viewportHeight - height - margin));
     }
+
+    dialogContainer.style.top = `${top}px`;
+    dialogContainer.style.bottom = 'auto';
+    dialogContainer.style.left = `${mousePosition.x}px`;
+    dialogContainer.style.transform = 'translate(0, 0)';
 }
 
 function addDragAndDropHandlers(element, originalPath) {

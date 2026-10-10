@@ -45,7 +45,7 @@ Check out the table of contents for detailed instructions. This is a summary ove
 
 ### App Browsing
 - **Search**: Use the search bar to find specific Apps by name.
-- **Filters**: Filter Apps by type (Open, Gold, Beta, User), favorites, or sort them alphabetically.
+- **Filters**: Filter Apps by favorites, or sort them alphabetically.
 - **Tags**: Click on tags to filter Apps by specific categories (e.g., base/quantized, model, function).
 
 ### Installing/Uninstalling Models
@@ -84,8 +84,6 @@ A simple File Manager to access and perform basic management of the files in you
 
 ### Settings
 - **Civitai/Hugging Face API Tokens**: Securely store your API tokens for services like Civitai and Hugging Face. These tokens are used when downloading models that require authentication.
-- **SAUS Token**: Required to access the 'Gold' and 'Beta' Apps/workflows.
-- **Sync Private Apps**: When the SAUS token is saved, this button appears. Use it to download the 'Gold' and 'Beta' Apps.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).
 
 **Disclaimer**: API tokens are stored encrypted in your local installation. However, you are responsible for ensuring their security. If you are unsure about the security of your system, do not use the API token functionality or save your keys.

@@ -39,18 +39,8 @@ You can see a series of tags, that can be used to filter the different apps, dep
 ## Search bar
 Simply type there any text to find specific Apps.
 
-### App type
-Apps are categorized by:
-- Open (box)
-- Gold (crown)
-- Beta (erlenmeyer)
-- User (person)
-
-All **Open** apps are free. I will try to convert into easy-to-use apps the most popular and commonly used ComfyUI workflows. But ComfyUI provides endless possibilities, so more complex or 'niche' workflows will be available as 'gold' or 'beta' Apps via my [ko-fi](https://ko-fi.com/s/f242d26788). 
-
-The Gold apps are generally specific Apps with some extra features and generally do not require extra custom nodes. Beta apps are still under development, are not fool-proof and may require additional custom nodes. They are also available to subscribers on my [Ko-fi page](https://ko-fi.com/koalanation). As a subscriber, you can suggest that some comfyui workflows are converted into Apps.
-
-The User category is, for the moment, a placeholder for special apps.
+### Apps
+All Apps ship with SAUS and are freely available. You can also drop your own Apps directly into the `web/apps/` folder and they will appear here.
 
 ### Favorites
 Use the star toggle can filter by favorites, which can be activated in the app card.
@@ -63,7 +53,7 @@ The app cards contain several elements that are here described:
 - [Thumbnail](RUNNING_APPS.md): I have tried to use as much as possible the ComfyUI thumbnail for easy identification. Click on it to open the app.
 - Title: the title of the App (hopefully descriptive enough)
 - Tags: tags (used in the filters) with the main characteristics in relation to type/model/subcategories
-- Type of app and favorites: on the top right of the card, the type of app (open/gold/beta/user) and a toggle to select as favorite.
+- Favorites: on the top right of the card, a toggle to select the app as favorite.
 - [Model (status)](MODELS.md): It shows how many of the required models to run the app are installed. If none are installed, it will be shown in <span style="color:red">Red</span>.If all requried models are installed, in <span style="color:green">Green</span>. If only some of the required models are installed, in <span style="color:orange">Orange</span>.
 - Information button: this button will open the information panel where the models can be [installed/uninstalled](MODELS.md).
 

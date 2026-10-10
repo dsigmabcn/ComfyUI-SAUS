@@ -132,6 +132,7 @@ async def preview_app_handler(request: web.Request) -> web.Response:
         wf_file = None
         thumbnail_data = None
         thumbnail_extension = None
+        app_id = "builder"
 
         while True:
             part = await reader.next()
@@ -148,6 +149,9 @@ async def preview_app_handler(request: web.Request) -> web.Response:
                 SAUS_url = app_config.get('url', None)
                 if not SAUS_url:
                     return web.Response(status=400, text="Missing 'url' in 'appConfig'")
+
+            elif part.name == 'appId':
+                app_id = (await part.text()).strip() or "builder"
 
             elif part.name == 'wf':
                 wf_file = await part.read(decode=False)
@@ -170,9 +174,8 @@ async def preview_app_handler(request: web.Request) -> web.Response:
         if not app_config or not wf_file:
             return web.Response(status=400, text="Missing 'appConfig' or 'wf' in request")
 
-        app_id = "builder"
         if not app_id:
-            return web.Response(status=400, text="Missing 'id' in request body")
+            return web.Response(status=400, text="Missing 'appId' in request body")
 
         if not SAFE_FOLDER_NAME_REGEX.match(app_id):
             return web.Response(status=400, text="Invalid 'app_id'. Only letters, numbers, dashes, and underscores are allowed.")
@@ -213,7 +216,9 @@ async def preview_app_handler(request: web.Request) -> web.Response:
 
 async def reset_preview_handler(request: web.Request) -> web.Response:
     try:
-        app_id = "builder"
+        app_id = request.rel_url.query.get('appId', 'builder') or "builder"
+        if not SAFE_FOLDER_NAME_REGEX.match(app_id):
+            return web.Response(status=400, text="Invalid 'appId'. Only letters, numbers, dashes, and underscores are allowed.")
         SAUS_BROWSER_PATH = WEBROOT / app_id
 
         if not SAUS_BROWSER_PATH.exists():
@@ -303,7 +308,7 @@ async def create_app_handler(request: web.Request) -> web.Response:
             return web.Response(status=400, text=f"App with url '{SAUS_url}' already exists")
 
         from .constants import SAUS_APPS_PATH
-        app_folder = SAUS_APPS_PATH / 'user' / SAUS_url
+        app_folder = SAUS_APPS_PATH / SAUS_url
         app_folder.parent.mkdir(parents=True, exist_ok=True)
         app_folder.mkdir(parents=True, exist_ok=False)
 

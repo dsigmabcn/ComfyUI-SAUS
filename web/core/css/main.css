@@ -891,6 +891,98 @@ input[type="number"] {
     line-height: 1.1;
 }
 
+/* ---------------------------- Aspect Ratio selector ---------------------------- */
+.aspect-ratio-selector-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background-secondary);
+    color: var(--color-primary-text);
+    width: 100%;
+    margin-bottom: 4px;
+    padding: 5px;
+}
+
+.ratio-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.ratio-icons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ratio-icon-btn {
+    min-width: 54px;
+    padding: 6px 5px;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-primary-text);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ratio-icon-btn:hover {
+    border-color: var(--color-primary);
+}
+
+.ratio-icon-btn.active {
+    background-color: var(--color-background-pattern-light);
+    color: var(--color-primary-text);
+    border-color: var(--color-background-pattern-light);
+}
+
+.ratio-shape {
+    display: block;
+    box-sizing: border-box;
+    border: 2px solid currentColor;
+    border-radius: 2px;
+    margin-bottom: 3px;
+}
+
+.ratio-shape-unknown {
+    width: 18px;
+    height: 18px;
+}
+
+/* Ratio on its own line, computed size underneath. */
+.ratio-ratio {
+    font-size: 11px;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.ratio-size {
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: nowrap;
+    opacity: 0.7;
+    margin-top: 1px;
+}
+
+/* Extra ratios revealed by the "Other" button (same idea as the Dimension
+   Selector's Custom panel). */
+.ratio-other-panel {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.ratio-icon-label {
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.1;
+}
+
 #dimension-selector {
     display: flex;
     width: 100%;
@@ -2964,12 +3056,15 @@ html:not(.css-loading) body {
 .leanListItem {
     list-style: none;
     background-color: var(--color-background-secondary);
-    padding: 8px;
+    padding: 6px 8px;
     cursor: pointer;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     transition: background-color 0.2s ease;
     display: flex;
     align-items: center;
+    /* Slightly smaller so more entries fit on screen without scrolling. */
+    font-size: 13px;
+    line-height: 1.25;
 }
 
 .leanListItem:hover {

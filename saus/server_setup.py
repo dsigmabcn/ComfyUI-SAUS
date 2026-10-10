@@ -3,7 +3,6 @@ import asyncio
 import server
 import os
 from .app_manager import AppManager
-from .downloader import download_update_apps
 from .constants import SAUSMSG, logger
 import folder_paths
 
@@ -86,7 +85,6 @@ def setup_server() -> None:
         except Exception as e:
              logger.error(f"{SAUSMSG}: Error setting keep_alive_timeout: {e}")
 
-    download_update_apps()
 
     try:
         AppManager.setup_app_routes(server_instance.app)

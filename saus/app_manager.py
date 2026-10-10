@@ -4,10 +4,9 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH, ARC_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, BUILDER_V2_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH, ARC_MANAGER_PATH
 )
 from .route_manager import RouteManager
-from .downloader import sync_apps_handler
 from .file_system import (
     directory_listing_handler, rename_file_handler, delete_file_handler, upload_file_handler,
     download_file_handler, upload_chunk_handler, list_input_files_handler,
@@ -62,14 +61,6 @@ class AppManager:
                 logger.warning(f"{SAUSMSG}: Missing 'url' in config for {app_dir}")
                 continue
             
-            try:
-                rel_path = app_dir.relative_to(SAUS_APPS_PATH)
-                if len(rel_path.parts) > 1:
-                    conf['app_type'] = rel_path.parts[0]
-                else:
-                    conf['app_type'] = 'open'
-            except Exception:
-                conf['app_type'] = 'open'
                 
             app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir))
             APP_CONFIGS.append(conf)
@@ -113,7 +104,6 @@ class AppManager:
             (f'/saus/api/download-model', 'POST', download_model_handler),
             (f'/saus/api/settings', 'GET', get_settings_handler),
             (f'/saus/api/settings', 'POST', save_settings_handler),
-            (f'/saus/api/sync-apps', 'POST', sync_apps_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
             (f'/saus/api/files/input', 'GET', list_input_files_handler),
             (f'/saus/api/logs', 'GET', get_logs_handler),          
@@ -135,6 +125,8 @@ class AppManager:
     def _setup_additional_routes(app: web.Application) -> None:
         if BUILDER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus/builder', BUILDER_PATH))
+        if BUILDER_V2_PATH.is_dir():
+            app.add_routes(RouteManager.create_routes('saus/builder_v2', BUILDER_V2_PATH))
         if SAUS_BROWSER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus', SAUS_BROWSER_PATH))
         else:

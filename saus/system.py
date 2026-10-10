@@ -208,7 +208,7 @@ async def get_settings_handler(request: web.Request) -> web.Response:
                 data = json.load(f)
             
             response_data = data.copy()
-            sensitive_keys = ['civitai_api_key', 'huggingface_api_key', 'saus_token']
+            sensitive_keys = ['civitai_api_key', 'huggingface_api_key']
             for key in sensitive_keys:
                 if response_data.get(key):
                     response_data[key] = "********"
@@ -234,7 +234,7 @@ async def save_settings_handler(request: web.Request) -> web.Response:
             except Exception:
                 existing_data = {}
 
-        sensitive_keys = ['civitai_api_key', 'huggingface_api_key', 'saus_token']
+        sensitive_keys = ['civitai_api_key', 'huggingface_api_key']
         
         for key, value in new_data.items():
             if key in sensitive_keys and value == "********":

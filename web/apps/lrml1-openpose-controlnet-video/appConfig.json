@@ -1,0 +1,114 @@
+{
+  "id": "lrml1",
+  "name": "OpenPose Controlnet Video",
+  "url": "lrml1-openpose-controlnet-video",
+  "description": "Create a OpenPose/DWPose video from an existing video",
+  "imageLoaders": [
+    {
+      "id": "imageLoadere6v7u5",
+      "label": "Load Video",
+      "nodePath": "87.inputs.video"
+    }
+  ],
+  "multiComponents": [
+    {
+      "id": "multiComponentog4b5z",
+      "label": "Video Settings",
+      "dropdowns": [
+        {
+          "id": "dropdowna2o6n7",
+          "url": "VHS_LoadVideo",
+          "key": "video",
+          "label": "File Video",
+          "nodePath": "87.inputs.video"
+        }
+      ],
+      "steppers": [
+        {
+          "id": "stepper9zpzhg",
+          "label": "Frame Load Cap",
+          "minValue": 1,
+          "maxValue": 10000,
+          "step": 1,
+          "defValue": 81,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "87.inputs.frame_load_cap"
+        },
+        {
+          "id": "steppermwqk8p",
+          "label": "Skip First Frames",
+          "minValue": 0,
+          "maxValue": 1000,
+          "step": 1,
+          "defValue": 0,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "87.inputs.skip_first_frames"
+        },
+        {
+          "id": "stepperppz16p",
+          "label": "Select Every Nth",
+          "minValue": 1,
+          "maxValue": 100,
+          "step": 1,
+          "defValue": 1,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "87.inputs.select_every_nth"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentv9het3",
+      "label": "ControlNet Video settings",
+      "steppers": [
+        {
+          "id": "stepperg1vydf",
+          "label": "Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 32,
+          "defValue": 1280,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "88.inputs.width"
+        },
+        {
+          "id": "stepperac849v",
+          "label": "Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 32,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "88.inputs.height"
+        }
+      ],
+      "dropdowns": [
+        {
+          "id": "dropdownpu1pb7",
+          "url": "DWPreprocessor",
+          "key": "detect_hand",
+          "label": "Detect hands",
+          "nodePath": "262.inputs.detect_hand"
+        },
+        {
+          "id": "dropdownbdciwa",
+          "url": "DWPreprocessor",
+          "key": "detect_body",
+          "label": "Detect body",
+          "nodePath": "262.inputs.detect_body"
+        },
+        {
+          "id": "dropdown8cp6gr",
+          "url": "DWPreprocessor",
+          "key": "detect_face",
+          "label": "Detect face",
+          "nodePath": "262.inputs.detect_face"
+        }
+      ]
+    }
+  ]
+}

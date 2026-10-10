@@ -1,0 +1,121 @@
+{
+  "id": "j5mss",
+  "name": "Wan VACE preprocessed Control Video",
+  "url": "j5mss-wan-vace-preprocessed-control-video",
+  "description": "Generates video based on control video (controlnet) reference (already generated) and a prompt, using the Wan VACE model (1.3 and 14B)",
+  "prompts": [
+    {
+      "id": "promptmdgso1",
+      "label": "Prompt",
+      "default": "An ancient Greek soldier soldier is preparing for battle.  The soldier wears his outfit and the weapons, ready for the battle. He is excited to start the battle.   The scene is located in somewhere in the mediterranean. The bacgkround is an arid area with some plants. The sky is blue with a few white clouds scattered. The horizon is visible with a mountain range",
+      "nodePath": "6.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownc6y3t5",
+      "url": "VHS_LoadVideo",
+      "key": "video",
+      "label": "File Video",
+      "nodePath": "87.inputs.video"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoader82wbkf",
+      "label": "Load Video",
+      "nodePath": "87.inputs.video"
+    }
+  ],
+  "multiComponents": [
+    {
+      "id": "multiComponent2nl6aj",
+      "label": "Control Video Settings",
+      "steppers": [
+        {
+          "id": "stepperwe5xw3",
+          "label": "Resize Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 1280,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "88.inputs.width"
+        },
+        {
+          "id": "stepper67sghx",
+          "label": "Resize Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 16,
+          "defValue": 720,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "88.inputs.height"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentj73l6q",
+      "label": "Final Video resolultion",
+      "steppers": [
+        {
+          "id": "stepperqc76ny",
+          "label": "Width",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 32,
+          "defValue": 848,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "86.inputs.width"
+        },
+        {
+          "id": "stepperb6jpb8",
+          "label": "Height",
+          "minValue": 1,
+          "maxValue": 2048,
+          "step": 32,
+          "defValue": 480,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "86.inputs.height"
+        }
+      ]
+    },
+    {
+      "id": "multiComponentz8khwx",
+      "label": "Sampler settings",
+      "dropdowns": [
+        {
+          "id": "dropdownjqy7bk",
+          "url": "UNETLoader",
+          "key": "unet_name",
+          "label": "Model",
+          "nodePath": "257.inputs.unet_name"
+        }
+      ],
+      "steppers": [
+        {
+          "id": "stepperfhxrzn",
+          "label": "Steps",
+          "minValue": 1,
+          "maxValue": 100,
+          "step": 1,
+          "defValue": 20,
+          "precision": 0,
+          "scaleFactor": 1,
+          "nodePath": "3.inputs.steps"
+        }
+      ],
+      "seeders": [
+        {
+          "id": "seeder92lizm",
+          "label": "Seed",
+          "nodePath": "3.inputs.seed"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "jzhqq",
+  "name": "LTX2 Text to Video",
+  "url": "jzhqq-ltx2-text-to-video",
+  "description": "Video generation from text and image using the 2 step LTX2 video model.",
+  "prompts": [
+    {
+      "id": "promptkgn7o7",
+      "label": "Prompt",
+      "default": "A close-up of a cheerful girl puppet with curly auburn yarn hair and wide button eyes, holding a small red umbrella above her head. Rain falls gently around her. She looks upward and begins to sing with joy in English: \"It's raining, it's raining, I love it when its raining.\" Her fabric mouth opening and closing to a melodic tune. Her hands grip the umbrella handle as she sways slightly from side to side in rhythm. The camera holds steady as the rain sparkles against the soft lighting. Her eyes blink occasionally as she sings.",
+      "nodePath": "121.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownlwopcv",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "label": "Model",
+      "nodePath": "138.inputs.ckpt_name"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "steppercpssd3",
+      "label": "Time (s)",
+      "minValue": 5,
+      "maxValue": 15,
+      "step": 1,
+      "defValue": 10,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "139.inputs.value"
+    },
+    {
+      "id": "stepperj60q6t",
+      "label": "Framerate (fps)",
+      "minValue": 20,
+      "maxValue": 50,
+      "step": 1,
+      "defValue": 24,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "130.inputs.value"
+    },
+    {
+      "id": "stepperp8ib7l",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "98.inputs.steps"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederrtjbdw",
+      "label": "Seed 1",
+      "nodePath": "115.inputs.noise_seed"
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimensionSelectore6ifkc",
+      "defaultWidth": 1280,
+      "defaultHeight": 720,
+      "nodePath": "111.inputs"
+    }
+  ]
+}

@@ -130,6 +130,15 @@ export class MessageHandler {
         this.previewManager = new PreviewManager();
         this.progressUpdater = new window.ProgressUpdater('main-progress', 'progress-text');
         this.nodeMap = new Map();
+        // Optional: when set to a non-empty array of node-id strings, only those
+        // nodes' outputs are displayed. null/empty = show all outputs (legacy).
+        this.outputNodeIds = null;
+    }
+
+    setOutputNodes(nodeIds) {
+        this.outputNodeIds = Array.isArray(nodeIds) && nodeIds.length > 0
+            ? nodeIds.map(id => id.toString())
+            : null;
     }
 
     setOriginalImage(dataURL) {
@@ -237,8 +246,14 @@ export class MessageHandler {
         }
     }
 
+    isOutputAllowed(data) {
+        if (!this.outputNodeIds) return true;
+        const nodeId = data && data.node != null ? data.node.toString() : null;
+        return nodeId != null && this.outputNodeIds.includes(nodeId);
+    }
+
     handleExecuted(data) {
-        if (data.output) {
+        if (data.output && this.isOutputAllowed(data)) {
             if ('images' in data.output) {
                 this.processFinalImageOutput(data.output.images);
             }

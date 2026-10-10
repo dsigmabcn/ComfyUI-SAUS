@@ -8,6 +8,7 @@ import Stepper from "./js/common/components/widgets/Stepper.js";
 import MultiStepper from "./js/common/components/widgets/MultiStepper.js";
 import DropdownStepper from "./js/common/components/widgets/DropdownStepper.js";
 import DimensionSelector from './js/common/components/widgets/DimSelector.js';
+import AspectRatioSelector from './js/common/components/widgets/AspectRatioSelector.js';
 import Dropdown from './js/common/components/widgets/Dropdown.js';
 import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
@@ -81,6 +82,12 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     const appName = getAppName();
     const client_id = uuidv4();
     const appConfig = await fetchappConfig(appName);
+
+    // Optional per-app output selection: only display media produced by these nodes.
+    if (appConfig.outputs && Array.isArray(appConfig.outputs)) {
+        messageHandler.setOutputNodes(appConfig.outputs.map(output => output.nodeId).filter(Boolean));
+    }
+
     const appList = await fetch('/saus/api/apps-list').then(res => res.json());
     const architectures = await fetch('/saus/api/architectures').then(res => res.json());
     const modelsData = await fetch('/saus/api/data-model-info').then(res => res.json());
@@ -105,14 +112,60 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
 
 
     // ----------------------------------------------------------------------
-    // MODIFIED: Refactored generateWorkflowControls to use Basic/Advanced containers
+    // Layout/style support: an appConfig component may carry an optional
+    //   "layout": { "region": "basic" | "advanced", "order": <number> }
+    //   "style":  { "<css-property>": "<value>" }
+    // block. When absent, the legacy label-based placement and DOM order are
+    // used unchanged, so existing apps are unaffected.
+    function applyWidgetLayoutStyle(element, itemConfig) {
+        const style = itemConfig && itemConfig.style;
+        if (style && typeof style === 'object') {
+            Object.entries(style).forEach(([prop, value]) => {
+                if (value === null || value === undefined || value === '') return;
+                const cssProp = prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+                try {
+                    element.style.setProperty(cssProp, String(value));
+                } catch (err) {
+                    console.warn('Invalid style property in appConfig:', prop, value);
+                }
+            });
+        }
+
+        const layout = itemConfig && itemConfig.layout;
+        if (layout && layout.order !== undefined && layout.order !== null) {
+            element.dataset.layoutOrder = String(layout.order);
+        }
+    }
+
+    function sortContainerByLayoutOrder(container) {
+        if (!container) return;
+        const children = Array.from(container.children);
+        if (!children.some(child => child.dataset.layoutOrder !== undefined)) return;
+
+        children
+            .map((el, index) => ({
+                el,
+                index,
+                order: el.dataset.layoutOrder !== undefined ? Number(el.dataset.layoutOrder) : index
+            }))
+            .sort((a, b) => (a.order - b.order) || (a.index - b.index))
+            .forEach(({ el }) => container.appendChild(el));
+    }
+
     function generateWorkflowControls(config) {
         // Get the new destination containers
         const basicContainer = document.getElementById('basic-controls-container');
         const advancedContainer = document.getElementById('advanced-controls-container');
 
-        // Helper to determine the container
+        // Helper to determine the container (an explicit layout.region wins)
         function getContainer(itemConfig) {
+            const region = itemConfig.layout && itemConfig.layout.region;
+            if (region === 'basic') {
+                return basicContainer;
+            }
+            if (region === 'advanced') {
+                return advancedContainer;
+            }
             // DimensionSelector and Seeder configs often lack a 'label', use ID as fallback
             const label = itemConfig.label || (itemConfig.id.includes('dimension-selector') ? "Dimension Selector" : itemConfig.id);
             if (basicControlLabels.includes(label)) {
@@ -123,19 +176,20 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
 
         function appendControl(itemConfig, className) {
             const container = getContainer(itemConfig);
-            
+
             const div = document.createElement('div');
             div.id = itemConfig.id;
             div.classList.add(className);
+            applyWidgetLayoutStyle(div, itemConfig);
             container.appendChild(div);
         }
 
-        if (config.dropdowns && Array.isArray(config.dropdowns)) {            
+        if (config.dropdowns && Array.isArray(config.dropdowns)) {
             config.dropdowns.forEach(dropdown => {
                 appendControl(dropdown, 'loader');
             });
         }
-        
+
         if (config.steppers && Array.isArray(config.steppers)) {
             config.steppers.forEach(stepper => {
                 appendControl(stepper, 'stepper-container');
@@ -145,11 +199,17 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         if (config.dimensionSelectors) {
             config.dimensionSelectors.forEach(selector => {
                 // Manually add 'Dimension Selector' as label for categorization
-                selector.label = "Dimension Selector"; 
+                selector.label = "Dimension Selector";
                 appendControl(selector, 'dimension-selector-container');
             });
         }
-        
+
+        if (config.aspectRatioSelectors) {
+            config.aspectRatioSelectors.forEach(selector => {
+                appendControl(selector, 'aspect-ratio-selector-container');
+            });
+        }
+
         if (config.inputs && Array.isArray(config.inputs)) {
             config.inputs.forEach(input => {
                 appendControl(input, 'input-container');
@@ -169,6 +229,9 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
                 appendControl(seeder, 'seeder-container');
             });
         }
+
+        sortContainerByLayoutOrder(basicContainer);
+        sortContainerByLayoutOrder(advancedContainer);
     }
 
 function setPromptComponents(config, options = { clearInputs: false }) {
@@ -179,7 +242,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     config.prompts.forEach((input, index) => {
         const container = document.createElement('div');
-        container.className = 'prompt-container'; 
+        container.className = 'prompt-container';
+        applyWidgetLayoutStyle(container, input); 
 
         const labelDiv = document.createElement('div');
         labelDiv.className = 'title-text';
@@ -215,6 +279,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         
         promptsContainer.appendChild(container);
     });
+
+    sortContainerByLayoutOrder(promptsContainer);
 }
 
     function generateDynamicScriptDefault(index) {
@@ -545,6 +611,13 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 }
             }
             const instance = new DimensionSelector(config, workflow);
+            widgetInstances[config.id] = instance;
+        });
+    }
+
+    if (appConfig.aspectRatioSelectors) {
+        appConfig.aspectRatioSelectors.forEach(config => {
+            const instance = new AspectRatioSelector(config, workflow);
             widgetInstances[config.id] = instance;
         });
     }

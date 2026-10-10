@@ -6,7 +6,7 @@
 __pycache__/
 saus/__pycache__/
 # other
-web/apps/
+# All apps live directly under web/apps/ and are shipped in the repo
 .ipynb_checkpoints/
 saus/data/settings.json
 saus/data/.secret.key

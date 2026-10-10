@@ -1,0 +1,123 @@
+{
+  "id": "kfifx",
+  "name": "Wan 2.2 Image to Video",
+  "url": "kfifx-wan-2-2-image-to-video",
+  "description": "Create videos from an image using the 2 step model Wan 2.2. For the distilled versions, use the high and low loras with total 4 steps, step change at 2 and CFG of 1.",
+  "prompts": [
+    {
+      "id": "promptkyqinm",
+      "label": "Prompt",
+      "default": "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
+      "nodePath": "6.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownfmc8fl",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "37.inputs.unet_name"
+    },
+    {
+      "id": "dropdownjf8eom",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "37.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdownowbnar",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "56.inputs.unet_name"
+    },
+    {
+      "id": "dropdown1j1a0u",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "56.inputs.weight_dtype"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "steppergyreng",
+      "label": "FPS",
+      "minValue": 8,
+      "maxValue": 25,
+      "step": 1,
+      "defValue": 16,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "117.inputs.value"
+    },
+    {
+      "id": "stepperzzbdwk",
+      "label": "Time (s)",
+      "minValue": 3,
+      "maxValue": 10,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "116.inputs.value"
+    },
+    {
+      "id": "stepper1z21rd",
+      "label": "Total Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "120.inputs.value"
+    },
+    {
+      "id": "stepper598nrz",
+      "label": "Steps change high to low",
+      "minValue": 1,
+      "maxValue": 50,
+      "step": 1,
+      "defValue": 10,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "121.inputs.value"
+    },
+    {
+      "id": "stepperq5bi9y",
+      "label": "CFG",
+      "minValue": 0,
+      "maxValue": 10,
+      "step": 0.1,
+      "defValue": 3.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "122.inputs.value"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seeder0iwdlk",
+      "label": "Seed",
+      "nodePath": "57.inputs.noise_seed"
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimensionSelectorofryl7",
+      "defaultWidth": 640,
+      "defaultHeight": 640,
+      "nodePath": "63.inputs"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderccqldy",
+      "label": "ImageLoader",
+      "nodePath": "62.inputs.image"
+    }
+  ]
+}

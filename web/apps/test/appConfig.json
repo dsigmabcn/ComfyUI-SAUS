@@ -1,0 +1,75 @@
+{
+  "id": "sauscfpu0p",
+  "name": "test",
+  "url": "test",
+  "description": "",
+  "prompts": [
+    {
+      "id": "prompt10rqfm",
+      "label": "Text",
+      "nodePath": "67.inputs.text",
+      "default": "",
+      "layout": {
+        "region": "prompts",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "steppere4dtxk",
+      "label": "Steps",
+      "nodePath": "70.inputs.steps",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 0,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    },
+    {
+      "id": "steppernvq3p5",
+      "label": "Cfg",
+      "nodePath": "70.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 0,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dropdowns": [],
+  "seeders": [
+    {
+      "id": "seederzbnu2p",
+      "label": "Seed",
+      "nodePath": "70.inputs.seed",
+      "seed": "102154490453346",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [],
+  "dimensionSelectors": [],
+  "outputs": [
+    {
+      "id": "output9",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

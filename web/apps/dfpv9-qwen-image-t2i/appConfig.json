@@ -1,0 +1,97 @@
+{
+  "id": "dfpv9",
+  "name": "QWEN Image T2I",
+  "url": "dfpv9-qwen-image-t2i",
+  "description": "Create Images using QWEN Image",
+  "prompts": [
+    {
+      "id": "promptk4a2ny",
+      "label": "Prompt",
+      "default": "Urban alleyway at dusk. Tall, statuesque high-fashion model striding elegantly, mid distant full body shot from an angular perspective, cinematic/editorial with bold contrasts and tactile materials. They wear a rose-gold metallic trench coat with deconstructed elements over a black long-sleeved turtleneck with subtle texture; paired with forest-green pleated pants with raw hems and a soft texture. Long braided dark hair, medium complexion. They carry a vibrant yellow designer handbag with geometric details and a structured silhouette. White architectural sneakers with bold geometric cutouts. Bold, high-contrast, tactile, urban-grit meets high-fashion impact, extreme clarity, extreme layering, post-processing with transparent light-transmitting ultra-smooth high-definition film effect, removing all noise and grain, removing all blur, removing all vintage feel, removing all roughness, drawn with 32K pixel precision, unparalleled fine line drawing of every single detail, the entire image like a brand new photograph, photorealistic",
+      "nodePath": "108.inputs.text"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownvjxcc1",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "label": "Model",
+      "nodePath": "105.inputs.unet_name"
+    },
+    {
+      "id": "dropdown7iyy1g",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "label": "Type",
+      "nodePath": "105.inputs.weight_dtype"
+    },
+    {
+      "id": "dropdown7fm7to",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "label": "CLIP",
+      "nodePath": "104.inputs.clip_name"
+    },
+    {
+      "id": "dropdownlddolg",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "label": "VAE",
+      "nodePath": "103.inputs.vae_name"
+    },
+    {
+      "id": "dropdownvqlt72",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "label": "Sampler",
+      "nodePath": "106.inputs.sampler_name"
+    },
+    {
+      "id": "dropdown4b7nj6",
+      "url": "KSampler",
+      "key": "scheduler",
+      "label": "Scheduler",
+      "nodePath": "106.inputs.scheduler"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepper21kvzi",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 25,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "106.inputs.steps"
+    },
+    {
+      "id": "stepperqsqw04",
+      "label": "CFG",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 7.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "106.inputs.cfg"
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seeder09pvd4",
+      "label": "Seed",
+      "nodePath": "106.inputs.seed"
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimensionSelectorhceygk",
+      "defaultWidth": 1328,
+      "defaultHeight": 1328,
+      "nodePath": "107.inputs"
+    }
+  ]
+}
