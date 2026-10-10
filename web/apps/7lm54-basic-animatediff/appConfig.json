@@ -57,7 +57,7 @@
       "key": "scheduler",
       "label": "Scheduler",
       "nodePath": "5.inputs.scheduler"
-    }   
+    }
   ],
   "steppers": [
     {
@@ -108,5 +108,26 @@
       "defaultHeight": 512,
       "nodePath": "6.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-video",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5"
+      ],
+      "other": [
+        "animatediff"
+      ]
+    },
+    "architecture": "ANIMATE_DIFF_SD1.5",
+    "models": [
+      "photon_v1.safetensors",
+      "v3_sd15_adapter.ckpt",
+      "vae-ft-mse-840000-ema-pruned.safetensors"
+    ]
+  }
 }

@@ -57,7 +57,7 @@
       "key": "scheduler",
       "label": "Scheduler",
       "nodePath": "5.inputs.scheduler"
-    }    
+    }
   ],
   "steppers": [
     {
@@ -108,5 +108,27 @@
       "defaultHeight": 512,
       "nodePath": "6.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "SD1.5"
+      ],
+      "other": [
+        "animatediff"
+      ]
+    },
+    "architecture": "ANIMATE_DIFF_LCM",
+    "models": [
+      "helloyoung25d_V10f.safetensors",
+      "AnimateLCM_sd15_t2v_lora.safetensors",
+      "vae-ft-mse-840000-ema-pruned.safetensors"
+    ]
+  }
 }

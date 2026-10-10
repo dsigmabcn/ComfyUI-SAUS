@@ -20,62 +20,28 @@ export async function checkModelStatus(fileId, modelPath) {
 }
 
 export async function updateAppStatus(app, statusElement) {
-    if (!app.architecture || !state.ARCHITECTURES[app.architecture]) {
-        statusElement.textContent = "Unknown";
-        statusElement.className = "status-text";
-        return;
-    }
+    const filenames = (app.metadata && app.metadata.models) || [];
 
-    const arch = state.ARCHITECTURES[app.architecture];
-    const components = arch.components || {};
-    const compulsory = components.compulsory || [];
-    const atLeastOne = components.at_least_one || [];
-
-    const totalRequired = compulsory.length + (atLeastOne.length > 0 ? 1 : 0);
-
-    if (totalRequired === 0) {
+    if (filenames.length === 0) {
+        // No models required (e.g. pure "tools" apps).
         statusElement.textContent = "Installed";
         statusElement.className = "status-text status-ready";
         return;
     }
 
-    let readyCompulsoryCount = 0;
-    let readyAtLeastOneCount = 0;
-
-    const checkComponents = async (componentList) => {
-        let readyCount = 0;
-        for (const compKey of componentList) {
-            const modelInfo = state.MODELS_DATA[compKey];
-            if (modelInfo) {
-                const status = await checkModelStatus(modelInfo.id, modelInfo.model_path);
-                if (status === 'ready') readyCount++;
-            }
-        }
-        return readyCount;
-    };
-
-    readyCompulsoryCount = await checkComponents(compulsory);
-    
-    if (atLeastOne.length > 0) {
-        for (const compKey of atLeastOne) {
-            const modelInfo = state.MODELS_DATA[compKey];
-            if (modelInfo) {
-                const status = await checkModelStatus(modelInfo.id, modelInfo.model_path);
-                if (status === 'ready') {
-                    readyAtLeastOneCount++;
-                    break;
-                }
-            }
-        }
+    let readyCount = 0;
+    for (const filename of filenames) {
+        const model = state.MODELS_DATA[filename];
+        const directory = (model && model.directory) || "";
+        const status = await checkModelStatus(filename, directory);
+        if (status === 'ready') readyCount++;
     }
 
-    const installedCount = readyCompulsoryCount + (readyAtLeastOneCount > 0 ? 1 : 0);
+    statusElement.textContent = `${readyCount} of ${filenames.length}`;
 
-    statusElement.textContent = `${installedCount} of ${totalRequired}`;
-
-    if (installedCount === 0) {
+    if (readyCount === 0) {
         statusElement.className = "status-text status-missing";
-    } else if (installedCount === totalRequired) {
+    } else if (readyCount === filenames.length) {
         statusElement.className = "status-text status-ready";
     } else {
         statusElement.className = "status-text status-partial";
@@ -115,84 +81,58 @@ export async function showAppDetails(app) {
         </div>
     `;
 
-    if (app.architecture && state.ARCHITECTURES[app.architecture]) {
-        const arch = state.ARCHITECTURES[app.architecture];
-        const components = arch.components || {};
-        
-        const [compulsoryHtml, atLeastOneHtml, optionalHtml] = await Promise.all([
-            renderComponentList("Compulsory Models", components.compulsory, 'compulsory'),
-            renderComponentList("At Least One Required", components.at_least_one, 'at_least_one'),
-            renderComponentList("Optional Models", components.optional, 'optional')
-        ]);
-        
-        html += compulsoryHtml + atLeastOneHtml + optionalHtml;
+    const filenames = (app.metadata && app.metadata.models) || [];
+    if (filenames.length) {
+        html += await renderComponentList("Models", filenames, 'compulsory');
     } else {
-        html += `<p>No architecture information available.</p>`;
+        html += `<p>This app has no model requirements.</p>`;
     }
 
     detailsContent.innerHTML = html;
 }
 
-async function renderComponentList(title, componentKeys, listType) {
-    if (!componentKeys || componentKeys.length === 0) return '';
+async function renderComponentList(title, filenames, listType) {
+    if (!filenames || filenames.length === 0) return '';
 
-    const modelStatuses = await Promise.all(componentKeys.map(async (key) => {
-        const model = state.MODELS_DATA[key];
-        if (!model) return { key, model: null, status: 'error' };
-        const status = await checkModelStatus(model.id, model.model_path);
-        return { key, model, status };
+    const modelStatuses = await Promise.all(filenames.map(async (filename) => {
+        const model = state.MODELS_DATA[filename] || { name: filename };
+        const directory = model.directory || "";
+        const status = await checkModelStatus(filename, directory);
+        return { filename, model, status };
     }));
 
     const readyCount = modelStatuses.filter(m => m.status === 'ready').length;
     const totalCount = modelStatuses.length;
 
-    let headerTrafficLight = '';
-    if (listType === 'compulsory' && totalCount > 0) {
-        let color = '#f44336'; // red
-        if (readyCount === totalCount) {
-            color = '#4caf50'; // green
-        } else if (readyCount > 0) {
-            color = '#ff9800'; // orange
-        }
-        headerTrafficLight = `<i class="fas fa-circle" style="color: ${color}; margin-right: 8px;"></i>`;
-    } else if (listType === 'at_least_one' && totalCount > 0) {
-        let color = readyCount > 0 ? '#4caf50' : '#f44336'; // green or red
-        headerTrafficLight = `<i class="fas fa-circle" style="color: ${color}; margin-right: 8px;"></i>`;
-    }
+    let color = '#f44336'; // red
+    if (readyCount === totalCount) color = '#4caf50';       // green
+    else if (readyCount > 0) color = '#ff9800';             // orange
 
-    let html = `<div class="component-section"><h4>${headerTrafficLight}${title}</h4>`;
+    let html = `<div class="component-section"><h4><i class="fas fa-circle" style="color: ${color}; margin-right: 8px;"></i>${title}</h4>`;
 
-    const itemsHtml = modelStatuses.map(({ key, model, status }) => {
-        if (!model) return '';
-
+    html += modelStatuses.map(({ filename, model, status }) => {
         const isReady = status === 'ready';
+        const url = model.url || '';
+        const directory = model.directory || '';
+        const type = model.type || '';
+        const backgroundClass = isReady ? 'required-installed' : 'required-missing';
 
-        let backgroundClass = '';
-        if (listType === 'compulsory' || listType === 'at_least_one') {
-            backgroundClass = isReady ? 'required-installed' : 'required-missing';
-        } else if (listType === 'optional') {
-            if (isReady) {
-                backgroundClass = 'optional-installed';
-            }
-        }
+        const action = isReady
+            ? `<button class="btn-action delete" onclick="deleteModel('${filename}', '${directory}')" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>`
+            : (url
+                ? `<button class="btn-action" onclick="downloadModel('${type}', '${url}', '${directory}', '${filename}', event)" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>`
+                : `<span class="status-badge missing" title="No download URL configured">no URL</span>`);
 
         return `
-            <div class="component-item ${backgroundClass}" data-file-id="${model.id}" data-list-type="${listType}">
+            <div class="component-item ${backgroundClass}" data-file-id="${filename}" data-list-type="${listType}">
                 <div class="component-info">
-                    <span class="component-name">${model.name}</span>
-                    <!--<span class="component-filename">${model.id}</span>-->
+                    <span class="component-name">${model.name || filename}</span>
                 </div>
-                <div class="component-actions">
-                    ${isReady 
-                        ? `<button class="btn-action delete" onclick="deleteModel('${model.id}', '${model.model_path}')" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>`
-                        : `<button class="btn-action" onclick="downloadModel('${model.type}', '${model.url_model}', '${model.model_path}', '${model.id}', event)" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>`
-                    }
-                </div>
+                <div class="component-actions">${action}</div>
             </div>
         `;
     }).join('');
 
-    html += itemsHtml;
     html += `</div>`;
     return html;
 }
@@ -287,13 +227,7 @@ export function updateComponentStatus(fileId, status, progress = 0) {
 
     const actions = item.querySelector('.component-actions');
     
-    let model = null;
-    for (const key in state.MODELS_DATA) {
-        if (state.MODELS_DATA[key].id === fileId) {
-            model = state.MODELS_DATA[key];
-            break;
-        }
-    }
+    const model = state.MODELS_DATA[fileId];
     if (!model) return;
 
     if (status === 'downloading') {
@@ -303,7 +237,7 @@ export function updateComponentStatus(fileId, status, progress = 0) {
         `;
     } else if (status === 'ready') {
         actions.innerHTML = `
-            <button class="btn-action delete" onclick="deleteModel('${model.id}', '${model.model_path}')" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>
+            <button class="btn-action delete" onclick="deleteModel('${fileId}', '${model.directory || ''}')" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>
         `;
 
         const listType = item.dataset.listType;
@@ -319,7 +253,7 @@ export function updateComponentStatus(fileId, status, progress = 0) {
 
     } else if (status === 'missing') {
         actions.innerHTML = `
-            <button class="btn-action" onclick="downloadModel('${model.type}', '${model.url_model}', '${model.model_path}', '${model.id}', event)" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>
+            <button class="btn-action" onclick="downloadModel('${model.type}', '${model.url || ''}', '${model.directory || ''}', '${fileId}', event)" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>
         `;
 
         const listType = item.dataset.listType;

@@ -3,8 +3,7 @@
   "name": "Flux Depth",
   "url": "ppfxh-flux-depth",
   "description": "Compatible with: Depth Model, Base Model + Depth Lora, and Depth Model + 8 Step Lora. (Set Lora Strength to 0 for no Lora)",
-  "author":"parousia",
-
+  "author": "parousia",
   "prompts": [
     {
       "id": "promptr6l1pw",
@@ -178,5 +177,26 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "controlnet"
+      ]
+    },
+    "architecture": "CONTROLNET FLUX",
+    "models": [
+      "FluxDevVae.safetensors",
+      "flux1-turbo-alpha-8step.safetensors",
+      "flux1-depth-dev-fp16-Q8_0-GGUF.gguf"
+    ]
+  }
 }

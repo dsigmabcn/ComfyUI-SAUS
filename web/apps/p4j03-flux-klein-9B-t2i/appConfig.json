@@ -79,5 +79,25 @@
       "defaultHeight": 1024,
       "nodePath": "99.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": []
+    },
+    "architecture": "FLUX2_KLEIN_9B",
+    "models": [
+      "flux-2-klein-base-9b.safetensors",
+      "qwen_3_8b_fp8mixed.safetensors",
+      "flux2-vae.safetensors"
+    ]
+  }
 }

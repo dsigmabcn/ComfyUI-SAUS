@@ -103,5 +103,23 @@
       "defaultHeight": 0,
       "nodePath": "10.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": []
+    },
+    "architecture": "FLUX_DEV_GGUF",
+    "models": [
+      "ae.safetensors",
+      "flux1-dev-Q6_K.gguf"
+    ]
+  }
 }

@@ -9,5 +9,18 @@
       "label": "ImageLoader",
       "nodePath": "2.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "tools",
+    "tags": {
+      "type": [
+        "remove"
+      ],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "OTHER",
+    "models": []
+  }
 }

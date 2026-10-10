@@ -67,7 +67,12 @@
         "FLUX_KREA"
       ],
       "lora": []
-    }
+    },
+    "models": [
+      "ae.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors"
+    ]
   },
   "QWEN": {
     "title": "QWEN IMAGE",
@@ -105,7 +110,12 @@
       "lora": [
         "QWEN_LIGHT_4steps"
       ]
-    }
+    },
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "qwen_image_bf16.safetensors"
+    ]
   },
   "Z-IMAGE": {
     "title": "Z-Image",
@@ -141,7 +151,11 @@
         "Z_IMAGE_TURBO"
       ],
       "lora": []
-    }
+    },
+    "models": [
+      "qwen_3_4b.safetensors",
+      "ae.safetensors"
+    ]
   },
   "FLUX2_KLEIN_4B": {
     "title": "FLUX-2 KLEIN 4B",
@@ -177,7 +191,11 @@
       "steps": "4",
       "cfg": "1",
       "lora": []
-    }
+    },
+    "models": [
+      "qwen_3_4b.safetensors",
+      "flux2-vae.safetensors"
+    ]
   },
   "FLUX2_KLEIN_9B": {
     "title": "FLUX-2 KLEIN 9B",
@@ -213,7 +231,11 @@
       "steps": "4",
       "cfg": "1",
       "lora": []
-    }
+    },
+    "models": [
+      "qwen_3_8b_fp8mixed.safetensors",
+      "flux2-vae.safetensors"
+    ]
   },
   "FLUX_DEV_GGUF": {
     "title": "FLUX DEV GGUF",
@@ -250,7 +272,12 @@
         "FLUX GGUF Q6"
       ],
       "lora": []
-    }
+    },
+    "models": [
+      "ae.safetensors",
+      "clip_l.safetensors",
+      "t5-v1_1-xxl-encoder-Q8_0.gguf"
+    ]
   },
   "ANIMATE_DIFF_SD1.5": {
     "title": "AnimateDiff SD1.5 V3",
@@ -269,7 +296,11 @@
         "REV ANIMATED"
       ],
       "optional": []
-    }
+    },
+    "models": [
+      "v3_sd15_mm.ckpt",
+      "v3_sd15_adapter.ckpt"
+    ]
   },
   "ANIMATE_DIFF_LCM": {
     "title": "AnimateDiff SD1.5 LCM",
@@ -288,7 +319,11 @@
         "REV ANIMATED"
       ],
       "optional": []
-    }
+    },
+    "models": [
+      "v3_sd15_mm.ckpt",
+      "v3_sd15_adapter.ckpt"
+    ]
   },
   "WAN2.1 VACE": {
     "title": "Wan 2.1 VACE",
@@ -309,7 +344,11 @@
         "OPENPOSE",
         "DEPTH"
       ]
-    }
+    },
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+    ]
   },
   "WAN22_TEXT_TO_VIDEO": {
     "title": "Wan 2.2 T2V 14B",
@@ -354,7 +393,13 @@
         "LIGHT_4steps_t2v_high",
         "LIGHT_4steps_t2v_low"
       ]
-    }
+    },
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan2.2_t2v_high_noise_14B_fp16.safetensors",
+      "wan2.2_t2v_low_noise_14B_fp16.safetensors"
+    ]
   },
   "WAN22_IMAGE_TO_VIDEO": {
     "title": "Wan 2.2 I2V 14B",
@@ -399,7 +444,13 @@
         "LIGHT_4steps_i2v_low",
         "LIGHT_4steps_i2v_high"
       ]
-    }
+    },
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan2.2_i2v_high_noise_14B_fp16.safetensors",
+      "wan2.2_i2v_low_noise_14B_fp16.safetensors"
+    ]
   },
   "LTX2_T2V_I2V": {
     "title": "LTX-2 Text and image to video",
@@ -425,8 +476,13 @@
         "LTX2_BASE"
       ],
       "lora": []
-    }
-
+    },
+    "models": [
+      "ltx-2-19b-dev-fp8.safetensors",
+      "ltx-2-19b-distilled-lora-384.safetensors",
+      "ltx-2-spatial-upscaler-x2-1.0.safetensors",
+      "gemma_3_12B_it_fp4_mixed.safetensors"
+    ]
   },
   "FLUX_REDUX": {
     "title": "FLUX REDUX",
@@ -445,7 +501,15 @@
       ],
       "at_least_one": [],
       "optional": []
-    }
+    },
+    "models": [
+      "ae.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "flux1-dev.safetensors",
+      "sigclip_vision_patch14_384.safetensors",
+      "flux1-redux-dev.safetensors"
+    ]
   },
   "FLUX_INPAINT": {
     "title": "FLUX INPAINT",
@@ -462,7 +526,13 @@
       ],
       "at_least_one": [],
       "optional": []
-    }
+    },
+    "models": [
+      "ae.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "flux1-fill-dev.safetensors"
+    ]
   },
   "FLUX_INPAINT_GGUF": {
     "title": "FLUX INPAINT GGUF",
@@ -481,7 +551,12 @@
         "FLUX_FILL_GGUF_Q6"
       ],
       "optional": []
-    }
+    },
+    "models": [
+      "ae.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors"
+    ]
   },
   "QWEN_EDIT": {
     "title": "QWEN EDIT",
@@ -520,7 +595,11 @@
         "QWEN_EDIT_2509_LIGHTING"
       ],
       "lora": []
-    }
+    },
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "qwen_2.5_vl_7b_fp8_scaled.safetensors"
+    ]
   },
   "CONTROLNET FLUX": {
     "title": "ControlNet FLUX",
@@ -549,5 +628,16 @@
         ""
       ]
     }
+  },
+  "QWEN IMAGE 2.1": {
+    "title": "QWEN IMAGE 2.1",
+    "description": "",
+    "categories": [],
+    "models": [
+      "qwen_image_2.1_int8_convrot.safetensors",
+      "qwen3vl_8b_int8_convrot.safetensors",
+      "qwen_image_2.1_vae_bf16.safetensors",
+      "Qwen-Image-2.1-PE-T2I.safetensors"
+    ]
   }
 }

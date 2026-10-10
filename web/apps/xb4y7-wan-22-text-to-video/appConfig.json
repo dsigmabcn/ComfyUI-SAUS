@@ -112,5 +112,26 @@
       "defaultHeight": 640,
       "nodePath": "104.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
+      "other": []
+    },
+    "architecture": "WAN22_TEXT_TO_VIDEO",
+    "models": [
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan_2.1_vae.safetensors",
+      "wan2.2_t2v_high_noise_14B_fp16.safetensors",
+      "wan2.2_t2v_low_noise_14B_fp16.safetensors"
+    ]
+  }
 }

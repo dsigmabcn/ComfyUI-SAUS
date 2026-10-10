@@ -86,5 +86,25 @@
       "label": "loadimage1",
       "nodePath": "12.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": [
+        "image-to-image"
+      ]
+    },
+    "architecture": "SD15",
+    "models": [
+      "RealVisXL_V5.0_fp16.safetensors"
+    ]
+  }
 }

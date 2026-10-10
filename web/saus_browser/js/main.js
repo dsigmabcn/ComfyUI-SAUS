@@ -9,78 +9,42 @@ import { renderApps, filterCurrentApps, renderTagsFilter, showHome, showApps, sh
 export async function loadApps() {
     state.sessionTimestamp = Date.now();
     try {
-        // Fetch Architectures and Model Data first
-        const [archResponse, modelsResponse] = await Promise.all([
-            fetch('/saus/api/architectures'),
-            fetch('/saus/api/data-model-info')
+        // Model registry (filename-keyed) + shared taxonomy.
+        const [modelsResponse, taxonomyResponse] = await Promise.all([
+            fetch('/saus/api/models'),
+            fetch('/saus/api/taxonomy')
         ]);
 
-        if (archResponse.ok) state.ARCHITECTURES = await archResponse.json();
         if (modelsResponse.ok) state.MODELS_DATA = await modelsResponse.json();
+        if (taxonomyResponse.ok) state.TAXONOMY = await taxonomyResponse.json();
 
         const response = await fetch('/saus/api/apps');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         state.allApps = await response.json();
-        //console.log("[SAUS] Loaded apps data:", state.allApps);
 
-        // Step 2: Fetch the separate list of categories (your app_list.json)
-        // You will need to replace this URL with the correct path to app_list.json
-        const categoriesResponse = await fetch('/saus/api/apps-list');
-        if (!categoriesResponse.ok) {
-            throw new Error(`HTTP error! status: ${categoriesResponse.status}`);
-        }
-        const categoriesData = await categoriesResponse.json();
-        
-        // Create a lookup map for faster access to categories by ID
-        const metaMap = new Map(categoriesData.map(item => [item.id, item]));
-
-        // Step 3: Assign categories to each app from the separate data source
+        // Category / tags / architecture now live in each app's appConfig.metadata.
         const uniqueCategories = new Set();
         state.allTags.clear();
         state.allApps.forEach(app => {
-            const meta = metaMap.get(app.id);
-            if (meta) {
-                app.category = meta.category;
-                
-                if (Array.isArray(meta.tags)) {
-                     // Fallback for array
-                     app.tags = { type: [], base_models: [], other: meta.tags };
-                     app.flatTags = meta.tags;
-                } else if (typeof meta.tags === 'object') {
-                     const asArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
-                     app.tags = {
-                        type: asArray(meta.tags.type),
-                        base_models: asArray(meta.tags.base_models),
-                        other: asArray(meta.tags.other)
-                     };
-                     app.flatTags = [
-                        ...app.tags.type,
-                        ...app.tags.base_models,
-                        ...app.tags.other
-                     ];
-                } else {
-                     app.tags = { type: [], base_models: [], other: [] };
-                     app.flatTags = [];
-                }
+            const meta = app.metadata || {};
+            const tags = meta.tags || {};
+            const asArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
 
-                app.architecture = meta.architecture; // Get architecture from metadata
-            } else {
-                // Assign a default category if none is found
-                app.category = 'Other'; 
-                app.tags = { type: [], base_models: [], other: [] };
-                app.flatTags = [];
-                app.architecture = null;
-            }
+            app.category = meta.category || 'Other';
+            app.tags = {
+                type: asArray(tags.type),
+                base_models: asArray(tags.base_models),
+                other: asArray(tags.other)
+            };
+            app.flatTags = [...app.tags.type, ...app.tags.base_models, ...app.tags.other];
+            app.architecture = meta.architecture || null;
+
             uniqueCategories.add(app.category);
-            if (app.flatTags) {
-                app.flatTags.forEach(tag => state.allTags.add(tag));
-            }
+            app.flatTags.forEach(tag => state.allTags.add(tag));
         });
-        
-        
-        
+
         state.categories = Array.from(uniqueCategories);
         //console.log(state.categories);
 

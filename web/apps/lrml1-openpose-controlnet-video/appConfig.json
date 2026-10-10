@@ -110,5 +110,18 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "tools",
+    "tags": {
+      "type": [
+        "controlnet"
+      ],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "OTHER",
+    "models": []
+  }
 }

@@ -91,5 +91,25 @@
       "label": "ImageLoader",
       "nodePath": "15.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "image-to-image"
+      ]
+    },
+    "architecture": "FLUX_DEV_GGUF",
+    "models": [
+      "ae.safetensors",
+      "flux1-dev-Q6_K.gguf"
+    ]
+  }
 }

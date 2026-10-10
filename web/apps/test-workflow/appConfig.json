@@ -112,5 +112,20 @@
       "nodeId": "9",
       "type": "media"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "other",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": null,
+    "models": [
+      "qwen_3_4b.safetensors",
+      "ae.safetensors",
+      "z_image_turbo_bf16.safetensors"
+    ]
+  }
 }

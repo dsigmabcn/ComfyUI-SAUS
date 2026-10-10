@@ -88,12 +88,11 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         messageHandler.setOutputNodes(appConfig.outputs.map(output => output.nodeId).filter(Boolean));
     }
 
-    const appList = await fetch('/saus/api/apps-list').then(res => res.json());
     const architectures = await fetch('/saus/api/architectures').then(res => res.json());
     const modelsData = await fetch('/saus/api/data-model-info').then(res => res.json());
 
-    const currentApp = appList.find(app => app.url === appName);
-    const architectureName = currentApp ? currentApp.architecture : null;
+    // Architecture now comes from the app's own metadata (no app_list.json).
+    const architectureName = (appConfig.metadata && appConfig.metadata.architecture) || null;
     
     let workflow = await fetchWorkflow(appName);
     let canvasLoader;
@@ -587,7 +586,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
     if (appConfig.dimensionSelectors) {
         appConfig.dimensionSelectors.forEach(config => {
-            const tags = currentApp?.tags || appConfig.tags;
+            const tags = (appConfig.metadata && appConfig.metadata.tags) || appConfig.tags;
             if (tags && tags.base_models) {
                 const baseModels = tags.base_models;
                 if (baseModels.includes('FLUX-2')) {

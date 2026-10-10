@@ -119,5 +119,26 @@
       "label": "ImageLoader",
       "nodePath": "62.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
+      "other": []
+    },
+    "architecture": "WAN22_IMAGE_TO_VIDEO",
+    "models": [
+      "wan2.2_i2v_high_noise_14B_fp16.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan_2.1_vae.safetensors",
+      "wan2.2_i2v_low_noise_14B_fp16.safetensors"
+    ]
+  }
 }

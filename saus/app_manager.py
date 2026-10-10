@@ -4,7 +4,7 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, BUILDER_PATH, BUILDER_V2_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH, ARC_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
 )
 from .route_manager import RouteManager
 from .file_system import (
@@ -15,9 +15,9 @@ from .file_system import (
 from .management import (
     apps_handler, extension_node_map_handler,
     install_package_handler, update_package_handler, uninstall_package_handler,
-    installed_custom_nodes_handler, preview_app_handler,
-    reset_preview_handler, create_app_handler, update_app_handler, delete_app_handler,
-    get_apps_list_handler, get_architectures_handler, get_model_data_handler
+    installed_custom_nodes_handler,
+    get_architectures_handler, get_model_data_handler,
+    get_taxonomy_handler, get_models_registry_handler, get_app_models_handler
 )
 from .downloads import (
     download_generic_handler, download_model_handler, check_model_status_handler,
@@ -28,7 +28,6 @@ from .system import (
     list_model_previews_handler, get_model_preview_handler, get_settings_handler,
     save_settings_handler, restart_server_handler
 )
-from .arc_manager_handler import get_all_arc_data_handler, save_all_arc_data_handler, get_available_apps_handler
 
 class AppManager:
     @staticmethod
@@ -80,11 +79,6 @@ class AppManager:
             (f'/saus/api/uninstall-package', 'POST', uninstall_package_handler),
             (f'/saus/api/saus-version', 'GET', saus_version_handler),
             (f'/saus/api/installed-custom-nodes', 'GET', installed_custom_nodes_handler),
-            (f'/saus/api/preview-app', 'POST', preview_app_handler),
-            (f'/saus/api/reset-preview', 'POST', reset_preview_handler),
-            (f'/saus/api/create-app', 'POST', create_app_handler),
-            (f'/saus/api/update-app', 'POST', update_app_handler),
-            (f'/saus/api/delete-app', 'DELETE', delete_app_handler),
             (f'/saus/api/model-preview', 'POST', set_model_preview_handler),
             (f'/saus/api/model-preview', 'DELETE', clear_model_preview_handler),
             (f'/saus/api/model-previews', 'POST', list_model_previews_handler),
@@ -94,11 +88,13 @@ class AppManager:
             (f'/saus/api/rename-file', 'POST', rename_file_handler),
             (f'/saus/api/delete-file', 'POST', delete_file_handler),
             (f'/saus/api/upload', 'POST', upload_file_handler),
-            (f'/saus/api/apps-list', 'GET', get_apps_list_handler),
             (f'/saus/api/download-file', 'GET', download_file_handler),
             (f'/saus/api/upload-chunk', 'POST', upload_chunk_handler),
             (f'/saus/api/architectures', 'GET', get_architectures_handler),
             (f'/saus/api/data-model-info', 'GET', get_model_data_handler),
+            (f'/saus/api/taxonomy', 'GET', get_taxonomy_handler),
+            (f'/saus/api/models', 'GET', get_models_registry_handler),
+            (f'/saus/api/app-models', 'GET', get_app_models_handler),
             (f'/saus/api/model-status', 'GET', check_model_status_handler),
             (f'/saus/api/delete-model', 'DELETE', delete_model_handler),
             (f'/saus/api/download-model', 'POST', download_model_handler),
@@ -106,11 +102,7 @@ class AppManager:
             (f'/saus/api/settings', 'POST', save_settings_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
             (f'/saus/api/files/input', 'GET', list_input_files_handler),
-            (f'/saus/api/logs', 'GET', get_logs_handler),          
-            (f'/saus/api/arc-manager/data', 'GET', get_all_arc_data_handler),
-            (f'/saus/api/arc-manager/data', 'POST', save_all_arc_data_handler),
-            (f'/saus/api/arc-manager/available-apps', 'GET', get_available_apps_handler),
-
+            (f'/saus/api/logs', 'GET', get_logs_handler),
         ]
 
         for path, method, handler in api_routes:
@@ -123,18 +115,12 @@ class AppManager:
 
     @staticmethod
     def _setup_additional_routes(app: web.Application) -> None:
-        if BUILDER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/builder', BUILDER_PATH))
-        if BUILDER_V2_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/builder_v2', BUILDER_V2_PATH))
         if SAUS_BROWSER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus', SAUS_BROWSER_PATH))
         else:
             logger.error(f"{SAUSMSG}: SAUS Browser path not found at {SAUS_BROWSER_PATH}")
         if MODEL_MANAGER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus/model_manager', MODEL_MANAGER_PATH))
-        if ARC_MANAGER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/arc_manager', ARC_MANAGER_PATH))
         if FILE_MANAGER_PATH.is_dir():
             app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH)) #Added for FILE_MANAGER
 

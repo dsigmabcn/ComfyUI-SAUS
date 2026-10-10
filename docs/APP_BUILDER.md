@@ -2,39 +2,26 @@
 
 [Return to User Guide](USER_GUIDE.md)
 
-SAUS ships **three** ways to build an app. The recommended one runs **inside ComfyUI** and uses the real ComfyUI graph.
+SAUS app building is **not part of ComfyUI-SAUS core**. It is provided by the companion **ComfyUI-SAUS-builder** package, installed next to `ComfyUI-SAUS` inside `custom_nodes/`:
 
-| Builder | Where | Notes |
-| --- | --- | --- |
-| **SAUS App Builder** (recommended) | inside ComfyUI — topbar button **SAUS Builder** | 3 steps over the **live ComfyUI graph**. No separate graph is drawn. |
-| Classic | `/saus/builder` | Single screen, node-centric |
-| Guided (legacy) | `/saus/builder_v2` | Thin wrapper: embeds the **real ComfyUI frontend** — no custom graph |
+```
+custom_nodes/
+├── ComfyUI-SAUS/            # runtime (serves + runs apps)
+└── ComfyUI-SAUS-builder/    # the App Builder
+```
 
-## Recommended: SAUS App Builder (inside ComfyUI)
+The builder runs **inside ComfyUI** and drives the **live ComfyUI graph** — no separate graph is drawn — writing finished apps into `ComfyUI-SAUS/web/apps/`.
 
-Shipped as a ComfyUI frontend extension (`web/core/js/common/scripts/sausAppBuilder.js`, exposed through `WEB_DIRECTORY`, so ComfyUI loads it automatically). It **does not draw its own graph** — it drives the live ComfyUI canvas using the same APIs ComfyUI itself uses (`app.canvas.convertEventToCanvasOffset`, `graph.getNodeOnPos`, `node.getWidgetOnPos`) and exports the workflow with `app.graphToPrompt()` — so sub-graphs / blueprints are handled by ComfyUI itself, not re-implemented.
+## Using it
 
-1. **Inputs** — open your workflow in ComfyUI (drag & drop the JSON onto the canvas), press **SAUS Builder**, then **click a parameter** on a node to expose it. Selected parameters are outlined **green** on the canvas; hovering shows the node/widget under the cursor. Change a widget's kind with the dropdown next to each row (`prompt`, `stepper`, `dropdown`, `seeder`, `imageLoader`, `toggle`, `input`).
-2. **Outputs** — **click the node(s)** whose results the app should display (outlined **purple**). Select none to show every output.
-3. **Preview** — set the app name/description, then **Save App** (writes a normal app into `web/apps/`), **Copy appConfig**, or **Open preview**.
+1. Open ComfyUI.
+2. Left sidebar → **hammer icon** → **Create new SAUS app**.
+   (If it is missing, run `__sausBuilder.open()` in the browser console.)
+3. **Inputs** — click a parameter's tick-box on a node to expose it (selected parameters are highlighted blue).
+4. **Outputs** — pickable output nodes are outlined orange with a tick-box in their corner; click to select.
+5. **Preview** — the left pane is the real SAUS app runtime (embedded iframe). Edit the name, components and layout on the right, then **Save App**.
 
-While picking, the canvas is set read-only (the same technique ComfyUI's own App Builder uses) and restored when you leave the step.
-
-> If the topbar button does not appear, open the browser console and run `__sausAppBuilder.open()`.
-
-## Classic builder — `/saus/builder`
-Single screen: load a workflow (API format), pick nodes from a dropdown, add components one at a time, group them into multi-components, and save.
-
-## `/saus/builder_v2` — the builder, embedded
-This page is a thin wrapper: it embeds the **real ComfyUI frontend** (`/`) in a frame and adds nothing of its own — there is no custom graph. ComfyUI draws the graph; the SAUS extension (loaded automatically by ComfyUI) supplies the **SAUS Builder** button and the 3-step panel.
-
-Use it if you prefer to stay on a SAUS URL:
-
-1. Open `http://<host>:<port>/saus/builder_v2`
-2. Drag your workflow JSON anywhere onto the graph.
-3. Click **SAUS Builder** (top bar) &rarr; step 1 &rarr; **Next** &rarr; step 2 &rarr; **Next** &rarr; step 3 &rarr; **Save App**.
-
-If the page reports that the extension was not detected, reload ComfyUI once (so it picks up `sausAppBuilder.js`) or run `__sausAppBuilder.open()` in the browser console.
+See the package's own `README.md` for the full workflow, editing existing apps, and the list of component types.
 
 ### Formats
 - **UI format** (the normal *Save* / drag-out JSON) — loaded directly by ComfyUI.
@@ -46,7 +33,7 @@ The saved `wf.json` always comes from ComfyUI's own `app.graphToPrompt()`, so it
 
 
 ## Widget layout &amp; style (`appConfig.json`)
-Both builders write the standard `appConfig.json`. The guided builder additionally records, per component, an optional block:
+The builder writes the standard `appConfig.json`, recording per component an optional block:
 
 ```json
 {

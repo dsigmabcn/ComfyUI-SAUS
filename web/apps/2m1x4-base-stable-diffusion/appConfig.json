@@ -152,5 +152,23 @@
       "nodeId": "9",
       "type": "media"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": []
+    },
+    "architecture": "SD15",
+    "models": [
+      "RealVisXL_V5.0_fp16.safetensors"
+    ]
+  }
 }

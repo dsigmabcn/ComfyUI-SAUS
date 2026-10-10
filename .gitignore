@@ -12,3 +12,7 @@ saus/data/settings.json
 saus/data/.secret.key
 *.py[cod]
 node.zip
+
+# Migration / backup artifacts
+*.bak
+web/saus_browser/data/migration_report.json

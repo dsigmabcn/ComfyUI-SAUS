@@ -115,5 +115,18 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "tools",
+    "tags": {
+      "type": [
+        "layout"
+      ],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "OTHER",
+    "models": []
+  }
 }

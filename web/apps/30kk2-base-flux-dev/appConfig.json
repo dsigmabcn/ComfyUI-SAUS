@@ -110,5 +110,25 @@
       "defaultHeight": 0,
       "nodePath": "10.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": []
+    },
+    "architecture": "FLUX_DEV",
+    "models": [
+      "flux1-dev.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "ae.safetensors"
+    ]
+  }
 }

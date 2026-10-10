@@ -93,5 +93,25 @@
       "defaultHeight": 1024,
       "nodePath": "68.inputs"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "Z-image"
+      ],
+      "other": []
+    },
+    "architecture": "Z-IMAGE",
+    "models": [
+      "qwen_3_4b.safetensors",
+      "ae.safetensors",
+      "z_image_bf16.safetensors"
+    ]
+  }
 }

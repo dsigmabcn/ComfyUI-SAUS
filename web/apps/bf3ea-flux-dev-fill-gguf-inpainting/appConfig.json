@@ -99,5 +99,25 @@
       "label": "Mask",
       "nodePath": "45.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "quantized"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "inpainting"
+      ]
+    },
+    "architecture": "FLUX_INPAINT_GGUF",
+    "models": [
+      "ae.safetensors",
+      "flux1-fill-dev-Q6_K.gguf"
+    ]
+  }
 }

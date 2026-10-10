@@ -42,33 +42,26 @@ export function renderSidebarCategories(callbacks) {
     container.querySelectorAll('.sidebar-filter-category').forEach(el => el.remove());
     container.querySelectorAll('.sidebar-section').forEach(el => el.remove());
 
-    const groupedCategories = {
-        "AI Image": [],
-        "AI Video": [],
-        "Other": []
-    };
+    const cfg = taxonomyConfig();
+
+    const groupedCategories = {};
+    cfg.sections.forEach(s => { groupedCategories[s.id] = []; });
 
     state.categories.forEach(cat => {
-        if (SECTIONS_CONFIG["AI Image"].categories.includes(cat)) {
-            groupedCategories["AI Image"].push(cat);
-        } else if (SECTIONS_CONFIG["AI Video"].categories.includes(cat)) {
-            groupedCategories["AI Video"].push(cat);
-        } else {
-            groupedCategories["Other"].push(cat);
-        }
+        const section = cfg.sections.find(s => s.categories.includes(cat));
+        const lastSection = cfg.sections.length ? cfg.sections[cfg.sections.length - 1].id : null;
+        const target = section ? section.id : (groupedCategories["Other"] ? "Other" : lastSection);
+        if (target && groupedCategories[target]) groupedCategories[target].push(cat);
     });
 
-    Object.keys(SECTIONS_CONFIG).forEach(sectionKey => {
-        const sectionCats = groupedCategories[sectionKey];
+    cfg.sections.forEach(section => {
+        const sectionCats = groupedCategories[section.id] || [];
         if (sectionCats.length === 0) return;
 
         sectionCats.sort((a, b) => {
-            const indexA = CATEGORY_ORDER.indexOf(a);
-            const indexB = CATEGORY_ORDER.indexOf(b);
-            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            if (indexA !== -1) return -1;
-            if (indexB !== -1) return 1;
-            return a.localeCompare(b);
+            const indexA = (cfg.order[a] !== undefined) ? cfg.order[a] : 999;
+            const indexB = (cfg.order[b] !== undefined) ? cfg.order[b] : 999;
+            return (indexA - indexB) || a.localeCompare(b);
         });
 
         const sectionDiv = document.createElement('div');
@@ -83,9 +76,8 @@ export function renderSidebarCategories(callbacks) {
         header.style.justifyContent = 'space-between';
         header.style.alignItems = 'center';
         header.style.userSelect = 'none';
-        
-        const iconClass = SECTIONS_CONFIG[sectionKey].icon;
-        header.innerHTML = `<span><i class="${iconClass}"></i> ${sectionKey}</span> <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8em;"></i>`;
+
+        header.innerHTML = `<span><i class="${section.icon}"></i> ${section.id}</span> <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8em;"></i>`;
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'sidebar-section-content';
@@ -103,11 +95,10 @@ export function renderSidebarCategories(callbacks) {
 
         sectionCats.forEach(category => {
             const span = document.createElement('span');
-            const catIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS["other"];
+            const catIcon = cfg.icons[category] || CATEGORY_ICONS["other"];
             span.className = 'sidebar-filter-category';
             span.dataset.category = category;
             span.innerHTML = `<i class="${catIcon}"></i> ${category}`;
-            
             contentDiv.appendChild(span);
         });
 
@@ -117,6 +108,44 @@ export function renderSidebarCategories(callbacks) {
     });
 
     initializeSidebarFilters(callbacks);
+}
+
+/** Build sidebar sections/order/icons from taxonomy.json, falling back to the
+ *  built-in vocabulary when taxonomy is unavailable. */
+function taxonomyConfig() {
+    const tax = state.TAXONOMY || {};
+    const cats = Array.isArray(tax.categories) ? tax.categories : [];
+    const sections = Array.isArray(tax.sections) ? tax.sections : [];
+
+    if (cats.length && sections.length) {
+        const order = {};
+        const icons = {};
+        cats.forEach((c, i) => {
+            order[c.id] = (typeof c.order === 'number') ? c.order : i;
+            icons[c.id] = c.icon || CATEGORY_ICONS["other"];
+        });
+        return {
+            order,
+            icons,
+            sections: sections.map(s => ({
+                id: s.id,
+                icon: s.icon || 'fas fa-th-large',
+                categories: cats.filter(c => c.section === s.id).map(c => c.id)
+            }))
+        };
+    }
+
+    const order = {};
+    CATEGORY_ORDER.forEach((c, i) => { order[c] = i; });
+    return {
+        order,
+        icons: CATEGORY_ICONS,
+        sections: Object.keys(SECTIONS_CONFIG).map(k => ({
+            id: k,
+            icon: SECTIONS_CONFIG[k].icon,
+            categories: SECTIONS_CONFIG[k].categories
+        }))
+    };
 }
 
 function initializeSidebarFilters(callbacks) {

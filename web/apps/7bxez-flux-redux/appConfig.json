@@ -154,5 +154,29 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "(re-)styling"
+      ]
+    },
+    "architecture": "FLUX_REDUX",
+    "models": [
+      "ae.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "flux1-dev.safetensors",
+      "sigclip_vision_patch14_384.safetensors",
+      "flux1-redux-dev.safetensors"
+    ]
+  }
 }

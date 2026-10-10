@@ -165,5 +165,26 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "video-to-video",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "WAN"
+      ],
+      "other": [
+        "VACE"
+      ]
+    },
+    "architecture": "WAN2.1 VACE",
+    "models": [
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan_2.1_vae.safetensors",
+      "wan2.1_vace_14B_fp16.safetensors"
+    ]
+  }
 }

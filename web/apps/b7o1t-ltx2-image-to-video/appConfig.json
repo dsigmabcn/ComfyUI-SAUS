@@ -76,5 +76,24 @@
       "label": "ImageLoader",
       "nodePath": "98.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "LTX-2"
+      ],
+      "other": []
+    },
+    "architecture": "LTX2_T2V_I2V",
+    "models": [
+      "ltx-2-spatial-upscaler-x2-1.0.safetensors",
+      "ltx-2-19b-distilled-lora-384.safetensors",
+      "ltx-2-19b-dev-fp8.safetensors"
+    ]
+  }
 }

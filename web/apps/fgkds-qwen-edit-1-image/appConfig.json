@@ -99,5 +99,25 @@
       "label": "ImageLoader",
       "nodePath": "78.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "QWEN"
+      ],
+      "other": []
+    },
+    "architecture": "QWEN_EDIT",
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "qwen_image_edit_2511_bf16.safetensors"
+    ]
+  }
 }

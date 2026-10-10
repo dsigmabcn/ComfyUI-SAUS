@@ -11,6 +11,7 @@ export const state = {
     sidebarFilter: null,
     ARCHITECTURES: {},
     MODELS_DATA: {},
+    TAXONOMY: { categories: [], sections: [], tags: {} },
     settingsComponent: null,
     hideDescriptions: false,
     hideTitles: false,

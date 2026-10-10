@@ -109,5 +109,27 @@
       "label": "Load Image",
       "nodePath": "15.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "image-to-image"
+      ]
+    },
+    "architecture": "FLUX_DEV",
+    "models": [
+      "flux1-dev.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "ae.safetensors"
+    ]
+  }
 }

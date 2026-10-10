@@ -93,5 +93,25 @@
       "label": "Mask",
       "nodePath": "16.inputs.image"
     }
-  ]
+  ],
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (editing)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": [
+        "inpainting"
+      ]
+    },
+    "architecture": "SD15",
+    "models": [
+      "RealVisXL_V5.0_fp16.safetensors"
+    ]
+  }
 }
