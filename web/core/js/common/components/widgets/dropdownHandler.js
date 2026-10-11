@@ -1,4 +1,5 @@
 import { updateWorkflow, getValueFromWorkflow } from '../workflowManager.js';
+import { escapeHtml, modelPathElements } from '../utils.js';
 
 const ADVANCED_WORKFLOW_PATHS = [
     'ckpt_name',
@@ -181,7 +182,9 @@ function findScrollableAncestor(element) {
 
 function scrollToSelectedItem(listContainer, selectedValue) {
     if (!selectedValue) return;
-    const selectedItem = listContainer.querySelector(`li[data-model-path="${selectedValue}"]`);
+    // Match by attribute value: a model name can contain quotes/brackets that
+    // would otherwise be parsed as CSS.
+    const selectedItem = modelPathElements(listContainer, selectedValue)[0];
     if (!selectedItem) return;
 
     // Scroll the list itself instead of calling scrollIntoView(), which also
@@ -237,9 +240,9 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
                     <path d="M10 4H2v16h20V6H12l-2-2z"/>
                   </svg>
                 </span>
-                <span class="dropdownFolderTitle">${key}</span>
+                <span class="dropdownFolderTitle">${escapeHtml(key)}</span>
               </div>
-              <div class="dropdownFolderPath">${currentPath}</div>
+              <div class="dropdownFolderPath">${escapeHtml(currentPath)}</div>
             </div>
             <ul class="dropdownSubList" style="display: none;"></ul>
           </li>
@@ -285,12 +288,12 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
         const mk = currentPath; //NEW to correct the path for linux system
 
         const liHtml = `
-          <li class="dropdownItemCard" data-model-path="${currentPath}">
+          <li class="dropdownItemCard" data-model-path="${escapeHtml(currentPath)}">
             <div class="dropdownCardTopRow">
-              <img class="dropdownCardImage" src="${modelImagePreviews[mk] || getImageUrl(currentPath)}" />
-              <span class="dropdownCardTitle">${key}</span>
+              <img class="dropdownCardImage" src="${escapeHtml(modelImagePreviews[mk] || getImageUrl(currentPath))}" />
+              <span class="dropdownCardTitle">${escapeHtml(key)}</span>
             </div>
-            <div class="dropdownCardSubtext">${currentPath}</div>
+            <div class="dropdownCardSubtext">${escapeHtml(currentPath)}</div>
           </li>
         `;
         parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -314,12 +317,12 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
             visiblePaths.push(item);
             const mk = pathToKey(item);
             const liHtml = `
-              <li class="dropdownItemCard" data-model-path="${item}">
+              <li class="dropdownItemCard" data-model-path="${escapeHtml(item)}">
                 <div class="dropdownCardTopRow">
-                  <img class="dropdownCardImage" src="${modelImagePreviews[mk] || getImageUrl(item)}" />
-                  <span class="dropdownCardTitle">${item}</span>
+                  <img class="dropdownCardImage" src="${escapeHtml(modelImagePreviews[mk] || getImageUrl(item))}" />
+                  <span class="dropdownCardTitle">${escapeHtml(item)}</span>
                 </div>
-                <div class="dropdownCardSubtext">${item}</div>
+                <div class="dropdownCardSubtext">${escapeHtml(item)}</div>
               </li>
             `;
             parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -349,8 +352,8 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
             visiblePaths.push(item);
             const displayName = DISPLAY_MODEL_NAME_ONLY ? getDisplayName(item) : item;
             const liHtml = `
-              <li class="leanListItem" data-model-path="${item}">
-                <span>${displayName}</span>
+              <li class="leanListItem" data-model-path="${escapeHtml(item)}">
+                <span>${escapeHtml(displayName)}</span>
               </li>
             `;
             parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -534,7 +537,7 @@ async function clearImageSelector(originalPath) {
         }
         delete modelImagePreviews[pathToKey(originalPath)];
 
-        document.querySelectorAll(`[data-model-path="${originalPath}"] .dropdownCardImage`)
+        modelPathElements(document, originalPath, '.dropdownCardImage')
             .forEach(img => { img.src = DEFAULT_PREVIEW_THUMBNAIL; });
 
         const dropdownElements = document.querySelectorAll('.drop-down-element');
@@ -588,7 +591,7 @@ function handleImageFile(file, originalPath) {
 
 function setModelImagePreview(originalPath, imageUrl) {
     modelImagePreviews[pathToKey(originalPath)] = imageUrl;
-    document.querySelectorAll(`[data-model-path="${originalPath}"] .dropdownCardImage`)
+    modelPathElements(document, originalPath, '.dropdownCardImage')
         .forEach(img => { img.src = imageUrl; });
 
     const dropdownElements = document.querySelectorAll('.drop-down-element');
@@ -623,8 +626,8 @@ export function populateDropdown(
     const shouldShowPreview = isPreviewWorkflowPath(workflowPath);
 
     const clickableHtml = `
-        <div class="drop-down-element" data-loader-id="${workflowPath}">
-            <label>${customLabel}</label>
+        <div class="drop-down-element" data-loader-id="${escapeHtml(workflowPath)}">
+            <label>${escapeHtml(customLabel)}</label>
             <input type="text" readonly ${DISPLAY_MODEL_NAME_ONLY ? 'title=""' : ''} />
             ${shouldShowPreview ? `<img class="dropdownElementPreviewImage" src="/core/media/ui/plus_icon_n.png" alt="Preview" />` : ''}
         </div>
@@ -762,7 +765,7 @@ export function populateDropdown(
         const dialogHtml = `
           <div class="dropdownDialogContainer custom-scrollbar">
             <div class="dropdownDialogTitleBar">
-              <div class="dropdownDialogTitleText">${customLabel}</div>
+              <div class="dropdownDialogTitleText">${escapeHtml(customLabel)}</div>
               <button class="dropdownDialogCloseButton">X</button>
             </div>
             <div class="dropdownDialogTopControls">
@@ -782,7 +785,7 @@ export function populateDropdown(
                         <input type="checkbox" checked />Nesting:
                     </label>
                     <span class="dropdownDialogNestingTriggerLabel">Nesting Trigger:</span>
-                    <input type="number" value="${DEFAULT_NESTING_TRIGGER_VALUE}" class="dropdownDialogNestingTriggerInput" />
+                    <input type="number" value="${Number(DEFAULT_NESTING_TRIGGER_VALUE) || 0}" class="dropdownDialogNestingTriggerInput" />
                     `
                     : ''
                 }

@@ -74,8 +74,8 @@ Return to the App Browsing page.
 A simple File Manager to access and perform basic management of the files in your ComfyUI installation.
 - **Favorite Folders**: Shortcut access to the 'Input', 'Output', and 'Models' folders inside ComfyUI.
 - **Upload File**: Upload files and models to your local machine/ComfyUI installation.
-- **Download from URL**: Download using a link, with the possibility to use API tokens (e.g., for gated CivitAI or Hugging Face models).
-- **Folder Navigation**: Click on folders to navigate into them, and use 'Go Up' to move one level up in the directory structure. Access is limited to the ComfyUI folder.
+- **Download from URL**: Download using a link. For gated CivitAI / Hugging Face models you can paste an API token for that single download (tokens are never stored).
+- **Folder Navigation**: Click on folders to navigate into them, and use 'Go Up' to move one level up in the directory structure. Access is limited to the Input, Output and Models folders.
 - **Image Visualization**: Click on an image or video file to open a preview panel and view it.
 - **File Management**: Use the icons on each file to rename, download, or delete it.
 
@@ -83,7 +83,4 @@ A simple File Manager to access and perform basic management of the files in you
 - **ComfyUI**: Open ComfyUI in a separate window.
 
 ### Settings
-- **Civitai/Hugging Face API Tokens**: Securely store your API tokens for services like Civitai and Hugging Face. These tokens are used when downloading models that require authentication.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).
-
-**Disclaimer**: API tokens are stored encrypted in your local installation. However, you are responsible for ensuring their security. If you are unsure about the security of your system, do not use the API token functionality or save your keys.

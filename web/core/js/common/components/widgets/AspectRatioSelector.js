@@ -203,9 +203,12 @@ class AspectRatioSelector {
     }
 
     currentSelection() {
-        if (this.selected !== null) return this.selected;
+        // The workflow is the source of truth: prefer the live value so an
+        // external change (or a click that raced a re-render) never leaves a
+        // stale selection in the UI.
         const value = getValueFromWorkflow(this.workflow, this.nodePath);
         if (value !== undefined && value !== null && value !== '') return value;
+        if (this.selected !== null) return this.selected;
         return this.options[0] ?? null;
     }
     // ------------------------------------------------------------------- render

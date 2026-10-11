@@ -1,4 +1,5 @@
 ''' General routing of the apps '''
+import re
 import json
 from pathlib import Path
 from aiohttp import web
@@ -8,14 +9,12 @@ from .constants import (
 )
 from .route_manager import RouteManager
 from .file_system import (
-    directory_listing_handler, rename_file_handler, delete_file_handler, upload_file_handler,
+    directory_listing_handler, rename_file_handler, delete_file_handler,
     download_file_handler, upload_chunk_handler, list_input_files_handler,
     get_logs_handler
 )
 from .management import (
-    apps_handler, extension_node_map_handler,
-    install_package_handler, update_package_handler, uninstall_package_handler,
-    installed_custom_nodes_handler,
+    apps_handler,
     get_architectures_handler, get_model_data_handler,
     get_taxonomy_handler, get_models_registry_handler, get_app_models_handler
 )
@@ -25,11 +24,16 @@ from .downloads import (
 )
 from .system import (
     saus_version_handler, set_model_preview_handler, clear_model_preview_handler,
-    list_model_previews_handler, get_model_preview_handler, get_settings_handler,
-    save_settings_handler, restart_server_handler
+    list_model_previews_handler, get_model_preview_handler,
+    restart_server_handler
 )
 
 class AppManager:
+    # An app's folder name comes from its appConfig.json, which may be hand
+    # edited or shipped by somebody else. Only accept the characters the builder
+    # allows before using it as a route path / folder name.
+    SAFE_APP_URL_REGEX = re.compile(r'^[\w\-]+$')
+
     @staticmethod
     def setup_app_routes(app: web.Application) -> None:
         try:
@@ -59,8 +63,14 @@ class AppManager:
             if not SAUS_url:
                 logger.warning(f"{SAUSMSG}: Missing 'url' in config for {app_dir}")
                 continue
-            
-                
+
+            if not AppManager.SAFE_APP_URL_REGEX.match(str(SAUS_url)):
+                logger.warning(
+                    f"{SAUSMSG}: Skipping {conf_file}: unsafe 'url' {SAUS_url!r} "
+                    "(only letters, numbers, dashes and underscores are allowed)"
+                )
+                continue
+
             app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir))
             APP_CONFIGS.append(conf)
 
@@ -73,12 +83,7 @@ class AppManager:
     def _setup_api_routes(app: web.Application) -> None:
         api_routes = [
             (f'/saus/api/apps', 'GET', apps_handler),
-            (f'/saus/api/extension-node-map', 'GET', extension_node_map_handler),
-            (f'/saus/api/install-package', 'POST', install_package_handler),
-            (f'/saus/api/update-package', 'POST', update_package_handler),
-            (f'/saus/api/uninstall-package', 'POST', uninstall_package_handler),
             (f'/saus/api/saus-version', 'GET', saus_version_handler),
-            (f'/saus/api/installed-custom-nodes', 'GET', installed_custom_nodes_handler),
             (f'/saus/api/model-preview', 'POST', set_model_preview_handler),
             (f'/saus/api/model-preview', 'DELETE', clear_model_preview_handler),
             (f'/saus/api/model-previews', 'POST', list_model_previews_handler),
@@ -87,7 +92,6 @@ class AppManager:
             (f'/saus/api/download', 'POST', download_generic_handler),
             (f'/saus/api/rename-file', 'POST', rename_file_handler),
             (f'/saus/api/delete-file', 'POST', delete_file_handler),
-            (f'/saus/api/upload', 'POST', upload_file_handler),
             (f'/saus/api/download-file', 'GET', download_file_handler),
             (f'/saus/api/upload-chunk', 'POST', upload_chunk_handler),
             (f'/saus/api/architectures', 'GET', get_architectures_handler),
@@ -98,8 +102,6 @@ class AppManager:
             (f'/saus/api/model-status', 'GET', check_model_status_handler),
             (f'/saus/api/delete-model', 'DELETE', delete_model_handler),
             (f'/saus/api/download-model', 'POST', download_model_handler),
-            (f'/saus/api/settings', 'GET', get_settings_handler),
-            (f'/saus/api/settings', 'POST', save_settings_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),
             (f'/saus/api/files/input', 'GET', list_input_files_handler),
             (f'/saus/api/logs', 'GET', get_logs_handler),

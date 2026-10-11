@@ -1,7 +1,6 @@
 import logging
 import mimetypes
 from pathlib import Path
-import re
 
 APP_NAME = "SAUS"
 
@@ -38,14 +37,16 @@ FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
 CUSTOM_THEMES_DIR = WEBROOT / 'custom-themes'
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
-CUSTOM_NODES_DIR = ROOT_DIR.parent
-EXTENSION_NODE_MAP_PATH = ROOT_DIR.parent / "ComfyUI-Manager" / "extension-node-map.json"
+COMFYUI_DIRECTORY = ROOT_DIR.parent.parent
 #added constant to point to the Models directory in the api handlers
-MODELS_DIRECTORY = CUSTOM_NODES_DIR.parent / "models"
-INPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "input"
-OUTPUT_FILES_DIRECTORY = CUSTOM_NODES_DIR.parent / "output"
-COMFYUI_DIRECTORY = CUSTOM_NODES_DIR.parent
+MODELS_DIRECTORY = COMFYUI_DIRECTORY / "models"
+INPUT_FILES_DIRECTORY = COMFYUI_DIRECTORY / "input"
+OUTPUT_FILES_DIRECTORY = COMFYUI_DIRECTORY / "output"
 COMFUI_LOGS_PATH = COMFYUI_DIRECTORY / "user" / "comfyui.log"
+
+# The only folders the file/upload/rename/delete API may touch. Everything is
+# validated with realpath + commonpath against these roots.
+ALLOWED_FILE_ROOTS = (INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY)
 
 #Previously in api_handlers
 DATA_DIR = Path(__file__).parent / "data"
@@ -56,8 +57,14 @@ FILE_REGISTRY_DIR = DATA_DIR / "file_registry"
 FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
 
-SAFE_FOLDER_NAME_REGEX = re.compile(r'^[\w\-]+$')
-ALLOWED_EXTENSIONS = {'css'}
+# Uploads land in user-data folders only, but we still refuse anything that
+# could be imported/executed by the server (scripts, native libraries, ...).
+BLOCKED_UPLOAD_EXTENSIONS = {
+    'py', 'pyc', 'pyo', 'pyw', 'pyd', 'so', 'dll', 'dylib', 'exe', 'msi',
+    'bat', 'cmd', 'com', 'scr', 'sh', 'bash', 'zsh', 'ksh', 'csh', 'ps1',
+    'psm1', 'vbs', 'vbe', 'js', 'mjs', 'cjs', 'jar', 'class', 'php', 'pl',
+    'rb', 'lua', 'htaccess', 'service', 'desktop',
+}
 mimetypes.add_type('application/javascript', '.js')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

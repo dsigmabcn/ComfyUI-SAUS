@@ -50,9 +50,14 @@ export function createAppCard(app) {
     });
 
     function sanitizeHTML(str) {
-        const temp = document.createElement('div');
-        temp.textContent = str;
-        return temp.innerHTML;
+        // Also escapes the quote characters: the result is used inside
+        // attributes (src="…", alt="…") as well as in text.
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     const imageContainer = document.createElement('div');

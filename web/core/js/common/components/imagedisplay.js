@@ -560,6 +560,29 @@ class Lightbox {
         this.content.style.top = '50%';
         this.content.style.transform = 'translate(-50%, -50%)';
     }
+
+    /** Size the modal to the media, proportionally, within the viewport. */
+    fitContentToMedia() {
+        const nw = this.mediaNaturalWidth;
+        const nh = this.mediaNaturalHeight;
+        if (!nw || !nh) return;
+
+        const pad = 20;   // content padding (10px each side)
+        const nav = 50;   // room for the navigation bar
+        const maxW = Math.max(320, window.innerWidth * 0.85) - pad;
+        const maxH = Math.max(240, window.innerHeight * 0.85) - pad - nav;
+        const ar = nw / nh;
+
+        let w = maxW;
+        let h = w / ar;
+        if (h > maxH) {
+            h = maxH;
+            w = h * ar;
+        }
+
+        this.content.style.width = `${Math.round(w + pad)}px`;
+        this.content.style.height = `${Math.round(h + pad + nav)}px`;
+    }
     setMedia(index) {
         this.currentIndex = index;
         this.displayMedia();
@@ -621,17 +644,7 @@ class Lightbox {
             this.mediaElement.onloadedmetadata = () => {
                 this.mediaNaturalWidth = this.mediaElement.videoWidth;
                 this.mediaNaturalHeight = this.mediaElement.videoHeight;
-
-                const currentWidth = this.content.offsetWidth;
-                const currentHeight = this.content.offsetHeight;
-
-                if (currentWidth > this.mediaNaturalWidth) {
-                    this.content.style.width = `${this.mediaNaturalWidth}px`;
-                }
-
-                if (currentHeight > this.mediaNaturalHeight) {
-                    this.content.style.height = `${this.mediaNaturalHeight}px`;
-                }
+                this.fitContentToMedia();
             };
         } else {
             this.mediaElement = document.createElement('img');
@@ -644,17 +657,7 @@ class Lightbox {
             this.mediaElement.onload = () => {
                 this.mediaNaturalWidth = this.mediaElement.naturalWidth;
                 this.mediaNaturalHeight = this.mediaElement.naturalHeight;
-
-                const currentWidth = this.content.offsetWidth;
-                const currentHeight = this.content.offsetHeight;
-
-                if (currentWidth > this.mediaNaturalWidth) {
-                    this.content.style.width = `${this.mediaNaturalWidth}px`;
-                }
-
-                if (currentHeight > this.mediaNaturalHeight) {
-                    this.content.style.height = `${this.mediaNaturalHeight}px`;
-                }
+                this.fitContentToMedia();
             };
         }
 

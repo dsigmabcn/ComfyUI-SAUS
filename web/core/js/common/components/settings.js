@@ -21,7 +21,6 @@ export class SettingsComponent {
         
         view.style.display = 'block';
         
-        await this.loadSettings();
         this.render(view);
     }
 
@@ -29,37 +28,6 @@ export class SettingsComponent {
         const view = document.getElementById('settings-view');
         if (view) {
             view.style.display = 'none';
-        }
-    }
-
-    async loadSettings() {
-        try {
-            const response = await fetch('/saus/api/settings');
-            if (response.ok) {
-                this.settings = await response.json();
-            }
-        } catch (e) {
-            console.error("Error loading settings:", e);
-        }
-    }
-
-    async saveSettings(newSettings) {
-        try {
-            const response = await fetch('/saus/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newSettings)
-            });
-            if (response.ok) {
-                this.showToast('Settings saved successfully.', 'success');
-                await this.loadSettings();
-                this.render(document.getElementById('settings-view'));
-            } else {
-                this.showToast('Failed to save settings.', 'error');
-            }
-        } catch (e) {
-            console.error("Error saving settings:", e);
-            this.showToast('An error occurred while saving settings.', 'error');
         }
     }
 
@@ -146,7 +114,11 @@ export class SettingsComponent {
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
                 
                 try {
-                    const response = await fetch('/saus/api/restart', { method: 'POST' });
+                    const response = await fetch('/saus/api/restart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirm: true })
+                    });
                     if (response.ok) {
                         alert('Server is restarting. Please refresh the page in a few moments.');
                     } else {
@@ -220,45 +192,24 @@ export class SettingsComponent {
 
     render(view) {
         if (!view) return;
-        
-        
+
         view.innerHTML = `
             <div class="settings-content">
                 <h1>Settings</h1>
-                <p style="color:rgb(255, 0, 0); font-size: 0.9em; margin-bottom: 20px; border: 1px solid rgb(255, 0, 0); padding: 10px; border-radius: 4px; background: rgba(255, 152, 0, 0.1);">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> The software encrypts your keys locally, but you are responsible for ensuring the security of your system. If you are not comfortable storing them here, please do not save them.
-                </p>
                 <div class="settings-form">
-                    <div class="form-group">
-                        <label for="civitai_api_key">Civitai API Key</label>
-                        <input type="password" id="civitai_api_key" value="${this.settings.civitai_api_key || ''}" placeholder="Enter API Key">
-                    </div>
-                    <div class="form-group">
-                        <label for="huggingface_api_key">Hugging Face API Key</label>
-                        <input type="password" id="huggingface_api_key" value="${this.settings.huggingface_api_key || ''}" placeholder="Enter API Key">
-                    </div>
                     <div class="form-actions" style="margin-top: 20px;">
-                        <button id="save-settings-btn" class="btn-action">Save Settings</button>
-                    </div>
-                    <div class="form-actions" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
                         <button id="restart-server-btn" class="btn-action" style="width: 100%; background-color: #d32f2f; border-color: #d32f2f; color: white;">
                             <i class="fas fa-power-off"></i> Restart Server
                         </button>
                     </div>
+                    <p style="font-size: 0.85em; color: #888; margin-top: 15px;">
+                        API tokens are no longer stored by SAUS. Paste a token directly in the File Manager's
+                        "Download from URL" dialog when a gated model needs one.
+                    </p>
                 </div>
             </div>
         `;
 
-        const saveBtn = view.querySelector('#save-settings-btn');
-        saveBtn.addEventListener('click', () => {
-            const newSettings = {
-                civitai_api_key: view.querySelector('#civitai_api_key').value,
-                huggingface_api_key: view.querySelector('#huggingface_api_key').value,
-            };
-            this.saveSettings(newSettings);
-        });
-
-        
         const restartBtn = view.querySelector('#restart-server-btn');
         restartBtn.addEventListener('click', () => this.restartServer(restartBtn));
     }

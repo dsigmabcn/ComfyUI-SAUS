@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { escapeHtml } from './models.js';
 
 const CATEGORY_ORDER = [
     "text-to-image",
@@ -77,7 +78,7 @@ export function renderSidebarCategories(callbacks) {
         header.style.alignItems = 'center';
         header.style.userSelect = 'none';
 
-        header.innerHTML = `<span><i class="${section.icon}"></i> ${section.id}</span> <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8em;"></i>`;
+        header.innerHTML = `<span><i class="${escapeHtml(section.icon)}"></i> ${escapeHtml(section.id)}</span> <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8em;"></i>`;
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'sidebar-section-content';
@@ -98,7 +99,7 @@ export function renderSidebarCategories(callbacks) {
             const catIcon = cfg.icons[category] || CATEGORY_ICONS["other"];
             span.className = 'sidebar-filter-category';
             span.dataset.category = category;
-            span.innerHTML = `<i class="${catIcon}"></i> ${category}`;
+            span.innerHTML = `<i class="${escapeHtml(catIcon)}"></i> ${escapeHtml(category)}`;
             contentDiv.appendChild(span);
         });
 

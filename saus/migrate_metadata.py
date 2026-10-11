@@ -142,9 +142,10 @@ def migrate_architectures(architectures: dict, models_data: dict):
             filename = key_to_file.get(key)
             if filename and filename not in files:
                 files.append(filename)
-        if files and arch.get("models") != files:
-            arch["models"] = files
-            changed += 1
+        # NOTE: architectures now store *grouped* models under the ``models``
+        # key (see ``migrate_architectures.py``). Do NOT overwrite it here with
+        # a flat filename list. ``files`` is kept for reporting only.
+        _ = files
     return architectures, changed
 
 

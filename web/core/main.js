@@ -14,7 +14,6 @@ import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
 import { initializeWebSocket, messageHandler } from './js/common/components/messageHandler.js';
 import { updateWorkflowValue, updateWorkflow } from './js/common/components/workflowManager.js';
-import { processWorkflowNodes } from './js/common/scripts/nodesscanner.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
 import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
 import { setFaviconStatus } from './js/common/scripts/favicon.js'; 
@@ -22,7 +21,6 @@ import { initialize } from './js/common/scripts/interactiveUI.js';
 import injectStylesheet from './js/common/scripts/injectStylesheet.js';
 import LoraWorkflowManager from './js/common/components/LoraWorkflowManager.js';
 import { CanvasLoader } from './js/common/components/canvas/CanvasLoader.js';
-import { checkAndShowMissingPackagesDialog } from './js/common/components/missingPackagesDialog.js';
 import CanvasComponent from './js/common/components/CanvasComponent.js';
 import { store } from  './js/common/scripts/stateManagerMain.js';
 
@@ -88,8 +86,16 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
         messageHandler.setOutputNodes(appConfig.outputs.map(output => output.nodeId).filter(Boolean));
     }
 
-    const architectures = await fetch('/saus/api/architectures').then(res => res.json());
-    const modelsData = await fetch('/saus/api/data-model-info').then(res => res.json());
+    // Defensive: a failing/non-JSON endpoint must not abort the whole app.
+    const safeJson = (url, fallback) =>
+        fetch(url).then(res => (res.ok ? res.json() : fallback)).catch((err) => {
+            console.warn('[SAUS] could not load', url, err);
+            return fallback;
+        });
+    const architectures = await safeJson('/saus/api/architectures', {});
+    const modelsData = await safeJson('/saus/api/data-model-info', {});
+    // Filename-keyed registry (used to apply the new architecture "models"/"variants").
+    const modelsRegistry = await safeJson('/saus/api/models', {});
 
     // Architecture now comes from the app's own metadata (no app_list.json).
     const architectureName = (appConfig.metadata && appConfig.metadata.architecture) || null;
@@ -295,25 +301,76 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     
     async function setupModeSelector() {
         const modeSelectorContainer = document.getElementById('mode-selector-container');
-        const hdButton = modeSelectorContainer.querySelector('[data-mode="hd"]');
-        const turboButton = modeSelectorContainer.querySelector('[data-mode="turbo"]');
-    
-        const modelWidgetConfig = appConfig.dropdowns.find(d => d.label === 'Model' || d.label === 'Checkpoint');
+        const customButton = modeSelectorContainer.querySelector('[data-mode="custom"]');
+
+        // Collect the installed model options from every *loader* dropdown the
+        // app exposes. Labels are free-form ("Unet Name", "Model", ...), so we
+        // match on the loader node type instead of the label.
+        const LOADER_TYPES = new Set([
+            'CheckpointLoaderSimple', 'CheckpointLoader', 'unCLIPCheckpointLoader', 'ImageOnlyCheckpointLoader',
+            'UNETLoader', 'UnetLoaderGGUF', 'UnetLoaderGGUFAdvanced',
+            'VAELoader', 'CLIPLoader', 'DualCLIPLoader', 'TripleCLIPLoader', 'QuadrupleCLIPLoader',
+            'CLIPVisionLoader', 'LoraLoader', 'LoraLoaderModelOnly',
+            'ControlNetLoader', 'DiffControlNetLoader', 'StyleModelLoader',
+            'UpscaleModelLoader', 'LatentUpscaleModelLoader'
+        ]);
         let availableModels = [];
-        if (modelWidgetConfig) {
+        const loaderOptions = {};   // cfg.id -> the loader's own valid values
+        const loaderConfigs = (appConfig.dropdowns || []).filter(d => d.url && d.key && LOADER_TYPES.has(d.url));
+        await Promise.all(loaderConfigs.map(async (cfg) => {
             try {
-                const url = `${window.location.origin}/object_info/${modelWidgetConfig.url}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                const firstKey = Object.keys(data)[0];
-                const loaderData = data[firstKey];
-                const key = modelWidgetConfig.key || 'ckpt_name';
-                availableModels = loaderData.input.required[key][0];
+                const res = await fetch(`${window.location.origin}/object_info/${cfg.url}`);
+                const data = await res.json();
+                const info = data[Object.keys(data)[0]];
+                const spec = info && info.input && (info.input.required?.[cfg.key] || info.input.optional?.[cfg.key]);
+                const opts = (spec && Array.isArray(spec[0]) ? spec[0] : []).filter(o => typeof o === 'string');
+                loaderOptions[cfg.id] = opts;
+                for (const o of opts) availableModels.push(o);
             } catch (error) {
                 console.error("Could not fetch available models list:", error);
             }
+        }));
+
+        // Variants can attach LoRAs even when the app itself has no LoRA dropdown
+        // (the "+Lora" button adds a LoraLoaderModelOnly node on the fly), so the
+        // LoRA list must be part of the installed/missing check too.
+        const loraOptions = [];
+        for (const loraType of ['LoraLoaderModelOnly', 'LoraLoader']) {
+            try {
+                const res = await fetch(`${window.location.origin}/object_info/${loraType}`);
+                const data = await res.json();
+                const info = data[Object.keys(data)[0]];
+                const spec = info && info.input && info.input.required && info.input.required.lora_name;
+                const opts = (spec && Array.isArray(spec[0]) ? spec[0] : []).filter(o => typeof o === 'string');
+                if (opts.length) {
+                    loraOptions.push(...opts);
+                    break;
+                }
+            } catch (error) {
+                // Node type not installed: try the next one.
+            }
         }
-    
+        loaderOptions['__lora__'] = loraOptions;
+        for (const o of loraOptions) availableModels.push(o);
+
+        const arch = (architectureName && architectures[architectureName]) || null;
+
+        // A file counts as installed when a loader option is it (or ends with it).
+        const fileInstalled = (fn) => {
+            const name = String(fn || '');
+            if (!name) return false;
+            return availableModels.some((opt) => opt === name || opt.endsWith('/' + name));
+        };
+        const modelFiles = (group) => (group.files || []).map(f => (typeof f === 'string' ? f : f.file)).filter(Boolean);
+        // A model group is satisfied per its cardinality ("all" | "one" | "none").
+        const checkModelGroup = (group) => {
+            const files = modelFiles(group);
+            if (group.need === 'one') return files.some(fileInstalled);
+            if (group.need === 'none') return true;
+            return files.every(fileInstalled);
+        };
+
+        // Legacy check (identifier-based settings.model).
         const checkModels = (settings) => {
             if (!settings || !settings.model || settings.model.length === 0) {
                 return true; 
@@ -334,42 +391,77 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             }
             return true;
         };
-    
-        if (architectureName && architectures[architectureName]) {
-            const arch = architectures[architectureName];
-    
-            if (arch.base_settings) {
-                hdButton.textContent = arch.base_settings.name;
-                if (!checkModels(arch.base_settings)) {
-                    hdButton.disabled = true;
-                    hdButton.classList.add('disabled-saus');
-                    hdButton.title = 'Required models for this mode are not installed.';
-                }
+
+        const setButton = (btn, label, enabled, title) => {
+            if (!btn) return;
+            if (label) btn.textContent = label;
+            btn.disabled = !enabled;
+            btn.classList.toggle('disabled-saus', !enabled);
+            // Use the CSS tooltip (data-tip) instead of the native one so the
+            // sticky "Basic / Advanced Controls" header cannot cover it.
+            if (!enabled && title) {
+                btn.dataset.tip = title;
+                btn.setAttribute('aria-label', title);
             } else {
-                hdButton.disabled = true;
-                hdButton.classList.add('disabled-saus');
-                hdButton.title = 'This mode is not configured for this architecture.';
+                delete btn.dataset.tip;
             }
-    
-            if (arch.turbo_settings) {
-                turboButton.textContent = arch.turbo_settings.name;
-                if (!checkModels(arch.turbo_settings)) {
-                    turboButton.disabled = true;
-                    turboButton.classList.add('disabled-saus');
-                    turboButton.title = 'Required models for this mode are not installed.';
+            btn.removeAttribute('title');
+        };
+
+        const staticButtons = {
+            hd: modeSelectorContainer.querySelector('[data-mode="hd"]'),
+            turbo: modeSelectorContainer.querySelector('[data-mode="turbo"]')
+        };
+        const variantButtons = [];
+
+        if (arch && arch.variants && Object.keys(arch.variants).length) {
+            // One button per named variant; drop the static HD/Turbo buttons.
+            Object.values(staticButtons).forEach((b) => b && b.remove());
+            // Insert into the same group as the Custom button (it is not a
+            // direct child of the container, so insertBefore on the container
+            // would throw).
+            const variantHost = customButton ? customButton.parentNode : modeSelectorContainer;
+            Object.entries(arch.variants).forEach(([id, variant]) => {
+                const btn = document.createElement('button');
+                btn.className = 'mode-button exclusive-mode';
+                btn.dataset.mode = 'variant';
+                btn.dataset.variant = id;
+                btn.textContent = variant.label || id;
+                // A variant is usable only when every model *it* selects is
+                // installed; otherwise grey it out with a tooltip.
+                const missing = [];
+                const optionalMissing = [];
+                (arch.models || []).forEach((group) => {
+                    const files = modelFiles(group);
+                    let file = (variant.pick || {})[group.id];
+                    if (!file && group.need === 'all' && files.length) file = files[0];
+                    if (file && !fileInstalled(file)) {
+                        // A "none" group (typically a LoRA) is optional: it is reported
+                        // in the tooltip but must never stop the variant being selectable.
+                        if ((group.need || 'all') === 'none') optionalMissing.push(file);
+                        else missing.push(file);
+                    }
+                });
+                if (missing.length) {
+                    btn.classList.add('disabled-saus');
+                    const tip = 'Missing models: ' + missing.slice(0, 3).join(', ')
+                        + (missing.length > 3 ? ` (+${missing.length - 3} more)` : '');
+                    btn.dataset.tip = tip;
+                    btn.setAttribute('aria-label', tip);
+                } else if (optionalMissing.length) {
+                    // Selectable, but tell the user what is missing.
+                    btn.dataset.tip = 'Optional models not installed: ' + optionalMissing.slice(0, 3).join(', ')
+                        + (optionalMissing.length > 3 ? ` (+${optionalMissing.length - 3} more)` : '');
                 }
-            } else {
-                turboButton.disabled = true;
-                turboButton.classList.add('disabled-saus');
-                turboButton.title = 'This mode is not configured for this architecture.';
-            }
+                variantHost.insertBefore(btn, customButton);
+                variantButtons.push(btn);
+            });
+        } else if (arch) {
+            setButton(staticButtons.hd, arch.base_settings ? arch.base_settings.name : 'HD', !!(arch.base_settings && checkModels(arch.base_settings)), 'Required models for this mode are not installed.');
+            setButton(staticButtons.turbo, arch.turbo_settings ? arch.turbo_settings.name : 'Turbo', !!(arch.turbo_settings && checkModels(arch.turbo_settings)), 'Required models for this mode are not installed.');
         } else {
-            hdButton.disabled = true;
-            hdButton.classList.add('disabled-saus');
-            hdButton.title = 'Architecture not found.';
-            turboButton.disabled = true;
-            turboButton.classList.add('disabled-saus');
-            turboButton.title = 'Architecture not found.';
+            setButton(staticButtons.hd, null, false, 'Architecture not found.');
+            setButton(staticButtons.turbo, null, false, 'Architecture not found.');
         }
     
         if (!modeSelectorContainer) {
@@ -379,7 +471,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     
         modeSelectorContainer.addEventListener('click', async (event) => {
             const clickedButton = event.target.closest('.mode-button');
-            if (!clickedButton || clickedButton.disabled) {
+            if (!clickedButton || clickedButton.disabled || clickedButton.classList.contains('disabled-saus')) {
                 return; 
             }
     
@@ -397,7 +489,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 const mode = clickedButton.dataset.mode;
 
-                const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
+                const modelWidgetConfigs = appConfig.dropdowns.filter(d =>
+                    d.label.startsWith('Model') || d.label === 'Checkpoint' || LOADER_TYPES.has(d.url));
                 const modelWidgetElements = modelWidgetConfigs.map(c => document.getElementById(c.id)).filter(el => el);
                 const typeWidgetElements = appConfig.dropdowns
                     .filter(d => d.label === 'Type')
@@ -421,8 +514,62 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 if (architectureName && architectures[architectureName]) {
                     const arch = architectures[architectureName];
-                    const settings = (mode === 'hd' && arch.base_settings) ? arch.base_settings :
-                                     (mode === 'turbo' && arch.turbo_settings) ? arch.turbo_settings : null;
+                    // New schema: a mode ("hd"/"turbo") maps to the 1st/2nd variant.
+                    // Models are placed by group -> node; settings/LoRAs reuse the
+                    // legacy shape below (model:[] so the positional loop is skipped).
+                    let settings = null;
+                    if (mode === 'variant' && arch.variants) {
+                        const variant = arch.variants[clickedButton.dataset.variant];
+                        if (variant) {
+                            const idByFile = {};
+                            Object.entries(modelsData || {}).forEach(([id, entry]) => {
+                                if (entry && entry.id) idByFile[entry.id] = id;
+                            });
+                            // A variant can name its LoRAs either in the model group it
+                            // picks from ("pick") or in its own list ("loras"): collect
+                            // the file names from both.
+                            const pickedLoras = [];
+                            (arch.models || []).forEach((group) => {
+                                const files = (group.files || []).map(f => (typeof f === 'string' ? f : f.file)).filter(Boolean);
+                                let file = (variant.pick || {})[group.id];
+                                if (file && !fileInstalled(file)) file = files.find(fileInstalled) || file;
+                                if (!file && group.need === 'all' && files.length) file = files[0];
+                                // LoRA groups are applied through the "+Lora" button (there
+                                // is usually no lora dropdown), so remember the file here.
+                                if (file && /lora/i.test(String((group.node || {}).nodeType || ''))) {
+                                    pickedLoras.push(file);
+                                }
+                                if (!file || !group.node || !group.node.nodeType) return;
+                                const cfg = appConfig.dropdowns.find(d => d.url === group.node.nodeType && d.key === group.node.input);
+                                if (!cfg || !cfg.nodePath) return;
+                                // Use the loader's OWN valid option for this file (the
+                                // registry "directory" includes the model-type root,
+                                // which the loader must NOT get).
+                                const opts = loaderOptions[cfg.id] || [];
+                                let value = opts.find((o) => o === file) || opts.find((o) => o.endsWith('/' + file));
+                                if (!value) {
+                                    const segs = String((modelsRegistry[file] || {}).directory || '').split('/').filter(Boolean);
+                                    const sub = segs.length > 1 ? segs.slice(1).join('/') : '';
+                                    value = sub ? `${sub}/${file}` : file;
+                                }
+                                updateWorkflow(workflow, cfg.nodePath, value);
+                                const container = document.getElementById(cfg.id);
+                                const input = container && container.querySelector('input');
+                                if (input) { input.value = file; input.title = value; }
+                            });
+                            settings = {
+                                name: variant.label,
+                                model: [],
+                                lora: (variant.loras || []).map(f => idByFile[f]).filter(Boolean),
+                                loraFiles: [...(variant.loras || []), ...pickedLoras],
+                                ...(variant.settings || {})
+                            };
+                        }
+                    } else if (mode === 'hd' && arch.base_settings) {
+                        settings = arch.base_settings;
+                    } else if (mode === 'turbo' && arch.turbo_settings) {
+                        settings = arch.turbo_settings;
+                    }
 
                     if (settings) {
                         // --- Models ---
@@ -453,6 +600,9 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                         }
 
                         // --- LoRAs ---
+                        // A LoRA is attached through the "+Lora" button, which adds (and
+                        // chains) a LoraLoaderModelOnly node, so the file name has to be
+                        // resolved to one of that loader's own values.
                         const existingLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
                         existingLoraWidgets.forEach(widget => {
                             const removeBtn = widget.querySelector('button[title="Remove LoRA"]');
@@ -461,43 +611,57 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                             }
                         });
 
-                        if (settings.lora && Array.isArray(settings.lora) && settings.lora.length > 0) {
-                            const loraIdentifiers = settings.lora;
+                        // Entries may be legacy keys ("QWEN_LIGHT_8steps"), registry ids or
+                        // plain file names -- resolve them all to a LoRA file name.
+                        const loraFiles = [];
+                        const addLoraFile = (identifier) => {
+                            if (!identifier) return;
+                            const legacy = modelsData[identifier];
+                            const file = (legacy && legacy.id) ? legacy.id : String(identifier);
+                            if (file && !loraFiles.includes(file)) loraFiles.push(file);
+                        };
+                        (settings.loraFiles || []).forEach(addLoraFile);
+                        (settings.lora || []).forEach(addLoraFile);
+
+                        const loraValueFor = (file) => {
+                            const opts = loaderOptions['__lora__'] || [];
+                            const hit = opts.find((o) => o === file) || opts.find((o) => o.endsWith('/' + file));
+                            if (hit) return hit;
+                            // Fall back to the registry folder, e.g. "/loras/QWEN/" -> "QWEN/".
+                            const segs = String((modelsRegistry[file] || {}).directory || '').split('/').filter(Boolean);
+                            const sub = segs.length > 1 ? segs.slice(1).join('/') : '';
+                            return sub ? `${sub}/${file}` : file;
+                        };
+
+                        if (loraFiles.length > 0) {
                             const addLoraButtons = document.querySelectorAll('.add-lora-button');
-                            
-                            for (const loraIdentifier of loraIdentifiers) {
-                                if (addLoraButtons.length > 0) {
-                                    // Assuming chaining loras on the first model loader
-                                    addLoraButtons[0].click();
-                                    await new Promise(resolve => setTimeout(resolve, 100));
-                                    
-                                    const newLoraWidget = Array.from(document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]')).pop();
 
-                                    if (newLoraWidget && modelsData[loraIdentifier]) {
-                                        const loraInfo = modelsData[loraIdentifier];
-                                        let path = (loraInfo.model_path || '').replace('/loras/', '');
-                                        path = path.replace(/^\/|\/$/g, '');
-                                        const newLoraValue = path ? `${path}/${loraInfo.id}` : loraInfo.id;
-                                        
-                                        const containerId = newLoraWidget.id;
-                                        const nodeId = containerId.split('_')[1];
-                                        const nodePath = `${nodeId}.inputs.lora_name`;
-                                        updateWorkflow(workflow, nodePath, newLoraValue);
+                            for (const loraFile of loraFiles) {
+                                if (addLoraButtons.length === 0) break;
 
-                                        const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
-                                        if (dropdownContainer) {
-                                            const input = dropdownContainer.querySelector('input');
-                                            if (input) {
-                                                const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
-                                                input.value = getDisplayName(newLoraValue);
-                                                input.title = newLoraValue;
-                                            }
-                                        }
+                                addLoraButtons[0].click();
+                                await new Promise(resolve => setTimeout(resolve, 100));
 
-                                        if (mode !== 'custom') {
-                                            newLoraWidget.style.display = 'none';
-                                        }
+                                const newLoraWidget = Array.from(document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]')).pop();
+                                if (!newLoraWidget) continue;
+
+                                const loraValue = loraValueFor(loraFile);
+                                const containerId = newLoraWidget.id;
+                                const nodeId = containerId.split('_')[1];
+                                updateWorkflow(workflow, `${nodeId}.inputs.lora_name`, loraValue);
+
+                                const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
+                                if (dropdownContainer) {
+                                    const input = dropdownContainer.querySelector('input');
+                                    if (input) {
+                                        const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
+                                        input.value = getDisplayName(loraValue);
+                                        input.title = loraValue;
                                     }
+                                }
+
+                                if (mode !== 'custom') {
+                                    newLoraWidget.style.display = 'none';
                                 }
                             }
                         }
@@ -548,28 +712,16 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             console.log('Active modes:', modes);
         });
 
-        const customButton = modeSelectorContainer.querySelector('[data-mode="custom"]');
-        if (hdButton && !hdButton.disabled) {
-            hdButton.click();
-        } else if (turboButton && !turboButton.disabled) {
-            turboButton.click();
-        } else if (customButton) {
-            customButton.click();
-        }
+        const defaultButton = variantButtons.find((b) => !b.disabled)
+            || [staticButtons.hd, staticButtons.turbo].find((b) => b && !b.disabled)
+            || customButton;
+        if (defaultButton) defaultButton.click();
     }
 
     const loraWorkflowManager = new LoraWorkflowManager(workflow, appConfig);
 
     workflow = loraWorkflowManager.getWorkflow();
     
-    processWorkflowNodes(workflow).then(({ nodeToCustomNodeMap, uniqueCustomNodesArray, missingNodes, missingCustomPackages }) => {
-        //console.log("Node to Custom Node Mapping:", nodeToCustomNodeMap);
-        //console.log("Unique Custom Nodes:", uniqueCustomNodesArray);
-        //console.log("Missing Nodes:", missingNodes);
-        //console.log("Missing Custom Packages:", missingCustomPackages);
-        checkAndShowMissingPackagesDialog(missingCustomPackages, missingNodes, appConfig);
-    });
-
     if (appConfig.dropdowns) {
         appConfig.dropdowns.forEach(config => {
             const instance = new Dropdown(config, workflow);
@@ -787,9 +939,8 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             return;
         }
         if (jobQueue.length > 0) {
-           queueDisplay.textContent = `${jobQueue.length}`;
-
-         } else {
+           queueDisplay.textContent = `${jobQueue.length} left`;
+        } else {
             queueDisplay.textContent = '';
         }
         
@@ -881,8 +1032,18 @@ function setupTabSwitching() {
 
 
 
+    // "Runs" selector next to Generate: queue the workflow N times.
+    const runsInput = document.getElementById('runsInput');
+    const getRunCount = () => {
+        const n = runsInput ? parseInt(runsInput.value, 10) : 1;
+        return Number.isFinite(n) && n > 0 ? Math.min(n, 99) : 1;
+    };
+    const queueRuns = () => {
+        const runs = getRunCount();
+        for (let i = 0; i < runs; i++) queue();
+    };
     document.getElementById('generateButton').addEventListener('click', function () {
-        queue();
+        queueRuns();
     });
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
@@ -892,7 +1053,7 @@ function setupTabSwitching() {
                 event.stopPropagation();
             }
             else if (event.ctrlKey) {
-                queue();
+                queueRuns();
                 event.preventDefault();
                 event.stopPropagation();
             }

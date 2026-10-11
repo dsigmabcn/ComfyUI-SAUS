@@ -71,15 +71,16 @@ export class PreviewManager {
         if (result.isTypeDetected) {
             const { objectURL } = result;
             switch (viewType) {
-                case 'standardView':
-                case 'splitView':
-                    this.setStandardPreview(objectURL);
-                    break;
                 case 'canvasView':
                     this.handleCanvasViewPreview(objectURL, maskingType, croppedImage);
                     break;
+                case 'standardView':
+                case 'splitView':
                 default:
-                    console.warn('Unknown viewType type:', viewType);
+                    // Live "progress" preview (falls back to the standard view
+                    // when the view type is not set yet).
+                    this.setStandardPreview(objectURL);
+                    break;
             }
         } else {
             console.error('Type not detected or unsupported.');

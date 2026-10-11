@@ -1,0 +1,210 @@
+{
+  "id": "30kk2",
+  "name": "Flux Dev Text to Image",
+  "url": "flux-dev-text-to-image",
+  "description": "Image generation with Flux Dev",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": []
+    },
+    "architecture": "FLUX_DEV",
+    "models": [
+      "flux1-dev.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_l.safetensors",
+      "ae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "prompt7zwm3c",
+      "label": "Prompt",
+      "nodePath": "14.inputs.text",
+      "default": "A fairy tale scene of a young girl with silver curly hair wearing a delicate white dress, standing among crystal butterflies and glowing glass roses. The scene is filled with soft magical light, like a dream from a fantasy world.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "composa8d9",
+      "label": "Megapixels",
+      "nodePath": "16.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 16,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "stepperwqpwgh",
+      "label": "Steps",
+      "nodePath": "3.inputs.steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 30,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "cfg",
+      "label": "Flux Guidance",
+      "nodePath": "15.inputs.guidance",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 3.5,
+      "precision": 1,
+      "scaleFactor": 10,
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownsdcjhu",
+      "label": "Model",
+      "nodePath": "1.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "dropdownx20r9w",
+      "label": "VAE",
+      "nodePath": "13.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownd49ves",
+      "label": "CLIP1",
+      "nodePath": "4.inputs.clip_name1",
+      "url": "DualCLIPLoader",
+      "key": "clip_name1",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "dropdown7kag44",
+      "label": "CLIP2",
+      "nodePath": "4.inputs.clip_name2",
+      "url": "DualCLIPLoader",
+      "key": "clip_name2",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "dropdown3nt12l",
+      "label": "Sampler",
+      "nodePath": "9.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "dropdownll8m0e",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seed",
+      "label": "Seed",
+      "nodePath": "8.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "compjql8kd",
+      "label": "Filename Prefix",
+      "nodePath": "12.inputs.filename_prefix",
+      "defValue": "Flux_Dev_T2I",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "compbg2n6g",
+      "label": "Aspect Ratio",
+      "nodePath": "16.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output12",
+      "label": "Save Image",
+      "nodeId": "12",
+      "type": "media"
+    }
+  ]
+}

@@ -9,14 +9,16 @@ import { renderApps, filterCurrentApps, renderTagsFilter, showHome, showApps, sh
 export async function loadApps() {
     state.sessionTimestamp = Date.now();
     try {
-        // Model registry (filename-keyed) + shared taxonomy.
-        const [modelsResponse, taxonomyResponse] = await Promise.all([
+        // Model registry (filename-keyed) + shared taxonomy + architectures.
+        const [modelsResponse, taxonomyResponse, archResponse] = await Promise.all([
             fetch('/saus/api/models'),
-            fetch('/saus/api/taxonomy')
+            fetch('/saus/api/taxonomy'),
+            fetch('/saus/api/architectures')
         ]);
 
         if (modelsResponse.ok) state.MODELS_DATA = await modelsResponse.json();
         if (taxonomyResponse.ok) state.TAXONOMY = await taxonomyResponse.json();
+        if (archResponse.ok) state.ARCHITECTURES = await archResponse.json();
 
         const response = await fetch('/saus/api/apps');
         if (!response.ok) {

@@ -1,0 +1,193 @@
+{
+  "id": "saus8viv2i",
+  "name": "Flux 2 Klein Text to Image",
+  "url": "flux-2-klein-text-to-image",
+  "description": "Generate images with the Flux 2 Klein Family (4B, 9B, base, distilled)",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-2"
+      ],
+      "other": []
+    },
+    "architecture": "FLUX 2 KLEIN FAMILY",
+    "models": [
+      "flux-2-klein-base-4b.safetensors",
+      "qwen_3_4b.safetensors",
+      "flux2-vae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "compc6wde0",
+      "label": "Prompt",
+      "nodePath": "107.inputs.text",
+      "default": "A hedgehog wearing a tiny party hat surrounded by confetti, early digital camera style, slight noise, flash photography, candid moment, 2000s digicam aesthetic, festive birthday celebration atmosphere",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "compbvgi55",
+      "label": "Megapixels",
+      "nodePath": "110.inputs.megapixels",
+      "minValue": 0.4,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    },
+    {
+      "id": "comps9oz1q",
+      "label": "Cfg",
+      "nodePath": "96.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 5,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "comp4l9uo0",
+      "label": "Steps",
+      "nodePath": "95.inputs.steps",
+      "minValue": 1,
+      "maxValue": 4096,
+      "step": 10,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 9
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "comp7ekouh",
+      "label": "Unet Name",
+      "nodePath": "104.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "flux-2-klein-base-4b.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      }
+    },
+    {
+      "id": "compwarn7y",
+      "label": "Clip Name",
+      "nodePath": "105.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen_3_4b.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      }
+    },
+    {
+      "id": "compvsijjv",
+      "label": "Vae Name",
+      "nodePath": "106.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "flux2-vae.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      }
+    },
+    {
+      "id": "compmoxm3s",
+      "label": "Sampler Name",
+      "nodePath": "94.inputs.sampler_name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name",
+      "default": "euler",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "compqafzrt",
+      "label": "Noise Seed",
+      "nodePath": "103.inputs.noise_seed",
+      "initialSeed": 0,
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "compn2u27q",
+      "label": "Save filename",
+      "nodePath": "9.inputs.filename_prefix",
+      "defValue": "Flux2-Klein",
+      "layout": {
+        "region": "basic",
+        "order": 10
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "compctxvkz",
+      "label": "Aspect Ratio",
+      "nodePath": "110.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output9",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

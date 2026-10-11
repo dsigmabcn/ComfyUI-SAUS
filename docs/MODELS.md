@@ -2,9 +2,17 @@
 
 [Return to User Guide](USER_GUIDE.md)
 
-Before running a SAUS app, the required models need to be installed. The models are placed in specific subfolders within the 'models' folder in ComfyUI so that the apps know where to find them. 
+Before running a SAUS app, the required models need to be installed, somewhere inside ComfyUI's model folders.
 
-In case you already have the models but they are placed in a different folder, you can still open the app and select the model file there.
+### Where models live
+**The exact folder does not matter.** SAUS looks for each model **by file name in every folder ComfyUI loads models from** (and inside any sub-folder), using ComfyUI's own folder configuration. So:
+
+- A diffusion model counts as installed whether it is in `models/unet/` or in `models/diffusion_models/` — ComfyUI treats both as the same kind of model. The same applies to text encoders (`models/text_encoders/` or `models/clip/`), ControlNet (`models/controlnet/` or `models/t2i_adapter/`), and so on.
+- Putting a model in a sub-folder is fine as well, e.g. `models/loras/sdxl/my-lora.safetensors`.
+
+Extra model locations configured with `--models-directory`, `--base-directory` or `extra_model_paths.yaml` are searched too.
+
+If you already have the model but with a **different file name**, you can still open the app and pick the file manually there. The folder shown for a model in the app information is only a *hint*: it is tried first when looking for the file, and it is used as the preferred download destination.
 
 
 ## Model Status

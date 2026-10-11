@@ -30,6 +30,51 @@
         "EPIC REALISM"
       ],
       "lora": []
+    },
+    "models": [
+      {
+        "id": "CHECKPOINT",
+        "type": "CHECKPOINT",
+        "need": "one",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "epicrealism_pureEvolutionV5.safetensors",
+            "label": "Epic Realism SD 1.5 V5"
+          },
+          {
+            "file": "RealVisXL_V5.0_fp16.safetensors",
+            "label": "RealVis XL V5"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "REALVISXL": {
+        "label": "RealVisXL",
+        "pick": {
+          "CHECKPOINT": "RealVisXL_V5.0_fp16.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "7.5"
+        },
+        "loras": []
+      },
+      "EPIC_SD1_5": {
+        "label": "EPIC-SD1.5",
+        "pick": {
+          "CHECKPOINT": "epicrealism_pureEvolutionV5.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "7.5"
+        },
+        "loras": []
+      }
     }
   },
   "FLUX_DEV": {
@@ -69,53 +114,84 @@
       "lora": []
     },
     "models": [
-      "ae.safetensors",
-      "t5xxl_fp8_e4m3fn.safetensors",
-      "clip_l.safetensors"
-    ]
-  },
-  "QWEN": {
-    "title": "QWEN IMAGE",
-    "description": "Core models required for QWEN IMAGE image generation.",
-    "categories": [
-      "Image Models"
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "t5xxl_fp8_e4m3fn.safetensors",
+            "label": "T5 Text Encoder"
+          },
+          {
+            "file": "clip_l.safetensors",
+            "label": "CLIP-L Text Encoder"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux1-dev.safetensors",
+            "label": "FLUX-DEV"
+          },
+          {
+            "file": "flux1-krea-dev.safetensors",
+            "label": "FLUX-KREA-DEV"
+          }
+        ]
+      }
     ],
-    "components": {
-      "compulsory": [
-        "WAN_VAE",
-        "QWEN_2.5VL_ENCODER",
-        "QWEN_IMAGE_MODEL"
-      ],
-      "at_least_one": [],
-      "optional": [
-        "QWEN_LIGHT_4steps"
-      ]
-    },
-    "base_settings": {
-      "name": "BASE",
-      "steps": "25",
-      "cfg": "7.5",
-      "model": [
-        "QWEN_IMAGE_MODEL"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "LIGHTNING",
-      "steps": "4",
-      "cfg": "1.0",
-      "model": [
-        "QWEN_IMAGE_MODEL"
-      ],
-      "lora": [
-        "QWEN_LIGHT_4steps"
-      ]
-    },
-    "models": [
-      "wan_2.1_vae.safetensors",
-      "qwen_2.5_vl_7b_fp8_scaled.safetensors",
-      "qwen_image_bf16.safetensors"
-    ]
+    "variants": {
+      "FLUX_DEV": {
+        "label": "FLUX-DEV",
+        "pick": {
+          "Diffusion_model": "flux1-dev.safetensors"
+        },
+        "settings": {
+          "steps": "30",
+          "cfg": "3.5"
+        },
+        "loras": []
+      },
+      "FLUX_KREA": {
+        "label": "FLUX-KREA",
+        "pick": {
+          "Diffusion_model": "flux1-krea-dev.safetensors"
+        },
+        "settings": {
+          "steps": "30",
+          "cfg": "3.5"
+        },
+        "loras": []
+      }
+    }
   },
   "Z-IMAGE": {
     "title": "Z-Image",
@@ -153,9 +229,80 @@
       "lora": []
     },
     "models": [
-      "qwen_3_4b.safetensors",
-      "ae.safetensors"
-    ]
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_3_4b.safetensors",
+            "label": "QWEN 3 4B text encoder"
+          }
+        ]
+      },
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "z_image_bf16.safetensors",
+            "label": "Z-IMAGE BF16"
+          },
+          {
+            "file": "z_image_turbo_bf16.safetensors",
+            "label": "Z-IMAGE TURBO BF16"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "Diffusion_model": "z_image_bf16.safetensors"
+        },
+        "settings": {
+          "steps": "30",
+          "cfg": "4.0"
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "TURBO",
+        "pick": {
+          "Diffusion_model": "z_image_turbo_bf16.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1.0"
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX2_KLEIN_4B": {
     "title": "FLUX-2 KLEIN 4B",
@@ -193,9 +340,80 @@
       "lora": []
     },
     "models": [
-      "qwen_3_4b.safetensors",
-      "flux2-vae.safetensors"
-    ]
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_3_4b.safetensors",
+            "label": "QWEN 3 4B text encoder"
+          }
+        ]
+      },
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux-2-klein-base-4b.safetensors",
+            "label": "FLUX 2 KLEIN 4B (base)"
+          },
+          {
+            "file": "flux-2-klein-4b.safetensors",
+            "label": "FLUX 2 KLEIN 4B (distilled)"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "Diffusion_model": "flux-2-klein-base-4b.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "DISTILLED": {
+        "label": "DISTILLED",
+        "pick": {
+          "Diffusion_model": "flux-2-klein-4b.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX2_KLEIN_9B": {
     "title": "FLUX-2 KLEIN 9B",
@@ -233,9 +451,80 @@
       "lora": []
     },
     "models": [
-      "qwen_3_8b_fp8mixed.safetensors",
-      "flux2-vae.safetensors"
-    ]
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_3_8b_fp8mixed.safetensors",
+            "label": "QWEN 3 8B mixed text encoder"
+          }
+        ]
+      },
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux-2-klein-base-9b.safetensors",
+            "label": "FLUX 2 KLEIN 9B (base)"
+          },
+          {
+            "file": "flux-2-klein-9b.safetensors",
+            "label": "FLUX 2 KLEIN 9B (distilled)"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "Diffusion_model": "flux-2-klein-base-9b.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "DISTILLED": {
+        "label": "DISTILLED",
+        "pick": {
+          "Diffusion_model": "flux-2-klein-9b.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX_DEV_GGUF": {
     "title": "FLUX DEV GGUF",
@@ -274,10 +563,84 @@
       "lora": []
     },
     "models": [
-      "ae.safetensors",
-      "clip_l.safetensors",
-      "t5-v1_1-xxl-encoder-Q8_0.gguf"
-    ]
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "clip_l.safetensors",
+            "label": "CLIP-L Text Encoder"
+          },
+          {
+            "file": "t5-v1_1-xxl-encoder-Q8_0.gguf",
+            "label": "T5 GGUF Q8"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux1-dev-Q8_0.gguf",
+            "label": "GGUF Q8 FLUX-DEV"
+          },
+          {
+            "file": "flux1-dev-Q6_K.gguf",
+            "label": "GGUF Q6_K FLUX-DEV"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "Q8": {
+        "label": "Q8",
+        "pick": {
+          "Diffusion_model": "flux1-dev-Q8_0.gguf"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "3.5"
+        },
+        "loras": []
+      },
+      "Q6": {
+        "label": "Q6",
+        "pick": {
+          "Diffusion_model": "flux1-dev-Q6_K.gguf"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "3.5"
+        },
+        "loras": []
+      }
+    }
   },
   "ANIMATE_DIFF_SD1.5": {
     "title": "AnimateDiff SD1.5 V3",
@@ -298,8 +661,55 @@
       "optional": []
     },
     "models": [
-      "v3_sd15_mm.ckpt",
-      "v3_sd15_adapter.ckpt"
+      {
+        "id": "MOTION_MODULE",
+        "type": "MOTION_MODULE",
+        "need": "all",
+        "node": {
+          "nodeType": "ADE_LoadAnimateDiffModel",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "v3_sd15_mm.ckpt",
+            "label": "AnimateDiff V3 MM"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "all",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "v3_sd15_adapter.ckpt",
+            "label": "AnimateDiff V3 LORA ADAPTER"
+          }
+        ]
+      },
+      {
+        "id": "CHECKPOINT",
+        "type": "CHECKPOINT",
+        "need": "one",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "epicrealism_pureEvolutionV5.safetensors",
+            "label": "Epic Realism SD 1.5 V5"
+          },
+          {
+            "file": "rev-animated-v1-2-2.safetensors",
+            "label": "REV Animated V2 Rebirth"
+          }
+        ]
+      }
     ]
   },
   "ANIMATE_DIFF_LCM": {
@@ -321,8 +731,55 @@
       "optional": []
     },
     "models": [
-      "v3_sd15_mm.ckpt",
-      "v3_sd15_adapter.ckpt"
+      {
+        "id": "MOTION_MODULE",
+        "type": "MOTION_MODULE",
+        "need": "all",
+        "node": {
+          "nodeType": "ADE_LoadAnimateDiffModel",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "v3_sd15_mm.ckpt",
+            "label": "AnimateDiff V3 MM"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "all",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "v3_sd15_adapter.ckpt",
+            "label": "AnimateDiff V3 LORA ADAPTER"
+          }
+        ]
+      },
+      {
+        "id": "CHECKPOINT",
+        "type": "CHECKPOINT",
+        "need": "one",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "epicrealism_pureEvolutionV5.safetensors",
+            "label": "Epic Realism SD 1.5 V5"
+          },
+          {
+            "file": "rev-animated-v1-2-2.safetensors",
+            "label": "REV Animated V2 Rebirth"
+          }
+        ]
+      }
     ]
   },
   "WAN2.1 VACE": {
@@ -346,8 +803,55 @@
       ]
     },
     "models": [
-      "wan_2.1_vae.safetensors",
-      "umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "VAE for WAN 2.1 and QWEN"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.1_vace_1.3B_fp16.safetensors",
+            "label": "WAN VACE 1.3B"
+          },
+          {
+            "file": "wan2.1_vace_14B_fp16.safetensors",
+            "label": "WAN VACE 14B"
+          }
+        ]
+      }
     ]
   },
   "WAN22_TEXT_TO_VIDEO": {
@@ -395,11 +899,104 @@
       ]
     },
     "models": [
-      "wan_2.1_vae.safetensors",
-      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
-      "wan2.2_t2v_high_noise_14B_fp16.safetensors",
-      "wan2.2_t2v_low_noise_14B_fp16.safetensors"
-    ]
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "VAE for WAN 2.1 and QWEN"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_t2v_high_noise_14B_fp16.safetensors",
+            "label": "WAN 2.2 T2V HIGH"
+          },
+          {
+            "file": "wan2.2_t2v_low_noise_14B_fp16.safetensors",
+            "label": "WAN 2.2 T2V LOW"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+            "label": "LIGHTX2V_LORA_2.2 I2V LOW"
+          },
+          {
+            "file": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+            "label": "LIGHTX2V_LORA_2.2 I2V HIGH"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "Diffusion_model": "wan2.2_t2v_low_noise_14B_fp16.safetensors"
+        },
+        "settings": {
+          "Total Steps": "20",
+          "Steps change high to low": "10",
+          "cfg": "3.5"
+        },
+        "loras": []
+      },
+      "LIGHTX2V": {
+        "label": "LIGHTX2V",
+        "pick": {
+          "Diffusion_model": "wan2.2_t2v_low_noise_14B_fp16.safetensors"
+        },
+        "settings": {
+          "Total Steps": "4",
+          "Steps change high to low": "2",
+          "cfg": "1.0"
+        },
+        "loras": [
+          "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+          "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
+        ]
+      }
+    }
   },
   "WAN22_IMAGE_TO_VIDEO": {
     "title": "Wan 2.2 I2V 14B",
@@ -446,11 +1043,104 @@
       ]
     },
     "models": [
-      "wan_2.1_vae.safetensors",
-      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
-      "wan2.2_i2v_high_noise_14B_fp16.safetensors",
-      "wan2.2_i2v_low_noise_14B_fp16.safetensors"
-    ]
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "VAE for WAN 2.1 and QWEN"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_high_noise_14B_fp16.safetensors",
+            "label": "WAN 2.2 I2V HIGH"
+          },
+          {
+            "file": "wan2.2_i2v_low_noise_14B_fp16.safetensors",
+            "label": "WAN 2.2 I2V LOW"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+            "label": "LIGHTX2V LORA_2.2 I2V LOW"
+          },
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+            "label": "LIGHTX2V LORA_2.2 I2V HIGH"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "Diffusion_model": "wan2.2_i2v_low_noise_14B_fp16.safetensors"
+        },
+        "settings": {
+          "Total Steps": "20",
+          "Steps change high to low": "10",
+          "cfg": "3.5"
+        },
+        "loras": []
+      },
+      "LIGHTX2V": {
+        "label": "LIGHTX2V",
+        "pick": {
+          "Diffusion_model": "wan2.2_i2v_low_noise_14B_fp16.safetensors"
+        },
+        "settings": {
+          "Total Steps": "4",
+          "Steps change high to low": "2",
+          "cfg": "1.0"
+        },
+        "loras": [
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors"
+        ]
+      }
+    }
   },
   "LTX2_T2V_I2V": {
     "title": "LTX-2 Text and image to video",
@@ -478,11 +1168,80 @@
       "lora": []
     },
     "models": [
-      "ltx-2-19b-dev-fp8.safetensors",
-      "ltx-2-19b-distilled-lora-384.safetensors",
-      "ltx-2-spatial-upscaler-x2-1.0.safetensors",
-      "gemma_3_12B_it_fp4_mixed.safetensors"
-    ]
+      {
+        "id": "CHECKPOINT",
+        "type": "CHECKPOINT",
+        "need": "all",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2-19b-dev-fp8.safetensors",
+            "label": "LTX-2 19B DEV FP8"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "all",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2-19b-distilled-lora-384.safetensors",
+            "label": "LTX-2 19B DISTILLED LORA"
+          }
+        ]
+      },
+      {
+        "id": "Latent_Upscaler",
+        "type": "Latent Upscaler",
+        "need": "all",
+        "node": {
+          "nodeType": "LatentUpscaleModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2-spatial-upscaler-x2-1.0.safetensors",
+            "label": "LTX-2 Spatial Upscaler"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "gemma_3_12B_it_fp4_mixed.safetensors",
+            "label": "GEMMA 3 12B FP4 ENCODER"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {
+          "CHECKPOINT": "ltx-2-19b-dev-fp8.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "4.0"
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX_REDUX": {
     "title": "FLUX REDUX",
@@ -503,12 +1262,85 @@
       "optional": []
     },
     "models": [
-      "ae.safetensors",
-      "t5xxl_fp8_e4m3fn.safetensors",
-      "clip_l.safetensors",
-      "flux1-dev.safetensors",
-      "sigclip_vision_patch14_384.safetensors",
-      "flux1-redux-dev.safetensors"
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "t5xxl_fp8_e4m3fn.safetensors",
+            "label": "T5 Text Encoder"
+          },
+          {
+            "file": "clip_l.safetensors",
+            "label": "CLIP-L Text Encoder"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux1-dev.safetensors",
+            "label": "FLUX-DEV"
+          }
+        ]
+      },
+      {
+        "id": "Clipvision",
+        "type": "Clipvision",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPVisionLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "sigclip_vision_patch14_384.safetensors",
+            "label": "SIG CLIP VISION 384"
+          }
+        ]
+      },
+      {
+        "id": "Style",
+        "type": "Style",
+        "need": "all",
+        "node": {
+          "nodeType": "StyleModelLoader",
+          "input": "style_model_name"
+        },
+        "files": [
+          {
+            "file": "flux1-redux-dev.safetensors",
+            "label": "FLUX REDUX"
+          }
+        ]
+      }
     ]
   },
   "FLUX_INPAINT": {
@@ -528,10 +1360,55 @@
       "optional": []
     },
     "models": [
-      "ae.safetensors",
-      "t5xxl_fp8_e4m3fn.safetensors",
-      "clip_l.safetensors",
-      "flux1-fill-dev.safetensors"
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "t5xxl_fp8_e4m3fn.safetensors",
+            "label": "T5 Text Encoder"
+          },
+          {
+            "file": "clip_l.safetensors",
+            "label": "CLIP-L Text Encoder"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux1-fill-dev.safetensors",
+            "label": "FLUX-DEV-FILL"
+          }
+        ]
+      }
     ]
   },
   "FLUX_INPAINT_GGUF": {
@@ -553,9 +1430,59 @@
       "optional": []
     },
     "models": [
-      "ae.safetensors",
-      "t5xxl_fp8_e4m3fn.safetensors",
-      "clip_l.safetensors"
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors",
+            "label": "FLUX AE VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "t5xxl_fp8_e4m3fn.safetensors",
+            "label": "T5 Text Encoder"
+          },
+          {
+            "file": "clip_l.safetensors",
+            "label": "CLIP-L Text Encoder"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux1-fill-dev-Q8_0.gguf",
+            "label": "FLUX-DEV-FILL GGUF Q8"
+          },
+          {
+            "file": "flux1-fill-dev-Q6_K.gguf",
+            "label": "FLUX-DEV-FILL GGUF Q6"
+          }
+        ]
+      }
     ]
   },
   "QWEN_EDIT": {
@@ -597,9 +1524,89 @@
       "lora": []
     },
     "models": [
-      "wan_2.1_vae.safetensors",
-      "qwen_2.5_vl_7b_fp8_scaled.safetensors"
-    ]
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "VAE for WAN 2.1 and QWEN"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+            "label": "QWEN 2.5 text encoder FP8"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "qwen_image_edit_2511_bf16.safetensors",
+            "label": "QWEN EDIT v2511"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
+            "label": "QWEN EDIT 2509 LIGHTNING 4-steps LORA"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "BASE",
+        "pick": {},
+        "settings": {
+          "steps": "20",
+          "cfg": "4.0"
+        },
+        "loras": []
+      },
+      "LIGHTNING": {
+        "label": "LIGHTNING",
+        "pick": {
+          "LORA": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1.0"
+        },
+        "loras": []
+      }
+    }
   },
   "CONTROLNET FLUX": {
     "title": "ControlNet FLUX",
@@ -613,7 +1620,24 @@
       "optional": [
         "CONTROLNET"
       ]
-    }
+    },
+    "models": [
+      {
+        "id": "CONTROLNET",
+        "type": "CONTROLNET",
+        "need": "none",
+        "node": {
+          "nodeType": "ControlNetLoader",
+          "input": "control_net_name"
+        },
+        "files": [
+          {
+            "file": "controlnet_1",
+            "label": "ControlNet Base Asset"
+          }
+        ]
+      }
+    ]
   },
   "OTHER": {
     "title": "Other",
@@ -634,10 +1658,327 @@
     "description": "",
     "categories": [],
     "models": [
-      "qwen_image_2.1_int8_convrot.safetensors",
-      "qwen3vl_8b_int8_convrot.safetensors",
-      "qwen_image_2.1_vae_bf16.safetensors",
-      "Qwen-Image-2.1-PE-T2I.safetensors"
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "qwen_image_2.1_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_8b_int8_convrot.safetensors"
+          },
+          {
+            "file": "Qwen-Image-2.1-PE-T2I.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "qwen_image_2.1_vae_bf16.safetensors"
+          }
+        ]
+      }
     ]
+  },
+  "FLUX 2 KLEIN FAMILY": {
+    "title": "Flux 2 Klein family",
+    "description": "Models for image generation the 4B, 9B models, base and distilled",
+    "categories": [
+      "Image Models",
+      "Edit"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux-2-klein-base-4b.safetensors",
+            "label": "FLUX 2 KLEIN 4B (base)"
+          },
+          {
+            "file": "flux-2-klein-4b.safetensors"
+          },
+          {
+            "file": "flux-2-klein-base-9b.safetensors"
+          },
+          {
+            "file": "flux-2-klein-9b.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "one",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_3_4b.safetensors",
+            "label": "QWEN 3 4B text encoder"
+          },
+          {
+            "file": "qwen_3_8b_fp8mixed.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "one",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          },
+          {
+            "file": "full_encoder_small_decoder.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "VARIANT1": {
+        "label": "4B HD",
+        "pick": {
+          "diffusion_model": "flux-2-klein-base-4b.safetensors",
+          "text_encoder": "qwen_3_4b.safetensors",
+          "vae": "flux2-vae.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "VARIANT2": {
+        "label": "4B Fast",
+        "pick": {
+          "diffusion_model": "flux-2-klein-4b.safetensors",
+          "text_encoder": "qwen_3_4b.safetensors",
+          "vae": "flux2-vae.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      },
+      "VARIANT3": {
+        "label": "9B HD",
+        "pick": {
+          "diffusion_model": "flux-2-klein-base-9b.safetensors",
+          "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
+          "vae": "full_encoder_small_decoder.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "VARIANT4": {
+        "label": "9B Fast",
+        "pick": {
+          "diffusion_model": "flux-2-klein-9b.safetensors",
+          "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
+          "vae": "full_encoder_small_decoder.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
+  },
+  "QWEN IMAGE": {
+    "title": "QWEN IMAGE",
+    "description": "QWEN IMAGE Image Generation. Versions initial and 2512, with lightning loras",
+    "categories": [
+      "Image Models"
+    ],
+    "components": {
+      "compulsory": [
+        "WAN_VAE",
+        "QWEN_2.5VL_ENCODER",
+        "QWEN_IMAGE_MODEL"
+      ],
+      "at_least_one": [],
+      "optional": [
+        "QWEN_LIGHT_4steps"
+      ]
+    },
+    "base_settings": {
+      "name": "BASE",
+      "steps": "25",
+      "cfg": "7.5",
+      "model": [
+        "QWEN_IMAGE_MODEL"
+      ],
+      "lora": []
+    },
+    "turbo_settings": {
+      "name": "LIGHTNING",
+      "steps": "4",
+      "cfg": "1.0",
+      "model": [
+        "QWEN_IMAGE_MODEL"
+      ],
+      "lora": [
+        "QWEN_LIGHT_4steps"
+      ]
+    },
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "VAE for WAN 2.1 and QWEN"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+            "label": "QWEN 2.5 text encoder FP8"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "qwen_image_fp8_e4m3fn.safetensors"
+          },
+          {
+            "file": "qwen_image_2512_fp8_e4m3fn.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "Qwen-Image-2512-Lightning-4steps-V1.0-fp32.safetensors"
+          },
+          {
+            "file": "Qwen-Image-Lightning-8steps-V1.0.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "BASE": {
+        "label": "HD",
+        "pick": {
+          "Diffusion_model": "qwen_image_fp8_e4m3fn.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "4"
+        },
+        "loras": []
+      },
+      "LIGHTNING": {
+        "label": "Turbo",
+        "pick": {
+          "Diffusion_model": "qwen_image_fp8_e4m3fn.safetensors",
+          "LORA": "Qwen-Image-Lightning-8steps-V1.0.safetensors"
+        },
+        "settings": {
+          "steps": "8",
+          "cfg": "1.0"
+        },
+        "loras": []
+      },
+      "VARIANT1": {
+        "label": "HD(2512)",
+        "pick": {
+          "Diffusion_model": "qwen_image_2512_fp8_e4m3fn.safetensors"
+        },
+        "settings": {
+          "steps": "50",
+          "cfg": "4"
+        },
+        "loras": []
+      },
+      "VARIANT2": {
+        "label": "Turbo(2512)",
+        "pick": {
+          "Diffusion_model": "qwen_image_2512_fp8_e4m3fn.safetensors",
+          "LORA": "Qwen-Image-2512-Lightning-4steps-V1.0-fp32.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
   }
 }

@@ -1,17 +1,42 @@
 import os
+import re
 import shutil
 import json
 from pathlib import Path
 from aiohttp import web
 
 from .constants import (
-    logger, COMFYUI_DIRECTORY, CUSTOM_THEMES_DIR,
+    logger, SAUSMSG,
     INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY,
     COMFUI_LOGS_PATH
 )
-from .helpers import allowed_file
+from .helpers import allowed_file, resolve_within_roots, require_json, require_saus_header
 
 TEMP_UPLOAD_DIR = "/tmp/app_uploads"
+
+# Uploads arrive in 20 MB chunks from the File Manager; refuse anything much
+# larger so a single request can never be buffered into memory.
+MAX_UPLOAD_CHUNK_BYTES = 64 * 1024 * 1024
+MAX_UPLOAD_FIELD_BYTES = 8 * 1024
+
+
+async def read_part_capped(part, limit: int) -> bytes:
+    """Read a multipart part without ever buffering more than ``limit`` bytes.
+
+    Raises ``ValueError`` when the part is too big (the caller turns that into a
+    413) instead of reading the whole thing first.
+    """
+    blocks = []
+    total = 0
+    while True:
+        block = await part.read_chunk(256 * 1024)
+        if not block:
+            break
+        total += len(block)
+        if total > limit:
+            raise ValueError(f"part exceeds {limit} bytes")
+        blocks.append(block)
+    return b"".join(blocks)
 
 async def directory_listing_handler(request: web.Request) -> web.Response:
     path_param = request.query.get("path")
@@ -19,15 +44,13 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
         return web.json_response({"error": "Missing 'path' parameter"}, status=400)
 
     try:
-        requested_path = Path(path_param).resolve()
+        # Confined to the user-data folders (input / output / models).
+        requested_path = resolve_within_roots(path_param)
+    except ValueError as e:
+        logger.warning(f"{SAUSMSG}: directory listing denied for {path_param!r}: {e}")
+        return web.json_response({"error": "Access denied"}, status=403)
 
-        # Ensure the requested path is within the allowed models directory
-        try:
-            requested_path.relative_to(COMFYUI_DIRECTORY.resolve())
-        except ValueError:
-            return web.json_response({"error": "Access denied"}, status=403)
-
-
+    try:
         if not requested_path.exists() or not requested_path.is_dir():
             return web.json_response({"error": "Directory not found"}, status=404)
 
@@ -46,25 +69,33 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
         return web.json_response({"error": str(e)}, status=500)
 
 async def rename_file_handler(request: web.Request) -> web.Response:
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
     try:
         data = await request.json()
-        current_path = Path(data.get("currentPath")).resolve()
         new_name = data.get("newName")
+
+        if not new_name or not isinstance(new_name, str):
+            return web.json_response({"error": "Missing newName"}, status=400)
+
+        if (os.path.sep in new_name or (os.path.altsep and os.path.altsep in new_name)
+                or '/' in new_name or '\\' in new_name or new_name in ('.', '..')):
+            return web.json_response({"error": "Invalid newName"}, status=400)
+
+        if not allowed_file(new_name):
+            return web.json_response({"error": "File type not allowed"}, status=400)
+
+        # Confined to input / output / models (realpath + commonpath).
+        try:
+            current_path = resolve_within_roots(data.get("currentPath"))
+        except ValueError as e:
+            logger.warning(f"{SAUSMSG}: rename denied: {e}")
+            return web.json_response({"error": "Access denied"}, status=403)
 
         if not current_path.exists():
             return web.json_response({"error": "File not found"}, status=404)
-
-        if not new_name:
-            return web.json_response({"error": "Missing newName"}, status=400)
-
-        if os.path.sep in new_name or (os.path.altsep and os.path.altsep in new_name) or new_name == '..':
-            return web.json_response({"error": "Invalid newName"}, status=400)
-
-        # Ensure the file is within the allowed directory
-        try:
-            current_path.relative_to(COMFYUI_DIRECTORY.resolve())
-        except ValueError:
-            return web.json_response({"error": "Access denied"}, status=403)
 
         new_path = current_path.parent / new_name
 
@@ -77,18 +108,22 @@ async def rename_file_handler(request: web.Request) -> web.Response:
 
 
 async def delete_file_handler(request: web.Request) -> web.Response:
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
     try:
         data = await request.json()
-        file_path = Path(data.get("filePath")).resolve()
+
+        # Confined to input / output / models (realpath + commonpath).
+        try:
+            file_path = resolve_within_roots(data.get("filePath"))
+        except ValueError as e:
+            logger.warning(f"{SAUSMSG}: delete denied: {e}")
+            return web.json_response({"error": "Access denied"}, status=403)
 
         if not file_path.exists():
             return web.json_response({"error": "File not found"}, status=404)
-
-        # Ensure the file is within the allowed directory
-        try:
-            file_path.relative_to(COMFYUI_DIRECTORY.resolve())
-        except ValueError:
-            return web.json_response({"error": "Access denied"}, status=403)
 
         if file_path.is_dir():
             shutil.rmtree(file_path)
@@ -100,49 +135,12 @@ async def delete_file_handler(request: web.Request) -> web.Response:
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
-async def upload_file_handler(request: web.Request) -> web.Response:
-    try:
-        reader = await request.multipart()
-    except ValueError:
-        return web.json_response({'error': 'Invalid content type'}, status=400)
-    
-    file_field = await reader.next()
-    if not file_field or file_field.name != 'file':
-        return web.json_response({'error': 'Missing or incorrect first field: expected file'}, status=400)
-    
-    file_content = await file_field.read()
-    bytes_to_write = len(file_content)
-    
-    if bytes_to_write == 0:
-        await reader.next() 
-        return web.json_response({'error': 'File data stream empty (consumed by server).'}, status=500)
-
-    target_path_field = await reader.next()
-    
-    if not target_path_field or target_path_field.name != 'targetPath':
-        return web.json_response({'error': 'Missing or incorrect second field: expected targetPath'}, status=400)
-
-    target_path = await target_path_field.text()
-    resolved_target = Path(target_path).resolve()
-    
-    try:
-        resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
-    except ValueError:
-        return web.json_response({'error': 'Access denied'}, status=403)
-    
-    filename = os.path.basename(file_field.filename)
-    os.makedirs(resolved_target, exist_ok=True)
-    file_path = resolved_target / filename
-
-    try:
-        with open(file_path, 'wb') as f:
-            f.write(file_content)
-    except Exception as e:
-        return web.json_response({'error': f'Failed to save file: {e}'}, status=500)
-
-    return web.json_response({'status': 'success', 'filename': filename})
-
 async def download_file_handler(request: web.Request) -> web.Response:
+    """Serve a file for preview/download.
+
+    Already confined to input / output / models (realpath + relative_to), which
+    is why absolute paths from ComfyUI's executor are still accepted here.
+    """
     file_path_str = request.query.get('filePath')
 
     if not file_path_str:
@@ -188,26 +186,38 @@ async def download_file_handler(request: web.Request) -> web.Response:
         return web.json_response({'error': f'An error occurred: {e}'}, status=500)
 
 async def upload_chunk_handler(request: web.Request) -> web.Response:
+    guard = require_saus_header(request)
+    if guard is not None:
+        return guard
+
     try:
         reader = await request.multipart()
     except ValueError:
         return web.json_response({'error': 'Invalid content type'}, status=400)
 
     data = {}
-    while True:
-        field = await reader.next()
-        if field is None:
-            break
-        
-        if field.name == 'fileChunk':
-            data['chunk'] = await field.read()
-            data['filename'] = field.filename
-        else:
-            data[field.name] = await field.text()
+    try:
+        while True:
+            field = await reader.next()
+            if field is None:
+                break
 
-    file_id = data.get('fileId')
+            if field.name == 'fileChunk':
+                data['chunk'] = await read_part_capped(field, MAX_UPLOAD_CHUNK_BYTES)
+                data['filename'] = field.filename
+            else:
+                raw = await read_part_capped(field, MAX_UPLOAD_FIELD_BYTES)
+                data[field.name] = raw.decode('utf-8', errors='replace')
+    except ValueError as e:
+        logger.warning(f"{SAUSMSG}: upload rejected: {e}")
+        return web.json_response(
+            {'error': f'Upload part too large (limit {MAX_UPLOAD_CHUNK_BYTES // (1024 * 1024)} MB per chunk)'},
+            status=413,
+        )
+
+    file_id = re.sub(r'[^A-Za-z0-9_.-]', '_', str(data.get('fileId') or ''))
     target_path = data.get('targetPath')
-    chunk_index = data.get('chunkIndex')
+    chunk_index = re.sub(r'[^0-9]', '', str(data.get('chunkIndex') or '0')) or '0'
     is_last = data.get('isLast') == 'true'
     
     if not file_id or not data.get('chunk'):
@@ -221,13 +231,18 @@ async def upload_chunk_handler(request: web.Request) -> web.Response:
         f.write(data['chunk'])
 
     if is_last:
-        resolved_target = Path(target_path).resolve()
+        # Confined to input / output / models (realpath + commonpath).
         try:
-            resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
-        except ValueError:
+            resolved_target = resolve_within_roots(target_path)
+        except ValueError as e:
+            logger.warning(f"{SAUSMSG}: upload denied: {e}")
             return web.json_response({'error': 'Access denied'}, status=403)
 
-        final_file_path = resolved_target / os.path.basename(data.get('fileName'))
+        safe_name = os.path.basename(str(data.get('fileName') or ''))
+        if not safe_name or safe_name in ('.', '..') or not allowed_file(safe_name):
+            return web.json_response({'error': 'File name not allowed'}, status=400)
+
+        final_file_path = resolved_target / safe_name
         final_file_path.parent.mkdir(parents=True, exist_ok=True)
         
         try:
@@ -260,13 +275,29 @@ async def list_input_files_handler(request: web.Request) -> web.Response:
         logger.error(f"Error listing input files: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
+def _resolve_comfyui_log():
+    """Newest ComfyUI log file (ComfyUI names it comfyui_<port>.log when a port
+    is set, so ``user/comfyui.log`` may not exist)."""
+    if COMFUI_LOGS_PATH.exists():
+        return COMFUI_LOGS_PATH
+    try:
+        candidates = sorted(
+            COMFUI_LOGS_PATH.parent.glob("comfyui*.log"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+    except Exception:
+        candidates = []
+    return candidates[0] if candidates else None
+
+
 async def get_logs_handler(request: web.Request) -> web.Response:
     try:
-        if COMFUI_LOGS_PATH.exists():
-            with open(COMFUI_LOGS_PATH, 'r', encoding='utf-8', errors='replace') as f:
+        log_path = _resolve_comfyui_log()
+        if log_path is not None and log_path.exists():
+            with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
                 logs = f.read()
-            return web.json_response({"logs": logs})
-        else:
-            return web.json_response({"logs": "Log file not found."})
+            return web.json_response({"logs": logs, "path": str(log_path)})
+        return web.json_response({"logs": "Log file not found."})
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)

@@ -1,4 +1,5 @@
 import DropdownStepper from './widgets/DropdownStepper.js';
+import { escapeHtml } from './utils.js';
 
 class LoraWorkflowManager {
 
@@ -45,7 +46,7 @@ class LoraWorkflowManager {
                     // Construct a descriptive label.
                     // If a model name was found, use it. Otherwise, use the node's ID for uniqueness.
                     const label = modelName || `Model #${loader.id}`;
-                    btn.innerHTML = `+LoRA<br><span style="font-size: 0.85em; opacity: 0.8;">${label}</span>`;
+                    btn.innerHTML = `+LoRA<br><span style="font-size: 0.85em; opacity: 0.8;">${escapeHtml(label)}</span>`;
                 };
 
                 updateButtonLabel();

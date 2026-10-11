@@ -1,8 +1,9 @@
 import os
 import json
+import socket
 import asyncio
 import ipaddress
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from pathlib import Path
 from aiohttp import web
 import aiohttp
@@ -11,7 +12,91 @@ from server import PromptServer
 from .constants import (
     SAUSMSG, logger, MODELS_DIRECTORY, COMFYUI_DIRECTORY, DATA_DIR
 )
-from .helpers import extract_filename_from_response, decrypt_value
+from .helpers import (
+    extract_filename_from_response, resolve_within_roots, require_json
+)
+from .model_lookup import find_model, destination_for, resolves_inside
+
+ALLOWED_HOSTS_FILE = DATA_DIR / "allowed_download_hosts.json"
+
+# Hosts that may receive the user-supplied API token. Kept in a file on disk so
+# the list can be reviewed or extended without touching the code.
+DEFAULT_ALLOWED_DOWNLOAD_HOSTS = [
+    "civitai.com",
+    "huggingface.co",
+    "hf.co",
+]
+
+
+def load_allowed_download_hosts():
+    hosts = list(DEFAULT_ALLOWED_DOWNLOAD_HOSTS)
+    try:
+        if ALLOWED_HOSTS_FILE.exists():
+            data = json.loads(ALLOWED_HOSTS_FILE.read_text(encoding='utf-8'))
+            if isinstance(data, dict):
+                data = data.get("hosts", [])
+            if isinstance(data, list):
+                hosts = [str(h).lower().strip() for h in data if str(h).strip()]
+    except Exception as e:
+        logger.error(f"{SAUSMSG}: Could not read {ALLOWED_HOSTS_FILE}: {e}")
+    return hosts
+
+
+def host_allowed_for_token(hostname) -> bool:
+    """True when the domain (or a sub-domain of it) may receive the API token."""
+    if not hostname:
+        return False
+    hostname = str(hostname).lower().rstrip('.')
+    for allowed in load_allowed_download_hosts():
+        allowed = allowed.lstrip('*.').lower()
+        if hostname == allowed or hostname.endswith('.' + allowed):
+            return True
+    return False
+
+
+def _is_blocked_address(ip) -> bool:
+    return bool(ip.is_private or ip.is_loopback or ip.is_link_local
+                or ip.is_reserved or ip.is_multicast or ip.is_unspecified)
+
+
+def validate_public_url(url: str) -> None:
+    """Raise ValueError when ``url`` must not be fetched (SSRF guard).
+
+    Refuses non-http(s) schemes, localhost, literal private/local addresses and
+    any host name that resolves to a private / local / reserved address.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ('http', 'https'):
+        raise ValueError(f"Invalid URL scheme: {parsed.scheme or 'none'}. Only http and https are allowed.")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("URL has no host")
+    hostname = hostname.lower()
+    if hostname == 'localhost' or hostname.endswith('.localhost'):
+        raise ValueError("Access to localhost is denied")
+
+    addresses = []
+    try:
+        addresses.append(ipaddress.ip_address(hostname))
+    except ValueError:
+        # Not a literal IP: resolve it and check every returned address.
+        try:
+            for info in socket.getaddrinfo(hostname, None):
+                try:
+                    addresses.append(ipaddress.ip_address(info[4][0]))
+                except ValueError:
+                    continue
+        except socket.gaierror as e:
+            raise ValueError(f"Could not resolve host '{hostname}': {e}")
+
+    if not addresses:
+        raise ValueError(f"Could not determine the address of '{hostname}'")
+
+    for ip in addresses:
+        if _is_blocked_address(ip):
+            raise ValueError(f"Access to private/local address {ip} is denied")
+
 
 async def _download_worker(
     url,
@@ -29,22 +114,13 @@ async def _download_worker(
 ):
     logger.info(f"[Downloader] Background task started for URL: {url}")
 
-    # Validate URL to prevent Server Side Request Forgery (SSRF)
+    # Never trust a caller/remote supplied name.
+    if filename:
+        filename = os.path.basename(str(filename).replace('\\', '/'))
+
+    # Validate the URL to prevent Server Side Request Forgery (SSRF).
     try:
-        parsed = urlparse(url)
-        if parsed.scheme not in ('http', 'https'):
-            raise ValueError(f"Invalid URL scheme: {parsed.scheme}. Only http and https are allowed.")
-        
-        hostname = parsed.hostname
-        if hostname:
-            if hostname.lower() == 'localhost':
-                raise ValueError("Access to localhost is denied")
-            try:
-                ip = ipaddress.ip_address(hostname)
-                if ip.is_private or ip.is_loopback or ip.is_link_local:
-                    raise ValueError(f"Access to private/local IP {hostname} is denied")
-            except ValueError:
-                pass
+        validate_public_url(url)
     except Exception as e:
         logger.error(f"[Downloader] Security validation failed for {url}: {e}")
         error_sender(filename or "unknown", str(e))
@@ -71,7 +147,22 @@ async def _download_worker(
                         logger.info(f"[Downloader] Resuming {filename or 'file'} from byte {downloaded_size}")
 
                 logger.info(f"[Downloader] Attempt {attempt+1}/{max_retries} connecting...")
-                async with session.get(url, headers=request_headers) as resp:
+                async with session.get(url, headers=request_headers, allow_redirects=False) as resp:
+                    if resp.status in (301, 302, 303, 307, 308):
+                        location = resp.headers.get('Location')
+                        if not location:
+                            error_sender(filename or "unknown", "Redirect response without a Location header")
+                            return False
+                        url = urljoin(url, location)
+                        try:
+                            validate_public_url(url)
+                        except Exception as e:
+                            logger.error(f"[Downloader] Blocked redirect to {url}: {e}")
+                            error_sender(filename or "unknown", str(e))
+                            return False
+                        logger.info(f"[Downloader] Following validated redirect to {url}")
+                        continue
+
                     if resp.status not in (200, 206):
                         error_msg = f"HTTP Error {resp.status}"
                         logger.error(f"[Downloader] {error_msg}")
@@ -86,6 +177,12 @@ async def _download_worker(
                             current_filename = extract_filename_from_response(resp, url)
                         else:
                             current_filename = Path(url).name
+                        # Reduce the remote-supplied name to a base name and refuse
+                        # empty / traversal names.
+                        current_filename = os.path.basename(str(current_filename).replace('\\', '/'))
+                        if not current_filename or current_filename in ('.', '..'):
+                            error_sender(filename or "unknown", "Server returned an unsafe file name")
+                            return False
                         save_path = Path(target_path) / current_filename
                         logger.info(f"[Downloader] Resolved filename: {current_filename}, Saving to: {save_path}")
 
@@ -144,46 +241,47 @@ async def _download_worker(
 
 async def download_generic_handler(request):
     try:
+        # JSON-only: forces a CORS preflight for cross-site callers, which this
+        # server never answers (CSRF guard).
+        guard = require_json(request)
+        if guard is not None:
+            return guard
+
         data = await request.json()
         url = data.get('url')
         target_path = data.get('targetPath')
         api_token = data.get('apiToken')
-        token_source = data.get('tokenSource')
 
         logger.info(f"[API] Received download request for: {url}")
 
         if not url or not target_path:
             return web.json_response({'error': 'Missing url or targetPath'}, status=400)
 
-        resolved_target = Path(target_path).resolve()
+        # Confined to input / output / models (realpath + commonpath).
         try:
-            resolved_target.relative_to(COMFYUI_DIRECTORY.resolve())
-        except ValueError:
-             return web.json_response({"error": "Access denied: Target path outside allowed directories"}, status=403)
+            resolved_target = resolve_within_roots(target_path)
+        except ValueError as e:
+            logger.warning(f"{SAUSMSG}: download target denied: {e}")
+            return web.json_response(
+                {"error": "Access denied: target path must be inside input, output or models"},
+                status=403,
+            )
 
         headers = {}
-        
-        final_token = None
-        if token_source in ['civitai', 'huggingface']:
-            settings_file = DATA_DIR / "settings.json"
-            if settings_file.exists():
-                try:
-                    with open(settings_file, 'r', encoding='utf-8') as f:
-                        settings = json.load(f)
-                    
-                    key_map = {
-                        'civitai': 'civitai_api_key',
-                        'huggingface': 'huggingface_api_key'
-                    }
-                    encrypted_token = settings.get(key_map.get(token_source))
-                    final_token = decrypt_value(encrypted_token)
-                except Exception as e:
-                    logger.error(f"Error reading stored token: {e}")
-        elif api_token:
-            final_token = api_token
 
-        if final_token:
-            headers['Authorization'] = f'Bearer {final_token}'
+        # SAUS no longer stores API tokens. The only token that can be attached
+        # is the one the user typed for this request, and it is only sent to the
+        # hosts listed in allowed_download_hosts.json.
+        if api_token and isinstance(api_token, str) and api_token.strip():
+            request_host = (urlparse(url).hostname or '')
+            if host_allowed_for_token(request_host):
+                headers['Authorization'] = f'Bearer {api_token.strip()}'
+                logger.info(f"[Downloader] API token attached for {request_host}")
+            else:
+                logger.warning(
+                    f"[Downloader] Token not sent: {request_host} is not listed in "
+                    f"{ALLOWED_HOSTS_FILE.name}"
+                )
 
         def progress_sender(filename, downloaded, total, progress):
             PromptServer.instance.send_sync("file_download_progress", {
@@ -205,11 +303,12 @@ async def download_generic_handler(request):
         asyncio.create_task(_download_worker(
             url=url,
             headers=headers,
-            target_path=target_path,
+            target_path=str(resolved_target),
             progress_sender=progress_sender,
             completion_sender=completion_sender,
             error_sender=error_sender,
-            resolve_filename_from_header=True
+            resolve_filename_from_header=True,
+            max_retries=10,
         ))
 
         return web.json_response({'message': 'Download initiated in background'})
@@ -218,26 +317,62 @@ async def download_generic_handler(request):
         return web.json_response({'error': str(e)}, status=500)
 
 async def download_model_handler(request: web.Request) -> web.Response:
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
     try:
         data = await request.json()
-        
+
         component_type = data.get('component_type')
         url_model = data.get('url_model')
-        model_path = data.get('model_path')
+        model_path = (data.get('model_path') or '').strip()
         file_name = data.get('file_name')
 
-        if not all([component_type, url_model, model_path]):
+        if not all([component_type, url_model]):
             return web.json_response({
-                'status': 'error', 
-                'message': f'Missing model URL, destination path, or component type. Received: type={component_type}, url={url_model}, path={model_path}'
+                'status': 'error',
+                'message': f'Missing model URL or component type. Received: type={component_type}, url={url_model}'
             }, status=400)
 
-        target_path = (MODELS_DIRECTORY / model_path.strip('/\\')).resolve()
-        
+        # Already installed in *any* folder ComfyUI looks at? Then the registry
+        # folder is only a hint and there is nothing to fetch (no duplicate copy).
+        if file_name:
+            existing = find_model(file_name, component_type, model_path)
+            if existing:
+                logger.info(
+                    f"{SAUSMSG}: '{file_name}' is already installed at "
+                    f"{existing['relative_name']} ({existing['folder_type']}); download skipped"
+                )
+                return web.json_response({
+                    'status': 'already_installed',
+                    'found_at': existing['relative_name'],
+                    'message': f"'{file_name}' is already installed.",
+                })
+
+        # Destination: the registry hint when it is usable, otherwise the folder
+        # ComfyUI uses for this kind of model (respects --models-directory and
+        # extra_model_paths.yaml).
+        target_path = None
+        if model_path:
+            candidate = (MODELS_DIRECTORY / model_path.strip('/\\')).resolve()
+            try:
+                candidate.relative_to(MODELS_DIRECTORY.resolve())
+                target_path = candidate
+            except ValueError:
+                target_path = None
+
+        if target_path is None:
+            target_path = destination_for(component_type, model_path)
+        if target_path is None:
+            target_path = MODELS_DIRECTORY / 'diffusion_models'
+
+        target_path = Path(target_path)
         try:
-            target_path.relative_to(MODELS_DIRECTORY.resolve())
-        except ValueError:
-            return web.json_response({'status': 'error', 'message': 'Invalid model path'}, status=403)
+            target_path.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.error(f"{SAUSMSG}: Could not create download folder {target_path}: {e}")
+            return web.json_response({'status': 'error', 'message': 'Could not create the target folder'}, status=500)
 
         def progress_sender(filename, downloaded, total, progress):
             PromptServer.instance.send_sync("model_download_progress", {
@@ -277,48 +412,61 @@ async def download_model_handler(request: web.Request) -> web.Response:
         logger.error(f"Error handling download request: {e}", exc_info=True)
         return web.json_response({'status': 'error', 'message': 'Internal Server Error'}, status=500)
 
+
+
 async def check_model_status_handler(request: web.Request) -> web.Response:
-    model_path = request.query.get('model_path', '')
+    """Is the model installed? Any folder, any sub-folder counts."""
     file_id = request.query.get('file_id', '')
+    if not file_id:
+        return web.json_response({'status': 'error', 'message': 'Missing file_id'}, status=400)
 
-    if not model_path or not file_id:
-        return web.json_response({'status': 'error', 'message': 'Missing model_path or file_id'}, status=400)
+    model_path = request.query.get('model_path', '')
+    model_type = request.query.get('type', '')
 
-    full_file_path = MODELS_DIRECTORY / model_path.strip('/\\') / file_id 
+    hit = find_model(file_id, model_type, model_path)
+    if hit:
+        return web.json_response({
+            'status': 'ready',
+            'found_at': hit['relative_name'],
+            'folder_type': hit['folder_type'],
+        })
+    return web.json_response({'status': 'missing'})
 
-    try:
-        full_file_path.resolve().relative_to(MODELS_DIRECTORY.resolve())
-    except ValueError:
-        return web.json_response({'status': 'error', 'message': 'Invalid file path.'}, status=403)
 
-    if full_file_path.exists() and full_file_path.is_file():
-        status = 'ready'
-    else:
-        status = 'missing'
-
-    return web.json_response({'status': status})
 
 async def delete_model_handler(request: web.Request) -> web.Response:
     try:
         data = await request.json()
         file_id = data.get('file_id')
-        model_path = data.get('model_path')
+        model_path = (data.get('model_path') or '').strip()
 
-        if not file_id or not model_path:
-            return web.json_response({'status': 'error', 'message': 'Missing file_id or model_path'}, status=400)
+        if not file_id:
+            return web.json_response({'status': 'error', 'message': 'Missing file_id'}, status=400)
 
-        full_file_path = MODELS_DIRECTORY / model_path.strip('/\\') / file_id
+        hit = find_model(file_id, data.get('type', ''), model_path)
+        if not hit:
+            return web.json_response(
+                {'status': 'error', 'message': f'File {file_id} not found in any model folder.'},
+                status=404,
+            )
 
-        try:
-            full_file_path.resolve().relative_to(MODELS_DIRECTORY.resolve())
-        except ValueError:
-            return web.json_response({'status': 'error', 'message': 'Invalid file path or security violation.'}, status=403)
+        target = Path(hit['path'])
+        # Only ever delete inside a folder ComfyUI registered for this type --
+        # never a request-supplied path.
+        if not resolves_inside(target, hit['directories']):
+            return web.json_response(
+                {'status': 'error', 'message': 'Refusing to delete outside the model folders.'},
+                status=403,
+            )
 
-        if full_file_path.exists() and full_file_path.is_file():
-            os.remove(full_file_path)
-            return web.json_response({'status': 'success', 'message': f'File {file_id} deleted.'})
-        else:
-            return web.json_response({'status': 'error', 'message': f'File not found at {full_file_path}'}, status=404)
+        if target.is_file():
+            os.remove(target)
+            return web.json_response({
+                'status': 'success',
+                'message': f'File {file_id} deleted from {hit["relative_name"]}.',
+            })
+
+        return web.json_response({'status': 'error', 'message': f'File not found at {target}'}, status=404)
 
     except Exception as e:
         logger.error(f"Error during file deletion: {e}")

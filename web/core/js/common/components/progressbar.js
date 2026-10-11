@@ -26,10 +26,22 @@
           </div>
         </div>
       </div>
-      <div id="queue-display"></div>
       <div id="buttonsgen">
-        <button id="generateButton" class="menuButtons">GENERATE</button>
-        <button id="interruptButton" class="menuButtons">INTERRUPT</button>
+        <div id="runs-wrap">
+          <div id="runs-control" title="How many times to run the workflow">
+            <span class="runs-stepper">
+              <button type="button" id="runsDec" aria-label="Decrease runs">&minus;</button>
+              <input id="runsInput" type="number" min="1" max="99" step="1" value="1" inputmode="numeric" aria-label="Number of runs">
+              <button type="button" id="runsInc" aria-label="Increase runs">+</button>
+            </span>
+          </div>
+          <div id="queue-display"></div>
+        </div>
+        <button id="generateButton" class="menuButtons">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          Run
+        </button>
+        <button id="interruptButton" class="menuButtons">Cancel</button>
       </div>
     </div>
   `;
@@ -120,6 +132,24 @@
         spinner.addEventListener('click', openLogModal);
         spinner.title = "View Logs";
     }
+
+    // Runs stepper: type a number or use the -/+ buttons (clamped 1..99).
+    const runsInput = document.getElementById('runsInput');
+    const clampRuns = (delta = 0) => {
+        if (!runsInput) return;
+        let n = parseInt(runsInput.value, 10);
+        if (!Number.isFinite(n)) n = 1;
+        n = Math.min(99, Math.max(1, n + delta));
+        runsInput.value = String(n);
+    };
+    if (runsInput) {
+        runsInput.addEventListener('change', () => clampRuns(0));
+        runsInput.addEventListener('blur', () => clampRuns(0));
+    }
+    const runsDec = document.getElementById('runsDec');
+    const runsInc = document.getElementById('runsInc');
+    if (runsDec) runsDec.addEventListener('click', () => clampRuns(-1));
+    if (runsInc) runsInc.addEventListener('click', () => clampRuns(1));
     // console.log('Progress bar content inserted');
   }
 

@@ -101,6 +101,81 @@ def target_dir(base_dir: str, subfolder: str) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# Where a model lives
+# --------------------------------------------------------------------------- #
+# Registry model type -> the ComfyUI "folder type"(s) to look in, best first.
+# ComfyUI maps a folder type to one or more directories itself (for example
+# "diffusion_models" covers both models/unet and models/diffusion_models), so
+# nothing here hardcodes a directory. Custom folder types registered by other
+# nodes are still searched (see candidate_folder_types).
+TYPE_FOLDER_NAMES: Dict[str, List[str]] = {
+    "checkpoint": ["checkpoints"],
+    "diffusion model": ["diffusion_models"],
+    "text encoder": ["text_encoders"],
+    "vae": ["vae"],
+    "lora": ["lora"],
+    "controlnet": ["controlnet"],
+    "clipvision": ["clip_vision"],
+    "style": ["style_models"],
+    "upscaler": ["upscale_models"],
+    "latent upscaler": ["latent_upscale_models"],
+    "motion module": ["diffusion_models", "loras"],
+    "audio encoder": ["audio_encoders"],
+}
+
+# Registry types whose ComfyUI folder name differs from the type itself.
+_TYPE_FOLDER_OVERRIDES = {"lora": "loras"}
+
+
+def candidate_folder_types(model_type: str = "", hint: str = "",
+                           known: Iterable[str] = ()) -> List[str]:
+    """ComfyUI folder types to search for a model, most likely first.
+
+    ``model_type`` is the registry's ``type`` ("Diffusion model", "LORA", ...),
+    ``hint`` is the registry's ``directory`` (a folder name or sub-path) and
+    ``known`` is whatever folder types ComfyUI registered. Anything not covered
+    by the map is searched too (last), so an unknown/empty ``type`` -- or a
+    folder registered by another custom node -- still resolves.
+    """
+    ordered: List[str] = []
+
+    def add(name) -> None:
+        text = str(name or "").strip().replace("\\", "/")
+        text = text.split("/")[0].strip().lower()
+        text = _TYPE_FOLDER_OVERRIDES.get(text, text)
+        if text and text not in ordered:
+            ordered.append(text)
+
+    for name in TYPE_FOLDER_NAMES.get(str(model_type or "").strip().lower(), []):
+        add(name)
+    add(hint)
+    for name in known:
+        add(name)
+    return ordered
+
+
+def match_folder_names(listing: Iterable[str], filename: str) -> str:
+    """The entry of a ComfyUI folder listing that refers to ``filename``.
+
+    ComfyUI lists files relative to the folder root (``sub/name.safetensors``),
+    so an exact match is preferred over a path that merely ends with the name.
+    Returns ``""`` when there is no match.
+    """
+    wanted = str(filename or "").strip().replace("\\", "/")
+    if not wanted:
+        return ""
+    suffix_match = ""
+    for name in listing or []:
+        normalized = str(name).replace("\\", "/")
+        if normalized == wanted:
+            return normalized
+        if not suffix_match and normalized.endswith("/" + wanted):
+            suffix_match = normalized
+    return suffix_match
+
+
+
+# --------------------------------------------------------------------------- #
 # Candidate catalog (filename -> {url, directory})
 # --------------------------------------------------------------------------- #
 def _add_candidate(catalog: dict, name: str, url: str = "", directory: str = "") -> None:

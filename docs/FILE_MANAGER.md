@@ -48,8 +48,7 @@ If this is the case, click in the dropdown list that is below the URL text box:
 <img src="../web/core/media/git/file_manager/list of api token options.png">
 
 - No API token: no api token is used to download the file (default)
-- Custom token: paste the api token in the field to download the file for gated models/files. A new text box will appear, where you can paste the token provided by HF or Civit (or the provider of the gated model/file)
-- Stored Hugging Face/Civit.ai token: in [settings](SETTINGS.md), you can store your tokens for HF/Civit, so you do not need to paste them for every download
+- Custom token: paste the api token in the field to download the file for gated models/files. A new text box will appear, where you can paste the token provided by HF or Civit (or the provider of the gated model/file). The token is used for that download only and is sent only to the hosts listed in `saus/data/allowed_download_hosts.json`; SAUS does not store it.
 
 ### API token from Hugging Face
 
@@ -71,7 +70,7 @@ For the creation of the new token, select 'Read', give a name to your token and 
 
 <img src="../web/core/media/git/file_manager/new token form.png">
 
-The new token is created. A pop up window with the token appears. Click on Copy to copy the token, and paste it into the 'custom' token in the File Manager, or save it somewhere in your computer, on paper, or in ['settings'](SETTINGS.md) if you want to use it again.
+The new token is created. A pop up window with the token appears. Click on Copy to copy the token, and paste it into the 'custom' token field in the File Manager. SAUS does not store tokens, so save it somewhere safe in your computer or on paper if you want to reuse it.
 
 The tokens are only shown once, so when you click on done and close the window, you cannot see the token anymore. If you forget or lose it, to access you will need to generate a new token. 
 
@@ -89,7 +88,7 @@ In the new screen, scroll down until the bottom, where you can see the API KEYS 
 
 <img src="../web/core/media/git/file_manager/API list Civit AI.png">
 
-A small pop up to create your key will appear. Give it a name and press 'Save'. You API key will appear. Copy it and paste it in the Custom API token field in the File Manager, or save it in ['settings'](SETTINGS.md). Same as for the Hugging Face token.
+A small pop up to create your key will appear. Give it a name and press 'Save'. You API key will appear. Copy it and paste it in the Custom token field in the File Manager. Same as for the Hugging Face token.
 
 <img src="../web/core/media/git/file_manager/CIVIT AI API key.png">
 

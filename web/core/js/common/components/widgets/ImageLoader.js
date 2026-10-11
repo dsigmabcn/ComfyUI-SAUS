@@ -1,4 +1,4 @@
-import { showSpinner, hideSpinner } from '../utils.js';
+import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
 
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
@@ -31,7 +31,7 @@ export default class ImageLoader {
 
     // The button now acts as the title and browse trigger.
     this.browseButton = document.createElement('button');
-    this.browseButton.innerHTML = `📂 ${this.config.label || 'Browse'}`;
+    this.browseButton.innerHTML = `📂 ${escapeHtml(this.config.label || 'Browse')}`;
     this.browseButton.classList.add('image-loader-title');
     this.browseButton.style.width = '100%';
     this.browseButton.style.cursor = 'pointer';

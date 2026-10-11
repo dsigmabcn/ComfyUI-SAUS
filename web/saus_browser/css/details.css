@@ -61,7 +61,7 @@
 
 .component-info { flex: 1; margin-right: 10px; min-width: 0; }
 .component-name { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 4px; }
-.component-filename { font-size: 0.8em; color: #aaa; display: block; margin-bottom: 0; word-break: break-all; }
+.component-filename { font-size: 0.8em; font-style: italic; color: #aaa; display: block; margin-bottom: 0; word-break: break-all; }
 
 .component-actions {
     display: flex;
@@ -121,4 +121,154 @@
 .component-item.required-installed,
 .component-item.optional-installed {
     background-color: rgba(76, 175, 80, 0.2);
+}
+
+/* ------------------------------------------------ App details modal */
+.app-details-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4vh 4vw;
+}
+
+.app-details-modal {
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    width: min(1500px, 96vw);
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.app-details-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.app-details-modal-head .details-title { margin: 0; }
+
+.app-details-modal-head .details-arch {
+    margin: 0;
+    font-size: 0.85em;
+    color: #888;
+    font-weight: bold;
+}
+
+.app-details-close { padding: 4px 10px; }
+
+.app-details-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.app-details-actions { margin: 12px 0 0; }
+
+.app-details-toptext .details-title { margin: 0 0 6px; }
+.app-details-toptext .details-description { margin-bottom: 8px; }
+
+.app-details-top {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+.details-instructions {
+    font-size: 0.92em;
+    color: #888;
+    margin: 0 0 16px;
+}
+
+.app-details-thumb {
+    width: 240px;
+    height: 140px;
+    object-fit: cover;
+    flex: none;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+}
+
+.app-details-toptext { flex: 1; min-width: 0; }
+
+/* Variants overview inside the details modal. */
+.variant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.variant-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.variant-models {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 6px;
+}
+
+/* The type label sits directly on top of its model box (no gap in between). */
+.variant-models .component-item {
+    margin-bottom: 0;
+    padding: 8px;
+}
+
+.variant-models .component-name { margin-bottom: 0; }
+
+/* Model-type label shown above the (colored) model box. */
+.model-type {
+    display: inline-block;
+    margin: 5px 0 0;
+    padding: 6px 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: none;
+    color: var(--color-button-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: transparent;
+}
+
+.variant-models .model-type:first-child { margin-top: 0; }
+
+.variant-card-title {
+    color: var(--color-accent);
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.variant-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.85em;
+    margin-bottom: 3px;
+}
+
+.variant-key { color: #888; }
+.variant-val { color: var(--color-primary-text); word-break: break-all; text-align: right; }
+
+.variant-settings {
+    margin-top: 8px;
+    font-size: 0.8em;
+    color: #aaa;
+    border-top: 1px solid var(--color-border);
+    padding-top: 6px;
 }

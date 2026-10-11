@@ -1,0 +1,215 @@
+{
+  "id": "dfpv9",
+  "name": "QWEN Image Text to Image",
+  "url": "qwen-image-text-to-image",
+  "description": "Create Images using QWEN Image",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "QWEN"
+      ],
+      "other": []
+    },
+    "architecture": "QWEN IMAGE",
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "qwen_image_fp8_e4m3fn.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptk4a2ny",
+      "label": "Prompt",
+      "nodePath": "108.inputs.text",
+      "default": "Urban alleyway at dusk. Tall, statuesque high-fashion model striding elegantly, mid distant full body shot from an angular perspective, cinematic/editorial with bold contrasts and tactile materials. They wear a rose-gold metallic trench coat with deconstructed elements over a black long-sleeved turtleneck with subtle texture; paired with forest-green pleated pants with raw hems and a soft texture. Long braided dark hair, medium complexion. They carry a vibrant yellow designer handbag with geometric details and a structured silhouette. White architectural sneakers with bold geometric cutouts. Bold, high-contrast, tactile, urban-grit meets high-fashion impact, extreme clarity, extreme layering, post-processing with transparent light-transmitting ultra-smooth high-definition film effect, removing all noise and grain, removing all blur, removing all vintage feel, removing all roughness, drawn with 32K pixel precision, unparalleled fine line drawing of every single detail, the entire image like a brand new photograph, photorealistic",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "compo7nuzb",
+      "label": "Megapixels",
+      "nodePath": "112.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "stepper21kvzi",
+      "label": "Steps",
+      "nodePath": "106.inputs.steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 25,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepperqsqw04",
+      "label": "CFG",
+      "nodePath": "106.inputs.cfg",
+      "minValue": 0.1,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 7.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "compupqjsx",
+      "label": "Model shift",
+      "nodePath": "110.inputs.shift",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 0.1,
+      "defValue": 3.1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdown7fm7to",
+      "label": "CLIP",
+      "nodePath": "104.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "dropdownlddolg",
+      "label": "VAE",
+      "nodePath": "103.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownvqlt72",
+      "label": "Sampler",
+      "nodePath": "106.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "dropdown4b7nj6",
+      "label": "Scheduler",
+      "nodePath": "106.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "comp9iuz1w",
+      "label": "Unet Name",
+      "nodePath": "105.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "qwen_image_fp8_e4m3fn.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seeder09pvd4",
+      "label": "Seed",
+      "nodePath": "106.inputs.seed",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "compey7max",
+      "label": "Save Filename",
+      "nodePath": "60.inputs.filename_prefix",
+      "defValue": "QWEN/Qwen-Image-2512",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "compytzci9",
+      "label": "Aspect Ratio",
+      "nodePath": "112.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output60",
+      "label": "Save Image",
+      "nodeId": "60",
+      "type": "media"
+    }
+  ]
+}

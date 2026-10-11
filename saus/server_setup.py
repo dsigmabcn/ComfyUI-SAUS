@@ -65,9 +65,12 @@ def setup_server() -> None:
         return
 
     if os.environ.get("RUNPOD_POD_ID"):
-        # Set the maximum client request body size on the main application.
-        # 50 GB = 53,687,091,200 bytes
-        MAX_UPLOAD_SIZE = 53687091200 
+        # Cap the maximum request body the server will accept. The File Manager
+        # uploads in 20 MB chunks, so large model files do not need a huge body:
+        # 1 GB leaves headroom while stopping a single request from buffering
+        # tens of gigabytes in RAM (or filling the disk).
+        # 1 GB = 1,073,741,824 bytes
+        MAX_UPLOAD_SIZE = 1024 * 1024 * 1024 
         
         # Set the size limit on the existing application instance
         server_instance.app.client_max_size = MAX_UPLOAD_SIZE

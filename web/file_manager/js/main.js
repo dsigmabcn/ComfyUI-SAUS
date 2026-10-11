@@ -12,9 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 500);
 
-    // Initialize Token UI
-    initTokenUI();
-
     // Initialize Settings
     initializeSettings();
 
@@ -30,47 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Rename Modal
     createRenameModal();
 });
-
-async function initTokenUI() {
-    const tokenSourceSelect = document.getElementById('token-source');
-    const tokenInput = document.getElementById('download-token');
-    
-    if (!tokenSourceSelect || !tokenInput) return;
-
-    // Fetch settings to check for stored tokens
-    try {
-        const response = await fetch('/saus/api/settings');
-        if (response.ok) {
-            const settings = await response.json();
-            
-            if (settings.civitai_api_key) {
-                const option = document.createElement('option');
-                option.value = 'civitai';
-                option.textContent = 'Stored Civitai Token';
-                tokenSourceSelect.appendChild(option);
-            }
-            
-            if (settings.huggingface_api_key) {
-                const option = document.createElement('option');
-                option.value = 'huggingface';
-                option.textContent = 'Stored Hugging Face Token';
-                tokenSourceSelect.appendChild(option);
-            }
-        }
-    } catch (e) {
-        console.error("Error fetching settings for token UI:", e);
-    }
-
-    tokenSourceSelect.addEventListener('change', () => {
-        if (tokenSourceSelect.value === 'custom') {
-            tokenInput.classList.remove('hidden-initial');
-            tokenInput.style.display = 'block';
-        } else {
-            tokenInput.classList.add('hidden-initial');
-            tokenInput.style.display = 'none';
-        }
-    });
-}
 
 function setupWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -210,7 +166,7 @@ window.startDownload = async function () {
         const response = await fetch('/saus/api/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken, tokenSource })
+            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken })
         });
 
         if (!response.ok) {
@@ -442,6 +398,9 @@ window.handleChunkedUpload = function (file) {
             // Use fetch for simpler async control flow
             const response = await fetch('/saus/api/upload-chunk', {
                 method: 'POST',
+                // Custom header: a cross-site <form> cannot set one, which is
+                // what stops forged uploads (CSRF).
+                headers: { 'X-SAUS-Request': '1' },
                 body: formData 
             });
 
@@ -568,9 +527,11 @@ window.displayDirectory = async function displayDirectory(path, explorerId = 'fi
     explorer.innerHTML = ''; /* Clear current contents*/
 
 
-    // Add "Go Up" link if not at root
+    // Add "Go Up" link unless we are already at one of the three folders the
+    // file API is allowed to touch (input / output / models).
+    const rootFolders = ['input', 'output', 'models'];
     const rootPath = '.';
-    if (path !== rootPath) {
+    if (path !== rootPath && !rootFolders.includes(path)) {
         let parentPath = path.substring(0, path.lastIndexOf('/'));
         if (!parentPath) parentPath = '.';
 

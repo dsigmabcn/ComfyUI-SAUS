@@ -1,0 +1,189 @@
+{
+  "id": "sausn253sl",
+  "name": "Stable Diffusion XL",
+  "url": "stable-diffusion-xl",
+  "description": "Image generation with SDXL (and SD1.5)\n",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "SD1.5",
+        "SDXL"
+      ],
+      "other": []
+    },
+    "architecture": "SD15",
+    "models": [
+      "RealVisXL_V5.0_fp16.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "compxx9xq7",
+      "label": "Positive prompt",
+      "nodePath": "6.inputs.text",
+      "default": "daytime sky nature dark blue galaxy bottle",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "comp1vvjdx",
+      "label": "Negative Prompt",
+      "nodePath": "7.inputs.text",
+      "default": "text, watermark",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "comp20vdum",
+      "label": "Megapixels",
+      "nodePath": "10.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 16,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "comp2vx19u",
+      "label": "Steps",
+      "nodePath": "3.inputs.steps",
+      "minValue": 1,
+      "maxValue": 10000,
+      "step": 10,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    },
+    {
+      "id": "compekel0y",
+      "label": "Cfg",
+      "nodePath": "3.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 8,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "comp0bmxir",
+      "label": "Ckpt Name",
+      "nodePath": "4.inputs.ckpt_name",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "default": "RealVisXL_V5.0_fp16.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      }
+    },
+    {
+      "id": "compgiylxe",
+      "label": "Sampler Name",
+      "nodePath": "3.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "default": "euler",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "compmh99zv",
+      "label": "Scheduler",
+      "nodePath": "3.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "default": "normal",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "compbfrs0m",
+      "label": "Seed",
+      "nodePath": "3.inputs.seed",
+      "initialSeed": 44460315132590,
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "compdptycy",
+      "label": "Save Filename",
+      "nodePath": "9.inputs.filename_prefix",
+      "defValue": "SD_SDXL_T2I",
+      "layout": {
+        "region": "basic",
+        "order": 10
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "compmvweer",
+      "label": "Aspect Ratio",
+      "nodePath": "10.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output9",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}
