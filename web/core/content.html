@@ -4,42 +4,42 @@
         <main class="content">
             <aside class="left-col" id="left-col">
                 <button id="toggle-left" class="toggle-button left-toggle" aria-label="Toggle Left Panel">
-                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M16 19V5l-11 7z"/>
+                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 </button>
                 <div class="left-panel-content">
                     <div id="side-workflow-controls" class="custom-scrollbar">
-                                                
-                        <div class="control-tabs-header">
-                            <button class="tab-button active" data-target="basic-tab">Basic Controls</button>
-                            <button class="tab-button" data-target="advanced-tab">Advanced Controls</button>
+
+                        <!-- One plain stacked column: the Basic controls are
+                             always visible, and the Advanced ones unfold below
+                             the LoRA list ("Show Advanced"). -->
+                        <div class="controls-body">
+                            <div id="mode-selector-container" class="mode-selector-container">
+                                <div class="mode-group-left">
+                                    <button class="mode-button exclusive-mode" data-mode="hd">HD</button>
+                                    <button class="mode-button exclusive-mode" data-mode="turbo">Turbo</button>
+                                    <button class="mode-button exclusive-mode active" data-mode="custom">Custom</button>
+                                </div>
+                                <div class="mode-group-right">
+                                    <button class="mode-button" data-mode="fp8">FP8</button>
+                                </div>
+                            </div>
+
+                            <div id="prompts"></div>
+                            <div id="basic-controls-container"></div>
+
+                            <!-- The LoRA list is added here (LoraWorkflowManager). -->
+                            <div id="lora-slot" class="lora-slot"></div>
+
+                            <button type="button" id="advancedToggle" class="advanced-toggle"
+                                    aria-expanded="false" aria-controls="advanced-controls-container">
+                                <span class="advanced-toggle-label">Show Advanced</span>
+                                <i class="fas fa-chevron-down advanced-toggle-chev" aria-hidden="true"></i>
+                            </button>
+
+                            <div id="advanced-controls-container" class="advanced-controls collapsed"></div>
                         </div>
-
-                        <div id="mode-selector-container" class="mode-selector-container">
-                            <div class="mode-group-left">
-                                <button class="mode-button exclusive-mode" data-mode="hd">HD</button>
-                                <button class="mode-button exclusive-mode" data-mode="turbo">Turbo</button>
-                                <button class="mode-button exclusive-mode active" data-mode="custom">Custom</button>
-                            </div>
-                            <div class="mode-group-right">
-                                <button class="mode-button" data-mode="fp8">FP8</button>
-                            </div>
-                        </div>
-
-                        <div class="control-tabs-content">
-                            
-                            <div class="tab-panel active" id="basic-tab">
-                                <div id="prompts"></div>
-                                <div id="basic-controls-container"></div>
-                            </div>
-
-                            <div class="tab-panel" id="advanced-tab">
-                                <div id="advanced-controls-container"></div>
-                            </div>
-
-                        </div>                     
-
 
                     </div> <!--sidebar controls-->
 
@@ -64,8 +64,8 @@
 
             <aside class="sidebar right-col" id="right-col">
                 <button id="toggle-right" class="toggle-button right-toggle" aria-label="Toggle Right Panel">
-                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 4 L17 12 L9 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
                 <div class="right-panel-content">

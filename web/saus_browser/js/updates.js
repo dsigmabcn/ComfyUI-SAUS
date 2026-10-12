@@ -12,11 +12,7 @@ export async function getVersion() {
     }
 }
 
-export async function showVersion() {
-    const currentVersion = await getVersion();
-    const copyrightEl = document.getElementById('copyright');
-    if (copyrightEl) copyrightEl.innerText = currentVersion;
-}
+/** The version is shown in the Settings tab (see settings_info.js). */
 
 function isNewerVersion(current, latest) {
     const currentParts = current.split('.').map(Number);

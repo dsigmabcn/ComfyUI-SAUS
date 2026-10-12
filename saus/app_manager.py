@@ -8,10 +8,11 @@ from .constants import (
     SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
 )
 from .route_manager import RouteManager
+from .static_cache import install as install_revalidate_middleware
 from .file_system import (
     directory_listing_handler, rename_file_handler, delete_file_handler,
     download_file_handler, upload_chunk_handler, list_input_files_handler,
-    get_logs_handler
+    get_logs_handler, thumbnail_handler, move_copy_handler
 )
 from .management import (
     apps_handler,
@@ -20,7 +21,7 @@ from .management import (
 )
 from .downloads import (
     download_generic_handler, download_model_handler, check_model_status_handler,
-    delete_model_handler
+    check_model_status_batch_handler, delete_model_handler
 )
 from .system import (
     saus_version_handler, set_model_preview_handler, clear_model_preview_handler,
@@ -28,6 +29,11 @@ from .system import (
     restart_server_handler
 )
 
+# aiohttp serves static files without a Cache-Control header, which leaves a
+# browser free to reuse its own copy for a while (heuristic caching). A changed
+# CSS or HTML file could then stay invisible until a hard refresh, so an update
+# to the shell looked like it "did not arrive". The middleware in static_cache
+# makes those responses revalidate (see that module).
 class AppManager:
     # An app's folder name comes from its appConfig.json, which may be hand
     # edited or shipped by somebody else. Only accept the characters the builder
@@ -37,6 +43,8 @@ class AppManager:
     @staticmethod
     def setup_app_routes(app: web.Application) -> None:
         try:
+            AppManager._setup_revalidate_middleware(app)
+
             AppManager._setup_apps_routes(app)
             
             AppManager._setup_core_routes(app)
@@ -47,6 +55,16 @@ class AppManager:
 
         except Exception as e:
             logger.error(f"{SAUSMSG}: Failed to set up routes: {e}")
+
+    @staticmethod
+    def _setup_revalidate_middleware(app: web.Application) -> None:
+        """Serve the shell's own files with Cache-Control: no-cache."""
+        try:
+            install_revalidate_middleware(app)
+        except Exception as e:
+            # A frozen application (setup after startup) keeps serving; only the
+            # revalidation is lost, so never let this break the routes.
+            logger.warning(f"{SAUSMSG}: Could not add the static revalidation middleware: {e}")
 
     @staticmethod
     def _setup_apps_routes(app: web.Application) -> None:
@@ -89,6 +107,8 @@ class AppManager:
             (f'/saus/api/model-previews', 'POST', list_model_previews_handler),
             (f'/saus/api/model-preview', 'GET', get_model_preview_handler),
             (f"/saus/api/directory", "GET", directory_listing_handler),
+            (f'/saus/api/thumbnail', 'GET', thumbnail_handler),
+            (f'/saus/api/move-file', 'POST', move_copy_handler),
             (f'/saus/api/download', 'POST', download_generic_handler),
             (f'/saus/api/rename-file', 'POST', rename_file_handler),
             (f'/saus/api/delete-file', 'POST', delete_file_handler),
@@ -100,6 +120,7 @@ class AppManager:
             (f'/saus/api/models', 'GET', get_models_registry_handler),
             (f'/saus/api/app-models', 'GET', get_app_models_handler),
             (f'/saus/api/model-status', 'GET', check_model_status_handler),
+            (f'/saus/api/model-status-batch', 'POST', check_model_status_batch_handler),
             (f'/saus/api/delete-model', 'DELETE', delete_model_handler),
             (f'/saus/api/download-model', 'POST', download_model_handler),
             (f'/saus/api/restart', 'POST', restart_server_handler),

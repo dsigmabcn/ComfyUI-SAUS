@@ -38,37 +38,37 @@ If you are accessing via [Runpod](RUNPOD.md), open the pod panel and click over 
 
 Check out the table of contents for detailed instructions. This is a summary overview:
 
-### Home & Sidebar
-- **Home**: The landing page where you can see an overview of how to generate AI images or videos.
-- **Sidebar**: Use the sidebar to navigate between different categories of Apps (workflows).
-- **Top Navigation Bar**: Use it to navigate between the SAUS Apps, the File Manager, ComfyUI, and the Settings Page.
+### Rail & Explorer
+- **Icon rail** (far left): the SAUS logo, the three sections (AI Image, AI Video, Other) and the tools. **Click** a section to open the panel on it (click it again to close it); **hover** another one to switch the open panel.
+- **Explorer panel**: the tree that lists one section at a time — subcategory, then the apps themselves, all in the panel. **Esc** closes it.
+- **Project links**: there is no header or footer — the logo is at the top of the rail, and the ko-fi / GitHub / YouTube links plus the installed version are in the **Settings** tab.
 
 ### App Browsing
-- **Search**: Use the search bar to find specific Apps by name.
-- **Filters**: Filter Apps by favorites, or sort them alphabetically.
-- **Tags**: Click on tags to filter Apps by specific categories (e.g., base/quantized, model, function).
+- **Explorer**: hover a section (AI Image / AI Video / Other), then click a subcategory, and its apps appear as compact rows.
+- **Opening apps**: click a row and the app opens as a **tab** in the workspace, so several apps can stay open at once. Each tab can be **enlarged** (⛶), **sent to ComfyUI** (⤴) or closed (✕).
+- **Search & Tags**: both live in the panel head (the search box and the *Tags* button).
+- **Tags**: filter Apps by specific characteristics (e.g., base/quantized, model, function).
 
 ### Installing/Uninstalling Models
-- **Model Status**: When selecting a category, the cards show if the required models are installed. 
+- **Model Status**: the dot on each app row shows whether the required models are installed: green when every variant of the app has all of its models, orange when only some variants are complete, red when none is. Hover the row for the details, including which variant is missing what.
 - **Information Panel**: Click on the (i) button to access the information panel and install the required models for the App.
 - **Installing Models**: If a model is missing, it is indicated with a red 'Missing' badge. Click on the Install button below to install the model.
 - **Uninstalling Models**: If a model is not used by any App, you can delete it by clicking on 'Uninstall'.
 
 ## Running an App
 
-1. **Open an App**: Open an App by clicking on the image of the card or the 'Open App' button in the information panel.
+1. **Open an App**: Click on an app row in the explorer (or the 'Open App' button in the information panel). The app opens in a tab of the workspace; use ✕ to close it or ⛶ to give it the whole browser area.
 2. **Configure Parameters - Basic**: Adjust the available settings (prompts, image size, seed, etc.) in the simplified interface.
-3. **Configure Parameters - Advanced**: Some Apps allow you to tune other advanced settings (CFG, sampler, scheduler, etc.).
+3. **Configure Parameters - Advanced**: Some Apps allow you to tune other advanced settings (CFG, sampler, scheduler, etc.). They are hidden behind the **Show Advanced** fold at the bottom of the control panel.
 4. **Configure Parameters - Masking**: Inpainting Apps have additional controls to draw a mask over the image you want to inpaint.
-5. **Generate**: Click the "Generate" button to start the generation process. Click on "Interrupt" to stop the generation.
+5. **Generate**: Click the "Generate" button to start the generation process. Click the **✕** next to the progress bar to stop the generation.
 6. **Live Preview**: Watch the progress and see the result in the preview window.
-7. **Recent**: See the images you have generated earlier (in the same session) by clicking on the images in the Recent panel.
+7. **Recent**: See the images you have generated earlier (in the same session) by clicking on the images in the Recent panel. The panel starts folded and opens by itself when the first image is generated.
 
 
-## Tools (Navigation Bar)
+## Tools (rail and footer)
 
-### SAUS Apps
-Return to the App Browsing page.
+The tools live at the bottom of the rail (the File Manager, the Console and the Settings open as tabs in the workspace; ComfyUI and the Guide open in a new window).
 
 ### File Manager
 A simple File Manager to access and perform basic management of the files in your ComfyUI installation.
@@ -80,7 +80,8 @@ A simple File Manager to access and perform basic management of the files in you
 - **File Management**: Use the icons on each file to rename, download, or delete it.
 
 ### ComfyUI
-- **ComfyUI**: Open ComfyUI in a separate window.
+- **ComfyUI**: Open ComfyUI in a separate window (the *ComfyUI* icon at the bottom of the rail).
 
 ### Settings
+- **Settings**: the *Settings* icon at the bottom of the rail opens them as a tab.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).

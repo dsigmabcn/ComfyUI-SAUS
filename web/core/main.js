@@ -634,34 +634,15 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                         };
 
                         if (loraFiles.length > 0) {
-                            const addLoraButtons = document.querySelectorAll('.add-lora-button');
-
                             for (const loraFile of loraFiles) {
-                                if (addLoraButtons.length === 0) break;
-
-                                addLoraButtons[0].click();
-                                await new Promise(resolve => setTimeout(resolve, 100));
-
-                                const newLoraWidget = Array.from(document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]')).pop();
-                                if (!newLoraWidget) continue;
-
                                 const loraValue = loraValueFor(loraFile);
-                                const containerId = newLoraWidget.id;
-                                const nodeId = containerId.split('_')[1];
-                                updateWorkflow(workflow, `${nodeId}.inputs.lora_name`, loraValue);
+                                const added = loraWorkflowManager.addLoraBlock(loraValue);
+                                if (!added) continue;
 
-                                const dropdownContainer = document.getElementById(`${containerId}-dropdown`);
-                                if (dropdownContainer) {
-                                    const input = dropdownContainer.querySelector('input');
-                                    if (input) {
-                                        const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
-                                        input.value = getDisplayName(loraValue);
-                                        input.title = loraValue;
-                                    }
-                                }
-
+                                // The row's own dropdown reads the value back from the
+                                // workflow, so nothing else needs updating here.
                                 if (mode !== 'custom') {
-                                    newLoraWidget.style.display = 'none';
+                                    added.container.style.display = 'none';
                                 }
                             }
                         }
@@ -988,46 +969,27 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
 
 
-    //Function to handle tab switching logic  
+    // The old Basic / Advanced tabs are gone: the Advanced controls now live
+    // in a fold below the LoRA list, closed until "Show Advanced" is clicked.
+function setupAdvancedToggle() {
+    const toggle = document.getElementById('advancedToggle');
+    const panel = document.getElementById('advanced-controls-container');
+    if (!toggle || !panel) return;
 
-function setupTabSwitching() {
-    const tabButtons = document.querySelectorAll('.control-tabs-header .tab-button');
-    const tabPanels = document.querySelectorAll('.control-tabs-content .tab-panel');
+    const label = toggle.querySelector('.advanced-toggle-label');
 
-    //console.log('--- FINAL TEST: Found ' + tabButtons.length + ' buttons and ' + tabPanels.length + ' panels. ---');
-    
-    if (tabButtons.length === 0 || tabPanels.length === 0) {
-        //console.error("FINAL TEST: Tab elements not found.");
-        return; 
-    }
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            //console.log(`\n--- FINAL TEST: Clicked ${targetId} ---`);
+    const setExpanded = (expanded) => {
+        toggle.setAttribute('aria-expanded', String(expanded));
+        toggle.classList.toggle('expanded', expanded);
+        panel.classList.toggle('collapsed', !expanded);
+        if (label) label.textContent = expanded ? 'Show less' : 'Show Advanced';
+    };
 
-            // 1. Deactivate all buttons and panels
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => {
-                panel.classList.remove('active');
-            });
-
-            // 2. Activate the clicked button and panel
-            this.classList.add('active');
-            
-            const targetPanel = document.getElementById(targetId);
-            if (targetPanel) {
-                targetPanel.classList.add('active'); 
-
-                // REPORT THIS VALUE!
-                const computedStyle = window.getComputedStyle(targetPanel);
-                console.warn(`FINAL TEST: Computed Display Style for ${targetId} is: ${computedStyle.getPropertyValue('display')}`);
-                
-            } else {
-                 console.error(`FINAL TEST: Target Panel ${targetId} not found!`);
-            }
-        });
+    toggle.addEventListener('click', () => {
+        setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
     });
+
+    setExpanded(false);
 }
 
 
@@ -1063,7 +1025,7 @@ function setupTabSwitching() {
         interrupt();
     });
 
-    setupTabSwitching(); 
+    setupAdvancedToggle(); 
 
 
     window.addEventListener('jobCompleted', () => {
@@ -1081,9 +1043,8 @@ function setupTabSwitching() {
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        initialize(false, false, false, false);
-        // Call the new tab setup function once the DOM is ready
-        //setupTabSwitching();
+        initialize(false, false, false, false, true);
+        // Build the "Show Advanced" fold once the DOM is ready.
 
         const overlay = document.getElementById('css-loading-overlay');
         overlay.classList.add('fade-out');

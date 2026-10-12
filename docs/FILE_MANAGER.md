@@ -8,34 +8,45 @@ If you are in a local installation, you will likely handle the file more easily 
 
 <img src= "../web/core/media/git/file_manager/navigation file manager.png">
 
-## Navigation
+## Layout
 
-In the file manager, you have:
-- Favorite folders
-- File and folders area
-- Upload/Download
+The manager is split into **two side-by-side panels**:
 
-## Favorite folders
-These are direct access to the 'input', 'output' and 'models' folders in ComfyUI
+- **Input** (left) — the files you feed into apps.
+- **Output** (right) — the images/videos the apps generate.
 
-## File and folders area
-In a simple file browser structure, you can navigate through the different folders.
+The old sidebar and the **'models' folder are gone**. Each panel browses one folder tree; the current path is shown under its title, with an **↑** button to go one level up (and double-clicking a folder opens it).
 
-- Click on 'Go up' to go one level higher in the folder structure
-- Click on a folder to open it
-- Click on the filename of an image and video and you can visualize it on the right panel.
-- Icons next to the files (basic functions):
-    - Rename: click on the pencil button to edit the name of the file
-    - Download file: if you are in Runpod, you can download the file to your local computer by clicking on the download button
-    - Delete: click on the trash bin icon to delete the file
+## Selecting files
+
+- **Click** a file to select it.
+- **Ctrl / ⌘ + click** adds or removes a file from the selection.
+- **Shift + click** selects a whole range.
+- **Double-click** a folder to open it, or a file to preview it.
+- **F2** renames the selected file.
+- **Drag and drop** a selection onto another folder, onto the other pane, or onto the pane's background to **move** it; hold **Ctrl / ⌘** while dropping to **copy** instead.
+
+The **Rename / Download / Delete** buttons sit at the right of each panel's title and act on the **selected** file(s). Rename works on a single file; Download and Delete work with any number of selected files.
+
+<img src= "../web/core/media/git/file_manager/navigation file manager.png">
+
+## Views and sorting
+
+- The **List** view shows **Name**, **Size** and **Last Modified** columns. Click a column header to sort by it (an arrow shows the direction); click again to reverse it.
+- The **medium icons** and **large icons** buttons switch to a grid; images show a compressed thumbnail.
+
+## The preview panel
+
+Double-click an image or video and it opens in the panel on the right. Use **‹ ›** to move to the previous/next file and the **✕** to close it.
 
 <img src="../web/core/media/git/file_manager/file manager with preview.png">
 
 The navigation within this File Manager only covers your ComfyUI installation, so it will not access anything which is 'outside' of the ComfyUI folder and subfolders.
 
-## Downloading and uploading from URL
+## Uploading and downloading from URL
 
-- Uploading files: you can upload files (images, loras, etc.) from your local computer to the (remote) ComfyUI by clicking that button
+- **Upload** and **From URL** are at the right of the *Input* panel title; both place the file in the folder the *Input* panel is currently showing.
+- Uploading files: you can upload files (images, loras, etc.) from your local computer to the (remote) ComfyUI by clicking the **Upload** button.
 - Download from URL: while SAUS provides you with the models to run the apps, you will probably want to download Loras, other models or other resources from the internet. You can do that by clicking and using 'Download from URL'
 <img src="../web/core/media/git/file_manager/Download URL.png">
 

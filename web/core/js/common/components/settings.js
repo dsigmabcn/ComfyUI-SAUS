@@ -202,10 +202,6 @@ export class SettingsComponent {
                             <i class="fas fa-power-off"></i> Restart Server
                         </button>
                     </div>
-                    <p style="font-size: 0.85em; color: #888; margin-top: 15px;">
-                        API tokens are no longer stored by SAUS. Paste a token directly in the File Manager's
-                        "Download from URL" dialog when a gated model needs one.
-                    </p>
                 </div>
             </div>
         `;

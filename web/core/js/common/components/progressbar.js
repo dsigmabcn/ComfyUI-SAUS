@@ -12,7 +12,10 @@
 
   const progressBarHTML = `
     <div id="loading-area">
-      <div id="spinner"></div>
+      <div id="spinner-stack">
+        <div id="spinner"></div>
+        <div id="queue-display"></div>
+      </div>
       <div class="progress-container">
         <div id="progress-status" class="hidden"></div>
         <div class="bar-wrapper">
@@ -30,94 +33,27 @@
         <div id="runs-wrap">
           <div id="runs-control" title="How many times to run the workflow">
             <span class="runs-stepper">
-              <button type="button" id="runsDec" aria-label="Decrease runs">&minus;</button>
+              <button type="button" id="runsDec" aria-label="Decrease runs">
+                <svg viewBox="0 0 7 4.3" width="10" height="6" aria-hidden="true"><path d="M0.650391 0.649902L3.65039 3.6499L6.65039 0.649902" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
               <input id="runsInput" type="number" min="1" max="99" step="1" value="1" inputmode="numeric" aria-label="Number of runs">
-              <button type="button" id="runsInc" aria-label="Increase runs">+</button>
+              <button type="button" id="runsInc" aria-label="Increase runs">
+                <svg viewBox="0 0 7 4.3" width="10" height="6" aria-hidden="true"><path d="M0.650391 3.649902L3.65039 0.649902L6.65039 3.649902" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
             </span>
           </div>
-          <div id="queue-display"></div>
         </div>
         <button id="generateButton" class="menuButtons">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
           Run
         </button>
-        <button id="interruptButton" class="menuButtons">Cancel</button>
+        <button id="interruptButton" class="menuButtons" title="Cancel the running generation">&times;</button>
       </div>
     </div>
   `;
 
-  let logRefreshInterval = null;
-
-  async function fetchLogs() {
-    const logContent = document.getElementById('log-content');
-    if (!logContent) return;
-
-    const isScrolledToBottom = logContent.scrollHeight - logContent.scrollTop <= logContent.clientHeight + 50;
-
-    try {
-      const response = await fetch('/saus/api/logs');
-      if (response.ok) {
-        const data = await response.json();
-        const logs = data.logs || "No logs found.";
-        if (logContent.textContent !== logs) {
-            logContent.textContent = logs;
-            if (isScrolledToBottom) {
-                logContent.scrollTop = logContent.scrollHeight;
-            }
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching logs: " + e.message);
-    }
-  }
-
-  function openLogModal() {
-    let modal = document.getElementById('log-modal');
-    if (!modal) {
-      createLogModal();
-      modal = document.getElementById('log-modal');
-    }
-    modal.style.display = 'block';
-    const logContent = document.getElementById('log-content');
-    if (logContent && !logContent.textContent) {
-      logContent.textContent = "Loading logs...";
-    }
-    fetchLogs();
-    if (logRefreshInterval) clearInterval(logRefreshInterval);
-    logRefreshInterval = setInterval(fetchLogs, 1000);
-  }
-
-  function closeLogModal() {
-    const modal = document.getElementById('log-modal');
-    if (modal) {
-        modal.style.display = "none";
-    }
-    if (logRefreshInterval) {
-        clearInterval(logRefreshInterval);
-        logRefreshInterval = null;
-    }
-  }
-
-  function createLogModal() {
-    const modalHTML = `
-      <div id="log-modal" class="log-modal">
-        <div class="log-modal-content">
-          <span class="log-close">&times;</span>
-          <h2 class="log-modal-header">ComfyUI Logs</h2>
-          <div id="log-content"></div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    const modal = document.getElementById('log-modal');
-    const closeBtn = modal.querySelector('.log-close');
-    closeBtn.onclick = closeLogModal;
-    window.addEventListener('click', (event) => {
-      if (event.target == modal) {
-        closeLogModal();
-      }
-    });
-  }
+  // The ComfyUI console lives in the SAUS shell now (rail -> Console), so the
+  // spinner below is a pure progress indicator.
 
   function insertProgressBar() {
     let progressBar = document.querySelector('#progressbar');
@@ -127,11 +63,7 @@
       document.body.appendChild(progressBar);
     }
     progressBar.innerHTML = progressBarHTML;
-    const spinner = document.getElementById('spinner');
-    if (spinner) {
-        spinner.addEventListener('click', openLogModal);
-        spinner.title = "View Logs";
-    }
+    // The spinner just spins while a job runs (decorative).
 
     // Runs stepper: type a number or use the -/+ buttons (clamped 1..99).
     const runsInput = document.getElementById('runsInput');

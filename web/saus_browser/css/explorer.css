@@ -1,0 +1,250 @@
+/* --- EXPLORER TREE: subcategories of the current section -> app rows --- */
+.explorer-category {
+    margin-bottom: 4px;
+}
+
+.explorer-category-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    color: var(--color-primary-text);
+    font-size: 0.92rem;
+    /* Stand out from the app rows: a raised header with an accent bar. */
+    background-color: var(--color-background-pattern);
+    border-left: 3px solid var(--color-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    font-weight: bold;
+}
+
+.explorer-category-head:hover {
+    background-color: var(--color-background-pattern-light);
+}
+
+.explorer-category-head i.node-icon {
+    width: 16px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.node-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.node-count {
+    font-size: 0.78rem;
+    opacity: 0.85;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1px 6px;
+}
+
+.node-chev {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    transition: transform 0.18s ease;
+}
+
+.explorer-category.open > .explorer-category-head .node-chev {
+    transform: rotate(90deg);
+}
+
+.explorer-category-body {
+    display: none;
+    padding-left: 10px;
+}
+
+.explorer-category.open > .explorer-category-body {
+    display: block;
+}
+
+.explorer-category.active > .explorer-category-head {
+    color: #ffffff;
+    border-left-color: var(--color-accent);
+}
+
+/* --- SEARCH / TAG RESULTS: a flat list instead of one section --- */
+.explorer-results-head {
+    padding: 8px;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.6;
+    border-bottom: 1px dashed var(--color-border);
+    margin-bottom: 6px;
+}
+
+.explorer-results-body {
+    padding-left: 2px;
+}
+
+/* --- COMPACT APP ROW --- */
+.app-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    margin: 1px 0;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.app-row:hover,
+.app-row.active {
+    background-color: var(--color-background-pattern);
+    border-color: var(--color-border);
+}
+
+.app-row-thumb {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    object-fit: cover;
+    background-color: var(--color-scrollbar-track);
+}
+
+/* The name wraps onto up to two lines so long titles are fully visible. */
+.app-row-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.app-row-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #6c757d;
+}
+
+.app-row-dot.status-ready { background-color: #4caf50; }
+.app-row-dot.status-partial { background-color: #ff9800; }
+.app-row-dot.status-missing { background-color: #f44336; }
+.app-row-dot.status-checking { background-color: #6c757d; animation: status-pulse 1.2s infinite ease-in-out; }
+.app-row-dot.status-error { background-color: #9c27b0; }
+
+@keyframes status-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
+
+.app-row-btns {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.app-row:hover .app-row-btns,
+.app-row:focus-within .app-row-btns {
+    opacity: 1;
+}
+
+.app-row-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-primary-text);
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    line-height: 1;
+}
+
+.app-row-btn:hover {
+    color: var(--color-accent);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-row-btn.fav-on {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+/* --- HOVER TOOLTIP --- */
+#explorerTooltip {
+    position: fixed;
+    z-index: 3000;
+    max-width: 340px;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    color: var(--color-primary-text);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+}
+
+/* Everything installed: green. */
+#explorerTooltip.ready {
+    border-left-color: #4caf50;
+}
+
+/* Some / all models missing: orange / red. */
+#explorerTooltip.partial {
+    border-left-color: #ff9800;
+}
+
+#explorerTooltip.warn {
+    border-left-color: #f44336;
+}
+
+#explorerTooltip .tip-title {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+#explorerTooltip.ready .tip-title {
+    color: #7ee08a;
+}
+
+#explorerTooltip .tip-hint {
+    display: block;
+    margin-top: 6px;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+#explorerTooltip ul {
+    margin: 4px 0 0 0;
+    padding-left: 16px;
+    max-height: 150px;
+    overflow: hidden;
+}
+
+#explorerTooltip li {
+    margin-bottom: 2px;
+    word-break: break-word;
+}
+
+.explorer-empty {
+    padding: 12px 10px;
+    font-size: 0.88rem;
+    opacity: 0.65;
+    font-style: italic;
+}

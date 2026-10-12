@@ -3,7 +3,7 @@
   "sections": [
     { "id": "AI Image", "icon": "fas fa-image" },
     { "id": "AI Video", "icon": "fas fa-video" },
-    { "id": "Other", "icon": "fas fa-tools" }
+    { "id": "Other", "icon": "fas fa-shapes" }
   ],
   "categories": [
     { "id": "text-to-image", "label": "text-to-image", "icon": "fas fa-paint-brush", "section": "AI Image", "order": 0 },

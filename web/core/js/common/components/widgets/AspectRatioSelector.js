@@ -56,8 +56,6 @@ class AspectRatioSelector {
         this.selected = null;
         this.retries = 0;
         this._sig = null;
-        // null = decide automatically (open when a non-quick ratio is selected).
-        this._otherOpen = null;
 
         this._onWorkflowUpdate = this.handleWorkflowUpdate.bind(this);
 
@@ -226,67 +224,78 @@ class AspectRatioSelector {
         const quick = this.quickEntries();
         const quickValues = quick.map((entry) => entry.value);
 
-        // Everything that is not a quick pick lives behind the "Other" button.
+        // Everything that is not a quick pick follows it in the carousel.
         const others = this.options
             .map((option) => this.describe(option))
             .filter((entry) => quickValues.indexOf(entry.value) < 0);
 
-        // No quick pick matches this node's options -> show them all as tiles.
-        const tiles = quick.length
-            ? quick
+        // One ordered list for the carousel: the configured quick ratios first,
+        // then every other ratio the node offers.
+        const entries = quick.length
+            ? quick.concat(others)
             : this.options.map((option) => this.describe(option));
-
-        const hasOthers = quick.length > 0 && others.length > 0;
-        const otherSelected = others.some((entry) => entry.value === selected);
-        const open = !hasOthers
-            ? false
-            : (this._otherOpen === null ? otherSelected : this._otherOpen);
 
         // Skip the DOM work when nothing visible would change (the app fires an
         // event on every interaction, and sizes depend on other widgets).
         const signature = [
             selected,
-            open ? 'open' : 'closed',
-            tiles.map((e) => `${e.value}@${this.sizeText(e)}`).join(','),
-            others.map((e) => `${e.value}@${this.sizeText(e)}`).join(',')
+            entries.map((e) => `${e.value}@${this.sizeText(e)}`).join(',')
         ].join('#');
         if (signature === this._sig) return;
         this._sig = signature;
 
-        const otherTile = hasOthers ? `
-                <button class="ratio-icon-btn ratio-other ${open ? 'active' : ''}" data-other="1" title="Other aspect ratios">
-                    ${shapeHtml(null)}
-                    <span class="ratio-ratio">Other</span>
-                    <span class="ratio-size"></span>
-                </button>` : '';
+        // Preserve the scroll position across re-renders.
+        const previousTrack = this.container.querySelector('.ratio-carousel-track');
+        const scrollLeft = previousTrack ? previousTrack.scrollLeft : 0;
 
-        // Same pattern as the Dimension Selector: the extra ratios live in a
-        // panel that the "Other" button reveals.
-        const panel = hasOthers ? `
-            <div class="ratio-other-panel" style="display:${open ? 'flex' : 'none'}">
-                ${others.map((entry) => this.tileHtml(entry, selected)).join('')}
-            </div>` : '';
-
-        const empty = !tiles.length && !others.length
+        const empty = !entries.length
             ? '<span class="ratio-icon-label">No options</span>'
             : '';
 
         this.container.innerHTML = `
             ${this.config.label ? `<label class="ratio-title">${escapeHtml(this.config.label)}</label>` : ''}
-            <div class="ratio-icons-container">
-                ${tiles.map((entry) => this.tileHtml(entry, selected)).join('')}${otherTile}${empty}
-            </div>${panel}`;
+            <div class="ratio-carousel">
+                <button type="button" class="ratio-nav ratio-nav-prev" aria-label="Previous aspect ratio">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <div class="ratio-carousel-track">
+                    ${entries.map((entry) => this.tileHtml(entry, selected)).join('')}${empty}
+                </div>
+                <button type="button" class="ratio-nav ratio-nav-next" aria-label="Next aspect ratio">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>`;
+
+        const track = this.container.querySelector('.ratio-carousel-track');
+        if (track) {
+            track.scrollLeft = scrollLeft;
+            this.container.querySelector('.ratio-nav-prev')
+                ?.addEventListener('click', () => this.scrollTrack(track, -1));
+            this.container.querySelector('.ratio-nav-next')
+                ?.addEventListener('click', () => this.scrollTrack(track, 1));
+        }
 
         this.container.querySelectorAll('.ratio-icon-btn[data-value]').forEach((btn) => {
             btn.addEventListener('click', () => this.select(btn.dataset.value));
         });
-        const otherBtn = this.container.querySelector('.ratio-other');
-        if (otherBtn) {
-            otherBtn.addEventListener('click', () => {
-                this._otherOpen = !open;
-                this.render();
-            });
+
+        // Bring the selected tile into view on first paint / external change.
+        const active = this.container.querySelector('.ratio-icon-btn.active');
+        if (active && track) {
+            const activeRect = active.getBoundingClientRect();
+            const trackRect = track.getBoundingClientRect();
+            if (activeRect.left < trackRect.left || activeRect.right > trackRect.right) {
+                track.scrollLeft += activeRect.left - trackRect.left
+                    - (trackRect.width - activeRect.width) / 2;
+            }
         }
+    }
+
+    /** Move the carousel by one tile. */
+    scrollTrack(track, direction) {
+        const tile = track.querySelector('.ratio-icon-btn');
+        const step = tile ? tile.offsetWidth + 6 : track.clientWidth * 0.8;
+        track.scrollBy({ left: direction * step, behavior: 'smooth' });
     }
 
     tileHtml(entry, selected) {
@@ -301,11 +310,7 @@ class AspectRatioSelector {
     }
 
     select(value) {
-        const quickValues = this.quickEntries().map((entry) => entry.value);
         this.selected = value;
-        // Picking a quick ratio hides the panel again (like the Dimension
-        // Selector); picking one of the extra ratios keeps it open.
-        this._otherOpen = quickValues.indexOf(value) < 0;
         updateWorkflow(this.workflow, this.nodePath, value);
         this.render();
         window.dispatchEvent(new CustomEvent('workflowValueUpdate', {

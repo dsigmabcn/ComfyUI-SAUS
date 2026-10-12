@@ -1,193 +1,783 @@
+
 import { SettingsComponent } from '../../../core/js/common/components/settings.js';
+import { insertElement } from '../../../core/js/common/components/header.js';
+// NOTE: footer.js is deliberately NOT imported — the File Manager has no footer.
+
+// Opened inside a workspace tab of the SAUS browser (see /saus/js/tabs.js)?
+// Then that page provides the chrome, so this one drops its own header.
+if (new URLSearchParams(window.location.search).get('embed') === '1') {
+    document.documentElement.classList.add('saus-embedded');
+}
+
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp)$/i;
+const VIDEO_RE = /\.(mp4|webm|ogg|mov|mkv)$/i;
+const MEDIA_RE = /\.(jpe?g|png|gif|webp|bmp|mp4|webm|ogg|mov|mkv)$/i;
+
+// One state object per pane. Input / Output are the two (and only) roots.
+const panes = {
+    input: { root: 'input', path: 'input', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
+    output: { root: 'output', path: 'output', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
+};
 
 let settingsComponent = null;
 
-document.addEventListener('DOMContentLoaded', () => {    
-    displayDirectory('output', 'file-explorer');
-    
+// The preview panel shows one file of one pane; nav walks that pane's media.
+const preview = { pane: null, index: -1 };
+
+// The pane the user last clicked (F2 targets it) and the current drag payload.
+let focusedPane = 'output';
+let dragState = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupPanes();
+    setupPreview();
+    reloadPane('input');
+    reloadPane('output');
+    initializeSettings();
+    setupWebSocket();
+    createUploadModal();
+    createDeleteModal();
+    createRenameModal();
+
+    const hiddenUpload = document.getElementById('hidden-upload');
+    if (hiddenUpload) hiddenUpload.addEventListener('change', handleFileUpload);
+
     setTimeout(() => {
         const appNameElement = document.querySelector('.appName');
-        if (appNameElement) {
-            appNameElement.innerHTML = '<h2>File Manager</h2>';
-        }
+        if (appNameElement) appNameElement.innerHTML = '<h2>File Manager</h2>';
     }, 500);
-
-    // Initialize Settings
-    initializeSettings();
-
-    // Initialize WebSocket for Progress
-    setupWebSocket();
-
-    // Initialize Upload Modal
-    createUploadModal();
-
-    // Initialize Delete Modal
-    createDeleteModal();
-
-    // Initialize Rename Modal
-    createRenameModal();
 });
 
-function setupWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    console.log(`[File Manager] Connecting to WebSocket: ${wsUrl}`);
+/* ------------------------------------------------------------------ *
+ * Path / formatting helpers
+ * ------------------------------------------------------------------ */
 
-    const ws = new WebSocket(wsUrl);
+const paneEl = (root) => document.querySelector(`.fm-pane[data-pane="${root}"]`);
+const paneRole = (root, role) => {
+    const el = paneEl(root);
+    return el ? el.querySelector(`[data-role="${role}"]`) : null;
+};
 
-    ws.onmessage = (event) => {
-        try {
-            const msg = JSON.parse(event.data);
-            if (msg.type === 'file_download_progress') {
-                const { filename, progress } = msg.data;
-                //console.log(`[WS] Progress for ${filename}: ${progress}%`);
-                updateDownloadProgress(progress, `Downloading ${filename}...`);
-            } else if (msg.type === 'file_download_complete') {
-                const { filename } = msg.data;
-                console.log(`[WS] Complete: ${filename}`);
-                finishDownload(filename);
-            } else if (msg.type === 'file_download_error') {
-                console.error(`[WS] Error:`, msg.data);
-                alert(`Download error: ${msg.data.error}`);
-                resetDownloadUI();
-            }
-        } catch (e) {
-            console.error("[WS] Error parsing message", e);
+const joinPath = (dir, name) => `${dir}/${name}`;
+
+/** A compressed preview image URL (server-side, see /saus/api/thumbnail). */
+const thumbUrl = (path, size = 256) =>
+    `/saus/api/thumbnail?path=${encodeURIComponent(path)}&size=${size}`;
+
+/** The folder above `path` inside `root` (null at the root itself). */
+function parentPath(path, root) {
+    if (path === root || path.length <= root.length) return null;
+    const idx = path.lastIndexOf('/');
+    return idx <= 0 ? null : path.slice(0, idx);
+}
+
+function formatSize(bytes) {
+    if (bytes === null || bytes === undefined) return '';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let n = bytes;
+    let u = 0;
+    while (n >= 1024 && u < units.length - 1) { n /= 1024; u += 1; }
+    const value = u === 0 ? n : (n < 10 ? n.toFixed(1) : Math.round(n));
+    return `${value} ${units[u]}`;
+}
+
+function formatDate(seconds) {
+    if (!seconds) return '';
+    const d = new Date(seconds * 1000);
+    return d.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+function fileIcon(item) {
+    if (item.type === 'folder') return 'fas fa-folder';
+    if (IMAGE_RE.test(item.name)) return 'fas fa-file-image';
+    if (VIDEO_RE.test(item.name)) return 'fas fa-file-video';
+    if (/\.(json|txt|md|csv|ya?ml)$/i.test(item.name)) return 'fas fa-file-lines';
+    return 'fas fa-file';
+}
+
+/* ------------------------------------------------------------------ *
+ * Data loading + sorting
+ * ------------------------------------------------------------------ */
+
+async function loadDirectory(path) {
+    try {
+        const response = await fetch(`/saus/api/directory?path=${encodeURIComponent(path)}`);
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Error loading directory:', error);
+        showToast('Failed to load folder.', 'error');
+        return [];
+    }
+}
+
+/** Folders first, then by the pane's sort key (name as the tie-break). */
+function sortedItems(pane) {
+    const dir = pane.sortDir;
+    const items = pane.items.slice();
+    items.sort((a, b) => {
+        const af = a.type === 'folder';
+        const bf = b.type === 'folder';
+        if (af !== bf) return af ? -1 : 1;
+        let cmp = 0;
+        if (pane.sortKey === 'size') cmp = (a.size || 0) - (b.size || 0);
+        else if (pane.sortKey === 'mtime') cmp = (a.mtime || 0) - (b.mtime || 0);
+        if (cmp === 0) cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true });
+        return cmp * dir;
+    });
+    return items;
+}
+
+async function reloadPane(root, keepName = null) {
+    const pane = panes[root];
+    pane.items = await loadDirectory(pane.path);
+    pane.selected.clear();
+    pane.anchor = null;
+    if (keepName && pane.items.some(i => i.name === keepName)) pane.selected.add(keepName);
+    renderPane(root);
+    syncPreviewAfterReload(root, keepName);
+}
+
+/* ------------------------------------------------------------------ *
+ * Rendering
+ * ------------------------------------------------------------------ */
+
+function renderPane(root) {
+    const pane = panes[root];
+    const listEl = paneRole(root, 'list');
+    const pathEl = paneRole(root, 'path');
+    if (!listEl) return;
+
+    if (pathEl) pathEl.textContent = `/${pane.path}`;
+
+    pane.view = sortedItems(pane);
+    listEl.className = `fm-list view-${pane.viewMode}`;
+    listEl.innerHTML = '';
+
+    if (pane.viewMode === 'list') listEl.appendChild(listHead(root));
+
+    const up = parentPath(pane.path, pane.root);
+    if (up) listEl.appendChild(upItem(up));
+
+    pane.view.forEach((item, idx) => {
+        listEl.appendChild(pane.viewMode === 'list' ? listRow(item, idx) : listTile(pane, item, idx));
+    });
+
+    syncPaneControls(root);
+    applySelection(root);
+}
+
+function listHead(root) {
+    const pane = panes[root];
+    const head = document.createElement('div');
+    head.className = 'fm-row fm-row-head';
+
+    [
+        ['name', 'Name', 'fm-c-name'],
+        ['size', 'Size', 'fm-c-size'],
+        ['mtime', 'Last Modified', 'fm-c-date'],
+    ].forEach(([key, label, cls]) => {
+        const cell = document.createElement('span');
+        cell.className = cls;
+        cell.dataset.sort = key;
+        cell.title = `Sort by ${label}`;
+        cell.appendChild(document.createTextNode(label));
+        if (pane.sortKey === key) {
+            const arrow = document.createElement('i');
+            arrow.className = 'fas fm-sort-arrow ' + (pane.sortDir === 1
+                ? 'fa-arrow-up-short-wide'
+                : 'fa-arrow-down-short-wide');
+            cell.appendChild(arrow);
         }
-    };
+        cell.addEventListener('click', () => {
+            if (pane.sortKey === key) {
+                pane.sortDir *= -1;
+            } else {
+                pane.sortKey = key;
+                // Name reads naturally A→Z; sizes and dates are nicer big/new first.
+                pane.sortDir = key === 'name' ? 1 : -1;
+            }
+            renderPane(root);
+        });
+        head.appendChild(cell);
+    });
 
-    ws.onclose = () => {
-        console.warn("[File Manager] WebSocket closed. Reconnecting in 5s...");
-        setTimeout(setupWebSocket, 5000);
-    };
+    return head;
 }
 
-function updateDownloadProgress(percent, text) {
-    const progressBar = document.getElementById('download-progress-bar');
-    const progressText = document.getElementById('download-progress-text');
-    if (progressBar) progressBar.style.width = `${percent}%`;
-    if (progressText) progressText.textContent = `${percent}%`;
-    
-    const statusDiv = document.getElementById('download-status');
-    if (statusDiv && text) statusDiv.textContent = text;
+function upItem(parent) {
+    const row = document.createElement('div');
+    row.className = 'fm-row fm-up-row';
+    row.dataset.up = parent;
+    const name = document.createElement('span');
+    name.className = 'fm-c-name';
+    name.innerHTML = '<i class="fas fa-arrow-up"></i> ';
+    name.appendChild(document.createTextNode('..'));
+    row.appendChild(name);
+    return row;
 }
 
-function finishDownload(filename) {
-    updateDownloadProgress(100);
-    const statusDiv = document.getElementById('download-status');
-    if (statusDiv) statusDiv.textContent = `Successfully downloaded: ${filename}`;
-    
-    setTimeout(() => {
-        window.closeModal();
-        displayDirectory(currentDirectory);
-        resetDownloadUI();
-    }, 1500);
+function listRow(item, idx) {
+    const row = document.createElement('div');
+    row.className = `fm-row${item.type === 'folder' ? ' is-folder' : ''}`;
+    row.dataset.idx = idx;
+    row.title = item.name;
+    row.draggable = true;
+
+    const name = document.createElement('span');
+    name.className = 'fm-c-name';
+    const icon = document.createElement('i');
+    icon.className = fileIcon(item);
+    const text = document.createElement('span');
+    text.className = 'fm-name-text';
+    text.textContent = item.name;
+    name.appendChild(icon);
+    name.appendChild(text);
+
+    const size = document.createElement('span');
+    size.className = 'fm-c-size';
+    size.textContent = item.type === 'folder' ? '' : formatSize(item.size);
+
+    const date = document.createElement('span');
+    date.className = 'fm-c-date';
+    date.textContent = item.mtime ? formatDate(item.mtime) : '';
+
+    row.appendChild(name);
+    row.appendChild(size);
+    row.appendChild(date);
+    return row;
 }
 
-function resetDownloadUI() {
-    const progressContainer = document.getElementById('download-progress-container');
-    const progressBar = document.getElementById('download-progress-bar');
-    const progressText = document.getElementById('download-progress-text');
-    const button = document.getElementById('download-button');
-    const statusDiv = document.getElementById('download-status');
+function listTile(pane, item, idx) {
+    const tile = document.createElement('div');
+    tile.className = `fm-tile${item.type === 'folder' ? ' is-folder' : ''}`;
+    tile.dataset.idx = idx;
+    tile.title = item.name;
+    tile.draggable = true;
 
-    if (progressBar) progressBar.style.width = '0%';
-    if (progressText) progressText.textContent = '';
-    if (progressContainer) {
-        progressContainer.style.display = 'none';
-        progressContainer.classList.add('hidden-initial');
+    const thumb = document.createElement('div');
+    thumb.className = 'fm-tile-thumb';
+    if (item.type === 'file' && IMAGE_RE.test(item.name)) {
+        // A compressed thumbnail (see /saus/api/thumbnail); fall back to the
+        // raw file once, then to the plain icon.
+        const filePath = joinPath(pane.path, item.name);
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.draggable = false;
+        img.alt = item.name;
+        img.src = thumbUrl(filePath, 320);
+        img.addEventListener('error', () => {
+            if (!img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = `/saus/api/download-file?filePath=${encodeURIComponent(filePath)}`;
+                return;
+            }
+            img.remove();
+            showTileIcon(thumb, item);
+        });
+        thumb.appendChild(img);
+    } else {
+        showTileIcon(thumb, item);
     }
-    if (button) {
-        button.disabled = false;
-        button.style.display = 'block';
-    }
-    if (statusDiv) statusDiv.textContent = '';
+
+    const name = document.createElement('div');
+    name.className = 'fm-tile-name';
+    name.textContent = item.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'fm-tile-meta';
+    meta.textContent = item.type === 'folder' ? 'Folder' : formatSize(item.size);
+
+    tile.appendChild(thumb);
+    tile.appendChild(name);
+    tile.appendChild(meta);
+    return tile;
 }
 
-let currentDirectory = 'output'; // sets initial drectory
-
-function loadManagerApp() {
-    // Code to load the Manager app into the content area
-    const content = document.querySelector('.content');
-    content.innerHTML = '<div id="manager-app">Manager App Loaded</div>';
-    // Add additional logic to initialize the Manager app
+function showTileIcon(thumb, item) {
+    thumb.classList.add('is-icon');
+    const icon = document.createElement('i');
+    icon.className = fileIcon(item);
+    thumb.appendChild(icon);
 }
 
-window.loadDownloadApp = function () {
-    /* Show the modal instead of replacing the content*/
-    document.getElementById('download-modal').classList.remove('hidden');
-};
+/* ------------------------------------------------------------------ *
+ * Selection + toolbar state
+ * ------------------------------------------------------------------ */
 
-window.closeModal = function () {
-    document.getElementById('download-modal').classList.add('hidden');
-};
+function selectedItems(pane) {
+    return pane.items.filter(i => pane.selected.has(i.name));
+}
 
-window.startDownload = async function () {
-    const url = document.getElementById('download-url').value;
-    const tokenSourceSelect = document.getElementById('token-source');
-    const tokenInput = document.getElementById('download-token');
-    
-    const tokenSource = tokenSourceSelect ? tokenSourceSelect.value : 'none';
-    let apiToken = '';
-    
-    if (tokenSource === 'custom' && tokenInput) {
-        apiToken = tokenInput.value.trim();
+function setDisabled(el, act, disabled) {
+    const btn = el.querySelector(`[data-act="${act}"]`);
+    if (btn) btn.disabled = disabled;
+}
+
+function updateTools(root) {
+    const pane = panes[root];
+    const el = paneEl(root);
+    if (!el) return;
+    const selected = selectedItems(pane);
+    const oneFile = selected.length === 1 && selected[0].type === 'file';
+    const anyFile = selected.some(i => i.type === 'file');
+    setDisabled(el, 'rename', !oneFile);
+    setDisabled(el, 'download', !anyFile);
+    setDisabled(el, 'delete', selected.length === 0);
+}
+
+function syncPaneControls(root) {
+    const pane = panes[root];
+    const el = paneEl(root);
+    if (!el) return;
+
+    el.querySelectorAll('.fm-view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === pane.viewMode);
+    });
+
+    updateTools(root);
+}
+
+function applySelection(root) {
+    const pane = panes[root];
+    const el = paneEl(root);
+    if (!el) return;
+    el.querySelectorAll('[data-idx]').forEach(node => {
+        const item = pane.view[parseInt(node.dataset.idx, 10)];
+        node.classList.toggle('selected', !!item && pane.selected.has(item.name));
+    });
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Pane wiring: selection, navigation, toolbar actions
+ * ------------------------------------------------------------------ */
+
+function setupPanes() {
+    ['input', 'output'].forEach(root => {
+        const el = paneEl(root);
+        if (!el) return;
+
+        el.addEventListener('click', (e) => onPaneClick(root, e));
+        el.addEventListener('dblclick', (e) => onPaneDblClick(root, e));
+
+        // Drag & drop between folders/panes (plain = move, Ctrl/⌘ = copy).
+        el.addEventListener('dragstart', (e) => onDragStart(root, e));
+        el.addEventListener('dragover', (e) => onDragOver(root, e));
+        el.addEventListener('dragleave', onDragLeave);
+        el.addEventListener('drop', (e) => onDrop(root, e));
+
+        el.querySelectorAll('.fm-view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                panes[root].viewMode = btn.dataset.view;
+                renderPane(root);
+            });
+        });
+    });
+
+    document.addEventListener('keydown', onGlobalKeyDown);
+}
+
+function onPaneClick(root, e) {
+    const pane = panes[root];
+    focusedPane = root;
+
+    const up = e.target.closest('[data-up]');
+    if (up) { pane.path = up.dataset.up; reloadPane(root); return; }
+
+    const action = e.target.closest('[data-act]');
+    if (action) {
+        switch (action.dataset.act) {
+            case 'upload': triggerFileUpload(); return;
+            case 'rename': doRename(root); return;
+            case 'download': doDownload(root); return;
+            case 'delete': doDelete(root); return;
+            case 'up': {
+                const parent = parentPath(pane.path, pane.root);
+                if (parent) { pane.path = parent; reloadPane(root); }
+                return;
+            }
+            default: return;
+        }
     }
-    
-    const button = document.getElementById('download-button');
 
-    const progressContainer = document.getElementById('download-progress-container');
-    const progressBar = document.getElementById('download-progress-bar');
-    const progressText = document.getElementById('download-progress-text');
-    const progressLabel = document.getElementById('download-progress-label');
-    const statusDiv = document.getElementById('download-status');
+    const node = e.target.closest('[data-idx]');
+    if (node) selectItem(root, node, e);
+}
 
-    if (!url) {
-        alert("Please enter a URL.");
-        return;
+function onPaneDblClick(root, e) {
+    const pane = panes[root];
+    focusedPane = root;
+    const node = e.target.closest('[data-idx]');
+    if (!node) return;
+    const item = pane.view[parseInt(node.dataset.idx, 10)];
+    if (!item) return;
+    if (item.type === 'folder') {
+        pane.path = joinPath(pane.path, item.name);
+        reloadPane(root);
+    } else if (MEDIA_RE.test(item.name)) {
+        openPreview(root, item.name);
+    }
+}
+
+function selectItem(root, node, e) {
+    const pane = panes[root];
+    const idx = parseInt(node.dataset.idx, 10);
+    const item = pane.view[idx];
+    if (!item) return;
+
+    const multi = e.ctrlKey || e.metaKey;
+    const range = e.shiftKey;
+
+    if (range && pane.anchor) {
+        const anchorIdx = pane.view.findIndex(i => i.name === pane.anchor);
+        if (anchorIdx >= 0) {
+            const [lo, hi] = anchorIdx < idx ? [anchorIdx, idx] : [idx, anchorIdx];
+            if (!multi) pane.selected.clear();
+            for (let i = lo; i <= hi; i += 1) pane.selected.add(pane.view[i].name);
+        }
+    } else if (multi) {
+        if (pane.selected.has(item.name)) pane.selected.delete(item.name);
+        else pane.selected.add(item.name);
+        pane.anchor = item.name;
+    } else {
+        pane.selected.clear();
+        pane.selected.add(item.name);
+        pane.anchor = item.name;
     }
 
-    console.log(`[Download] Starting download for URL: ${url}`);
+    applySelection(root);
+    updateTools(root);
+}
 
-    // UI: Start progress
-    if (progressContainer) {
-        progressContainer.classList.remove('hidden-initial');
-        progressContainer.style.display = 'block';
+/* ------------------------------------------------------------------ *
+ * Header actions
+ * ------------------------------------------------------------------ */
+
+function doRename(root) {
+    const pane = panes[root];
+    const selected = selectedItems(pane);
+    if (selected.length !== 1 || selected[0].type !== 'file') return;
+    const item = selected[0];
+    showRenameModal(joinPath(pane.path, item.name), item.name, root);
+}
+
+function doDownload(root) {
+    const pane = panes[root];
+    selectedItems(pane).filter(i => i.type === 'file').forEach(item => {
+        const link = document.createElement('a');
+        link.href = `/saus/api/download-file?filePath=${encodeURIComponent(joinPath(pane.path, item.name))}`;
+        link.download = item.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    });
+}
+
+function doDelete(root) {
+    const pane = panes[root];
+    const selected = selectedItems(pane);
+    if (!selected.length) return;
+    showDeleteModal(
+        selected.map(i => ({ name: i.name, path: joinPath(pane.path, i.name) })),
+        root
+    );
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Drag & drop: plain drag moves, Ctrl/⌘ + drag copies
+ * ------------------------------------------------------------------ */
+
+/** The folder a drop lands in: a folder item, or the pane's current folder. */
+function dropDir(root, e) {
+    const pane = panes[root];
+    const node = e.target.closest('[data-idx]');
+    if (node) {
+        const item = pane.view[parseInt(node.dataset.idx, 10)];
+        if (item && item.type === 'folder') return joinPath(pane.path, item.name);
     }
-    progressBar.style.width = '0%';
-    progressText.textContent = '';
-    progressLabel.style.display = 'block';
-    if (statusDiv) statusDiv.textContent = "Initiating download...";
-    
-    button.disabled = true;
-    button.style.display = 'none';
+    return pane.path;
+}
+
+function clearDropHighlight() {
+    document.querySelectorAll('.drop-target').forEach(n => n.classList.remove('drop-target'));
+}
+
+function onDragStart(root, e) {
+    const node = e.target.closest('[data-idx]');
+    if (!node) return;
+    const pane = panes[root];
+    const item = pane.view[parseInt(node.dataset.idx, 10)];
+    if (!item) return;
+
+    // Dragging an unselected item selects it first (like other file managers).
+    if (!pane.selected.has(item.name)) {
+        pane.selected.clear();
+        pane.selected.add(item.name);
+        pane.anchor = item.name;
+        applySelection(root);
+        updateTools(root);
+    }
+
+    dragState = { root, names: Array.from(pane.selected) };
+    focusedPane = root;
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'copyMove';
+        try { e.dataTransfer.setData('text/plain', item.name); } catch (_) { /* ignore */ }
+    }
+}
+
+function onDragOver(root, e) {
+    if (!dragState) return;
+    e.preventDefault();
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = (e.ctrlKey || e.metaKey) ? 'copy' : 'move';
+    }
+    clearDropHighlight();
+    const pane = panes[root];
+    const node = e.target.closest('[data-idx]');
+    const item = node ? pane.view[parseInt(node.dataset.idx, 10)] : null;
+    if (item && item.type === 'folder') node.classList.add('drop-target');
+    else paneEl(root).classList.add('drop-target');
+}
+
+function onDragLeave(e) {
+    // Only clear once the pointer really leaves every pane.
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.fm-pane')) return;
+    clearDropHighlight();
+}
+
+function onDrop(root, e) {
+    if (!dragState) return;
+    e.preventDefault();
+    clearDropHighlight();
+
+    const targetDir = dropDir(root, e);
+    const copy = e.ctrlKey || e.metaKey;
+    const source = dragState;
+    dragState = null;
+    transferItems(source.root, source.names, targetDir, copy);
+}
+
+async function transferItems(sourceRoot, names, targetDir, copy) {
+    const pane = panes[sourceRoot];
+    const sourcePaths = names.map(name => joinPath(pane.path, name));
+    if (!sourcePaths.length) return;
 
     try {
-        const response = await fetch('/saus/api/download', {
+        const response = await fetch('/saus/api/move-file', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, targetPath: currentDirectory, apiToken })
+            body: JSON.stringify({ sourcePaths, targetDir, copy })
         });
-
         if (!response.ok) {
-            throw new Error(`Download failed: ${response.statusText}`);
+            let detail = `HTTP ${response.status}`;
+            try {
+                const body = await response.json();
+                if (body && body.error) detail = `${detail}: ${body.error}`;
+            } catch (_) { /* not JSON */ }
+            throw new Error(detail);
         }
-        
-        console.log("[Download] Server accepted request. Waiting for WebSocket updates...");
-        if (statusDiv) statusDiv.textContent = "Download started on server...";
-        
-        // We do NOT close the modal here. We wait for WS 'file_download_complete'.
-
+        const data = await response.json();
+        if (data.errors && data.errors.length) {
+            showToast(data.errors[0], 'error');
+        } else {
+            showToast(copy ? 'Copied.' : 'Moved.', 'success');
+        }
     } catch (error) {
-        console.error("Download error:", error);
-        alert("Failed to start download.");
-        resetDownloadUI();
+        console.error('Transfer error:', error);
+        showToast(`Transfer failed (${error.message}).`, 'error');
     }
-};
+
+    // The target may live in the other pane, so refresh both.
+    hidePreview();
+    await reloadPane('input');
+    await reloadPane('output');
+}
+
+/* ------------------------------------------------------------------ *
+ * Keyboard: F2 renames the selected file
+ * ------------------------------------------------------------------ */
+
+function onGlobalKeyDown(e) {
+    if (e.key !== 'F2') return;
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+    const pane = panes[focusedPane];
+    if (!pane) return;
+    const selected = selectedItems(pane);
+    if (selected.length === 1 && selected[0].type === 'file') {
+        e.preventDefault();
+        doRename(focusedPane);
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Preview panel (right side): close ✕ + ‹ › navigation
+ * ------------------------------------------------------------------ */
+
+function setupPreview() {
+    const panel = document.getElementById('fm-preview');
+    if (!panel) return;
+    panel.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-act]');
+        if (!btn) return;
+        if (btn.dataset.act === 'close') hidePreview();
+        else if (btn.dataset.act === 'prev') stepPreview(-1);
+        else if (btn.dataset.act === 'next') stepPreview(1);
+    });
+}
+
+function mediaItems(pane) {
+    return pane.view.filter(i => i.type === 'file' && MEDIA_RE.test(i.name));
+}
+
+function openPreview(root, name) {
+    const media = mediaItems(panes[root]);
+    const idx = media.findIndex(i => i.name === name);
+    if (idx < 0) { hidePreview(); return; }
+    preview.pane = root;
+    preview.index = idx;
+    renderPreview();
+}
+
+function stepPreview(delta) {
+    if (!preview.pane) return;
+    const pane = panes[preview.pane];
+    const media = mediaItems(pane);
+    const next = preview.index + delta;
+    if (next < 0 || next >= media.length) return;
+    preview.index = next;
+
+    // Keep the list selection in step with what the preview is showing.
+    const item = media[next];
+    pane.selected.clear();
+    pane.selected.add(item.name);
+    pane.anchor = item.name;
+    applySelection(preview.pane);
+    updateTools(preview.pane);
+    renderPreview();
+}
+
+function renderPreview() {
+    const panel = document.getElementById('fm-preview');
+    const pane = preview.pane ? panes[preview.pane] : null;
+    if (!panel || !pane) return;
+
+    const media = mediaItems(pane);
+    const item = media[preview.index];
+    if (!item) { hidePreview(); return; }
+
+    const url = `/saus/api/download-file?filePath=${encodeURIComponent(joinPath(pane.path, item.name))}`;
+    const body = panel.querySelector('[data-role="body"]');
+    body.innerHTML = '';
+
+    let mediaEl;
+    if (IMAGE_RE.test(item.name)) {
+        mediaEl = document.createElement('img');
+        mediaEl.src = url;
+        mediaEl.alt = item.name;
+    } else {
+        mediaEl = document.createElement('video');
+        mediaEl.src = url;
+        mediaEl.controls = true;
+        mediaEl.autoplay = true;
+        mediaEl.loop = true;
+        mediaEl.muted = true;
+    }
+    mediaEl.draggable = false;
+    body.appendChild(mediaEl);
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'fm-preview-info';
+    metaEl.textContent = `${formatSize(item.size)} · ${formatDate(item.mtime)}`;
+    body.appendChild(metaEl);
+
+    const resEl = document.createElement('div');
+    resEl.className = 'fm-preview-info';
+    body.appendChild(resEl);
+    const setRes = (w, h) => { if (w && h) resEl.textContent = `Resolution: ${w}×${h}`; };
+    if (mediaEl.tagName === 'IMG') {
+        mediaEl.addEventListener('load', () => setRes(mediaEl.naturalWidth, mediaEl.naturalHeight));
+    } else {
+        mediaEl.addEventListener('loadedmetadata', () => setRes(mediaEl.videoWidth, mediaEl.videoHeight));
+    }
+
+    panel.querySelector('[data-role="name"]').textContent = item.name;
+    const prevBtn = panel.querySelector('[data-act="prev"]');
+    const nextBtn = panel.querySelector('[data-act="next"]');
+    if (prevBtn) prevBtn.disabled = preview.index <= 0;
+    if (nextBtn) nextBtn.disabled = preview.index >= media.length - 1;
+
+    panel.classList.remove('hidden');
+}
+
+function hidePreview() {
+    const panel = document.getElementById('fm-preview');
+    if (panel) panel.classList.add('hidden');
+    preview.pane = null;
+    preview.index = -1;
+}
+
+/** Keep the preview in step after the pane it belongs to is reloaded. */
+function syncPreviewAfterReload(root, keepName) {
+    if (preview.pane !== root) return;
+    const media = mediaItems(panes[root]);
+    const idx = keepName ? media.findIndex(i => i.name === keepName) : -1;
+    if (idx < 0) { hidePreview(); return; }
+    preview.index = idx;
+    renderPreview();
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Toast
+ * ------------------------------------------------------------------ */
+
+function showToast(message, type = 'info') {
+    if (!document.getElementById('saus-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'saus-toast-styles';
+        style.innerHTML = `
+            .saus-toast {
+                position: fixed; top: 20px; right: 20px; background-color: #333;
+                color: white; padding: 15px 20px; border-radius: 5px; z-index: 10000;
+                opacity: 0; transform: translateY(-20px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-family: sans-serif;
+                font-size: 1em; display: flex; align-items: center;
+            }
+            .saus-toast.show { opacity: 1; transform: translateY(0); }
+            .saus-toast.toast-success { background-color: #28a745; }
+            .saus-toast.toast-error { background-color: #dc3545; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `saus-toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+    }, 3000);
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Upload (chunked) — always into the Input pane's current folder
+ * ------------------------------------------------------------------ */
 
 function createUploadModal() {
     if (document.getElementById('upload-modal')) return;
-    
     const modalHTML = `
     <div id="upload-modal" class="modal hidden">
         <div class="modal-content" style="text-align: center;">
@@ -199,482 +789,368 @@ function createUploadModal() {
                 </div>
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
+function triggerFileUpload() {
+    const input = document.getElementById('hidden-upload');
+    if (input) input.click();
+}
+window.triggerFileUpload = triggerFileUpload;
+
+function resetUploadInput() {
+    const input = document.getElementById('hidden-upload');
+    if (input) input.value = '';
+}
+
+function handleFileUpload() {
+    const fileInput = document.getElementById('hidden-upload');
+    if (!fileInput || !fileInput.files.length) return;
+
+    const uploadModal = document.getElementById('upload-modal');
+    const progressBar = document.getElementById('upload-progress-bar-modal');
+    const progressText = document.getElementById('upload-progress-text-modal');
+
+    if (uploadModal) {
+        uploadModal.classList.remove('hidden');
+        const title = uploadModal.querySelector('h3');
+        if (title) title.textContent = 'Uploading File...';
+    }
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.textContent = '0%';
+
+    handleChunkedUpload(fileInput.files[0]);
+}
+
+function handleChunkedUpload(file) {
+    const CHUNK_SIZE = 1024 * 1024 * 20;
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE) || 1;
+    const fileId = `${file.name}-${file.size}-${Date.now()}`;
+    const targetPath = panes.input.path;
+
+    const progressBar = document.getElementById('upload-progress-bar-modal');
+    const progressText = document.getElementById('upload-progress-text-modal');
+    const uploadModal = document.getElementById('upload-modal');
+
+    let start = 0;
+    let end = CHUNK_SIZE;
+    let chunkCount = 0;
+
+    const sendChunk = async () => {
+        if (start < file.size) {
+            const formData = new FormData();
+            formData.append('fileChunk', file.slice(start, end));
+            formData.append('fileName', file.name);
+            formData.append('fileId', fileId);
+            formData.append('targetPath', targetPath);
+            formData.append('isLast', end >= file.size);
+            formData.append('chunkIndex', chunkCount);
+
+            let response = null;
+            try {
+                response = await fetch('/saus/api/upload-chunk', {
+                    method: 'POST',
+                    headers: { 'X-SAUS-Request': '1' },
+                    body: formData
+                });
+            } catch (error) {
+                console.error('Upload error:', error);
+            }
+
+            if (!response || !response.ok) {
+                showToast('Upload failed.', 'error');
+                if (uploadModal) uploadModal.classList.add('hidden');
+                resetUploadInput();
+                return;
+            }
+
+            const uploadedBytes = Math.min(end, file.size);
+            const percent = Math.floor((uploadedBytes / file.size) * 100);
+            if (progressBar) progressBar.style.width = `${percent}%`;
+            if (progressText) progressText.textContent = `${percent}% (Chunk ${chunkCount + 1} of ${totalChunks})`;
+
+            start = end;
+            end = start + CHUNK_SIZE;
+            chunkCount += 1;
+            await sendChunk();
+        } else {
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressText) progressText.textContent = '100%';
+            if (uploadModal) {
+                const title = uploadModal.querySelector('h3');
+                if (title) title.textContent = 'File Upload Successful!';
+            }
+            resetUploadInput();
+            reloadPane('input', file.name);
+            setTimeout(() => { if (uploadModal) uploadModal.classList.add('hidden'); }, 1500);
+        }
+    };
+
+    sendChunk();
+}
+
+
+/* ------------------------------------------------------------------ *
+ * "Download from URL" modal (always targets the Input pane)
+ * ------------------------------------------------------------------ */
+
+function setupWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'file_download_progress') {
+                const { filename, progress } = msg.data;
+                updateDownloadProgress(progress, `Downloading ${filename}...`);
+            } else if (msg.type === 'file_download_complete') {
+                finishDownload(msg.data.filename);
+            } else if (msg.type === 'file_download_error') {
+                alert(`Download error: ${msg.data.error}`);
+                resetDownloadUI();
+            }
+        } catch (e) {
+            console.error('[WS] Error parsing message', e);
+        }
+    };
+
+    ws.onclose = () => {
+        setTimeout(setupWebSocket, 5000);
+    };
+}
+
+function updateDownloadProgress(percent, text) {
+    const bar = document.getElementById('download-progress-bar');
+    const label = document.getElementById('download-progress-text');
+    if (bar) bar.style.width = `${percent}%`;
+    if (label) label.textContent = `${percent}%`;
+    const status = document.getElementById('download-status');
+    if (status && text) status.textContent = text;
+}
+
+function finishDownload(filename) {
+    updateDownloadProgress(100);
+    const status = document.getElementById('download-status');
+    if (status) status.textContent = `Successfully downloaded: ${filename}`;
+    setTimeout(() => {
+        closeModal();
+        resetDownloadUI();
+        reloadPane('input', filename);
+    }, 1500);
+}
+
+function resetDownloadUI() {
+    const container = document.getElementById('download-progress-container');
+    const bar = document.getElementById('download-progress-bar');
+    const text = document.getElementById('download-progress-text');
+    const button = document.getElementById('download-button');
+    const status = document.getElementById('download-status');
+
+    if (bar) bar.style.width = '0%';
+    if (text) text.textContent = '';
+    if (container) {
+        container.style.display = 'none';
+        container.classList.add('hidden-initial');
+    }
+    if (button) {
+        button.disabled = false;
+        button.style.display = 'block';
+    }
+    if (status) status.textContent = '';
+}
+
+
+function loadDownloadApp() {
+    const modal = document.getElementById('download-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+window.loadDownloadApp = loadDownloadApp;
+
+function closeModal() {
+    const modal = document.getElementById('download-modal');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeModal = closeModal;
+
+async function startDownload() {
+    const urlField = document.getElementById('download-url');
+    const tokenSource = document.getElementById('token-source');
+    const tokenInput = document.getElementById('download-token');
+    const url = urlField ? urlField.value.trim() : '';
+    const apiToken = (tokenSource && tokenSource.value === 'custom' && tokenInput)
+        ? tokenInput.value.trim() : '';
+
+    if (!url) { alert('Please enter a URL.'); return; }
+
+    const button = document.getElementById('download-button');
+    const container = document.getElementById('download-progress-container');
+    const bar = document.getElementById('download-progress-bar');
+    const text = document.getElementById('download-progress-text');
+    const status = document.getElementById('download-status');
+
+    if (container) {
+        container.classList.remove('hidden-initial');
+        container.style.display = 'block';
+    }
+    if (bar) bar.style.width = '0%';
+    if (text) text.textContent = '';
+    if (status) status.textContent = 'Initiating download...';
+    if (button) { button.disabled = true; button.style.display = 'none'; }
+
+    try {
+        const response = await fetch('/saus/api/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, targetPath: panes.input.path, apiToken })
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        if (status) status.textContent = 'Download started on server...';
+    } catch (error) {
+        console.error('Download error:', error);
+        alert('Failed to start download.');
+        resetDownloadUI();
+    }
+}
+window.startDownload = startDownload;
+
+
+/* ------------------------------------------------------------------ *
+ * Delete
+ * ------------------------------------------------------------------ */
+
 function createDeleteModal() {
     if (document.getElementById('delete-modal')) return;
-    
     const modalHTML = `
     <div id="delete-modal" class="modal hidden">
         <div class="modal-content" style="text-align: center; max-width: 400px;">
-            <h3 style="margin-top: 0; margin-bottom: 15px;">Delete File</h3>
-            <p id="delete-modal-message">Are you sure you want to delete this file?</p>
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Delete</h3>
+            <p id="delete-modal-message">Are you sure you want to delete this?</p>
             <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
                 <button id="delete-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
                 <button id="delete-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: #d32f2f; color: white; border: none; border-radius: 4px;">Delete</button>
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-
     const cancelBtn = document.getElementById('delete-cancel-btn');
-    if (cancelBtn) {
-        cancelBtn.onclick = closeDeleteModal;
-    }
+    if (cancelBtn) cancelBtn.onclick = closeDeleteModal;
 }
 
-let fileToDeletePath = null;
-
-function showDeleteModal(path, name) {
+function showDeleteModal(items, root) {
     const modal = document.getElementById('delete-modal');
     const message = document.getElementById('delete-modal-message');
     const confirmBtn = document.getElementById('delete-confirm-btn');
-    
-    if (modal && message && confirmBtn) {
-        message.textContent = `Are you sure you want to delete "${name}"?`;
-        fileToDeletePath = path;
-        
-        confirmBtn.onclick = async () => {
-            if (fileToDeletePath) {
-                await deleteFile(fileToDeletePath);
-                closeDeleteModal();
-            }
-        };
-        
-        modal.classList.remove('hidden');
-    }
+    if (!modal || !message || !confirmBtn) return;
+
+    message.textContent = items.length === 1
+        ? `Are you sure you want to delete "${items[0].name}"?`
+        : `Are you sure you want to delete these ${items.length} items?`;
+
+    confirmBtn.onclick = async () => {
+        closeDeleteModal();
+        await deleteItems(items, root);
+    };
+    modal.classList.remove('hidden');
 }
 
 function closeDeleteModal() {
     const modal = document.getElementById('delete-modal');
     if (modal) modal.classList.add('hidden');
-    fileToDeletePath = null;
 }
+
+async function deleteItems(items, root) {
+    let failed = 0;
+    for (const item of items) {
+        try {
+            const response = await fetch('/saus/api/delete-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filePath: item.path })
+            });
+            if (!response.ok) throw new Error(response.statusText);
+        } catch (error) {
+            console.error('Delete error:', error);
+            failed += 1;
+        }
+    }
+    const ok = items.length - failed;
+    if (failed) showToast(`Deleted ${ok}/${items.length} item(s).`, 'error');
+    else showToast(items.length === 1 ? 'Item deleted.' : `${items.length} items deleted.`, 'success');
+
+    // reloadPane hides the preview when the file it was showing is gone.
+    await reloadPane(root);
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Rename
+ * ------------------------------------------------------------------ */
 
 function createRenameModal() {
     if (document.getElementById('rename-modal')) return;
-    
     const modalHTML = `
     <div id="rename-modal" class="modal hidden">
         <div class="modal-content" style="text-align: center; max-width: 400px;">
-            <h3 style="margin-top: 0; margin-bottom: 15px;">Rename File</h3>
+            <h3 style="margin-top: 0; margin-bottom: 15px;">Rename</h3>
             <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
             <div style="display: flex; justify-content: center; gap: 10px;">
                 <button id="rename-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
                 <button id="rename-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: var(--color-accent, #007bff); color: white; border: none; border-radius: 4px;">Rename</button>
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-
     const cancelBtn = document.getElementById('rename-cancel-btn');
-    if (cancelBtn) {
-        cancelBtn.onclick = closeRenameModal;
-    }
+    if (cancelBtn) cancelBtn.onclick = closeRenameModal;
 }
 
-let fileToRenamePath = null;
-let currentRenameName = null;
-
-function showRenameModal(path, currentName) {
+function showRenameModal(path, currentName, root) {
     const modal = document.getElementById('rename-modal');
     const input = document.getElementById('rename-input');
     const confirmBtn = document.getElementById('rename-confirm-btn');
-    
-    if (modal && input && confirmBtn) {
-        input.value = currentName;
-        fileToRenamePath = path;
-        currentRenameName = currentName;
-        
-        confirmBtn.onclick = async () => {
-            const newName = input.value.trim();
-            if (newName && newName !== currentRenameName) {
-                await renameFile(fileToRenamePath, newName);
-                closeRenameModal();
-            } else if (newName === currentRenameName) {
-                closeRenameModal();
-            }
-        };
-        
-        modal.classList.remove('hidden');
-        input.focus();
-    }
+    if (!modal || !input || !confirmBtn) return;
+
+    input.value = currentName;
+    confirmBtn.onclick = async () => {
+        const newName = input.value.trim();
+        closeRenameModal();
+        if (newName && newName !== currentName) await renameFile(path, newName, root);
+    };
+    modal.classList.remove('hidden');
+    input.focus();
+    if (input.select) input.select();
 }
 
 function closeRenameModal() {
     const modal = document.getElementById('rename-modal');
     if (modal) modal.classList.add('hidden');
-    fileToRenamePath = null;
-    currentRenameName = null;
 }
 
-function showToast(message, type = 'info') {
-    if (!document.getElementById('saus-toast-styles')) {
-        const style = document.createElement('style');
-        style.id = 'saus-toast-styles';
-        style.innerHTML = `
-            .saus-toast {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background-color: #333;
-                color: white;
-                padding: 15px 20px;
-                border-radius: 5px;
-                z-index: 10000;
-                opacity: 0;
-                transform: translateY(-20px);
-                transition: opacity 0.3s ease, transform 0.3s ease;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                font-family: sans-serif;
-                font-size: 1em;
-                display: flex;
-                align-items: center;
-            }
-            .saus-toast.show {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            .saus-toast.toast-success {
-                background-color: #28a745;
-            }
-            .saus-toast.toast-error {
-                background-color: #dc3545;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `saus-toast toast-${type}`;
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    requestAnimationFrame(() => {
-        toast.classList.add('show');
-    });
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        toast.addEventListener('transitionend', () => toast.remove());
-    }, 3000);
-}
-
-/* Function to workaround issues with uploading large files - connection timeout problem*/
-
-window.handleChunkedUpload = function (file) {
-    const CHUNK_SIZE = 1024 * 1024 * 20; // 5 MB chunks
-    let start = 0;
-    let end = CHUNK_SIZE;
-    let chunkCount = 0;
-    // 💥 ADDED: Record the start time 
-    const startTime = Date.now(); 
-
-    const progressBar = document.getElementById('upload-progress-bar-modal');
-    const progressText = document.getElementById('upload-progress-text-modal');
-    const uploadModal = document.getElementById('upload-modal');
-
-    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-    const fileId = file.name + '-' + file.size + '-' + Date.now(); 
-
-    const sendChunk = async () => {
-        if (start < file.size) {
-            const chunk = file.slice(start, end);
-            const formData = new FormData();
-
-            formData.append('fileChunk', chunk);
-            formData.append('fileName', file.name);
-            formData.append('fileId', fileId);          // Unique ID for assembly
-            formData.append('targetPath', currentDirectory);
-            formData.append('isLast', end >= file.size);
-            formData.append('chunkIndex', chunkCount);
-            
-            // Use fetch for simpler async control flow
-            const response = await fetch('/saus/api/upload-chunk', {
-                method: 'POST',
-                // Custom header: a cross-site <form> cannot set one, which is
-                // what stops forged uploads (CSRF).
-                headers: { 'X-SAUS-Request': '1' },
-                body: formData 
-            });
-
-            if (!response.ok) {
-                // Handle failure (maybe retry or alert user)
-                alert(`Upload failed at chunk ${chunkCount}.`);
-                if (uploadModal) uploadModal.classList.add('hidden');
-                return;
-            }
-
-            // 💥 WHERE TO UPDATE PROGRESS BAR 💥
-            // Calculate the percentage based on how many bytes have started uploading (the 'end' position)
-            const uploadedBytes = Math.min(end, file.size);
-            const percent = Math.floor((uploadedBytes / file.size) * 100);
-            
-
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}% (Chunk ${chunkCount + 1} of ${totalChunks})`;
-            //progressText.textContent = `${percent}%`;
-
-            // ------------------------------------
-            // 💥 ADDED DEBUG LOG 💥
-            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
-            console.log(`[DEBUG UPLOAD] Chunk ${chunkCount + 1}/${totalChunks} | ${percent}% | Time: ${elapsedTime}s`);
-            // -
-            
-            // ------------------------------------
-            await new Promise(resolve => setTimeout(resolve, 50)); 
-
-            // Move to the next chunk
-            start = end;
-            end = start + CHUNK_SIZE;
-            chunkCount++;
-            
-            // Recursively send the next chunk
-            await sendChunk(); 
-        } else {
-            // All chunks sent successfully
-            if (progressBar) progressBar.style.width = '100%';
-            if (progressText) progressText.textContent = '100%';
-
-            if (uploadModal) {
-                const modalTitle = uploadModal.querySelector('h3');
-                if (modalTitle) modalTitle.textContent = 'File Upload Successful!';
-            }
-
-            displayDirectory(currentDirectory);
-
-            setTimeout(() => {
-                if (uploadModal) uploadModal.classList.add('hidden');
-            }, 1500);
-        }
-    };
-
-    sendChunk();
-};
-
-// You'd call this from window.handleFileUpload instead of the XHR method.
-window.handleFileUpload = function () {
-    const fileInput = document.getElementById('hidden-upload');
-    const uploadModal = document.getElementById('upload-modal');
-    const progressBar = document.getElementById('upload-progress-bar-modal');
-    const progressText = document.getElementById('upload-progress-text-modal');
-
-    if (fileInput.files.length) {
-        // 💥 ADDED: Make the progress UI visible and reset it 💥
-        if (uploadModal) {
-            uploadModal.classList.remove('hidden');
-            const modalTitle = uploadModal.querySelector('h3');
-            if (modalTitle) modalTitle.textContent = 'Uploading File...';
-        }
-        if (progressBar) progressBar.style.width = '0%';
-        if (progressText) progressText.textContent = '0%';
-        
-        window.handleChunkedUpload(fileInput.files[0]);
-    }
-};
-
-
-/*function for uploading files - OLD VERSION*/
-window.triggerFileUpload = function () {
-    document.getElementById('hidden-upload').click();
-};
-
-/*functions for the navigation of folders */
-
-async function loadDirectory(path) {
+async function renameFile(path, newName, root) {
     try {
-        const response = await fetch(`/saus/api/directory?path=${encodeURIComponent(path)}`);
-        if (!response.ok) {
-            throw new Error(`Failed to load directory: ${response.statusText}`);
-        }
-        return await response.json();
+        const response = await fetch('/saus/api/rename-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPath: path, newName })
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        showToast('File renamed.', 'success');
+        await reloadPane(root, newName);
     } catch (error) {
-        console.error("Error loading directory:", error);
-        return [];
+        console.error('Rename error:', error);
+        showToast('Failed to rename file.', 'error');
     }
 }
 
-//async function displayDirectory(path, explorerId = 'file-explorer') {
-window.displayDirectory = async function displayDirectory(path, explorerId = 'file-explorer') {
-     // Get the title element
-    const titleElement = document.getElementById('current-path-title');
-
-    // Update the title with the new path
-    if (titleElement) {
-        titleElement.textContent = '' + path;
-    }   
-
-    // Ensure settings are hidden and explorer is shown
-    const midCol = document.querySelector('.mid-col');
-    if (settingsComponent) settingsComponent.hide();
-    if (midCol) midCol.classList.remove('hidden');
-    
-    
-    
-    
-    currentDirectory = path;
-    const explorer = document.getElementById(explorerId);
-    if (!explorer) {
-        console.warn(`Explorer element with ID "${explorerId}" not found.`);
-        return;
-    }
-    explorer.innerHTML = ''; /* Clear current contents*/
-
-
-    // Add "Go Up" link unless we are already at one of the three folders the
-    // file API is allowed to touch (input / output / models).
-    const rootFolders = ['input', 'output', 'models'];
-    const rootPath = '.';
-    if (path !== rootPath && !rootFolders.includes(path)) {
-        let parentPath = path.substring(0, path.lastIndexOf('/'));
-        if (!parentPath) parentPath = '.';
-
-        const upItem = document.createElement('div');
-        upItem.className = 'file-item up';
-
-        // Create a span for the name and icon (like other items)
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'file-name';
-        nameSpan.style.display = 'flex';
-        nameSpan.style.alignItems = 'center';
-        nameSpan.style.gap = 'center';
-
-        // Add the icon inside the name span
-        const upIcon = document.createElement('i');
-        upIcon.className = 'fas fa-arrow-up';
-        upIcon.title = 'Go Up';
-        upIcon.style.marginRight = '6px'; // tighter spacing
-
-
-        const upLabel = document.createElement('span');
-        upLabel.textContent = 'Go Up';
-
-        nameSpan.appendChild(upIcon);
-        nameSpan.appendChild(upLabel);
-
-        upItem.appendChild(nameSpan);
-        upItem.onclick = () => displayDirectory(parentPath, explorerId);
-        explorer.appendChild(upItem);
-
-    }
-
-    const directory = await loadDirectory(path);
-    
-    //directory.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    // The following sorts first folders, then files
-    directory.sort((a, b) => {
-    
-    if (a.type === 'folder' && b.type !== 'folder') {
-        return -1; // Place 'a' (folder) before 'b' (file)
-    }
-    
-    if (a.type !== 'folder' && b.type === 'folder') {
-        return 1; // Place 'a' (file) after 'b' (folder)
-    }
-    // If both are the same type (both folders or both files), sort them alphabetically by name
-    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-    });
-
-
-    directory.forEach(item => {
-        const fileItem = createFileItem(item.name, item.type, `${path}/${item.name}`, explorerId);
-        explorer.appendChild(fileItem);
-    });
-}
-
-function createFileItem(name, type, path) {
-    const item = document.createElement('div');
-    item.className = `file-item ${type}`;
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'file-name';
-
-    if (type === 'folder') {
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-folder';
-        icon.style.marginRight = '8px';
-        nameSpan.appendChild(icon);
-    }
-    nameSpan.appendChild(document.createTextNode(name));
-
-    /*nameSpan.onclick = () => {
-        if (type === 'folder') {
-            displayDirectory(path);
-        }*/
-    // MODIFIED ONCLICK LOGIC HERE to show the preview panel
-    nameSpan.onclick = () => {
-        if (type === 'folder') {
-            displayDirectory(path);
-            
-            // Hide preview when navigating into a folder
-            document.getElementById('preview-col').classList.add('hidden');
-            document.getElementById('preview-content').innerHTML = '';
-            
-        } else if (type === 'file') {
-            // New: Show preview for files
-            window.showPreview(path, type, name);
-        }
-
-
-    };
-
-    const actions = document.createElement('span');
-    actions.className = 'file-actions';
-
-    if (type === 'file') {
-        // Rename button
-        const renameBtn = document.createElement('button');
-        renameBtn.innerHTML = '<i class="fas fa-pen"></i>';
-        renameBtn.title = 'Rename';
-        renameBtn.onclick = (e) => {
-            e.stopPropagation();
-            showRenameModal(path, name);
-        };
-        // Download link
-        const downloadLink = document.createElement('a');
-        //downloadLink.href = path;
-        downloadLink.href = `/saus/api/download-file?filePath=${encodeURIComponent(path)}`;
-        downloadLink.download = name; // tells the browser to download instead of open
-        downloadLink.innerHTML = '<i class="fas fa-download"></i>';
-        downloadLink.title = 'Download';
-
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.title = 'Delete';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            showDeleteModal(path, name);
-        };
-
-        actions.appendChild(renameBtn);
-        actions.appendChild(downloadLink);
-        actions.appendChild(deleteBtn);
-    }
-
-    const nameAndActions = document.createElement('div');
-    nameAndActions.style.display = 'flex';
-    nameAndActions.style.alignItems = 'center';
-    nameAndActions.style.gap = '8px';
-    nameAndActions.appendChild(nameSpan);
-    nameAndActions.appendChild(actions);
-    item.appendChild(nameAndActions);
-
-
-    return item;
-}
-
+/* ------------------------------------------------------------------ *
+ * Settings
+ * ------------------------------------------------------------------ */
 
 function initializeSettings() {
-    settingsComponent = new SettingsComponent('.content');
-
-    // Handle Settings Link (Delegation since header is injected)
+    settingsComponent = new SettingsComponent('#settings-host');
     document.addEventListener('click', (event) => {
         const target = event.target.closest('a');
         if (target && (target.id === 'settingsLink' || target.getAttribute('href') === '#settings')) {
@@ -685,128 +1161,18 @@ function initializeSettings() {
 }
 
 async function showSettings() {
-    const midCol = document.querySelector('.mid-col');
-    const previewCol = document.getElementById('preview-col');
-
-    if (midCol) midCol.classList.add('hidden');
-    if (previewCol) {
-        previewCol.classList.add('hidden');
-        previewCol.style.flex = '0';
-    }
-    
-    if (settingsComponent) settingsComponent.show();
-}
-
-async function renameFile(currentPath, newName) {
-    try {
-        const response = await fetch('/saus/api/rename-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ currentPath, newName })
-        });
-        if (!response.ok) {
-            throw new Error(`Rename failed: ${response.statusText}`);
-        }
-        await displayDirectory(currentDirectory);
-        showToast('File renamed successfully', 'success');
-    } catch (error) {
-        console.error("Rename error:", error);
-        showToast("Failed to rename file.", 'error');
-    }
-}
-
-async function deleteFile(filePath) {
-    try {
-        const response = await fetch('/saus/api/delete-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filePath })
-        });
-        if (!response.ok) {
-            throw new Error(`Delete failed: ${response.statusText}`);
-        }
-        await displayDirectory(currentDirectory);
-        showToast('File deleted successfully', 'success');
-    } catch (error) {
-        console.error("Delete error:", error);
-        showToast("Failed to delete file.", 'error');
-    }
-};
-
-
-import { insertElement } from '../../../core/js/common/components/header.js';
-import '../../../core/js/common/components/footer.js';
-/// FUNCTION TO SHOW PREVIEWS IN THE RIGHT PANEL //////////////
-window.showPreview = function(path, type, fileName) {
-    const previewCol = document.getElementById('preview-col');
-    const previewContent = document.getElementById('preview-content');
-    const isImage = /\.(jpe?g|png|gif|webp)$/i.test(fileName);
-    const isVideo = /\.(mp4|webm|ogg)$/i.test(fileName);
-    
-    if (!previewCol) return;
-
-    if (isImage || isVideo) {
-        // Use the same server endpoint pattern used for downloading files
-        const fileUrl = `/saus/api/download-file?filePath=${encodeURIComponent(path)}`;
-
-        previewCol.classList.remove('hidden');
-        previewCol.style.flex = '1'; // Make the preview column visible and take space
-        
-        let mediaTag=''; // Added for showing the filanme over the image
-        const infoId = 'media-info-' + Date.now(); // Unique ID for the info placeholder - RESOLUTION
-
-        
-        if (isImage) {
-            mediaTag = `<img id="preview-media" src="${fileUrl}" alt="${fileName}" style="max-width: 100%; height: auto; display: block; margin-top: 10px;"/>`;
-        } else if (isVideo) {
-            mediaTag = `<video id="preview-media" controls src="${fileUrl}" style="max-width: 100%; height: auto; display: block; margin-top: 10px;"></video>`;
-        }
-        //Prepend the filename before the media element
-        previewContent.innerHTML = `
-            <div style="font-weight: bold; padding-bottom: 5px;">${fileName}</div>
-            ${mediaTag}
-            <div id="${infoId}" style="margin-top: 5px; font-size: 0.9em;">Loading resolution...</div>
-        `;
-
-        // ----------------------------------------------------
-        // Metadata Retrieval Logic (Resolution Only)
-        // ----------------------------------------------------
-        const mediaElement = document.getElementById('preview-media');
-        const infoElement = document.getElementById(infoId);
-
-        // Function to update the info display
-        const updateInfo = (width, height) => {
-            infoElement.textContent = `Resolution: ${width}x${height}`;
-        };
-
-        // Event listener for images
-        if (isImage) {
-            mediaElement.onload = function() {
-                updateInfo(this.naturalWidth, this.naturalHeight);
-            };
-            mediaElement.onerror = function() {
-                infoElement.textContent = 'Error loading image.';
-            };
-        } 
-        
-        // Event listener for videos
-        else if (isVideo) {
-            // 'loadedmetadata' fires when the video's dimension data is loaded
-            mediaElement.addEventListener('loadedmetadata', function() {
-                updateInfo(this.videoWidth, this.videoHeight);
-            });
-            mediaElement.onerror = function() {
-                infoElement.textContent = 'Error loading video.';
-            };
-        }
-        // ----------------------------------------------------
-
-
-
+    const layout = document.getElementById('fm-layout');
+    const host = document.getElementById('settings-host');
+    const view = document.getElementById('settings-view');
+    const isOpen = view && view.style.display !== 'none';
+    if (isOpen) {
+        if (settingsComponent) settingsComponent.hide();
+        if (host) host.classList.remove('active');
+        if (layout) layout.classList.remove('hidden');
     } else {
-        // Hide the preview column if the file is not an image or video
-        previewCol.classList.add('hidden');
-        previewContent.innerHTML = '';
-        previewCol.style.flex = '0'; // Ensure it takes no space when hidden
+        if (layout) layout.classList.add('hidden');
+        if (host) host.classList.add('active');
+        if (settingsComponent) settingsComponent.show();
     }
-};
+}
+

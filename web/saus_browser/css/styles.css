@@ -1,8 +1,8 @@
 @import 'variables.css';
 @import 'base.css';
-@import 'sidebar.css';
 @import 'home.css';
-@import 'apps.css';
+@import 'shell.css';
+@import 'explorer.css';
 @import 'controls.css';
 @import 'details.css';
 @import 'updates.css';

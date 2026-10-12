@@ -93,44 +93,258 @@ export function modelsForApp(app) {
     }];
 }
 
-function isModelSatisfied(group, readyCount) {
-    if (group.need === 'none') return true;
-    if (group.need === 'one') return readyCount > 0;
-    return group.files.length > 0 && readyCount === group.files.length;
+/* ------------------------------------------------------------------ *
+ * What an app needs, per variant (see variantBlocks).
+ * ------------------------------------------------------------------ */
+
+/**
+ * What an app needs, one block per variant.
+ *
+ * A variant picks one file per "one of" group and inherits everything that is
+ * compulsory; the LoRAs it adds (lightning / turbo) stay optional, so a missing
+ * one never blocks the variant. Shared by the status dot and the information
+ * modal, so the two can never disagree.
+ */
+export function variantBlocks(app) {
+    const arch = (app && app.architecture && state.ARCHITECTURES)
+        ? state.ARCHITECTURES[app.architecture]
+        : null;
+
+    const listTypeFor = (need) => need === 'one' ? 'at_least_one'
+        : need === 'none' ? 'optional' : 'compulsory';
+
+    if (arch && arch.variants && Object.keys(arch.variants).length) {
+        return Object.entries(arch.variants).map(([variantId, variant]) => {
+            const entries = [];
+            (arch.models || []).forEach((group) => {
+                const files = (group.files || [])
+                    .map((f) => (typeof f === 'string' ? f : f.file))
+                    .filter(Boolean);
+                const pick = (variant.pick || {})[group.id];
+                const label = group.type || group.id;
+
+                if (pick) {
+                    // A file a variant picks is required by that variant - even
+                    // from a group the app as a whole does not need (the
+                    // LIGHTNING variant needs its lightning LoRA, for example).
+                    entries.push({ file: pick, label, listType: 'compulsory' });
+                } else if ((group.need || 'all') === 'all') {
+                    files.forEach((f) => entries.push({ file: f, label, listType: 'compulsory' }));
+                } else if ((group.need || 'all') === 'one') {
+                    // "one of these": any single one of them completes the variant.
+                    files.forEach((f) => entries.push({ file: f, label, listType: 'at_least_one' }));
+                }
+            });
+            // LoRAs attached to a variant (lightning / turbo) are required by it.
+            (variant.loras || []).forEach((f) => entries.push({ file: f, label: 'LORA', listType: 'compulsory' }));
+            return { title: variant.label || variantId, settings: variant.settings || {}, entries };
+        });
+    }
+
+    const entries = [];
+    modelsForApp(app).forEach((group) => {
+        if (group.need === 'none') return;
+        (group.files || []).forEach((f) => entries.push({
+            file: f.file, label: group.label || 'Models', listType: listTypeFor(group.need),
+        }));
+    });
+    return [{ title: 'Base', settings: {}, entries }];
 }
 
-export async function updateAppStatus(app, statusElement) {
-    const groups = modelsForApp(app).filter((group) => group.need !== 'none');
+/* ------------------------------------------------------------------ *
+ * Model status. The explorer shows one dot + tooltip per app, so status
+ * is fetched in batches and cached: unfolding a subcategory costs a
+ * single request no matter how many models those apps need.
+ * ------------------------------------------------------------------ */
 
-    if (groups.length === 0) {
-        // No models required (e.g. pure "tools" apps).
-        statusElement.textContent = "Installed";
-        statusElement.className = "status-text status-ready";
-        return;
-    }
+const STATUS_TTL_MS = 60 * 1000;
+const STATUS_BATCH_LIMIT = 500;
 
-    let satisfied = 0;
-    for (const group of groups) {
-        let readyCount = 0;
-        for (const entry of group.files) {
-            const model = state.MODELS_DATA[entry.file];
-            const directory = (model && model.directory) || "";
-            const type = (model && model.type) || "";
-            const status = await checkModelStatus(entry.file, directory, type);
-            if (status === 'ready') readyCount++;
+let statusChangeHandler = null;
+
+/** main.js wires this so the explorer can repaint after a download. */
+export function setStatusChangeHandler(fn) {
+    statusChangeHandler = typeof fn === 'function' ? fn : null;
+}
+
+function statusEntry(fileId) {
+    const model = state.MODELS_DATA[fileId] || {};
+    return {
+        file_id: fileId,
+        model_path: model.directory || '',
+        type: model.type || '',
+        // Human-readable name, used in the hover tooltip.
+        label: model.name || fileId,
+    };
+}
+
+/** Every registry file the app's variants can need, deduplicated. */
+function filesForApp(app) {
+    const seen = new Map();
+    variantBlocks(app).forEach(block => block.entries.forEach(entry => {
+        if (entry.file && !seen.has(entry.file)) seen.set(entry.file, statusEntry(entry.file));
+    }));
+    return Array.from(seen.values());
+}
+
+/**
+ * Ask the server about many files at once. Falls back to the per-file
+ * endpoint when the batch route is missing (an older server).
+ */
+async function fetchModelStatuses(entries) {
+    const chunk = entries.slice(0, STATUS_BATCH_LIMIT);
+    if (!chunk.length) return new Map();
+
+    try {
+        const response = await fetch('/saus/api/model-status-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                files: chunk.map(({ file_id, model_path, type }) => ({ file_id, model_path, type })),
+            }),
+        });
+        if (response.ok) {
+            const data = await response.json();
+            const statuses = new Map();
+            const reported = data.statuses || {};
+            chunk.forEach(entry => {
+                statuses.set(entry.file_id, reported[entry.file_id] || 'missing');
+            });
+            return statuses;
         }
-        if (isModelSatisfied(group, readyCount)) satisfied++;
+    } catch (error) {
+        console.error('Batch model status failed, falling back to single checks:', error);
     }
 
-    statusElement.textContent = `${satisfied} of ${groups.length}`;
-
-    if (satisfied === 0) {
-        statusElement.className = "status-text status-missing";
-    } else if (satisfied === groups.length) {
-        statusElement.className = "status-text status-ready";
-    } else {
-        statusElement.className = "status-text status-partial";
+    const statuses = new Map();
+    for (const entry of chunk) {
+        statuses.set(entry.file_id, await checkModelStatus(entry.file_id, entry.model_path, entry.type));
     }
+    return statuses;
+}
+
+/** Per-listType tally of a variant's entries. */
+function variantBuckets(block, statuses) {
+    const buckets = new Map();
+    block.entries.forEach(entry => {
+        const bucket = buckets.get(entry.listType) || { ready: 0, missing: [] };
+        if ((statuses.get(entry.file) || 'missing') === 'ready') {
+            bucket.ready++;
+        } else {
+            bucket.missing.push(statusEntry(entry.file).label);
+        }
+        buckets.set(entry.listType, bucket);
+    });
+    return buckets;
+}
+
+/**
+ * A variant is complete when every compulsory file is present and every
+ * "one of" group has at least one file. Optional models never block it.
+ */
+function bucketsComplete(buckets) {
+    for (const [listType, bucket] of buckets) {
+        if (listType === 'optional') continue;
+        if (listType === 'at_least_one') {
+            if (bucket.ready === 0) return false;
+        } else if (bucket.missing.length > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** What a variant still needs: a satisfied "one of" group stays silent. */
+function bucketsMissing(buckets) {
+    const missing = [];
+    buckets.forEach((bucket, listType) => {
+        if (listType === 'optional') return;
+        if (listType === 'at_least_one' && bucket.ready > 0) return;
+        missing.push(...bucket.missing);
+    });
+    return missing;
+}
+
+/**
+ * App status across its variants (pure function):
+ *
+ *   green  = every variant has all of its required models
+ *   orange = at least one variant is complete, another is not
+ *   red    = no variant is complete
+ */
+function computeAppStatus(app, statuses, at) {
+    const variants = variantBlocks(app).map(block => {
+        const buckets = variantBuckets(block, statuses);
+        return {
+            title: block.title,
+            ready: bucketsComplete(buckets),
+            missing: bucketsMissing(buckets),
+            hasModels: block.entries.length > 0,
+        };
+    });
+
+    // Variants that need nothing at all do not count either way.
+    const counted = variants.filter(variant => variant.hasModels);
+    const total = counted.length;
+    const satisfied = counted.filter(variant => variant.ready).length;
+
+    let stateName = 'ready';
+    if (total && satisfied !== total) {
+        stateName = satisfied === 0 ? 'missing' : 'partial';
+    }
+
+    const firstMissing = counted.find(variant => !variant.ready);
+    return {
+        state: stateName,
+        satisfied,
+        total,
+        missing: firstMissing ? firstMissing.missing : [],
+        variants,
+        at,
+    };
+}
+
+/** Cached status of one app; ``force`` ignores the cache. */
+export async function getAppStatus(app, { force = false } = {}) {
+    if (!app || !app.id) return { state: 'ready', satisfied: 0, total: 0, missing: [], at: Date.now() };
+
+    const cached = state.statusCache.get(app.id);
+    if (cached && !force && Date.now() - cached.at < STATUS_TTL_MS) return cached;
+
+    const entries = filesForApp(app);
+    const statuses = entries.length ? await fetchModelStatuses(entries) : new Map();
+    const fresh = computeAppStatus(app, statuses, Date.now());
+    state.statusCache.set(app.id, fresh);
+    return fresh;
+}
+
+/** Check a whole screenful of apps with one request, then prime the cache. */
+export async function warmAppStatuses(apps) {
+    const pending = (apps || []).filter(app => {
+        if (!app || !app.id) return false;
+        const cached = state.statusCache.get(app.id);
+        return !cached || Date.now() - cached.at >= STATUS_TTL_MS;
+    });
+    if (!pending.length) return;
+
+    const entries = new Map();
+    pending.forEach(app => filesForApp(app).forEach(entry => entries.set(entry.file_id, entry)));
+
+    const statuses = entries.size
+        ? await fetchModelStatuses(Array.from(entries.values()))
+        : new Map();
+
+    const at = Date.now();
+    pending.forEach(app => {
+        state.statusCache.set(app.id, computeAppStatus(app, statuses, at));
+    });
+}
+
+/** Drop cached statuses (after a download/delete) and notify the UI. */
+export function invalidateStatusCache(appId = null) {
+    if (appId) state.statusCache.delete(appId);
+    else state.statusCache.clear();
+    if (statusChangeHandler) statusChangeHandler();
 }
 
 export async function showAppDetails(app) {
@@ -172,19 +386,9 @@ export async function showAppDetails(app) {
     const detailsContent = document.getElementById('app-details-content');
     detailsContent.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading details...</div>';
 
-    let card = null;
-    document.querySelectorAll('.app-card').forEach((el) => {
-        if (!card && el.dataset.appId === app.id) card = el;
-    });
-    let statusClass = 'status-missing'; // default
-    if (card) {
-        const statusEl = card.querySelector('.status-text');
-        if (statusEl.classList.contains('status-ready')) {
-            statusClass = 'status-ready';
-        } else if (statusEl.classList.contains('status-partial')) {
-            statusClass = 'status-partial';
-        }
-    }
+    // Status of the app (cached by the explorer, refreshed here if needed).
+    const appStatus = await getAppStatus(app);
+    const statusClass = `status-${appStatus.state}`;
 
     let html = `
         <div class="app-details-top">
@@ -200,37 +404,10 @@ export async function showAppDetails(app) {
         </div>
     `;
 
-    const groupListType = (need) => need === 'one' ? 'at_least_one'
-        : need === 'none' ? 'optional' : 'compulsory';
-
     // One card per variant. The models (with status + install/uninstall
-    // buttons) live INSIDE each variant, so nothing is duplicated. When the
-    // architecture has no variants, everything is a single "Base" card.
-    const blocks = [];
-    if (arch && arch.variants && Object.keys(arch.variants).length) {
-        Object.entries(arch.variants).forEach(([vid, v]) => {
-            const entries = [];
-            (arch.models || []).forEach((group) => {
-                const files = (group.files || []).map((f) => (typeof f === 'string' ? f : f.file)).filter(Boolean);
-                const lt = groupListType(group.need || 'all');
-                const pick = (v.pick || {})[group.id];
-                if (pick) {
-                    entries.push({ file: pick, label: group.type || group.id, listType: lt });
-                } else if ((group.need || 'all') === 'all') {
-                    files.forEach((f) => entries.push({ file: f, label: group.type || group.id, listType: lt }));
-                }
-            });
-            (v.loras || []).forEach((f) => entries.push({ file: f, label: 'LORA', listType: 'optional' }));
-            blocks.push({ title: v.label || vid, settings: v.settings || {}, entries });
-        });
-    } else {
-        const groups = modelsForApp(app);
-        const entries = [];
-        groups.forEach((g) => (g.files || []).forEach((f) => entries.push({
-            file: f.file, label: g.label || 'Models', listType: groupListType(g.need)
-        })));
-        blocks.push({ title: 'Base', settings: {}, entries });
-    }
+    // buttons) live INSIDE each variant, so nothing is duplicated. Built by the
+    // same helper the explorer's status dot uses (variantBlocks).
+    const blocks = variantBlocks(app);
 
     const allFiles = [...new Set(blocks.flatMap((b) => b.entries.map((e) => e.file)))];
     const readyByFile = {};
@@ -461,17 +638,9 @@ export function updateComponentStatus(fileId, status, progress = 0) {
     //console.log(`[SAUS] updateComponentStatus: ${fileId} -> ${status} (${progress}%)`);
 
     if (status === 'ready' || status === 'missing') {
-        const AppCards = document.querySelectorAll('.app-card');
-        AppCards.forEach(card => {
-            const AppId = card.dataset.appId;
-            const app = state.allApps.find(f => f.id === AppId);
-            const statusEl = card.querySelector('.status-text');
-            if (app && statusEl) {
-                statusEl.textContent = "Checking...";
-                statusEl.className = "status-text status-loading";
-                updateAppStatus(app, statusEl);
-            }
-        });
+        // A model appeared or vanished: drop the cached app summaries so the
+        // explorer repaints its dots and tooltips on the next render.
+        invalidateStatusCache();
     }
 
     // Lookup by property (a crafted file name can never be parsed as a selector).

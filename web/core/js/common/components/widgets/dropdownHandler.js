@@ -4,7 +4,6 @@ import { escapeHtml, modelPathElements } from '../utils.js';
 const ADVANCED_WORKFLOW_PATHS = [
     'ckpt_name',
     'vae_name',
-    'lora_name',
     'unet_name',
     'clip_name1',
     'clip_name2',
@@ -15,9 +14,10 @@ const ADVANCED_WORKFLOW_PATHS = [
     'face_restore_model',
 ];
 
+// Models that show a thumbnail in the dropdown row / list. LoRAs are left out
+// on purpose: their list is a plain name list, like the sampler / scheduler.
 const DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = [
     'ckpt_name',
-    'lora_name',
     'unet_name',
 ];
 

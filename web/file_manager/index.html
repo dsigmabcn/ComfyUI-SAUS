@@ -7,64 +7,96 @@
     <title>File Manager</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" href="/core/media/ui/saus_logo.png" type="image/png">
-    <link rel="stylesheet" href="file_manager/css/styles.css">
+    <link rel="stylesheet" href="file_manager/css/styles.css?v=4">
 </head>
 
 <body>
     <div class="container">
         <header></header>
-        <div class="main-wrapper">
-            <nav class="sidebar">
-                <!-- SIDEBAR -->
-                <!-- The sidebar menu with the navigation through the folders -->
-                <div class="menu-category">
-                    <a href="#" onclick="displayDirectory('input', 'file-explorer')">
-                        <span><i class="fas fa-folder"></i> Input</span>
-                    </a>
-                    <a href="#" onclick="displayDirectory('output', 'file-explorer')">
-                        <span><i class="fas fa-folder"></i> Output</span>
-                    </a>
-                    <a href="#" onclick="displayDirectory('models', 'file-explorer')">
-                        <span><i class="fas fa-folder"></i> Models</span>
-                    </a>
-                </div>
-                <!-- The sidebar with the options to Upload files, download files from URL and to Return to SAUS -->
-                <div class="menu-category">
-                    <a href="#" onclick="triggerFileUpload()"><span><i class="fas fa-upload"></i> Upload File</span></a>
-                    <input type="file" id="hidden-upload" style="display: none;" onchange="handleFileUpload()" />
-                    <a href="#" onclick="loadDownloadApp()"><span><i class="fas fa-download"></i> Download from
-                            URL</span></a>
-                    
-                </div>
 
-            </nav>
+        <!-- Two panes: Input (left) and Output (right), plus the preview panel. -->
+        <div class="fm-layout" id="fm-layout">
 
-            <div class="content">
-
-                <!--CONTENT PART -->
-                <!-- Mid-column/space with the file explorer -->
-                <div class="mid-col">
-                    <h2 id="current-path-title">Current Folder: /</h2>
-                    <div id="file-explorer">
-                        
+            <!-- INPUT -->
+            <section class="fm-pane" data-pane="input">
+                <div class="fm-head">
+                    <button type="button" class="fm-up" data-act="up" title="Go up one folder"><i class="fas fa-arrow-up"></i></button>
+                    <h2 class="fm-title"><i class="fas fa-folder-open"></i> <span class="fm-path" data-role="path">/input</span></h2>
+                    <div class="fm-tools">
+                        <button type="button" class="fm-btn" data-act="upload" title="Upload a file">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                        <span class="fm-sep"></span>
+                        <button type="button" class="fm-btn" data-act="rename" title="Rename selected file" disabled>
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button type="button" class="fm-btn" data-act="download" title="Download selected file(s)" disabled>
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button type="button" class="fm-btn fm-danger" data-act="delete" title="Delete selected item(s)" disabled>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <span class="fm-sep"></span>
+                        <span class="fm-views">
+                            <button type="button" class="fm-view-btn" data-view="list" title="List view"><i class="fas fa-list"></i></button>
+                            <button type="button" class="fm-view-btn" data-view="medium" title="Medium icons"><i class="fas fa-border-all"></i></button>
+                            <button type="button" class="fm-view-btn" data-view="large" title="Large icons"><i class="fas fa-table-cells-large"></i></button>
+                        </span>
                     </div>
                 </div>
-                <!-- Right column: Preview column-->
-                <div id="preview-col" class="preview-col hidden">
-                    <div id="preview-content">
+                <div class="fm-list" data-role="list"></div>
+            </section>
+
+            <!-- OUTPUT -->
+            <section class="fm-pane" data-pane="output">
+                <div class="fm-head">
+                    <button type="button" class="fm-up" data-act="up" title="Go up one folder"><i class="fas fa-arrow-up"></i></button>
+                    <h2 class="fm-title"><i class="fas fa-folder-open"></i> <span class="fm-path" data-role="path">/output</span></h2>
+                    <div class="fm-tools">
+                        <button type="button" class="fm-btn" data-act="rename" title="Rename selected file" disabled>
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button type="button" class="fm-btn" data-act="download" title="Download selected file(s)" disabled>
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button type="button" class="fm-btn fm-danger" data-act="delete" title="Delete selected item(s)" disabled>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <span class="fm-sep"></span>
+                        <span class="fm-views">
+                            <button type="button" class="fm-view-btn" data-view="list" title="List view"><i class="fas fa-list"></i></button>
+                            <button type="button" class="fm-view-btn" data-view="medium" title="Medium icons"><i class="fas fa-border-all"></i></button>
+                            <button type="button" class="fm-view-btn" data-view="large" title="Large icons"><i class="fas fa-table-cells-large"></i></button>
+                        </span>
                     </div>
                 </div>
-            </div>
+                <div class="fm-list" data-role="list"></div>
+            </section>
+
+            <!-- PREVIEW -->
+            <aside class="fm-preview hidden" id="fm-preview">
+                <div class="fm-preview-head">
+                    <button type="button" class="fm-nav" data-act="prev" title="Previous file"><i class="fas fa-chevron-left"></i></button>
+                    <span class="fm-preview-name" data-role="name"></span>
+                    <button type="button" class="fm-nav" data-act="next" title="Next file"><i class="fas fa-chevron-right"></i></button>
+                    <button type="button" class="fm-close" data-act="close" title="Close preview"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="fm-preview-body" data-role="body"></div>
+            </aside>
         </div>
-        <footer>
-            <p id="copyright"></p>
-        </footer>
+
+
+        <!-- Hidden host for the Settings view. -->
+        <div id="settings-host"></div>
     </div>
-    <!-- MODAL FOR DOWNLOAD - HIDDEN AND SHOWN WHEN CLICKING DOWNLOAD FRO URS -->
+
+    <input type="file" id="hidden-upload" style="display: none;" />
+
+    <!-- MODAL FOR DOWNLOAD FROM URL -->
     <div id="download-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
-            <h2>URL to download file/model</h2>
+            <h2>URL to download file</h2>
             <input type="text" id="download-url" class="download-input" placeholder="Paste URL here" />
             <select id="token-source" class="download-input">
                 <option value="none">No API Token</option>
@@ -76,40 +108,21 @@
             <div id="download-status" class="download-status-message"></div>
 
             <div id="download-progress-container" class="progress-container hidden-initial">
-
                 <div id="download-progress-label" class="progress-label">
                     Download progress
                 </div>
-
                 <div id="download-progress" class="progress-bar-base">
                     <div id="download-progress-bar" class="progress-bar-value">
                     </div>
-
                     <span id="download-progress-text" class="progress-text">
                     </span>
                 </div>
             </div>
         </div>
     </div>
-    <!-- The progress bar for upload with appear her -->
-    <div id="upload-progress-container" style="display: none; margin-top: 10px;">
-        <div id="upload-progress-label"
-            style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--color-primary-text);">
-            Upload progress
-        </div>
-        <div id="upload-progress"
-            style="height: 20px; background: var(--color-progress-background); border-radius: 4px; position: relative;">
-            <div id="upload-progress-bar"
-                style="width: 0%; height: 100%; background: var(--color-progress-value); border-radius: 4px;">
-            </div>
-            <span id="upload-progress-text"
-                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                                                font-size: 12px; color: var(--color-primary-text); pointer-events: none;">
-            </span>
-        </div>
-    </div>
 
-    <script type="module" src="file_manager/js/main.js"></script>
+    <script type="module" src="file_manager/js/main.js?v=4"></script>
 </body>
 
 </html>
+

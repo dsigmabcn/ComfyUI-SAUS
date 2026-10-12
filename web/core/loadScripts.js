@@ -3,6 +3,13 @@ import { coreScriptsPath } from '/core/js/common/scripts/corePath.js';
 const urlParams = new URLSearchParams(window.location.search);
 const appName = urlParams.get('app');
 
+// Opened inside a tab of the SAUS browser? That page already provides the
+// logo, the navigation bar and the footer, so the app drops its own (see
+// .saus-embedded in main.css).
+if (urlParams.get('embed') === '1') {
+    document.documentElement.classList.add('saus-embedded');
+}
+
 const isBuilder = appName !== undefined && appName !== null;
 
 const config = {

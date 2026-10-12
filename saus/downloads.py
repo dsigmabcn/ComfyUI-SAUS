@@ -19,6 +19,10 @@ from .model_lookup import find_model, destination_for, resolves_inside
 
 ALLOWED_HOSTS_FILE = DATA_DIR / "allowed_download_hosts.json"
 
+# One explorer render can ask about every model of every visible app; cap the
+# batch so a single request can never turn into an unbounded disk scan loop.
+MAX_STATUS_BATCH_FILES = 500
+
 # Hosts that may receive the user-supplied API token. Kept in a file on disk so
 # the list can be reviewed or extended without touching the code.
 DEFAULT_ALLOWED_DOWNLOAD_HOSTS = [
@@ -431,6 +435,48 @@ async def check_model_status_handler(request: web.Request) -> web.Response:
             'folder_type': hit['folder_type'],
         })
     return web.json_response({'status': 'missing'})
+
+
+async def check_model_status_batch_handler(request: web.Request) -> web.Response:
+    """Batch form of ``check_model_status_handler``.
+
+    The explorer asks about every model of every visible app at once, so one
+    request replaces dozens of round-trips (each of which walks the model
+    folders).
+
+    Body: ``{"files": [{"file_id": "...", "model_path": "...", "type": "..."}]}``
+    Response: ``{"statuses": {"<file_id>": "ready" | "missing"}}``
+    """
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({'status': 'error', 'message': 'Invalid JSON body'}, status=400)
+
+    entries = data.get('files') if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        return web.json_response({'status': 'error', 'message': 'Missing files list'}, status=400)
+    if len(entries) > MAX_STATUS_BATCH_FILES:
+        return web.json_response(
+            {'status': 'error', 'message': f'Too many files (max {MAX_STATUS_BATCH_FILES})'},
+            status=413,
+        )
+
+    statuses = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        file_id = str(entry.get('file_id') or '')
+        if not file_id or file_id in statuses:
+            continue
+        model_path = str(entry.get('model_path') or '')
+        model_type = str(entry.get('type') or '')
+        statuses[file_id] = 'ready' if find_model(file_id, model_type, model_path) else 'missing'
+
+    return web.json_response({'statuses': statuses})
 
 
 

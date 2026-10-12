@@ -1,10 +1,12 @@
 import { PromptServerClient } from './websocket.js';
-import { SettingsComponent } from '../../core/js/common/components/settings.js';
-import { state, loadFavorites, preferencesManager } from './state.js';
-import { checkForUpdate, showVersion } from './updates.js';
+import { state, loadFavorites } from './state.js';
+import { checkForUpdate } from './updates.js';
 import { updateComponentStatus } from './models.js';
-import { renderSidebarCategories, initializeStaticSidebarEvents } from './sidebar.js';
-import { renderApps, filterCurrentApps, renderTagsFilter, showHome, showApps, showSettings } from './ui.js';
+import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
+import { setRenderHandler, renderTagsFilter } from './ui.js';
+import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.js';
+
+const GUIDE_URL = 'https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md';
 
 export async function loadApps() {
     state.sessionTimestamp = Date.now();
@@ -48,185 +50,69 @@ export async function loadApps() {
         });
 
         state.categories = Array.from(uniqueCategories);
-        //console.log(state.categories);
 
-        const uiCallbacks = {
-            showApps,
-            showHome,
-            showSettings,
-            renderTagsFilter,
-            refreshApps: () => renderApps(filterCurrentApps())
-        };
-
-        renderSidebarCategories(uiCallbacks);
+        renderRail();
         renderTagsFilter();
-        renderApps(filterCurrentApps());
-        showHome(); // Show home page by default on load
+        renderExplorer();
+        // Re-open the tabs of the previous session, or show the welcome pane.
+        restoreTabs();
     } catch (error) {
         console.error('Error fetching apps:', error);
     }
 }
 
-export function initializeMenu() {
-    const categoryElements = document.querySelectorAll('.menu-category > span');
-    categoryElements.forEach(category => {
-        category.addEventListener('click', () => {
-            const submenu = category.nextElementSibling;
-            submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const clearBtn = document.querySelector('.clear-search');
-    let preSearchSidebarFilter = null;
-    let wasSearching = !!searchInput.value;
-
-    const handleSearch = () => {
-        const isSearching = !!searchInput.value;
-
-        if (isSearching && !wasSearching) { // User started typing
-            preSearchSidebarFilter = state.sidebarFilter;
-            state.sidebarFilter = null;
-            document.querySelectorAll('.sidebar-filter-category.active, .sidebar-section-header.active-section').forEach(el => el.classList.remove('active', 'active-section'));
-            showApps();
-        } else if (!isSearching && wasSearching) { // User cleared the search
-            state.sidebarFilter = preSearchSidebarFilter;
-            preSearchSidebarFilter = null; // Reset for next search
-            if (state.sidebarFilter) {
-                // Re-highlight the sidebar category
-                document.querySelectorAll('.sidebar-filter-category').forEach(link => {
-                    if (link.dataset.category === state.sidebarFilter) {
-                        link.classList.add('active');
-                        const parentSection = link.closest('.sidebar-section');
-                        if (parentSection) {
-                            const header = parentSection.querySelector('.sidebar-section-header');
-                            if (header) {
-                                header.classList.add('active-section');
-                                const contentDiv = header.nextElementSibling;
-                                if (contentDiv.style.display === 'none') {
-                                    contentDiv.style.display = 'block';
-                                    const icon = header.querySelector('.toggle-icon');
-                                    if (icon) icon.className = 'fas fa-chevron-down toggle-icon';
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        clearBtn.style.display = isSearching ? 'inline' : 'none';
-        wasSearching = isSearching;
-
-        renderApps(filterCurrentApps());
-    };
-
-    searchInput.addEventListener('input', debounce(handleSearch, 300));
-
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        handleSearch();
-        searchInput.focus();
-    });
-
-    if (wasSearching) {
-        clearBtn.style.display = 'inline';
-        renderApps(filterCurrentApps());
+/** The tools at the bottom of the rail. */
+function handleRailTool(target) {
+    switch (target) {
+        case 'comfyui':
+            window.open('/', '_blank');
+            break;
+        case 'filemanager':
+            openBuiltIn('filemanager');
+            break;
+        case 'guide':
+            window.open(GUIDE_URL, '_blank', 'noopener');
+            break;
+        case 'console':
+            openBuiltIn('console');
+            break;
+        case 'settings':
+            openBuiltIn('settings');
+            break;
+        default:
+            break;
     }
-}
-
-
-function createToggleButtons() {
-    const controlsDiv = document.querySelector('.right-controls');
-    
-    state.favoritesFilterActive = preferencesManager.get('favoritesFilterActive');
-  
-    const favoritesToggle = document.createElement('button');
-    favoritesToggle.className = 'toggle-button';
-    favoritesToggle.id = 'favoritesToggle';
-    favoritesToggle.innerHTML = state.favoritesFilterActive ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-    favoritesToggle.title = state.favoritesFilterActive ? 'Show All Apps' : 'Show Favorites';
-    
-    controlsDiv.appendChild(favoritesToggle);
-    
-    favoritesToggle.addEventListener('click', () => toggleFavoritesFilter(favoritesToggle));
-    
-    favoritesToggle.classList.toggle('active', state.favoritesFilterActive);
-}
-
-function toggleFavoritesFilter(button) {
-    state.favoritesFilterActive = !state.favoritesFilterActive;
-    preferencesManager.set('favoritesFilterActive', state.favoritesFilterActive);
-    button.classList.toggle('active', state.favoritesFilterActive);
-    button.innerHTML = state.favoritesFilterActive ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-    button.title = state.favoritesFilterActive ? 'Show All Apps' : 'Show Favorites';
-    renderApps(filterCurrentApps());
 }
 
 function initializeWebSocket() {
     const client = new PromptServerClient();
-    
+
     client.on('model_download_progress', (e) => {
-        //console.log('[SAUS] WS Progress:', e.detail);
         const { file_name, progress } = e.detail;
         updateComponentStatus(file_name, 'downloading', progress);
     });
 
     client.on('model_download_complete', (e) => {
-        console.log('[SAIS] WS Complete:', e.detail);
         const { file_name } = e.detail;
         updateComponentStatus(file_name, 'ready');
     });
 }
 
 export function initializeUI() {
-    state.settingsComponent = new SettingsComponent('.mid-col');
-
     loadFavorites();
-    initializeMenu();
-    initializeSearch();
-    createToggleButtons();    
-    
-    const uiCallbacks = {
-        showApps,
-        showHome,
-        showSettings,
-        renderTagsFilter,
-        refreshApps: () => renderApps(filterCurrentApps())
-    };
-    initializeStaticSidebarEvents(uiCallbacks);
-    
+
+    // Anything that changes what the tree should show calls requestRender().
+    setRenderHandler(renderExplorer);
+    initExplorer({ onTool: handleRailTool });
+
+    document.addEventListener('saus:open-app', handleOpenAppEvent);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') exitFocus();
+    });
+
     initializeWebSocket();
     loadApps();
-    showVersion();
     checkForUpdate();
-    
-    window.addEventListener('appsSynced', () => {
-        //console.log('[SAUS] Apps synced, reloading...');
-        loadApps();
-    });
 
-    document.addEventListener('click', (event) => {
-        const detailsCol = document.getElementById('app-details-col');
-        if (detailsCol && !detailsCol.classList.contains('hidden')) {
-            const isModal = event.target.closest && event.target.closest('.modal-overlay');
-            if (!detailsCol.contains(event.target) && !isModal) {
-                detailsCol.classList.add('hidden');
-            }
-        }
-    });
+    window.addEventListener('appsSynced', () => loadApps());
 }

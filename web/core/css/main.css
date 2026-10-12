@@ -90,6 +90,14 @@ header {
     position: relative; /* For positioning child elements if needed */
 }
 
+/* Embedded in a workspace tab of the SAUS browser (see /saus/js/tabs.js):
+   that page owns the logo, the navigation bar and the footer, so the app
+   drops its own and keeps the whole iframe for the workflow UI. */
+.saus-embedded header,
+.saus-embedded footer {
+    display: none;
+}
+
 .header-nav {
     display: flex; /* Use flexbox for centering */
     justify-content: flex-start; /* Center links horizontally */
@@ -273,7 +281,9 @@ a {
     background-color: var(--color-background);
     position: relative;
     transition: width 0.3s ease;
-    overflow: hidden;
+    /* Visible (not hidden) so the panel handle never gets clipped: the
+       content is clipped by .left-panel-content instead. */
+    overflow: visible;
 }
 
 /* .content .mid-col {
@@ -314,12 +324,17 @@ a {
     padding-left: 10px;
     position: relative;
     transition: width 0.3s ease;
-    overflow: hidden;
+    /* Visible (not hidden) so the panel handle stays visible open & closed;
+       the content is clipped by .right-panel-content instead. */
+    overflow: visible;
 }
 
 .content .right-col.minimized {
     width: 0;
-    padding: 4px;
+    min-width: 0;
+    padding: 0;
+    /* Keep the handle visible (and clickable) while folded. */
+    overflow: visible;
 }
 
 /* Sidebar Content Styles */
@@ -623,14 +638,31 @@ a {
     width: 100%;
 }
 
+/* The spinner ("the gears") and its "N left" queue counter stack vertically. */
+#spinner-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 0 0 auto;
+}
+
+#spinner-stack #spinner {
+    margin-right: 0;
+    /* Scale around the centre so the gears line up with the "N left" below. */
+    transform-origin: center center;
+}
+
 #queue-display {
     margin: 0;
     user-select: none;
-    color: var(--color-accent);
-    font-size: 0.9em;
+    /* Same colour as the spinning gears above it. */
+    color: var(--color-spinner);
+    font-size: 0.85em;
     white-space: nowrap;
     text-align: center;
-    width: 100%;
+    width: auto;
 }
 
 footer {
@@ -969,15 +1001,50 @@ input[type="number"] {
     margin-top: 1px;
 }
 
-/* Extra ratios revealed by the "Other" button (same idea as the Dimension
-   Selector's Custom panel). */
-.ratio-other-panel {
-    display: none;
-    flex-wrap: wrap;
+/* Horizontal carousel: arrows step through the ratios one tile at a time. */
+.ratio-carousel {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    width: 100%;
+}
+
+.ratio-carousel-track {
+    display: flex;
+    align-items: stretch;
     gap: 6px;
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px dashed var(--color-border);
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+
+.ratio-carousel-track .ratio-icon-btn {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
+
+.ratio-nav {
+    flex: 0 0 auto;
+    width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: var(--color-background-secondary);
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.ratio-nav:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 .ratio-icon-label {
@@ -1231,6 +1298,23 @@ button:hover {
 
 }
 
+/* The Cancel button is a compact red ✕. */
+#buttonsgen #interruptButton {
+    padding: 9px 13px;
+    min-width: 40px;
+    font-size: 18px;
+    line-height: 1;
+    background-color: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
+}
+
+#buttonsgen #interruptButton:hover {
+    background-color: #e53935;
+    border-color: #e53935;
+    color: #ffffff;
+}
+
 #buttonsgen #runs-wrap {
     display: flex;
     flex-direction: column;
@@ -1248,7 +1332,7 @@ button:hover {
 #buttonsgen .runs-stepper {
     display: inline-flex;
     align-items: center;
-    height: 24px;
+    height: 38px;            /* same height as the Run / ✕ buttons */
     background-color: #000;
     border: 1px solid var(--color-accent);
     border-radius: 5px;
@@ -1259,12 +1343,19 @@ button:hover {
     margin: 0;
     padding: 0 4px;
     height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     border-radius: 0;
     background-color: transparent;
     color: var(--color-accent);
     font-size: 15px;
     line-height: 1;
+}
+
+#buttonsgen .runs-stepper button svg {
+    display: block;
 }
 
 #buttonsgen .runs-stepper button:hover {
@@ -1575,6 +1666,13 @@ button:hover {
     flex: 0 1 auto; /* Don't grow, can shrink, auto basis */
     justify-self: right;
 }
+/* The control column fills the panel and scrolls on its own, so the
+   "Show Advanced" fold at the bottom stays reachable. */
+#side-workflow-controls {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 #images-container,
 #side-workflow-controls,
 #load-image-container,
@@ -2216,7 +2314,7 @@ html:not(.css-loading) body {
 .lightbox-content {
     position: absolute;
     padding: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 12px 40px rgba(0, 0, 0, 0.85);
     overflow: hidden;
     cursor: move;
     z-index: 1001;
@@ -2226,8 +2324,10 @@ html:not(.css-loading) body {
     box-sizing: border-box; 
     max-width: 95vw; 
     max-height: 95vh; 
-    background-color: var(--color-background-secondary);
-    border: 1px dashed var(--color-border);
+    /* A slightly lighter panel so the modal stands out from the app behind it. */
+    background-color: var(--color-background-pattern);
+    border: 1px solid var(--color-border);
+    user-select: none;
 
 }
 .lightbox-close {
@@ -3208,74 +3308,15 @@ html:not(.css-loading) body {
 }
 
 /* ==================================== */
-/* 1. TAB HEADER AND BUTTON STYLES      */
+/* CONTROL PANEL + ADVANCED FOLD        */
 /* ==================================== */
 
-/* Container for the tab buttons */
-.control-tabs-header {
+/* The controls are a plain stacked column inside the scrollable panel. */
+.controls-body {
     display: flex;
-    justify-content: space-around; /* Distribute buttons evenly */
-    align-items: center;
-    border-bottom: 1px solid var(--border-color); /* Separator line below tabs */
-    padding: 0 0 5px 0; /* Space below the tabs */
-    margin-bottom: 5px; /* Space between tabs and content */
-    background-color: var(--background-color-panel);
-    position: sticky; /* Keep tabs visible when scrolling control panel */
-    top: 0;
-    z-index: 10;
-}
-
-/* Base style for all tab buttons */
-.tab-button {
-    flex-grow: 1; /* Make buttons fill the width */
-    padding: 8px 5px;
-    margin: 0 2px;
-    border: 1px var(--color-border);
-    background-color: transparent; /* Default state: transparent */
-    color: var(--text-color-faded);
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    border-radius: 4px;
-    text-align: center;
-}
-
-/* Hover effect */
-.tab-button:hover {
-    color: var(--text-color);
-    background-color: var(--background-color-hover);
-}
-
-/* Active (selected) tab button style */
-.tab-button.active {
-    color: var(--color-primary-text); /* Highlight color */
-    /* border-bottom: 2px solid var(--color-primary); */
-    background-color: var(--color-background-pattern-light); /* Subtle background for active tab */
-    font-weight: 600;
-}
-
-
-/* ==================================== */
-/* 2. TAB CONTENT STYLES                */
-/* ==================================== */
-
-/* Main container for tab panels (optional, for layout) */
-.control-tabs-content {
-    /* Ensures content below the sticky header scrolls */
-}
-
-/* Base style for all panels */
-.tab-panel {
-    display: none;
-    padding-top: 5px; /* Add a bit of space between tab header and content */
-}
-
-/* Since the JS handles display: none/block, this is mostly for clarity. */
-/* You already have the inline style 'display: none;' on the advanced-tab in HTML. */
-/* The JS toggles the 'active' class and 'display' property. */
-.tab-panel.active {
-    display: block !important; /* Overrides the inline style or default hidden state */
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
 }
 
 /* Styling for the control groups to maintain consistency */
@@ -3284,58 +3325,48 @@ html:not(.css-loading) body {
     margin-bottom: 5px; /* Add separation between individual controls */
 }
 
-/* Log Modal Styles */
-.log-modal {
-    display: none; 
-    position: fixed; 
-    z-index: 10000; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: hidden; 
-    background-color: rgba(0,0,0,0.5); 
-}
-.log-modal-content {
-    background-color: var(--color-background-secondary);
-    margin: 5% auto; 
-    padding: 20px;
-    border: 1px solid var(--color-border);
-    width: 80%; 
-    height: 80%;
+/* "Show Advanced" / "Show less": a full-width fold below the LoRA list. */
+.advanced-toggle {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 6px 0 4px 0;
+    padding: 8px 10px;
+    background-color: var(--color-background-secondary);
     color: var(--color-primary-text);
-}
-.log-close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    align-self: flex-end;
+    border: 1px dashed var(--color-border);
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
+    text-align: left;
 }
-.log-close:hover,
-.log-close:focus {
+
+.advanced-toggle:hover {
     color: var(--color-accent);
-    text-decoration: none;
-    cursor: pointer;
+    border-color: var(--color-accent);
 }
-#log-content {
-    flex: 1;
-    background-color: #111;
-    color: #0f0;
-    font-family: monospace;
-    padding: 10px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    border: 1px solid #333;
-    margin-top: 10px;
-    font-size: 12px;
+
+.advanced-toggle .advanced-toggle-chev {
+    transition: transform 0.2s ease;
+    opacity: 0.8;
 }
-.log-modal-header {
-    margin: 0;
+
+.advanced-toggle.expanded .advanced-toggle-chev {
+    transform: rotate(180deg);
 }
+
+/* The advanced controls stay out of the way until unfolded. */
+.advanced-controls {
+    overflow: hidden;
+}
+
+.advanced-controls.collapsed {
+    display: none !important;
+}
+
 /* Mode Selector Styles */
 .mode-selector-container {
     display: flex;
@@ -3419,3 +3450,116 @@ html:not(.css-loading) body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
+
+/* --- SAUS: "Add Lora+" button + LoRA blocks ---
+   The button adds a block per LoRA: a "LoRA" title on top, the regular
+   (searchable) dropdown, and the Strength control below. */
+.lora-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.lora-loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.lora-loader-caption {
+    font-size: 0.78em;
+    opacity: 0.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* "Add Lora+" styled like the other list controls, only slimmer. */
+.add-lora-button {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 7px 10px;
+    background-color: var(--color-background-secondary);
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.add-lora-button:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background-color: var(--color-background-secondary);
+}
+
+/* One LoRA: the dropdown, then the Strength below (✕ in the corner). */
+.lora-block {
+    position: relative;
+    width: 100%;
+    padding: 8px;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+}
+
+/* Keep the dropdown clear of the ✕ in the top-right corner. */
+.lora-block .dropdown-container {
+    padding-right: 28px;
+}
+
+/* No redundant "LoRA" label: the dropdown shows the selected file. */
+.lora-block .drop-down-element > label {
+    display: none;
+}
+
+.lora-remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.lora-remove-btn:hover {
+    background-color: #ff4444;
+    color: #000000;
+}
+
+/* --- SAUS: clearer panel handles (a chevron, not a bar) --- */
+.toggle-button {
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 34px;
+    color: #fff;
+    border-radius: 6px;
+}
+
+.toggle-button .arrow {
+    width: 12px;
+    height: 12px;
+}
+
+/* --- SAUS: Run / ✕ / runs sit inline next to the progress bar again --- */
+.main-area {
+    position: relative;
+}

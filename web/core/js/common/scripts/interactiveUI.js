@@ -137,7 +137,8 @@ export function initialize(
     moveElementsOnMinimizeParam = true,
     minimizeOnStart = false,
     rememberStateOnLoad = false,
-    moveHistoryOnMinimizeParam = true
+    moveHistoryOnMinimizeParam = true,
+    startRightMinimized = false
 ) {
     moveElementsOnMinimize = moveElementsOnMinimizeParam;
     moveHistoryOnMinimize = moveHistoryOnMinimizeParam;
@@ -148,7 +149,10 @@ export function initialize(
     }
 
     let isLeftMinimized = minimizeOnStart;
-    let isRightMinimized = minimizeOnStart;
+    // The "Recent" panel folds on its own: it starts closed and is opened by
+    // the first generated image (see HistoryManager.revealPanel). It is not
+    // tied to the left panel's minimizeOnStart.
+    let isRightMinimized = minimizeOnStart || startRightMinimized;
 
     if (rememberStateOnLoad) {
         const savedLeftState = localStorage.getItem('leftColMinimized');
@@ -245,7 +249,7 @@ export function initialize(
 }
 
 if (toggleLeftBtn) {
-    initialize(false, false, false, false);
+    initialize(false, false, false, false, true);
 }
 
 

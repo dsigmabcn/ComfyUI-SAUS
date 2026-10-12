@@ -1,5 +1,6 @@
 import os
 import re
+import io
 import shutil
 import json
 from pathlib import Path
@@ -13,6 +14,10 @@ from .constants import (
 from .helpers import allowed_file, resolve_within_roots, require_json, require_saus_header
 
 TEMP_UPLOAD_DIR = "/tmp/app_uploads"
+
+# Extensions the thumbnail endpoint will try to shrink (everything else is
+# served as-is, or rejected).
+IMAGE_THUMB_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif'}
 
 # Uploads arrive in 20 MB chunks from the File Manager; refuse anything much
 # larger so a single request can never be buffered into memory.
@@ -58,15 +63,159 @@ async def directory_listing_handler(request: web.Request) -> web.Response:
         for item in requested_path.iterdir():
             if item.name.startswith('.'):
                 continue
-            items.append({
+            entry = {
                 "name": item.name,
-                "type": "folder" if item.is_dir() else "file"
-            })
+                "type": "folder" if item.is_dir() else "file",
+                "size": None,
+                "mtime": None
+            }
+            try:
+                stat = item.stat()
+                if not item.is_dir():
+                    entry["size"] = stat.st_size
+                entry["mtime"] = stat.st_mtime
+            except OSError:
+                pass
+            items.append(entry)
 
         return web.json_response(items)
 
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
+
+async def thumbnail_handler(request: web.Request) -> web.Response:
+    """A small, compressed preview of an input/output image (icon views).
+
+    Uses Pillow when available (it ships with ComfyUI); otherwise it falls back
+    to serving the original file so the grid still shows *something*.
+    """
+    path_param = request.query.get('path')
+    if not path_param:
+        return web.json_response({'error': "Missing 'path' parameter"}, status=400)
+
+    try:
+        file_path = resolve_within_roots(path_param)
+    except ValueError as e:
+        logger.warning(f"{SAUSMSG}: thumbnail denied for {path_param!r}: {e}")
+        return web.json_response({'error': 'Access denied'}, status=403)
+
+    if not file_path.is_file():
+        return web.json_response({'error': 'File not found'}, status=404)
+
+    if file_path.suffix.lower() not in IMAGE_THUMB_EXTENSIONS:
+        return web.json_response({'error': 'Not an image'}, status=415)
+
+    try:
+        size = max(48, min(1024, int(request.query.get('size', '256'))))
+    except (TypeError, ValueError):
+        size = 256
+
+    try:
+        from PIL import Image
+    except Exception:
+        # No Pillow: hand back the original file (no compression).
+        return web.FileResponse(file_path, headers={'Cache-Control': 'max-age=600'})
+
+    try:
+        with Image.open(file_path) as img:
+            rgb = img.convert('RGB')
+            rgb.thumbnail((size, size))
+            buffer = io.BytesIO()
+            try:
+                rgb.save(buffer, format='WEBP', quality=72, method=4)
+                content_type = 'image/webp'
+            except Exception:
+                buffer = io.BytesIO()
+                rgb.save(buffer, format='JPEG', quality=72)
+                content_type = 'image/jpeg'
+        return web.Response(
+            body=buffer.getvalue(),
+            content_type=content_type,
+            headers={'Cache-Control': 'max-age=600'},
+        )
+    except Exception as e:
+        logger.warning(f"{SAUSMSG}: thumbnail failed for {file_path}: {e}")
+        return web.json_response({'error': str(e)}, status=500)
+
+
+async def move_copy_handler(request: web.Request) -> web.Response:
+    """Move (default) or copy files/folders between the allowed roots.
+
+    Body: ``{ "sourcePaths": [...], "targetDir": "...", "copy": bool }``.
+    Used by the File Manager's drag & drop (plain drag = move, Ctrl+drag = copy).
+    """
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({'error': 'Invalid JSON'}, status=400)
+
+    sources = data.get('sourcePaths')
+    if isinstance(sources, str):
+        sources = [sources]
+    if not isinstance(sources, list) or not sources:
+        return web.json_response({'error': 'Missing sourcePaths'}, status=400)
+
+    copy = bool(data.get('copy'))
+
+    try:
+        target_dir = resolve_within_roots(data.get('targetDir'))
+    except ValueError as e:
+        logger.warning(f"{SAUSMSG}: transfer denied (target): {e}")
+        return web.json_response({'error': 'Access denied'}, status=403)
+
+    if not target_dir.exists() or not target_dir.is_dir():
+        return web.json_response({'error': 'Target folder not found'}, status=404)
+
+    moved = 0
+    errors = []
+    for source in sources:
+        try:
+            src = resolve_within_roots(source)
+        except ValueError as e:
+            errors.append(f'{source}: access denied')
+            continue
+
+        if not src.exists():
+            errors.append(f'{src.name}: not found')
+            continue
+
+        dest = target_dir / src.name
+        try:
+            if src.resolve() == dest.resolve():
+                continue  # dropped back into its own folder
+        except OSError:
+            pass
+
+        if src.is_dir():
+            try:
+                dest.resolve().relative_to(src.resolve())
+                errors.append(f'{src.name}: cannot move a folder into itself')
+                continue
+            except ValueError:
+                pass
+
+        if dest.exists():
+            errors.append(f'{src.name}: already exists in the target folder')
+            continue
+
+        try:
+            if copy:
+                if src.is_dir():
+                    shutil.copytree(src, dest)
+                else:
+                    shutil.copy2(src, dest)
+            else:
+                shutil.move(str(src), str(dest))
+            moved += 1
+        except Exception as e:
+            errors.append(f'{src.name}: {e}')
+
+    return web.json_response({'moved': moved, 'errors': errors})
+
 
 async def rename_file_handler(request: web.Request) -> web.Response:
     guard = require_json(request)

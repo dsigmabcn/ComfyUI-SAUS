@@ -11,57 +11,64 @@
 </head>
 <body>
     <div class="container">
-        <header></header>
         <div class="main-wrapper">
-            <div class="content-wrapper">
-                <nav class="sidebar">
-                    <div class="menu-category">
-                        <a href="#home" id="homeLink"><i class="fas fa-home"></i> Home</a>
-                        
-                    </div>
-                    <div class="menu-category" id="sidebarCategoriesContainer">
-                    </div>
-                    <!--<div id="theme-selector"></div>-->
+            <div class="app-shell" id="appShell">
+                <!-- Always visible icon rail -->
+                <nav class="side-rail" id="sideRail" aria-label="Sections"></nav>
 
-                </nav>
-                <div class="content">
-                    <div class="mid-col">
-                        <div id="homeContainer" class="home-container hidden">
+                <!-- Explorer panel: opened by clicking a rail icon -->
+                <aside class="side-panel" id="sidePanel">
+                    <div class="side-panel-head">
+                        <!-- Search + filters sit above the title so the controls are
+                             always in reach; the title hides while filtering. -->
+                        <div class="panel-head-tools">
+                            <div id="search-container">
+                                <input type="text" id="searchInput" placeholder="Search apps..." autocomplete="off">
+                                <i class="fas fa-times-circle clear-search"></i>
+                            </div>
+                            <button type="button" class="panel-tags-btn" id="tagsToggle" title="Filter by tags">
+                                <i class="fas fa-tags"></i>
+                                <span class="filters-badge hidden" id="filtersBadge">0</span>
+                            </button>
+                        </div>
+                        <!-- The favourite apps, pinned between the search field
+                             and the section (category) name. -->
+                        <div id="favoritesSection" class="favorites-section hidden">
+                            <div class="favorites-head">Favorites</div>
+                            <div id="favoritesList" class="favorites-list"></div>
+                        </div>
+                        <div class="panel-head-top">
+                            <span class="side-panel-title" id="sidePanelTitle">Apps</span>
+                        </div>
+                        <div id="tagsContainer" class="tags-container hidden">
+                            <!-- Tag chips are added here -->
+                        </div>
+                    </div>
+                    <div class="explorer" id="explorer"></div>
+                </aside>
+
+                <!-- Tabs + the panes they show -->
+                <section class="workspace">
+                    <div class="tab-strip hidden" id="tabStrip"></div>
+                    <div class="panes" id="paneContainer">
+                        <div id="homeContainer" class="pane home-container">
                             <div class="home-content">
                                 <h1>Welcome to SAUS</h1>
-                                <h3 style="text-align: center;" >A <strong>S</strong>imple <strong>A</strong>pp <strong>U</strong> <strong>S</strong>ee</h3>
-                                <img src="/core/media/ui/Saus%20quick%20start%20card.png" alt="Quick Start" style="max-width: 100%; max-height: 70vh; height: auto; margin: 20px 0;">
-                                <h4 style="font-size: 1.2em; text-align: center;">See the detailed <a href="https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md" target="_blank">user guide here</a></h4>
+                                <h3 style="text-align: center;">A Simple App U See</h3>
+                                <img src="/core/media/ui/Saus%20quick%20start%20card.png" alt="Quick Start" style="max-width: 100%; max-height: 55vh; height: auto; margin: 20px 0;">
+                                <h4 style="font-size: 1.1em; text-align: center;">Click one of the icons on the left to browse the apps.</h4>
+                                <h4 style="font-size: 1.1em; text-align: center;">Every app you open stays here as a tab.</h4>
                             </div>
                         </div>
-                        <div class="controls">
-                            <div id="tagsContainer" class="tags-container">
-                                <!-- Tags will be dynamically added here -->
-                            </div>
-                            <div class="right-controls">
-                                <div id="search-container">
-                                    <input type="text" id="searchInput" placeholder="Search all apps..." autocomplete="off">
-                                    <i class="fas fa-times-circle clear-search"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="app-grid" id="appGrid">
-                            <!-- App cards will be dynamically added here -->
-                        </div> <!--app grid-->
-                    </div> <!--mid col-->
-                </div> <!-- content-->
-            </div> <!--content wrapper-->
-        </div><!--main wrapper -->
-        <footer>
-            <p id="copyright"></p>
-        </footer>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div><!--container-->
     <script type="module">
-        import { insertElement } from './core/js/common/components/header.js';
         import { initializeUI } from '/saus/js/main.js';
         document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
-            insertElement();
         });
     </script>
 </body>

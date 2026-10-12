@@ -16,17 +16,19 @@ If you already have the model but with a **different file name**, you can still 
 
 
 ## Model Status
-The App card shows how many of the models required to run an app are installed
+Every app row in the explorer carries a status dot. Apps can offer several **variants** (for example HD and Turbo), each with its own models, and the dot reports the app as a whole:
 
-<img src="../web/core/media/git/app_browsing/app cards.png">
+- <span style="color:green">green</span>: every variant of the app has all of its models installed.
+- <span style="color:orange">orange</span>: at least one variant is complete, but another one is not.
+- <span style="color:red">red</span>: no variant is complete yet.
 
-If the models are <span style="color:green">Installed</span>, you can go ahead and open the app (click over the thumbnail).
+A variant needs what it is built on: the models it picks (including its own distillation/lightning LoRA) are required **for that variant**, while models that no variant picks never block anything. Where the app offers several alternatives (two VAEs, for example), having any one of them is enough.
 
-If the models are only <span style="color:orange">Partially installed</span> or <span style="color:red">Missing</span>, you will need to install them. 
-For the installation, you need to access the information panel: hover over and click the information button on the card at the bottom right.
+When an app has several variants, hovering the row shows one line per variant (e.g. `HD ✓`, `Turbo — 2 models missing`); with a single variant it simply lists the missing models.
+For the installation, you need to access the information panel: click the information button on the row.
 <img src="../web/core/media/git/models/info-button.png">
 
-The information panel appears on the right of the screen:
+The information panel opens as a window over the workspace:
 
 <img src="../web/core/media/git/models/information-panel.png">
 
@@ -35,7 +37,7 @@ Some models (typically VAEs and text encoders) are used by multiple apps, so you
 ### App information
 - **Title**: The title of the app.
 - **Description**: A short description of the app. **May include some specific instructions, e.g., to run distillation/lightning loras.**
-- **Open App**: By clicking on it, you can open the app (in a new window).
+- **Open App**: By clicking on it, the app opens in a tab of the workspace (or use ↗ on its tab to open it in a separate window).
 
 Even if not all models are installed, you can access the App. You can still manually select the models in the App, if for example you have already models installed in ComfyUI but are not located in the routes defined by SAUS, or have a different filename.
 

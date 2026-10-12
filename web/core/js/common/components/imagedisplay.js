@@ -112,10 +112,21 @@ class HistoryManager {
 
         this.history.unshift(imageUrl);
         this.renderThumbnail(imageUrl);
+        this.revealPanel();
 
         if (this.history.length > this.maxItems) {
             this.history.pop();
             this.historyContainer.removeChild(this.historyContainer.lastChild);
+        }
+    }
+
+    /** The "Recent" panel starts folded and unfolds on the first result. */
+    revealPanel() {
+        const rightCol = document.getElementById('right-col');
+        const toggle = document.getElementById('toggle-right');
+        if (rightCol && rightCol.classList.contains('minimized')) {
+            rightCol.classList.remove('minimized');
+            if (toggle) toggle.classList.remove('active');
         }
     }
 
@@ -430,11 +441,12 @@ class Lightbox {
     initiateDrag(e) {
         this.bringToFront(); 
 
+        // The media itself is draggable too (not just the border area). Video
+        // keeps its native controls usable, so it is left out.
         if (
             e.target.classList.contains('lightbox-prev') ||
             e.target.classList.contains('lightbox-next') ||
             e.target.classList.contains('lightbox-close') ||
-            e.target.tagName.toLowerCase() === 'img' ||
             e.target.tagName.toLowerCase() === 'video' ||
             e.target.classList.contains('lightbox-resize-handle')
         ) {
@@ -650,6 +662,7 @@ class Lightbox {
             this.mediaElement = document.createElement('img');
             this.mediaElement.src = mediaUrl;
             this.mediaElement.alt = 'Lightbox Image';
+            this.mediaElement.draggable = false;   // drag moves the modal, not the file
             this.mediaElement.style.maxWidth = '100%';
             this.mediaElement.style.maxHeight = '100%';
             this.mediaElement.style.outline = 'none'; 
