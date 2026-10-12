@@ -1,11 +1,19 @@
 /**
  * "Open the workflow in ComfyUI".
  *
- * Every SAUS app ships web/apps/<url>/wf.json (API format). That file is
- * copied into ComfyUI's own user workflow folder through ComfyUI's
- * /userdata API, so it shows up in the ComfyUI workflow list; ComfyUI detects
- * API-format JSON on load and builds the graph from it. ComfyUI is then
- * opened in a new window.
+ * The graph that goes over is the one the app is running right now, read from
+ * the app itself (window.SAUS in web/core/main.js): its settings and the variant
+ * the user selected, which is an overlay applied to the template graph at run
+ * time and therefore cannot be read from a file. An app that cannot be reached
+ * - not loaded yet, or an older copy without the accessor - falls back to the
+ * base wf.json it ships.
+ *
+ * Either way the JSON is copied into ComfyUI's own user workflow folder through
+ * ComfyUI's /userdata API, so it also shows up in the ComfyUI workflow list.
+ * ComfyUI is then opened in a new window, carrying a ?saus_workflow= parameter
+ * that points at that copy; the extension SAUS injects into the ComfyUI page
+ * (web/core/js/common/scripts/saus_open_workflow.js) reads the parameter and
+ * loads the graph in a new workflow tab of that window.
  */
 
 function safeFileName(name) {
@@ -63,17 +71,78 @@ async function fetchAppWorkflow(appUrl) {
     throw new Error('this app ships no workflow file');
 }
 
+/* How long to wait for the app of a freshly created tab to finish booting. */
+const APP_READY_TIMEOUT_MS = 3000;
+const APP_READY_POLL_MS = 150;
+
 /**
- * @param {{url: string, name: string}} tab
+ * The graph the app is running right now, read straight from the app page.
+ *
+ * ``frame`` is the app's iframe. It is built on demand by the app browser and
+ * may still be booting (or missing for an app tab that was restored but never
+ * shown), so we wait - briefly - for the app to report itself ready.
+ *
+ * @returns {Promise<?{workflow: object, variant: ?{mode: string, variant: ?string, label: string}}>}
+ *          null when the app cannot be read (older copy without the accessor,
+ *          still loading, or not same-origin): the caller then falls back to
+ *          the base wf.json.
+ */
+async function readLiveWorkflow(frame) {
+    if (!frame) return null;
+
+    const deadline = Date.now() + APP_READY_TIMEOUT_MS;
+
+    for (;;) {
+        let saus = null;
+        try {
+            // Reading another origin's window throws here. Apps are served by
+            // ComfyUI itself, so this only guards a future setup.
+            saus = frame.contentWindow ? frame.contentWindow.SAUS : null;
+        } catch (error) {
+            console.warn('[SAUS] the app page cannot be read, exporting its base workflow:', error);
+            return null;
+        }
+
+        if (saus && typeof saus.getWorkflow === 'function' && saus.isReady && saus.isReady()) {
+            const workflow = saus.getWorkflow();
+            if (!workflow) return null;
+
+            return { workflow, variant: (saus.getVariant && saus.getVariant()) || null };
+        }
+
+        if (Date.now() >= deadline) {
+            console.warn('[SAUS] the app did not finish loading, exporting its base workflow');
+            return null;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, APP_READY_POLL_MS));
+    }
+}
+
+/**
+ * @param {{url: string, name: string, id: string}} tab
+ * @param {?function} [getFrame] returns the app's iframe (created on demand)
  * @returns {Promise<boolean>} true when ComfyUI accepted the workflow
  */
-export async function exportWorkflowToComfyUI(tab) {
+export async function exportWorkflowToComfyUI(tab, getFrame) {
     if (!tab || !tab.url) return false;
 
-    try {
-        const workflowText = await fetchAppWorkflow(tab.url);
+    // Opened while the click is still being handled: after an await the browser
+    // would count this as an unsolicited popup and block it.
+    const comfyWindow = window.open('', '_blank');
 
-        const fileName = `${safeFileName(tab.name || tab.url)}.json`;
+    try {
+        const running = await readLiveWorkflow(typeof getFrame === 'function' ? getFrame(tab) : null);
+        const workflowText = running
+            ? JSON.stringify(running.workflow)
+            : await fetchAppWorkflow(tab.url);
+
+        // Name the copy after the variant being exported, so the variants of an
+        // app can sit in the workflow list side by side.
+        const name = [tab.name || tab.url];
+        if (running && running.variant && running.variant.label) name.push(running.variant.label);
+        const fileName = `${safeFileName(name.join(' · '))}.json`;
+
         // Same endpoint ComfyUI's own workflow list reads from (the slash stays
         // encoded, which is how the UI asks for a file inside "workflows/").
         const target = `/api/userdata/${encodeURIComponent(`workflows/${fileName}`)}`;
@@ -84,10 +153,24 @@ export async function exportWorkflowToComfyUI(tab) {
         });
         if (!saved.ok) throw new Error(`ComfyUI refused it (HTTP ${saved.status})`);
 
-        window.open('/', '_blank');
-        toast(`Workflow saved as “${fileName}” — open it from ComfyUI's workflow list.`, 'success');
+        // The workflow itself is loaded by the extension SAUS injects into the
+        // ComfyUI page, which reads this parameter and puts the graph in a new
+        // workflow tab there.
+        const comfyUrl = new URL('/', window.location.origin);
+        comfyUrl.searchParams.set('saus_workflow', target);
+        if (comfyWindow) {
+            comfyWindow.location.replace(comfyUrl.href);
+        } else {
+            window.open(comfyUrl.href, '_blank');   // the window was blocked
+        }
+
+        toast(running
+            ? `“${fileName}” saved and opened in a new ComfyUI tab.`
+            : `${tab.name || tab.url} was not ready: its base workflow was sent to ComfyUI.`,
+            running ? 'success' : 'info');
         return true;
     } catch (error) {
+        if (comfyWindow) comfyWindow.close();
         console.error('Workflow export failed:', error);
         toast(`Could not send the workflow to ComfyUI: ${error.message}`, 'error');
         return false;

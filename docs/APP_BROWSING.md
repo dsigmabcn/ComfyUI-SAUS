@@ -61,7 +61,7 @@ In every case, click **(i)** to see the details and install the missing models.
 Clicking an app row opens it in the **workspace** as a tab, next to the ones you already have open. Each tab carries:
 
 - the **app name** and its icon;
-- **⤴ export the workflow to ComfyUI**: the app's `wf.json` (the graph the app itself runs) is saved as `<App name>.json` in ComfyUI's workflow list, and ComfyUI opens in a new window — pick it from the workflow list there. An app that ships a UI-format `ui_wf.json` instead is sent as-is;
+- **⤴ open the workflow in ComfyUI**: the graph the app is running **right now is loaded in a new workflow tab** of a new ComfyUI window — its settings and the variant you selected included, ready to run, next to whatever was already open on that canvas. The graph is also saved as `<App name> · <mode>.json` (`<mode>` being the app's **Custom / HD / Turbo** button, or the variant you picked) in ComfyUI's workflow list. An app that cannot be read (still starting, or one that ships only a base graph) falls back to its `wf.json`;
 - **⛶ enlarge**: that tab takes the whole browser area (the rail, the panel and the tab strip step aside). Click it again, or press **Esc**, to go back;
 - **✕**: closes the tab (and frees the app).
 

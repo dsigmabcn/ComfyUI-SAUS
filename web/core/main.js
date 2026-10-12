@@ -102,6 +102,12 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     
     let workflow = await fetchWorkflow(appName);
     let canvasLoader;
+
+    // Set once the whole interface is built: the SAUS app browser waits for it
+    // before exporting this app's graph to ComfyUI (see window.SAUS below).
+    let uiReady = false;
+    // The mode / variant the user picked. Only used to name the exported file.
+    let activeMode = null;
     
     const widgetInstances = {}; // To store all widget instances
 
@@ -489,6 +495,14 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 const mode = clickedButton.dataset.mode;
 
+                // Remember the choice: the SAUS app browser names the workflow it
+                // exports to ComfyUI (the share button of the app tabs) after it.
+                activeMode = {
+                    mode,
+                    variant: clickedButton.dataset.variant || null,
+                    label: (clickedButton.textContent || mode).trim(),
+                };
+
                 const modelWidgetConfigs = appConfig.dropdowns.filter(d =>
                     d.label.startsWith('Model') || d.label === 'Checkpoint' || LOADER_TYPES.has(d.url));
                 const modelWidgetElements = modelWidgetConfigs.map(c => document.getElementById(c.id)).filter(el => el);
@@ -815,6 +829,29 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     initCanvas();
 
 
+    /**
+     * Copy what the user typed in the prompt boxes into ``target``: the live
+     * workflow object, or a copy of it.
+     *
+     * The prompt boxes are the only controls that are not written into the
+     * workflow as you type, so both a Run and the export to ComfyUI (the share
+     * button of the SAUS app browser) collect them here.
+     */
+    function collectPromptValues(target) {
+        if (!appConfig.prompts) return;
+
+        appConfig.prompts.forEach(pathConfig => {
+            const { id } = pathConfig;
+            const element = document.getElementById(id);
+            if (element) {
+                const value = element.value.replace(/(\r\n|\n|\r)/gm, " ");
+                updateWorkflowValue(target, id, value, appConfig);
+            } else {
+                console.warn(`Element not found for ID: ${id}`);
+            }
+        });
+    }
+
     async function queue() {   
         //console.log("Queueing new job");
         messageHandler.updateNodeMap(workflow);
@@ -827,18 +864,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
         //console.log("Queueing workflow:", workflow);        
 
-        if (appConfig.prompts) {
-            appConfig.prompts.forEach(pathConfig => {
-                const { id } = pathConfig;
-                const element = document.getElementById(id);
-                if (element) {
-                    const value = element.value.replace(/(\r\n|\n|\r)/gm, " ");
-                    updateWorkflowValue(workflow, id, value, appConfig);
-                } else {
-                    console.warn(`Element not found for ID: ${id}`);
-                }
-            });
-        }
+        collectPromptValues(workflow);
 
         const jobId = StateManager.incrementJobId();
         const job = { id: jobId, workflow: { ...workflow } };
@@ -1054,4 +1080,27 @@ function setupAdvancedToggle() {
         });
     });
    
+    /* ---------------------------------------------------------------------- *
+     * What the SAUS app browser reads when the share button of an app tab
+     * exports this workflow to ComfyUI.
+     *
+     * It has to come from this page: a variant is an overlay applied to the
+     * graph at run time (models, settings, LoRAs), so there is no per-variant
+     * workflow file to hand over instead.
+     * ---------------------------------------------------------------------- */
+    window.SAUS = window.SAUS || {};
+    window.SAUS.isReady = () => uiReady;
+    window.SAUS.getVariant = () => (activeMode ? { ...activeMode } : null);
+    window.SAUS.getWorkflow = () => {
+        if (!workflow) return null;
+
+        // A copy, so the caller can never touch the state this app runs with.
+        const snapshot = JSON.parse(JSON.stringify(workflow));
+        collectPromptValues(snapshot);
+        return snapshot;
+    };
+
+    // Everything an export needs is in place from here on.
+    uiReady = true;
+
 })(window, document, undefined);

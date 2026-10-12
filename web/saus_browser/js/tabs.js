@@ -76,7 +76,13 @@ function renderTabStrip() {
         if (tab.kind === 'app') {
             actions.appendChild(tabButton('Open this workflow in ComfyUI', 'fas fa-share-from-square', (event) => {
                 event.stopPropagation();
-                exportWorkflowToComfyUI(tab);
+                // ensurePane builds the app's iframe on demand (hidden), so the app
+                // can be asked for the workflow it is running right now - variant
+                // included - without the button switching the visible tab.
+                exportWorkflowToComfyUI(tab, () => {
+                    const pane = ensurePane(tab.id);
+                    return pane ? pane.querySelector('iframe') : null;
+                });
             }));
         }
 
