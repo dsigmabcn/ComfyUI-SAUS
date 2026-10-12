@@ -57,9 +57,22 @@ const state = {
     rawPayload: null,
     responseOk: true,
     status: 200,
+    contentType: 'application/json',
+    contentLength: null,
     graphDataResult: true,
     extension: null,
 };
+
+/* The caps the extension enforces (kept in step with it on purpose: the test
+ * states the expectation, it does not read it out of the code). */
+const MAX_WORKFLOW_BYTES = 5 * 1024 * 1024;
+const MAX_WORKFLOW_NODES = 2000;
+
+/** An API graph with ``count`` nodes. */
+const manyNodes = (count) => Object.fromEntries(Array.from(
+    { length: count },
+    (_, index) => [String(index + 1), { inputs: {}, class_type: 'LoadImage' }],
+));
 
 const app = {
     async loadApiJson(data, target) {
@@ -86,6 +99,14 @@ globalThis.fetch = async (url) => {
     return {
         ok: state.responseOk,
         status: state.status,
+        headers: {
+            get(name) {
+                const wanted = String(name).toLowerCase();
+                if (wanted === 'content-type') return state.contentType;
+                if (wanted === 'content-length') return state.contentLength;
+                return null;
+            },
+        },
         text: async () => state.rawPayload ?? JSON.stringify(state.payload),
     };
 };
@@ -116,6 +137,8 @@ function reset(overrides = {}) {
     state.rawPayload = null;
     state.responseOk = true;
     state.status = 200;
+    state.contentType = 'application/json';
+    state.contentLength = null;
     state.graphDataResult = true;
     Object.assign(state, overrides);
     globalThis.window.location.href = `${COMFY_ORIGIN}/`;
@@ -264,11 +287,11 @@ async function openPage(href, bootLoads = 1, payload = API_WORKFLOW) {
     };
 
     assert.equal((await detect(API_WORKFLOW)).method, 'loadApiJson');
-    assert.equal((await detect({})).method, 'loadGraphData', 'an empty object is not an API graph');
     assert.equal((await detect(UI_WORKFLOW)).method, 'loadGraphData');
     assert.equal((await detect({ 1: { class_type: 'X', inputs: {} }, 2: { inputs: {} } })).method, 'loadGraphData',
         'one entry without class_type is not an API graph');
-    assert.equal((await detect({ extra: [], nodes: [] })).method, 'loadGraphData', 'a nodes array means UI graph');
+    assert.equal((await detect({ extra: [], nodes: [{ id: 1, type: 'LoadImage' }] })).method, 'loadGraphData',
+        'a nodes array means a UI graph');
 
     // an array is refused outright (covered in scenario 5), never passed on
     await openPage(`${COMFY_ORIGIN}/?saus_workflow=${encodeURIComponent(WORKFLOW_PATH)}`, 1, [API_WORKFLOW]);
@@ -277,5 +300,84 @@ async function openPage(href, bootLoads = 1, payload = API_WORKFLOW) {
     console.log('6. format detection: OK');
 }
 
-console.log('\nall scenarios passed');
+/* ------------------------------------------------------------------ */
+/* 7. the parameter is not a way to fetch just anything                */
+/* ------------------------------------------------------------------ */
+{
+    const attemptPath = async (path) => {
+        await openPage(`${COMFY_ORIGIN}/?saus_workflow=${encodeURIComponent(path)}`, 1);
+        return { calls: state.calls.length, notices: [...state.notices], fetches: state.fetches.length };
+    };
 
+    // Anything that is not a ComfyUI workflow copy or a SAUS app file is
+    // refused before a single request goes out, so a link cannot make this
+    // page read an arbitrary same-origin document.
+    const refused = [
+        '/history',
+        '/api/object_info',
+        '/view?filename=picture.png',
+        '/api/userdata/../comfy.settings.json',      // normalises to /api/comfy.settings.json
+        '/api/userdata/%2e%2e/secret.txt',           // only the '..' check can catch this one
+    ];
+    for (const path of refused) {
+        const result = await attemptPath(path);
+        assert.equal(result.fetches, 0, `${path} must not be fetched`);
+        assert.equal(result.calls, 0, `${path} must not reach the canvas`);
+        assert.match(result.notices[0], /not a workflow file/);
+    }
+
+    // ...while the two shapes the feature produces still work
+    for (const path of ['/api/userdata/workflows/My App.json', '/saus/my-app/wf.json']) {
+        const result = await attemptPath(path);
+        assert.equal(result.fetches, 1, `${path} must still be fetched`);
+        assert.equal(result.calls, 1, `${path} must still be loaded`);
+    }
+    console.log('7. parameter restricted to workflow files: OK');
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. only a workflow-shaped JSON document is accepted                 */
+/* ------------------------------------------------------------------ */
+{
+    const attempt = async (overrides) => {
+        reset(overrides);
+        globalThis.window.location.href = `${COMFY_ORIGIN}/?saus_workflow=${encodeURIComponent(WORKFLOW_PATH)}`;
+        const extension = await loadExtension();
+        extension.setup();
+        await extension.afterLoadGraph();
+        await sleep(700);
+        return { calls: state.calls.length, notices: [...state.notices] };
+    };
+
+    // served as something other than JSON
+    let result = await attempt({ contentType: 'text/html' });
+    assert.equal(result.calls, 0);
+    assert.match(result.notices[0], /not as JSON/);
+
+    // far bigger than a workflow, both announced and actually delivered
+    result = await attempt({ contentLength: String(MAX_WORKFLOW_BYTES + 1) });
+    assert.equal(result.calls, 0);
+    assert.match(result.notices[0], /too large/);
+
+    result = await attempt({ rawPayload: 'x'.repeat(MAX_WORKFLOW_BYTES + 1) });
+    assert.equal(result.calls, 0);
+    assert.match(result.notices[0], /too large/);
+
+    // more nodes than a workflow ever has
+    result = await attempt({ payload: manyNodes(MAX_WORKFLOW_NODES + 1) });
+    assert.equal(result.calls, 0);
+    assert.match(result.notices[0], /far more than a workflow/);
+
+    // nothing to load at all
+    result = await attempt({ payload: {} });
+    assert.equal(result.calls, 0);
+    assert.match(result.notices[0], /holds no nodes/);
+
+    // and a large-but-legal workflow is still loaded: the caps are not too tight
+    result = await attempt({ payload: manyNodes(MAX_WORKFLOW_NODES) });
+    assert.equal(result.calls, 1);
+    assert.deepEqual(state.notices, []);
+    console.log('8. content type, size and shape are enforced: OK');
+}
+
+console.log('\nall scenarios passed');

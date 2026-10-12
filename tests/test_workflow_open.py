@@ -24,6 +24,7 @@ OPEN_WORKFLOW_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'scripts' / 'saus_o
 EXPORT_JS = ROOT / 'web' / 'saus_browser' / 'js' / 'workflow_export.js'
 TABS_JS = ROOT / 'web' / 'saus_browser' / 'js' / 'tabs.js'
 MAIN_JS = ROOT / 'web' / 'core' / 'main.js'
+SAUS_DIR = ROOT / 'saus'
 HARNESSES = ROOT / 'tests' / 'js'
 CONSTANTS_PY = ROOT / 'saus' / 'constants.py'
 
@@ -95,6 +96,77 @@ def test_the_browser_reads_what_the_app_exposes():
     assert re.search(r'isReady', shell), 'and wait for the app to be ready'
     assert re.search(r'exportWorkflowToComfyUI\(tab, \(\) =>', TABS_JS.read_text(encoding='utf-8')), \
         'the app tab must pass its own iframe to the export'
+
+
+def test_the_parameter_only_reaches_workflow_files():
+    source = OPEN_WORKFLOW_JS.read_text(encoding='utf-8')
+
+    assert re.search(r"ALLOWED_PATH_PREFIXES = \['/api/userdata/', '/saus/'\]", source), \
+        'the parameter must be restricted to the shapes this feature produces'
+    assert re.search(r'target\.origin !== window\.location\.origin', source), \
+        'and to this origin'
+    assert re.search(r"includes\('\.\.'\)", source), 'and never a traversal'
+    assert re.search(r"get\('Content-Type'\)", source), 'only JSON is read'
+    assert re.search(r'MAX_WORKFLOW_BYTES', source) and re.search(r'MAX_WORKFLOW_NODES', source), \
+        'and only a workflow-sized document'
+
+
+def test_the_copy_never_overwrites_a_user_workflow():
+    shell = EXPORT_JS.read_text(encoding='utf-8')
+
+    assert 'overwrite=false' in shell, \
+        'the save must ask ComfyUI not to overwrite an existing workflow'
+    assert re.search(r'status !== 409', shell), 'and number the copy when the name is taken'
+    assert re.search(r'\bopener = null', shell), \
+        'the opened ComfyUI page must not keep a handle back on the app browser'
+
+
+def test_every_post_handler_has_a_csrf_guard():
+    """POST is a "simple" CORS method, so a cross-site page can send one without a
+    preflight and no custom header. Requiring a JSON body - or the SAUS header for
+    multipart uploads - forces the preflight this server never answers. (DELETE is
+    not a simple method, so the browser preflights those anyway.)
+    """
+    sources = {path.name: path.read_text(encoding='utf-8') for path in SAUS_DIR.glob('*.py')}
+
+    routes = re.findall(r"\(f?'(/saus/api/[^']+)',\s*'(GET|POST|DELETE)',\s*(\w+)\)", sources['app_manager.py'])
+    posts = [(path, name) for path, method, name in routes if method == 'POST']
+    assert len(posts) >= 8, f'the route table should list the POST routes, found {len(posts)}'
+
+    for path, name in posts:
+        body = next((text for text in sources.values() if f'async def {name}(' in text), None)
+        assert body is not None, f'{name} ({path}) has no handler in saus/'
+
+        start = body.index(f'async def {name}(')
+        rest = body[start:]
+        ends = [index for index in (rest.find('\nasync def '), rest.find('\ndef ')) if index != -1]
+        handler = rest[:min(ends) if ends else len(rest)]
+
+        assert re.search(r'require_json\(request\)|require_saus_header\(request\)', handler), \
+            f'{name} ({path}) does not guard against cross-site POSTs'
+
+
+def test_every_handler_that_reads_a_json_body_requires_one():
+    """A handler that parses a JSON body must first demand a JSON content type:
+    that is what forces the CORS preflight a cross-site page cannot get answered.
+    Covers the handlers whose route is not a POST as well (a DELETE that reads a
+    body is not protected by the method alone).
+    """
+    handlers = 0
+    for path in sorted(SAUS_DIR.glob('*.py')):
+        text = path.read_text(encoding='utf-8')
+        for match in re.finditer(r'\n(async def (\w+)_handler\(.*?)\n(?=\nasync def |\ndef |\Z)',
+                                 text, re.S):
+            handler, name = match.group(1), match.group(2)
+            if 'await request.json()' not in handler:
+                continue
+
+            handlers += 1
+            before_reading = handler[:handler.index('await request.json()')]
+            assert re.search(r'require_json\(request\)|require_saus_header\(request\)', before_reading), \
+                f'{name}_handler in {path.name} reads a JSON body without requiring one first'
+
+    assert handlers >= 8, f'expected to find the JSON handlers, found {handlers}'
 
 
 def test_the_workflow_lands_in_a_new_tab():

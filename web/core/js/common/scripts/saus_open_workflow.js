@@ -24,6 +24,17 @@ import { app } from "../../scripts/app.js";
 
 const QUERY_PARAM = 'saus_workflow';
 
+/* Only the two things this feature ever points at: the copy the ⤴ button saved
+ * into ComfyUI's workflow folder, or a workflow an app ships. Anything else in
+ * the parameter is refused, so a link cannot make this page fetch an arbitrary
+ * same-origin URL. */
+const ALLOWED_PATH_PREFIXES = ['/api/userdata/', '/saus/'];
+
+/* A workflow is a small JSON document; these keep a hostile (or simply wrong)
+ * file from being read into this page and handed to ComfyUI's loader. */
+const MAX_WORKFLOW_BYTES = 5 * 1024 * 1024;
+const MAX_WORKFLOW_NODES = 2000;
+
 /* ComfyUI loads the restored workflow only after every extension setup() has
  * returned, so we never block setup(): we wait for the graph loads it performs
  * while booting and only step in once they stopped. */
@@ -124,6 +135,60 @@ async function openInNewWorkflowTab(data) {
     }
 }
 
+/** Only the two shapes this feature produces, and never a traversal. */
+function isAllowedWorkflowPath(url) {
+    let pathname = url.pathname;
+    try {
+        pathname = decodeURIComponent(pathname);   // %2e%2e must not slip through
+    } catch (error) {
+        return false;
+    }
+
+    if (pathname.split('/').includes('..')) return false;
+    return ALLOWED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+/** Refuses anything that cannot be a workflow, before ComfyUI sees it. */
+function assertLooksLikeWorkflow(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('the file does not hold a workflow');
+    }
+
+    // An API graph is keyed by node id; a UI graph holds a "nodes" array.
+    const nodes = Array.isArray(data.nodes) ? data.nodes.length : Object.keys(data).length;
+    if (nodes === 0) {
+        throw new Error('the file holds no nodes');
+    }
+    if (nodes > MAX_WORKFLOW_NODES) {
+        throw new Error(`it holds ${nodes} nodes, far more than a workflow ever has`);
+    }
+}
+
+/** Reads the workflow - only if it really is a workflow-shaped JSON document. */
+async function fetchWorkflowJson(target) {
+    const response = await fetch(target.href, { headers: { Accept: 'application/json' } });
+    if (!response.ok) {
+        throw new Error(`ComfyUI answered ${response.status}`);
+    }
+
+    const contentType = (response.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase();
+    if (contentType && contentType !== 'application/json') {
+        throw new Error(`it is served as ${contentType}, not as JSON`);
+    }
+
+    const declared = Number(response.headers.get('Content-Length'));
+    if (Number.isFinite(declared) && declared > MAX_WORKFLOW_BYTES) {
+        throw new Error('it is too large to be a workflow');
+    }
+
+    const text = await response.text();
+    if (text.length > MAX_WORKFLOW_BYTES) {
+        throw new Error('it is too large to be a workflow');
+    }
+
+    return JSON.parse(text);
+}
+
 async function openWorkflowFromAddressBar(workflowUrl) {
     await whenBootIsDone();
 
@@ -135,17 +200,12 @@ async function openWorkflowFromAddressBar(workflowUrl) {
     if (target.origin !== window.location.origin) {
         throw new Error('it lives outside ComfyUI');
     }
-
-    const response = await fetch(target.href, { headers: { Accept: 'application/json' } });
-    if (!response.ok) {
-        throw new Error(`ComfyUI answered ${response.status}`);
+    if (!isAllowedWorkflowPath(target)) {
+        throw new Error('it is not a workflow file of ComfyUI or of a SAUS app');
     }
 
-    const data = JSON.parse(await response.text());
-    // ComfyUI would fall back to its default workflow on anything else.
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-        throw new Error('the file does not hold a workflow');
-    }
+    const data = await fetchWorkflowJson(target);
+    assertLooksLikeWorkflow(data);
 
     await openInNewWorkflowTab(data);
 }

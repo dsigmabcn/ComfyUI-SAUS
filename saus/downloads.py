@@ -482,6 +482,12 @@ async def check_model_status_batch_handler(request: web.Request) -> web.Response
 
 async def delete_model_handler(request: web.Request) -> web.Response:
     try:
+        # JSON-only, like every other mutating handler: it forces a CORS
+        # preflight that a cross-site page cannot get answered (CSRF guard).
+        guard = require_json(request)
+        if guard is not None:
+            return guard
+
         data = await request.json()
         file_id = data.get('file_id')
         model_path = (data.get('model_path') or '').strip()

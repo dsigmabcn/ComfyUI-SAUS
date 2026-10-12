@@ -75,6 +75,14 @@ async function fetchAppWorkflow(appUrl) {
 const APP_READY_TIMEOUT_MS = 3000;
 const APP_READY_POLL_MS = 150;
 
+/* A workflow goes into the user's workflow list and onto ComfyUI's canvas, so
+ * keep it to a workflow-sized document and never take a file that is not one. */
+const MAX_EXPORT_BYTES = 5 * 1024 * 1024;
+const MAX_EXPORT_NODES = 2000;
+
+/* How many "name (2).json" attempts before giving up on a free name. */
+const MAX_SAVE_ATTEMPTS = 20;
+
 /**
  * The graph the app is running right now, read straight from the app page.
  *
@@ -105,7 +113,7 @@ async function readLiveWorkflow(frame) {
 
         if (saus && typeof saus.getWorkflow === 'function' && saus.isReady && saus.isReady()) {
             const workflow = saus.getWorkflow();
-            if (!workflow) return null;
+            if (!isExportableWorkflow(workflow)) return null;
 
             return { workflow, variant: (saus.getVariant && saus.getVariant()) || null };
         }
@@ -117,6 +125,64 @@ async function readLiveWorkflow(frame) {
 
         await new Promise((resolve) => setTimeout(resolve, APP_READY_POLL_MS));
     }
+}
+
+/** A graph we are willing to put in the user's workflow list and canvas. */
+function isExportableWorkflow(graph) {
+    if (!graph || typeof graph !== 'object' || Array.isArray(graph)) return false;
+
+    // An API graph is keyed by node id; a UI graph holds a "nodes" array.
+    const nodes = Array.isArray(graph.nodes) ? graph.nodes.length : Object.keys(graph).length;
+    return nodes > 0 && nodes <= MAX_EXPORT_NODES;
+}
+
+/** The stored copy of a workflow, or null when there is none. */
+async function readCopy(target) {
+    try {
+        const response = await fetch(target);
+        return response.ok ? await response.text() : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Put the workflow in ComfyUI's own workflow folder, never over a file that is
+ * already there: ComfyUI refuses to overwrite with ``overwrite=false`` (409), and
+ * the copy is then numbered the way ComfyUI numbers its own ("name (2).json").
+ *
+ * Exporting the same app again is the common case, so a copy that is already
+ * byte-for-byte the same is simply reused.
+ *
+ * @returns {Promise<{target: string, fileName: string}>} where the copy ended up,
+ *          and the name it ended up with (numbered when it had to be)
+ */
+async function saveWorkflowCopy(fileName, workflowText) {
+    for (let attempt = 0; attempt < MAX_SAVE_ATTEMPTS; attempt += 1) {
+        const numbered = attempt === 0
+            ? fileName
+            : fileName.replace(/\.json$/i, ` (${attempt + 1}).json`);
+
+        // Same endpoint ComfyUI's own workflow list reads from (the slash stays
+        // encoded, which is how the UI asks for a file inside "workflows/").
+        const target = `/api/userdata/${encodeURIComponent(`workflows/${numbered}`)}`;
+
+        if (attempt === 0) {
+            const existing = await readCopy(target);
+            if (existing === workflowText) return { target, fileName: numbered };
+        }
+
+        const saved = await fetch(`${target}?overwrite=false`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: workflowText,
+        });
+        if (saved.ok) return { target, fileName: numbered };
+        if (saved.status !== 409) throw new Error(`ComfyUI refused it (HTTP ${saved.status})`);
+        // 409: that name is taken, try the next one.
+    }
+
+    throw new Error('too many copies of that workflow are already in ComfyUI');
 }
 
 /**
@@ -137,36 +203,35 @@ export async function exportWorkflowToComfyUI(tab, getFrame) {
             ? JSON.stringify(running.workflow)
             : await fetchAppWorkflow(tab.url);
 
+        if (workflowText.length > MAX_EXPORT_BYTES) {
+            throw new Error('that workflow is too large to send');
+        }
+
         // Name the copy after the variant being exported, so the variants of an
         // app can sit in the workflow list side by side.
         const name = [tab.name || tab.url];
         if (running && running.variant && running.variant.label) name.push(running.variant.label);
         const fileName = `${safeFileName(name.join(' · '))}.json`;
 
-        // Same endpoint ComfyUI's own workflow list reads from (the slash stays
-        // encoded, which is how the UI asks for a file inside "workflows/").
-        const target = `/api/userdata/${encodeURIComponent(`workflows/${fileName}`)}`;
-        const saved = await fetch(target, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: workflowText,
-        });
-        if (!saved.ok) throw new Error(`ComfyUI refused it (HTTP ${saved.status})`);
+        const copy = await saveWorkflowCopy(fileName, workflowText);
 
         // The workflow itself is loaded by the extension SAUS injects into the
         // ComfyUI page, which reads this parameter and puts the graph in a new
         // workflow tab there.
         const comfyUrl = new URL('/', window.location.origin);
-        comfyUrl.searchParams.set('saus_workflow', target);
+        comfyUrl.searchParams.set('saus_workflow', copy.target);
         if (comfyWindow) {
+            // The ComfyUI page needs nothing back from us, and it shares this
+            // origin: drop the handle it would otherwise have on this window.
+            comfyWindow.opener = null;
             comfyWindow.location.replace(comfyUrl.href);
         } else {
             window.open(comfyUrl.href, '_blank');   // the window was blocked
         }
 
         toast(running
-            ? `“${fileName}” saved and opened in a new ComfyUI tab.`
-            : `${tab.name || tab.url} was not ready: its base workflow was sent to ComfyUI.`,
+            ? `“${copy.fileName}” saved and opened in a new ComfyUI tab.`
+            : `${tab.name || tab.url} was not ready: its base workflow went over as “${copy.fileName}”.`,
             running ? 'success' : 'info');
         return true;
     } catch (error) {

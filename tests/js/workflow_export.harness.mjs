@@ -24,13 +24,20 @@ const state = {
     toasts: [],
     fetch: [],
     workflowOk: true,
+    workflowBody: APP_WORKFLOW,
     saveOk: true,
+    storedCopies: {},        // endpoint -> the workflow already stored there
+    conflictNames: [],       // file names ComfyUI already has (overwrite=false -> 409)
 };
+
+/** The endpoint ComfyUI's workflow list reads a copy from. */
+const copyUrl = (fileName) => `/api/userdata/${encodeURIComponent(`workflows/${fileName}`)}`;
 
 const blankWindow = (label) => ({
     label,
     navigatedTo: null,
     closed: false,
+    opener: { notNull: true },      // so a scenario can see it being dropped
     close() { this.closed = true; },
     location: { replace(url) { this.owner.navigatedTo = url; }, owner: null },
 });
@@ -48,13 +55,28 @@ globalThis.window = {
 globalThis.document = {
     getElementById: () => null,
     createElement: () => ({ className: '', classList: { add() {}, remove() {} }, style: {}, appendChild() {}, remove() {} }),
-    createTextNode: (text) => text,
+    createTextNode: (text) => { state.toasts.push(text); return text; },
     body: { appendChild() {} },
 };
 globalThis.fetch = async (url, options = {}) => {
-    state.fetch.push({ url, method: options.method ?? 'GET', body: options.body });
-    const ok = options.method === 'POST' ? state.saveOk : state.workflowOk;
-    return { ok, status: ok ? 200 : 500, text: async () => APP_WORKFLOW };
+    const method = options.method ?? 'GET';
+    state.fetch.push({ url, method, body: options.body });
+
+    if (method === 'POST') {
+        // ComfyUI answers 409 when ?overwrite=false and the name is taken.
+        if (state.conflictNames.some((name) => url.startsWith(copyUrl(name)))) {
+            return { ok: false, status: 409, text: async () => '' };
+        }
+        return { ok: state.saveOk, status: state.saveOk ? 200 : 500, text: async () => '' };
+    }
+
+    // GET: the app's own wf.json, or a copy already in the workflow folder.
+    if (url.startsWith('/saus/')) {
+        return { ok: state.workflowOk, status: state.workflowOk ? 200 : 500, text: async () => state.workflowBody };
+    }
+    const stored = state.storedCopies[url];
+    if (stored === undefined) return { ok: false, status: 404, text: async () => '' };
+    return { ok: true, status: 200, text: async () => stored };
 };
 
 /** Stub of the app's iframe: the window.SAUS API web/core/main.js exposes. */
@@ -77,7 +99,10 @@ function reset(overrides = {}) {
     state.toasts = [];
     state.fetch = [];
     state.workflowOk = true;
+    state.workflowBody = APP_WORKFLOW;
     state.saveOk = true;
+    state.storedCopies = {};
+    state.conflictNames = [];
     Object.assign(state, overrides);
     globalThis.window.blockPopups = false;
 }
@@ -99,13 +124,14 @@ function reset(overrides = {}) {
     assert.equal(parsed.pathname, '/');
     const param = parsed.searchParams.get('saus_workflow');
     assert.ok(param, 'ComfyUI is told which workflow to open');
-    assert.equal(param, '/api/userdata/workflows%2FBackground%20Remover.json');
+    assert.equal(param, copyUrl('Background Remover.json'));
 
-    const calls = state.fetch.map((f) => f.method);
-    assert.deepEqual(calls, ['GET', 'POST'], 'the app workflow is read, then saved to userdata');
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'],
+        'the app workflow is read, any stored copy checked, then the copy saved');
     assert.ok(state.fetch[0].url.startsWith('/saus/65j5u-background-remover/wf.json?cacheSaus='),
         `unexpected first request: ${state.fetch[0].url}`);
-    assert.equal(state.fetch[1].url, '/api/userdata/workflows%2FBackground%20Remover.json');
+    assert.equal(state.fetch[2].url, `${copyUrl('Background Remover.json')}?overwrite=false`,
+        'nothing is overwritten');
     console.log('1. reserves a window, saves to userdata, hands over ?saus_workflow=: OK');
 }
 
@@ -174,13 +200,17 @@ function reset(overrides = {}) {
     const result = await exportWorkflowToComfyUI(tab, () => frame);
 
     assert.equal(result, true);
-    assert.deepEqual(state.fetch.map((call) => call.method), ['POST'],
+    const saved = state.fetch.find((call) => call.method === 'POST');
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST'],
         'the base wf.json must not be fetched when the app can hand over its own graph');
-    assert.deepEqual(JSON.parse(state.fetch[0].body), liveGraph, 'the live graph is what reaches ComfyUI');
-    assert.equal(state.fetch[0].url, '/api/userdata/workflows%2FMy%20App%20%C2%B7%20Turbo.json',
-        'the copy is named after the variant being exported');
-    assert.equal(new URL(state.opened[0].navigatedTo).searchParams.get('saus_workflow'), state.fetch[0].url,
-        'ComfyUI is pointed at that exact copy');
+    assert.deepEqual(JSON.parse(saved.body), liveGraph, 'the live graph is what reaches ComfyUI');
+    assert.equal(saved.url, `${copyUrl('My App · Turbo.json')}?overwrite=false`,
+        'the copy is named after the variant being exported, and never overwrites');
+    assert.equal(new URL(state.opened[0].navigatedTo).searchParams.get('saus_workflow'),
+        copyUrl('My App · Turbo.json'), 'ComfyUI is pointed at that exact copy');
+    assert.equal(state.opened[0].opener, null, 'the ComfyUI window gets no handle back on this one');
+    assert.match(state.toasts[0], /“My App · Turbo\.json” saved and opened/,
+        'the user is told which copy went over');
     console.log('5. running app -> its live graph, named after the variant: OK');
 }
 
@@ -192,9 +222,9 @@ function reset(overrides = {}) {
     const result = await exportWorkflowToComfyUI(tab, () => ({ contentWindow: {} }));
 
     assert.equal(result, true);
-    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST'], 'the base file is read and saved');
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'], 'the base file is read and saved');
     assert.ok(state.fetch[0].url.startsWith('/saus/old-app/wf.json'), `unexpected first request: ${state.fetch[0].url}`);
-    assert.equal(state.fetch[1].url, '/api/userdata/workflows%2FOld%20App.json', 'no variant in the name');
+    assert.equal(state.fetch[2].url, `${copyUrl('Old App.json')}?overwrite=false`, 'no variant in the name');
     console.log('6. app without the accessor -> base wf.json: OK');
 }
 
@@ -209,8 +239,8 @@ function reset(overrides = {}) {
 
     assert.equal(result, true);
     assert.ok(asked > 2, 'it must wait for the app to report itself ready');
-    assert.deepEqual(state.fetch.map((call) => call.method), ['POST'], 'and then export the live graph');
-    assert.deepEqual(JSON.parse(state.fetch[0].body), liveGraph);
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST'], 'and then export the live graph');
+    assert.deepEqual(JSON.parse(state.fetch.find((call) => call.method === 'POST').body), liveGraph);
     console.log('7. app still booting -> waited for, live graph exported: OK');
 }
 
@@ -224,7 +254,7 @@ function reset(overrides = {}) {
         () => liveFrame({ 1: { class_type: 'X' } }, null, () => false),
     );
     assert.equal(result, true);
-    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST']);
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST']);
     assert.ok(Date.now() - started >= 3000, 'the app is given a few seconds before falling back');
 
     // cross-origin window: reading it throws
@@ -232,14 +262,61 @@ function reset(overrides = {}) {
     const crossOriginFrame = { get contentWindow() { throw new Error('SecurityError'); } };
     result = await exportWorkflowToComfyUI({ url: 'other-app', name: 'Other App', id: 'tab-5' }, () => crossOriginFrame);
     assert.equal(result, true);
-    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST'], 'a page we may not read -> base workflow');
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'], 'a page we may not read -> base workflow');
 
     // no iframe at all (restored tab that was never shown)
     reset();
     result = await exportWorkflowToComfyUI({ url: 'closed-app', name: 'Closed App', id: 'tab-6' }, () => null);
     assert.equal(result, true);
-    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'POST']);
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST']);
     console.log('8. never-ready / unreadable / missing app -> base workflow: OK');
+}
+
+/* 9. the copy never lands on a workflow the user already has */
+{
+    // The name is taken by a *different* workflow: ComfyUI answers 409 to
+    // overwrite=false, so the copy is numbered the way ComfyUI numbers its own.
+    reset({
+        storedCopies: { [copyUrl('My App.json')]: '{"1":{"class_type":"SomethingElse"}}' },
+        conflictNames: ['My App.json'],
+    });
+
+    const result = await exportWorkflowToComfyUI({ url: 'my-app', name: 'My App', id: 'tab-9' }, () => null);
+
+    assert.equal(result, true);
+    assert.deepEqual(state.fetch.filter((call) => call.method === 'POST').map((call) => call.url), [
+        `${copyUrl('My App.json')}?overwrite=false`,
+        `${copyUrl('My App (2).json')}?overwrite=false`,
+    ], 'a taken name is numbered, never overwritten');
+    assert.equal(new URL(state.opened[0].navigatedTo).searchParams.get('saus_workflow'),
+        copyUrl('My App (2).json'), 'ComfyUI is pointed at the copy that was actually written');
+    assert.match(state.toasts[0], /My App \(2\)\.json/, 'and the user is told the name it ended up with');
+    console.log('9. a taken name is never overwritten: OK');
+}
+
+/* 10. exporting the same app again reuses its copy instead of filling the list */
+{
+    reset({ storedCopies: { [copyUrl('My App.json')]: APP_WORKFLOW } });
+
+    await exportWorkflowToComfyUI({ url: 'my-app', name: 'My App', id: 'tab-10' }, () => null);
+
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET'],
+        'an identical copy is reused: nothing is written at all');
+    assert.equal(new URL(state.opened[0].navigatedTo).searchParams.get('saus_workflow'),
+        copyUrl('My App.json'));
+    console.log('10. an identical copy is reused: OK');
+}
+
+/* 11. a graph the app hands over that is not a workflow is not used */
+{
+    reset();
+    const result = await exportWorkflowToComfyUI({ url: 'odd-app', name: 'Odd App', id: 'tab-11' }, () => liveFrame({}));
+
+    assert.equal(result, true);
+    assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'],
+        'an empty graph is not a workflow: the app base file is sent instead');
+    assert.ok(state.fetch[0].url.startsWith('/saus/odd-app/wf.json'));
+    console.log('11. a non-workflow graph from the app -> base workflow: OK');
 }
 
 console.log('\nall scenarios passed');
