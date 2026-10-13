@@ -1,0 +1,265 @@
+{
+  "47": {
+    "inputs": {
+      "image": "flux1_dev_uso_reference_image_gen_input_image.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "9": {
+    "inputs": {
+      "images": [
+        "131",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "124_44": {
+    "inputs": {
+      "conditioning": [
+        "137",
+        0
+      ],
+      "latent": [
+        "129",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "124_35": {
+    "inputs": {
+      "conditioning": [
+        "124_41",
+        0
+      ],
+      "guidance": 3.5
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "124_41": {
+    "inputs": {
+      "conditioning": [
+        "124_44",
+        0
+      ],
+      "reference_latents_method": "uxo/uno"
+    },
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "_meta": {
+      "title": "FluxKontextMultiReferenceLatentMethod"
+    }
+  },
+  "125": {
+    "inputs": {
+      "ckpt_name": "flux1-dev-fp8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "126": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "127": {
+    "inputs": {
+      "name": "uso-flux1-projector-v1.safetensors"
+    },
+    "class_type": "ModelPatchLoader",
+    "_meta": {
+      "title": "ModelPatchLoader"
+    }
+  },
+  "128": {
+    "inputs": {
+      "model": [
+        "125",
+        0
+      ],
+      "lora_name": "uso-flux1-dit-lora-v1.safetensors",
+      "strength_model": 1
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "129": {
+    "inputs": {
+      "pixels": [
+        "132",
+        0
+      ],
+      "vae": [
+        "125",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "130": {
+    "inputs": {
+      "conditioning": [
+        "137",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "131": {
+    "inputs": {
+      "samples": [
+        "139",
+        0
+      ],
+      "vae": [
+        "125",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "132": {
+    "inputs": {
+      "image": [
+        "47",
+        0
+      ],
+      "upscale_method": "area",
+      "largest_size": 512
+    },
+    "class_type": "ImageScaleToMaxDimension",
+    "_meta": {
+      "title": "ImageScaleToMaxDimension"
+    }
+  },
+  "134_117": {
+    "inputs": {
+      "clip_vision": [
+        "126",
+        0
+      ],
+      "image": [
+        "136",
+        0
+      ],
+      "crop": "center"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "134_118": {
+    "inputs": {
+      "model": [
+        "128",
+        0
+      ],
+      "model_patch": [
+        "127",
+        0
+      ],
+      "clip_vision_output": [
+        "134_117",
+        0
+      ]
+    },
+    "class_type": "USOStyleReference",
+    "_meta": {
+      "title": "USOStyleReference"
+    }
+  },
+  "136": {
+    "inputs": {
+      "image": "flux1_dev_uso_reference_image_gen_input_image.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "137": {
+    "inputs": {
+      "clip": [
+        "125",
+        1
+      ],
+      "text": "A European girl with a heartfelt smile. She is immersed in a vast, endless field of blooming flowers under a perfect summer sky."
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "138": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "EmptySD3LatentImage"
+    }
+  },
+  "139": {
+    "inputs": {
+      "model": [
+        "134_118",
+        0
+      ],
+      "positive": [
+        "124_35",
+        0
+      ],
+      "negative": [
+        "130",
+        0
+      ],
+      "latent_image": [
+        "138",
+        0
+      ],
+      "seed": 1058487910949722,
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  }
+}

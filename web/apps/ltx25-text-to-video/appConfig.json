@@ -1,0 +1,209 @@
+{
+  "id": "ltx25t2v",
+  "name": "LTX-2.5",
+  "url": "ltx25-text-to-video",
+  "description": "Text to Video with the LTX-2.5 22B distilled transformer, with synchronized audio.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "LTX-2.5"
+      ],
+      "other": []
+    },
+    "architecture": "LTX-2.5",
+    "models": [
+      "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
+      "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "ltx-2.5-video-vae-bf16.safetensors",
+      "ltx-2.5-audio-vae-bf16.safetensors",
+      "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "gemma4_e2b_it_int8_convrot.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptltx25t2v",
+      "label": "Prompt",
+      "nodePath": "452.inputs.value",
+      "default": "Dynamic cinematic close-up of high-tech modular machinery self-assembling in midair, precision robotic parts, magnetic connectors, and glowing circuits clicking together, subtle smoke and light flares, extremely detailed titanium textures. The final product displays a clean, clear surface with large glowing engraved text “LTX-2.5” centered and unobstructed, dramatic lighting, photorealism, 8K, sharp focus.\n",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperltx25mp",
+      "label": "Megapixels",
+      "nodePath": "409.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 4,
+      "step": 0.1,
+      "defValue": 0.9,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepperltx25dur",
+      "label": "Duration (s)",
+      "nodePath": "450.inputs.value",
+      "minValue": 1,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownltx25model",
+      "label": "Model",
+      "nodePath": "439.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "dropdownltx25clip",
+      "label": "CLIP",
+      "nodePath": "442.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownltx25clipenh",
+      "label": "CLIP (Prompt Enhancer)",
+      "nodePath": "453.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "dropdownltx25vae",
+      "label": "Video VAE",
+      "nodePath": "440.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "dropdownltx25avae",
+      "label": "Audio VAE",
+      "nodePath": "441.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "dropdownltx25ups",
+      "label": "Latent Upscaler",
+      "nodePath": "438.inputs.model_name",
+      "url": "LatentUpscaleModelLoader",
+      "key": "model_name",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederltx25t2v",
+      "label": "Seed",
+      "nodePath": "429.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [
+    {
+      "id": "toggleltx25pe",
+      "label": "Prompt Enhance",
+      "nodePath": "454.inputs.value",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "inputltx25fn",
+      "label": "Filename Prefix",
+      "nodePath": "75.inputs.filename_prefix",
+      "defValue": "video/LTX_2.5_t2v",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "arcltx25",
+      "label": "Aspect Ratio",
+      "nodePath": "409.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "16:9, 1:1, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output75",
+      "label": "Save Video",
+      "nodeId": "75",
+      "type": "media"
+    }
+  ]
+}

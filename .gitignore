@@ -16,3 +16,5 @@ node.zip
 # Migration / backup artifacts
 *.bak
 web/saus_browser/data/migration_report.json
+# Cline project config (skill symlink into the canonical file)
+.clinerules/

@@ -1,0 +1,229 @@
+{
+  "id": "ltx25i2v",
+  "name": "LTX-2.5 Image to Video",
+  "url": "ltx25-image-to-video",
+  "description": "Image to Video with the LTX-2.5 22B distilled transformer, with synchronized audio.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "distilled-fast"
+      ],
+      "base_models": [
+        "LTX-2.5"
+      ],
+      "other": []
+    },
+    "architecture": "LTX-2.5",
+    "models": [
+      "gemma4_e2b_it_int8_convrot.safetensors",
+      "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "ltx-2.5-video-vae-bf16.safetensors",
+      "ltx-2.5-audio-vae-bf16.safetensors",
+      "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptltx25i2v",
+      "label": "Prompt",
+      "nodePath": "409.inputs.value",
+      "default": "Egyptian royal in blue-and-gold headdress and high collar, white dress with golden embroidery and armbands, desert, robot soldiers in formation left and right. She walks steadily forward, head held level and gaze fixed ahead—no dipping or lowering of the head. The camera performs a single, smooth push-in only: starting in a wider shot of her, the robots, and the desert, it moves steadily forward until she is in a medium or medium-close frame, then holds. She stops, posture and head still upright, and says: “The old gods are silent. I am not.” Robot soldiers shift or march in place; sand and fabric move with the wind. No pull-back; the only camera move is the continuous push-in.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperltx25i2vmp",
+      "label": "Megapixels",
+      "nodePath": "403.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 4,
+      "step": 0.1,
+      "defValue": 0.9,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepperltx25i2vdur",
+      "label": "Duration (s)",
+      "nodePath": "413.inputs.value",
+      "minValue": 1,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownltx25i2vmodel",
+      "label": "Model",
+      "nodePath": "411.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "dropdownltx25i2vtype",
+      "label": "Type",
+      "nodePath": "411.inputs.weight_dtype",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownltx25i2vclip",
+      "label": "CLIP",
+      "nodePath": "420.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "dropdownltx25i2vclipenh",
+      "label": "CLIP (Prompt Enhancer)",
+      "nodePath": "405.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "dropdownltx25i2vvae",
+      "label": "Video VAE",
+      "nodePath": "416.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "dropdownltx25i2vavae",
+      "label": "Audio VAE",
+      "nodePath": "417.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    },
+    {
+      "id": "dropdownltx25i2vups",
+      "label": "Latent Upscaler",
+      "nodePath": "426.inputs.model_name",
+      "url": "LatentUpscaleModelLoader",
+      "key": "model_name",
+      "layout": {
+        "region": "advanced",
+        "order": 13
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederltx25i2v",
+      "label": "Seed",
+      "nodePath": "423.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderltx25i2v",
+      "label": "Start Frame",
+      "nodePath": "395.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 7
+      }
+    }
+  ],
+  "toggles": [
+    {
+      "id": "toggleltx25i2vpe",
+      "label": "Prompt Enhance",
+      "nodePath": "407.inputs.value",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "inputltx25i2vfn",
+      "label": "Filename Prefix",
+      "nodePath": "75.inputs.filename_prefix",
+      "defValue": "video/LTX-2.5_i2v",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "arcltx25i2v",
+      "label": "Aspect Ratio",
+      "nodePath": "403.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "16:9, 1:1, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output75",
+      "label": "Save Video",
+      "nodeId": "75",
+      "type": "media"
+    }
+  ]
+}

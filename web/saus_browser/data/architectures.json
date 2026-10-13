@@ -175,8 +175,7 @@
           "Diffusion_model": "flux1-dev.safetensors"
         },
         "settings": {
-          "steps": "30",
-          "cfg": "3.5"
+          "steps": "30"
         },
         "loras": []
       },
@@ -186,8 +185,7 @@
           "Diffusion_model": "flux1-krea-dev.safetensors"
         },
         "settings": {
-          "steps": "30",
-          "cfg": "3.5"
+          "steps": "30"
         },
         "loras": []
       }
@@ -519,122 +517,6 @@
         "settings": {
           "steps": "4",
           "cfg": "1"
-        },
-        "loras": []
-      }
-    }
-  },
-  "FLUX_DEV_GGUF": {
-    "title": "FLUX DEV GGUF",
-    "description": "Models required for (GGUF) FLUX image generation.",
-    "categories": [
-      "Low VRAM - GGUF"
-    ],
-    "components": {
-      "compulsory": [
-        "AE_VAE",
-        "CLIP_L_ENCODER",
-        "T5 XXL GGUF Q8"
-      ],
-      "at_least_one": [
-        "FLUX GGUF Q8",
-        "FLUX GGUF Q6"
-      ],
-      "optional": []
-    },
-    "base_settings": {
-      "name": "Q8",
-      "steps": "20",
-      "cfg": "3.5",
-      "model": [
-        "FLUX GGUF Q8"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "Q6",
-      "steps": "20",
-      "cfg": "3.5",
-      "model": [
-        "FLUX GGUF Q6"
-      ],
-      "lora": []
-    },
-    "models": [
-      {
-        "id": "VAE",
-        "type": "VAE",
-        "need": "all",
-        "node": {
-          "nodeType": "VAELoader",
-          "input": "vae_name"
-        },
-        "files": [
-          {
-            "file": "ae.safetensors",
-            "label": "FLUX AE VAE"
-          }
-        ]
-      },
-      {
-        "id": "TEXT_ENCODER",
-        "type": "TEXT ENCODER",
-        "need": "all",
-        "node": {
-          "nodeType": "CLIPLoader",
-          "input": "clip_name"
-        },
-        "files": [
-          {
-            "file": "clip_l.safetensors",
-            "label": "CLIP-L Text Encoder"
-          },
-          {
-            "file": "t5-v1_1-xxl-encoder-Q8_0.gguf",
-            "label": "T5 GGUF Q8"
-          }
-        ]
-      },
-      {
-        "id": "Diffusion_model",
-        "type": "Diffusion model",
-        "need": "one",
-        "node": {
-          "nodeType": "UNETLoader",
-          "input": "unet_name"
-        },
-        "files": [
-          {
-            "file": "flux1-dev-Q8_0.gguf",
-            "label": "GGUF Q8 FLUX-DEV"
-          },
-          {
-            "file": "flux1-dev-Q6_K.gguf",
-            "label": "GGUF Q6_K FLUX-DEV"
-          }
-        ]
-      }
-    ],
-    "variants": {
-      "Q8": {
-        "label": "Q8",
-        "pick": {
-          "Diffusion_model": "flux1-dev-Q8_0.gguf"
-        },
-        "settings": {
-          "steps": "20",
-          "cfg": "3.5"
-        },
-        "loras": []
-      },
-      "Q6": {
-        "label": "Q6",
-        "pick": {
-          "Diffusion_model": "flux1-dev-Q6_K.gguf"
-        },
-        "settings": {
-          "steps": "20",
-          "cfg": "3.5"
         },
         "loras": []
       }
@@ -1410,131 +1292,25 @@
       }
     ]
   },
-  "FLUX_INPAINT_GGUF": {
-    "title": "FLUX INPAINT GGUF",
-    "description": "Assets for image prompt guidance and style transfer with quantized models",
-    "categories": [
-      "Style, Edit, inpaint"
-    ],
-    "components": {
-      "compulsory": [
-        "AE_VAE",
-        "T5XXL_ENCODER",
-        "CLIP_L_ENCODER"
-      ],
-      "at_least_one": [
-        "FLUX_FILL_GGUF_Q8",
-        "FLUX_FILL_GGUF_Q6"
-      ],
-      "optional": []
-    },
-    "models": [
-      {
-        "id": "VAE",
-        "type": "VAE",
-        "need": "all",
-        "node": {
-          "nodeType": "VAELoader",
-          "input": "vae_name"
-        },
-        "files": [
-          {
-            "file": "ae.safetensors",
-            "label": "FLUX AE VAE"
-          }
-        ]
-      },
-      {
-        "id": "TEXT_ENCODER",
-        "type": "TEXT ENCODER",
-        "need": "all",
-        "node": {
-          "nodeType": "CLIPLoader",
-          "input": "clip_name"
-        },
-        "files": [
-          {
-            "file": "t5xxl_fp8_e4m3fn.safetensors",
-            "label": "T5 Text Encoder"
-          },
-          {
-            "file": "clip_l.safetensors",
-            "label": "CLIP-L Text Encoder"
-          }
-        ]
-      },
-      {
-        "id": "Diffusion_model",
-        "type": "Diffusion model",
-        "need": "one",
-        "node": {
-          "nodeType": "UNETLoader",
-          "input": "unet_name"
-        },
-        "files": [
-          {
-            "file": "flux1-fill-dev-Q8_0.gguf",
-            "label": "FLUX-DEV-FILL GGUF Q8"
-          },
-          {
-            "file": "flux1-fill-dev-Q6_K.gguf",
-            "label": "FLUX-DEV-FILL GGUF Q6"
-          }
-        ]
-      }
-    ]
-  },
   "QWEN_EDIT": {
     "title": "QWEN EDIT",
-    "description": "Assets for image prompt guidance and style transfer.",
+    "description": "Qwen-Image-Edit 2511 (int8). HD and Turbo (2511 Lightning 4-step LoRA) variants, shared by the 1-image Edit and 2-images Reference apps.",
     "categories": [
-      "Style",
-      "Edit",
-      "inpaint"
+      "image-to-image (editing)",
+      "image-to-image (reference)"
     ],
-    "components": {
-      "compulsory": [
-        "WAN_VAE",
-        "QWEN_2.5VL_ENCODER"
-      ],
-      "at_least_one": [
-        "QWEN_EDIT_MODEL"
-      ],
-      "optional": [
-        "QWEN_EDIT_2509_LIGHTING"
-      ]
-    },
-    "base_settings": {
-      "name": "BASE",
-      "steps": "20",
-      "cfg": "4.0",
-      "model": [
-        "QWEN_EDIT_2509_MODEL"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "LIGHTNING",
-      "steps": "4",
-      "cfg": "1.0",
-      "model": [
-        "QWEN_EDIT_2509_LIGHTING"
-      ],
-      "lora": []
-    },
     "models": [
       {
         "id": "VAE",
         "type": "VAE",
         "need": "all",
         "node": {
-          "nodeType": "VAELoader",
-          "input": "vae_name"
+          "input": "vae_name",
+          "nodeType": "VAELoader"
         },
         "files": [
           {
-            "file": "wan_2.1_vae.safetensors",
-            "label": "VAE for WAN 2.1 and QWEN"
+            "file": "qwen_image_vae.safetensors"
           }
         ]
       },
@@ -1543,28 +1319,26 @@
         "type": "TEXT ENCODER",
         "need": "all",
         "node": {
-          "nodeType": "CLIPLoader",
-          "input": "clip_name"
+          "input": "clip_name",
+          "nodeType": "CLIPLoader"
         },
         "files": [
           {
-            "file": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
-            "label": "QWEN 2.5 text encoder FP8"
+            "file": "qwen_2.5_vl_7b_fp8_scaled.safetensors"
           }
         ]
       },
       {
         "id": "Diffusion_model",
         "type": "Diffusion model",
-        "need": "one",
+        "need": "all",
         "node": {
-          "nodeType": "UNETLoader",
-          "input": "unet_name"
+          "input": "unet_name",
+          "nodeType": "UNETLoader"
         },
         "files": [
           {
-            "file": "qwen_image_edit_2511_bf16.safetensors",
-            "label": "QWEN EDIT v2511"
+            "file": "qwen_image_edit_2511_int8_convrot.safetensors"
           }
         ]
       },
@@ -1573,35 +1347,34 @@
         "type": "LORA",
         "need": "none",
         "node": {
-          "nodeType": "LoraLoader",
-          "input": "lora_name"
+          "input": "lora_name",
+          "nodeType": "LoraLoader"
         },
         "files": [
           {
-            "file": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
-            "label": "QWEN EDIT 2509 LIGHTNING 4-steps LORA"
+            "file": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors"
           }
         ]
       }
     ],
     "variants": {
-      "BASE": {
-        "label": "BASE",
+      "HD": {
+        "label": "HD",
         "pick": {},
         "settings": {
-          "steps": "20",
-          "cfg": "4.0"
+          "steps": "40",
+          "cfg": "4"
         },
         "loras": []
       },
-      "LIGHTNING": {
-        "label": "LIGHTNING",
+      "TURBO": {
+        "label": "Turbo",
         "pick": {
-          "LORA": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors"
+          "LORA": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors"
         },
         "settings": {
           "steps": "4",
-          "cfg": "1.0"
+          "cfg": "1"
         },
         "loras": []
       }
@@ -1983,10 +1756,11 @@
   },
   "KREA 2 TURBO": {
     "title": "KREA 2 TURBO",
-    "description": "KREA 2 Turbo architecture for Text to Image and Reference sytle",
+    "description": "Krea 2 Turbo (int8) with the qwen3vl-4b text encoder, the Krea 2 VAE and the krea2 style-reference LoRA. Shared by the text-to-image and the style-reference apps.",
     "categories": [
       "Text to Image",
-      "Style"
+      "Style",
+      "Style reference"
     ],
     "models": [
       {
@@ -2052,11 +1826,12 @@
     ],
     "variants": {}
   },
-  "Minimax H3 text to video": {
-    "title": "Minimax H3 Text to video",
-    "description": "Models for Minimax H3 text to video. Shares same diffusers as FLF",
+  "Minimax FL2VA": {
+    "title": "Minimax H3 FL2VA",
+    "description": "Minimax H3 FL2VA (first/last frame or text -> video + audio). Shared by the Text-to-Video and Image-to-Video apps: same diffusion model, different conditioning. Turbo adds the FL2V 8-step LoRA.",
     "categories": [
-      "text to video"
+      "Text to video",
+      "Image to video"
     ],
     "models": [
       {
@@ -2219,6 +1994,706 @@
           {
             "file": "gemma4_e2b_it_int8_convrot.safetensors",
             "label": "gemma4_e2b_it_int8_convrot.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "WAN22_T2V_14B": {
+    "title": "Wan 2.2 T2V 14B",
+    "description": "Wan 2.2 Text to Video 14B (high + low noise). HD and Turbo (LightX2V 4-step LoRA) variants.",
+    "categories": [
+      "Text to video"
+    ],
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "WAN 2.1 VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 T2V HIGH (fp8)"
+          },
+          {
+            "file": "wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 T2V LOW (fp8)"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+            "label": "LIGHTX2V HIGH"
+          },
+          {
+            "file": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+            "label": "LIGHTX2V LOW"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "HD": {
+        "label": "HD",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "20",
+          "Number of steps high pass": "10",
+          "CFG": "3.5"
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "Turbo",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "4",
+          "Number of steps high pass": "2",
+          "CFG": "1"
+        },
+        "loras": [
+          "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+          "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
+        ]
+      }
+    }
+  },
+  "WAN22_I2V_14B": {
+    "title": "Wan 2.2 I2V 14B",
+    "description": "Wan 2.2 Image to Video 14B (high + low noise). HD and Turbo (LightX2V 4-step LoRA) variants.",
+    "categories": [
+      "Image to video"
+    ],
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "WAN 2.1 VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 I2V HIGH (fp8)"
+          },
+          {
+            "file": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 I2V LOW (fp8)"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+            "label": "LIGHTX2V HIGH"
+          },
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+            "label": "LIGHTX2V LOW"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "HD": {
+        "label": "HD",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "20",
+          "Number of steps high pass": "10",
+          "CFG": "3.5"
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "Turbo",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "4",
+          "Number of steps high pass": "2",
+          "CFG": "1"
+        },
+        "loras": [
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
+        ]
+      }
+    }
+  },
+  "WAN22_FLF_14B": {
+    "title": "Wan 2.2 FLF 14B",
+    "description": "Wan 2.2 First & Last Frame to Video 14B (uses the I2V high + low noise models). HD and Turbo (LightX2V 4-step LoRA) variants.",
+    "categories": [
+      "Image to video"
+    ],
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "wan_2.1_vae.safetensors",
+            "label": "WAN 2.1 VAE"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+            "label": "UMT5 XXL ENCODER"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 I2V HIGH (fp8)"
+          },
+          {
+            "file": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+            "label": "WAN 2.2 I2V LOW (fp8)"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+            "label": "LIGHTX2V HIGH"
+          },
+          {
+            "file": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+            "label": "LIGHTX2V LOW"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "HD": {
+        "label": "HD",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "20",
+          "Number of steps high pass": "10",
+          "CFG": "4"
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "Turbo",
+        "pick": {},
+        "settings": {
+          "Total number of steps": "4",
+          "Number of steps high pass": "2",
+          "CFG": "1"
+        },
+        "loras": [
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+          "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
+        ]
+      }
+    }
+  },
+  "Minimax R2VA": {
+    "title": "Minimax H3 R2VA",
+    "description": "Minimax H3 R2VA (reference images / audio -> video + audio). Used by the Reference-to-Video and Multiframe apps (same model, different reference wiring). Turbo adds the R2V 4-step LoRA.",
+    "categories": [
+      "Image to video"
+    ],
+    "models": [
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "input": "vae_name",
+          "nodeType": "VAELoader"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_video_vae_int8_convrot.safetensors",
+            "label": "minimax_h3_video_vae_int8_convrot.safetensors"
+          },
+          {
+            "file": "minimax_h3_audio_vae_fp32.safetensors",
+            "label": "minimax_h3_audio_vae_fp32.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "input": "unet_name",
+          "nodeType": "UNETLoader"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+            "label": "minimax_h3_ref2va_pruned_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "input": "clip_name",
+          "nodeType": "CLIPLoader"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+            "label": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "lora",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "input": "lora_name",
+          "nodeType": "LoraLoader"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+            "label": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "VARIANT1": {
+        "label": "HD",
+        "pick": {},
+        "settings": {
+          "steps": "20"
+        },
+        "loras": []
+      },
+      "VARIANT2": {
+        "label": "Turbo",
+        "pick": {
+          "lora": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors"
+        },
+        "settings": {
+          "steps": "4"
+        },
+        "loras": []
+      }
+    }
+  },
+  "FLUX 2 KLEIN EDIT": {
+    "title": "Flux 2 Klein Edit family",
+    "description": "Klein edit models (4B and 9B, base and distilled) used by the Edit and 2-images Reference apps. 4B uses flux2-vae, 9B uses full_encoder_small_decoder. No Fast LoRAs: the distilled models are separate checkpoints.",
+    "categories": [
+      "image-to-image (editing)",
+      "image-to-image (reference)"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux-2-klein-base-4b.safetensors",
+            "label": "FLUX 2 KLEIN 4B (base)"
+          },
+          {
+            "file": "flux-2-klein-4b.safetensors"
+          },
+          {
+            "file": "flux-2-klein-base-9b.safetensors"
+          },
+          {
+            "file": "flux-2-klein-9b.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "one",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen_3_4b.safetensors",
+            "label": "QWEN 3 4B text encoder"
+          },
+          {
+            "file": "qwen_3_8b_fp8mixed.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "one",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          },
+          {
+            "file": "full_encoder_small_decoder.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "VARIANT1": {
+        "label": "4B HD",
+        "pick": {
+          "diffusion_model": "flux-2-klein-base-4b.safetensors",
+          "text_encoder": "qwen_3_4b.safetensors",
+          "vae": "flux2-vae.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "VARIANT2": {
+        "label": "4B Fast",
+        "pick": {
+          "diffusion_model": "flux-2-klein-4b.safetensors",
+          "text_encoder": "qwen_3_4b.safetensors",
+          "vae": "flux2-vae.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      },
+      "VARIANT3": {
+        "label": "9B HD",
+        "pick": {
+          "diffusion_model": "flux-2-klein-base-9b.safetensors",
+          "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
+          "vae": "full_encoder_small_decoder.safetensors"
+        },
+        "settings": {
+          "steps": "20",
+          "cfg": "5"
+        },
+        "loras": []
+      },
+      "VARIANT4": {
+        "label": "9B Fast",
+        "pick": {
+          "diffusion_model": "flux-2-klein-9b.safetensors",
+          "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
+          "vae": "full_encoder_small_decoder.safetensors"
+        },
+        "settings": {
+          "steps": "4",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
+  },
+  "QWEN IMAGE 2.1 EDIT": {
+    "title": "Qwen Image 2.1 Edit",
+    "description": "Qwen-Image-2.1 edit models: diffusion, qwen3vl-8b encoder, the i2i prompt-enhancer encoder (qwen3.5 9B) and the 2.1 VAE.",
+    "categories": [
+      "image-to-image (editing)"
+    ],
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "input": "vae_name",
+          "nodeType": "VAELoader"
+        },
+        "files": [
+          {
+            "file": "qwen_image_2.1_vae_bf16.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "input": "clip_name",
+          "nodeType": "CLIPLoader"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_8b_int8_convrot.safetensors"
+          },
+          {
+            "file": "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "input": "unet_name",
+          "nodeType": "UNETLoader"
+        },
+        "files": [
+          {
+            "file": "qwen_image_2.1_int8_convrot.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "FLUX KONTEXT": {
+    "title": "FLUX KONTEXT",
+    "description": "FLUX.1 Kontext dev (fp8) with the CLIP-L + T5-XXL text encoders and the FLUX VAE. Shared by the 1-image Edit app and the 2-images Reference app.",
+    "categories": [
+      "image-to-image (editing)",
+      "image-to-image (reference)"
+    ],
+    "models": [
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "input": "vae_name",
+          "nodeType": "VAELoader"
+        },
+        "files": [
+          {
+            "file": "ae.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "input": "clip_name1",
+          "nodeType": "DualCLIPLoader"
+        },
+        "files": [
+          {
+            "file": "clip_l.safetensors"
+          },
+          {
+            "file": "t5xxl_fp8_e4m3fn.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "input": "unet_name",
+          "nodeType": "UNETLoader"
+        },
+        "files": [
+          {
+            "file": "flux1-dev-kontext_fp8_scaled.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "FLUX USO": {
+    "title": "FLUX USO",
+    "description": "FLUX.1-dev (fp8 checkpoint) plus the USO style-reference LoRA / projector and the SigLIP vision encoder. Used by the USO reference apps.",
+    "categories": [
+      "image-to-image (reference)"
+    ],
+    "models": [
+      {
+        "id": "CHECKPOINT",
+        "type": "CHECKPOINT",
+        "need": "all",
+        "node": {
+          "input": "ckpt_name",
+          "nodeType": "CheckpointLoaderSimple"
+        },
+        "files": [
+          {
+            "file": "flux1-dev-fp8.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "CLIPVISION",
+        "type": "Clipvision",
+        "need": "all",
+        "node": {
+          "input": "clip_name",
+          "nodeType": "CLIPVisionLoader"
+        },
+        "files": [
+          {
+            "file": "sigclip_vision_patch14_384.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "LORA",
+        "type": "LORA",
+        "need": "all",
+        "node": {
+          "input": "lora_name",
+          "nodeType": "LoraLoaderModelOnly"
+        },
+        "files": [
+          {
+            "file": "uso-flux1-dit-lora-v1.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "MODEL_PATCH",
+        "type": "MODEL PATCH",
+        "need": "all",
+        "node": {
+          "input": "name",
+          "nodeType": "ModelPatchLoader"
+        },
+        "files": [
+          {
+            "file": "uso-flux1-projector-v1.safetensors"
           }
         ]
       }

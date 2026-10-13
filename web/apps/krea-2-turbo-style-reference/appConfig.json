@@ -1,0 +1,199 @@
+{
+  "id": "krea2style",
+  "name": "Krea 2 Turbo Style Reference",
+  "url": "krea-2-turbo-style-reference",
+  "description": "Restyle an image with Krea 2 Turbo (int8) + the Krea 2 style-reference LoRA, with an optional prompt enhancer.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "distilled-fast"
+      ],
+      "base_models": [
+        "KREA 2"
+      ],
+      "other": [
+        "(re-)styling"
+      ]
+    },
+    "architecture": "KREA 2 TURBO",
+    "models": [
+      "krea2_turbo_int8_convrot.safetensors",
+      "qwen3vl_4b_fp8_scaled.safetensors",
+      "qwen_image_vae.safetensors",
+      "krea2_style_reference.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "pkrea2style",
+      "label": "Prompt",
+      "nodePath": "86.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "default": "a white yeti with horns reading a book that is titled \"Ostris + Krea2 Style Reference\""
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepskrea2style",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 8,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "95.inputs.steps",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "cfgkrea2style",
+      "label": "CFG",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "92.inputs.cfg",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "megapixelskrea2style",
+      "label": "Megapixels",
+      "minValue": 0.1,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "71.inputs.megapixels",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedkrea2style",
+      "label": "Seed",
+      "nodePath": "98.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnkrea2style",
+      "label": "Filename Prefix",
+      "nodePath": "29.inputs.filename_prefix",
+      "defValue": "Krea2_turbo_style_reference",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgreferenceimagekrea2style",
+      "label": "Reference Image",
+      "nodePath": "69.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "modelkrea2style",
+      "label": "Model",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "nodePath": "78.inputs.unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "clipkrea2style",
+      "label": "CLIP",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "nodePath": "79.inputs.clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "vaekrea2style",
+      "label": "VAE",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "80.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "typekrea2style",
+      "label": "Type",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "nodePath": "78.inputs.weight_dtype",
+      "style": {
+        "display": "none"
+      }
+    }
+  ],
+  "toggles": [
+    {
+      "id": "promptenhancekrea2style",
+      "label": "Prompt Enhance",
+      "defaultValue": false,
+      "nodePath": "89.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "arkrea2style",
+      "label": "Aspect Ratio",
+      "nodePath": "71.inputs.aspect_ratio"
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outkrea2style",
+      "label": "Save Image",
+      "nodeId": "29",
+      "type": "media"
+    }
+  ]
+}

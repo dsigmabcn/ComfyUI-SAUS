@@ -1,0 +1,172 @@
+{
+  "id": "qedit2",
+  "name": "Qwen Image Edit (2 images)",
+  "url": "qwen-image-edit-2-images",
+  "description": "Edit using two images with Qwen-Image-Edit 2511 (int8). HD and Turbo (Lightning 4-step LoRA) modes.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "QWEN"
+      ],
+      "other": [
+        "edit"
+      ]
+    },
+    "architecture": "QWEN_EDIT",
+    "models": [
+      "qwen_image_edit_2511_int8_convrot.safetensors",
+      "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "qwen_image_vae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "pqedit2",
+      "label": "Prompt",
+      "nodePath": "170_151.inputs.prompt",
+      "default": "Change the furniture leather difference in image 1 to the fur material in image 2.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepsqedit2",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 40,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "170_166.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    },
+    {
+      "id": "cfgqedit2",
+      "label": "CFG",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 4,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "170_154.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedqedit2",
+      "label": "Seed",
+      "nodePath": "170_169.inputs.seed",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnqedit2",
+      "label": "Filename Prefix",
+      "nodePath": "9.inputs.filename_prefix",
+      "defValue": "Qwen_Edit_2511",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgeq2a",
+      "label": "Image 1",
+      "nodePath": "41.inputs.image"
+    },
+    {
+      "id": "imgeq2b",
+      "label": "Image 2",
+      "nodePath": "83.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "unetqedit2",
+      "label": "Model",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "nodePath": "170_161.inputs.unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clipqedit2",
+      "label": "CLIP",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "nodePath": "170_162.inputs.clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "vaeqedit2",
+      "label": "VAE",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "170_146.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "typeqedit2",
+      "label": "Type",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "nodePath": "170_161.inputs.weight_dtype",
+      "style": {
+        "display": "none"
+      }
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outqedit2",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

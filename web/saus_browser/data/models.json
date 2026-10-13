@@ -289,6 +289,38 @@
       "thumbnail": "",
       "source": "migrated"
     },
+    "wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors": {
+      "name": "WAN 2.2 T2V HIGH (fp8)",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors": {
+      "name": "WAN 2.2 T2V LOW (fp8)",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors": {
+      "name": "WAN 2.2 I2V HIGH (fp8)",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors": {
+      "name": "WAN 2.2 I2V LOW (fp8)",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
     "wan2.2_t2v_high_noise_14B_fp16.safetensors": {
       "name": "WAN 2.2 T2V HIGH",
       "type": "Diffusion model",
@@ -377,14 +409,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "flux1-kontext-dev.safetensors": {
-      "name": "FLUX-KONTEXT",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/KoalaNation/colorize_models/resolve/main/diffusion_models/flux1-kontext-dev.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "flux1-fill-dev.safetensors": {
       "name": "FLUX-DEV-FILL",
       "type": "Diffusion model",
@@ -400,6 +424,22 @@
       "directory": "/diffusion_models/",
       "thumbnail": "",
       "source": "migrated"
+    },
+    "qwen_image_edit_2511_int8_convrot.safetensors": {
+      "name": "qwen_image_edit_2511_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors": {
+      "name": "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors",
+      "directory": "/text_encoders/",
+      "thumbnail": "",
+      "source": "builder"
     },
     "qwen_image_edit_2509_bf16.safetensors": {
       "name": "QWEN EDIT v2509",
@@ -641,6 +681,22 @@
       "thumbnail": "",
       "source": "builder"
     },
+    "minimax_h3_ref2va_pruned_int8_convrot.safetensors": {
+      "name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors": {
+      "name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "type": "LORA",
+      "url": "https://huggingface.co/lightx2v/Minimax-h3-Turbo/resolve/main/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "directory": "/loras/",
+      "thumbnail": "",
+      "source": "builder"
+    },
     "minimax_h3_fl2va_pruned_int8_convrot.safetensors": {
       "name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
       "type": "Diffusion model",
@@ -668,7 +724,7 @@
     "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors": {
       "name": "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
       "type": "Latent Upscaler",
-      "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
+      "url": "https://huggingface.co/KoalaNation/LTX-2.5/resolve/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
       "directory": "latent_upscale_models",
       "thumbnail": "",
       "source": "builder"
@@ -676,7 +732,7 @@
     "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors": {
       "name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
       "type": "Diffusion model",
-      "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "url": "https://huggingface.co/KoalaNation/LTX-2.5/resolve/main/diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
       "directory": "diffusion_models",
       "thumbnail": "",
       "source": "builder"
@@ -684,7 +740,7 @@
     "ltx-2.5-video-vae-bf16.safetensors": {
       "name": "ltx-2.5-video-vae-bf16.safetensors",
       "type": "VAE",
-      "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-video-vae-bf16.safetensors",
+      "url": "https://huggingface.co/KoalaNation/LTX-2.5/resolve/main/vae/ltx-2.5-video-vae-bf16.safetensors",
       "directory": "vae",
       "thumbnail": "",
       "source": "builder"
@@ -692,7 +748,7 @@
     "ltx-2.5-audio-vae-bf16.safetensors": {
       "name": "ltx-2.5-audio-vae-bf16.safetensors",
       "type": "VAE",
-      "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-audio-vae-bf16.safetensors",
+      "url": "https://huggingface.co/KoalaNation/LTX-2.5/resolve/main/vae/ltx-2.5-audio-vae-bf16.safetensors",
       "directory": "vae",
       "thumbnail": "",
       "source": "builder"
@@ -700,7 +756,7 @@
     "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors": {
       "name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
       "type": "TEXT ENCODER",
-      "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "url": "https://huggingface.co/KoalaNation/LTX-2.5/resolve/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
       "directory": "text_encoders",
       "thumbnail": "",
       "source": "builder"
@@ -710,6 +766,38 @@
       "type": "TEXT ENCODER",
       "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e2b_it_int8_convrot.safetensors",
       "directory": "text_encoders",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "flux1-dev-kontext_fp8_scaled.safetensors": {
+      "name": "flux1-dev-kontext_fp8_scaled.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/flux1-kontext-dev_ComfyUI/resolve/main/split_files/diffusion_models/flux1-dev-kontext_fp8_scaled.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "flux1-dev-fp8.safetensors": {
+      "name": "flux1-dev-fp8.safetensors",
+      "type": "CHECKPOINT",
+      "url": "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors",
+      "directory": "/checkpoints/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "uso-flux1-dit-lora-v1.safetensors": {
+      "name": "uso-flux1-dit-lora-v1.safetensors",
+      "type": "LORA",
+      "url": "https://huggingface.co/Comfy-Org/USO_1.0_Repackaged/resolve/main/split_files/loras/uso-flux1-dit-lora-v1.safetensors",
+      "directory": "/loras/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "uso-flux1-projector-v1.safetensors": {
+      "name": "uso-flux1-projector-v1.safetensors",
+      "type": "MODEL PATCH",
+      "url": "https://huggingface.co/Comfy-Org/USO_1.0_Repackaged/resolve/main/split_files/model_patches/uso-flux1-projector-v1.safetensors",
+      "directory": "/model_patches/",
       "thumbnail": "",
       "source": "builder"
     }

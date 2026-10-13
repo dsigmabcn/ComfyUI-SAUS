@@ -1,0 +1,272 @@
+{
+  "9": {
+    "inputs": {
+      "images": [
+        "135",
+        0
+      ],
+      "filename_prefix": "Flux2-Klein-4b-base"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "76": {
+    "inputs": {
+      "image": "car_interior_white.jpeg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "131": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "132": {
+    "inputs": {
+      "width": [
+        "144",
+        0
+      ],
+      "height": [
+        "144",
+        1
+      ],
+      "steps": 20
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "133": {
+    "inputs": {
+      "model": [
+        "137",
+        0
+      ],
+      "positive": [
+        "147",
+        0
+      ],
+      "negative": [
+        "145",
+        0
+      ],
+      "cfg": 5
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "CFGGuider"
+    }
+  },
+  "134": {
+    "inputs": {
+      "noise": [
+        "136",
+        0
+      ],
+      "guider": [
+        "133",
+        0
+      ],
+      "sampler": [
+        "131",
+        0
+      ],
+      "sigmas": [
+        "132",
+        0
+      ],
+      "latent_image": [
+        "142",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "135": {
+    "inputs": {
+      "samples": [
+        "134",
+        0
+      ],
+      "vae": [
+        "141",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "136": {
+    "inputs": {
+      "noise_seed": 192774551144773
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "137": {
+    "inputs": {
+      "unet_name": "flux-2-klein-base-4b.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "138": {
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "139": {
+    "inputs": {
+      "clip": [
+        "138",
+        0
+      ],
+      "text": "Change the camera angle to a first-person driver's perspective looking through the steering wheel at the dashboard and windshield, maintaining the same white minimalist interior style and lighting\n"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "140": {
+    "inputs": {
+      "clip": [
+        "138",
+        0
+      ],
+      "text": ""
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "141": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "142": {
+    "inputs": {
+      "width": [
+        "144",
+        0
+      ],
+      "height": [
+        "144",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "EmptyFlux2LatentImage"
+    }
+  },
+  "143": {
+    "inputs": {
+      "image": [
+        "76",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ImageScaleToTotalPixels"
+    }
+  },
+  "144": {
+    "inputs": {
+      "image": [
+        "143",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "145": {
+    "inputs": {
+      "conditioning": [
+        "140",
+        0
+      ],
+      "latent": [
+        "146",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "146": {
+    "inputs": {
+      "pixels": [
+        "143",
+        0
+      ],
+      "vae": [
+        "141",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "147": {
+    "inputs": {
+      "conditioning": [
+        "139",
+        0
+      ],
+      "latent": [
+        "146",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  }
+}

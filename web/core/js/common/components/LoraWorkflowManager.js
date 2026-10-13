@@ -60,6 +60,24 @@ class LoraWorkflowManager {
         });
     }
 
+    /**
+     * Which loader a LoRA belongs to when there are several (e.g. Wan 2.2
+     * high + low noise). The variant flow passes a file name, so match it to the
+     * loader whose model shares a noise keyword ("high"/"low"); fall back to the
+     * first loader when there is nothing to go on.
+     */
+    _pickLoaderForLora(file, modelLoaders) {
+        if (!file || modelLoaders.length <= 1) return modelLoaders[0];
+        const loraName = fileName(file).toLowerCase();
+        const keywords = ['high', 'low'].filter((k) => loraName.includes(k));
+        if (!keywords.length) return modelLoaders[0];
+        const match = modelLoaders.find((loader) => {
+            const modelName = this._loaderLabel(loader).toLowerCase();
+            return keywords.some((k) => modelName.includes(k));
+        });
+        return match || modelLoaders[0];
+    }
+
     /** The model a loader holds, used as a caption when there are several. */
     _loaderLabel(loader) {
         if (loader.inputs) {
@@ -81,7 +99,7 @@ class LoraWorkflowManager {
             if (modelLoaders.length === 0) {
                 throw new Error('No model loader found in the workflow to attach LoRA.');
             }
-            targetModelLoader = modelLoaders[0];
+            targetModelLoader = this._pickLoaderForLora(file, modelLoaders);
         }
 
         const newNodeId = this.addLora(targetModelLoader.id);

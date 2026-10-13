@@ -1,6 +1,6 @@
 {
   "id": "saus8s8ng6",
-  "name": "Minimax",
+  "name": "Minimax H3",
   "url": "minimax-text-to-video",
   "description": "Generate videos with Minimax text to video",
   "metadata": {
@@ -11,7 +11,7 @@
       "base_models": [],
       "other": []
     },
-    "architecture": "Minimax H3 text to video",
+    "architecture": "Minimax FL2VA",
     "models": [
       "minimax_h3_video_vae_int8_convrot.safetensors",
       "minimax_h3_audio_vae_fp32.safetensors",
@@ -73,8 +73,8 @@
       "precision": 0,
       "scaleFactor": 1,
       "layout": {
-        "region": "basic",
-        "order": 5
+        "region": "advanced",
+        "order": 12
       }
     }
   ],
@@ -88,7 +88,7 @@
       "default": "simple",
       "layout": {
         "region": "advanced",
-        "order": 7
+        "order": 6
       }
     },
     {
@@ -100,7 +100,7 @@
       "default": "minimax_h3_video_vae_int8_convrot.safetensors",
       "layout": {
         "region": "advanced",
-        "order": 8
+        "order": 7
       }
     },
     {
@@ -112,7 +112,7 @@
       "default": "minimax_h3_audio_vae_fp32.safetensors",
       "layout": {
         "region": "advanced",
-        "order": 9
+        "order": 8
       }
     },
     {
@@ -124,7 +124,7 @@
       "default": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
       "layout": {
         "region": "advanced",
-        "order": 10
+        "order": 9
       }
     },
     {
@@ -136,7 +136,7 @@
       "default": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
       "layout": {
         "region": "advanced",
-        "order": 11
+        "order": 10
       }
     },
     {
@@ -148,7 +148,7 @@
       "default": "res_multistep",
       "layout": {
         "region": "advanced",
-        "order": 12
+        "order": 11
       }
     }
   ],
@@ -174,7 +174,7 @@
       "defValue": "video/MiniMax_H3",
       "layout": {
         "region": "basic",
-        "order": 6
+        "order": 5
       }
     }
   ],

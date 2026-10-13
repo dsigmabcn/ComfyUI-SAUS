@@ -1,0 +1,222 @@
+{
+  "id": "mmh3r2v",
+  "name": "Minimax H3 Reference to Video",
+  "url": "minimax-h3-reference-to-video",
+  "description": "Reference to Video with Minimax H3 (R2VA), with synchronized audio. HD and Turbo (4-step LoRA) modes.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "Minimax H3"
+      ],
+      "other": []
+    },
+    "architecture": "Minimax R2VA",
+    "models": [
+      "minimax_h3_video_vae_int8_convrot.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors",
+      "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "pr2v",
+      "label": "Prompt",
+      "nodePath": "138.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "default": "Bold comic-book ink style, heavy linework, red and blue-black palette, night city. Use <Picture 2> and <Picture 1> as reference frames and <Audio 1> exactly as it is. CUT 1: top-down view of the little boy superhero on the rooftop - red cape fluttering in the wind, hands planted on his hips. TRANSITION: a violent WHIP PAN off the rooftop. CUT 2: low hero angle on the colossal black mech-kaiju towering over the skyline as it roars."
+    }
+  ],
+  "aspectRatioSelectors": [
+    {
+      "id": "arcr2v",
+      "label": "Aspect Ratio",
+      "nodePath": "115.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "mpr2v",
+      "label": "Megapixels",
+      "minValue": 0.1,
+      "maxValue": 4,
+      "step": 0.1,
+      "defValue": 0.4,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "115.inputs.megapixels",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "durr2v",
+      "label": "Duration (s)",
+      "minValue": 2,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "132.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepsr2v",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "143.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedr2v",
+      "label": "Noise Seed",
+      "nodePath": "129.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnr2v",
+      "label": "Filename Prefix",
+      "nodePath": "92.inputs.filename_prefix",
+      "defValue": "video/MiniMax_H3",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgr2v1",
+      "label": "Reference image 1",
+      "nodePath": "137.inputs.image"
+    },
+    {
+      "id": "imgr2v2",
+      "label": "Reference image 2",
+      "nodePath": "139.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "unetr2v",
+      "label": "Unet Name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "nodePath": "127.inputs.unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clipr2v",
+      "label": "Clip Name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "nodePath": "128.inputs.clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "v1r2v",
+      "label": "Vae Name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "119.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "v2r2v",
+      "label": "Vae Name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "120.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "schedr2v",
+      "label": "Scheduler",
+      "url": "BasicScheduler",
+      "key": "scheduler",
+      "nodePath": "124.inputs.scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "sampr2v",
+      "label": "Sampler Name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name",
+      "nodePath": "123.inputs.sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "id": "output92",
+      "label": "Save Video",
+      "nodeId": "92",
+      "type": "media"
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": []
+}

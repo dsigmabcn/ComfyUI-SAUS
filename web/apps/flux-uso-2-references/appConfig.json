@@ -1,0 +1,173 @@
+{
+  "id": "uso2ref",
+  "name": "Flux USO (2 references)",
+  "url": "flux-uso-2-references",
+  "description": "Generate an image that follows the style of two reference images with FLUX.1-dev + USO.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "(re-)styling"
+      ]
+    },
+    "architecture": "FLUX USO",
+    "models": [
+      "flux1-dev-fp8.safetensors",
+      "sigclip_vision_patch14_384.safetensors",
+      "uso-flux1-dit-lora-v1.safetensors",
+      "uso-flux1-projector-v1.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "puso2ref",
+      "label": "Prompt",
+      "nodePath": "148.inputs.text",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "default": "A man dressed fashionably stands on the forest."
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepsuso2ref",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "150.inputs.steps",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    },
+    {
+      "id": "cfguso2ref",
+      "label": "CFG",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "150.inputs.cfg",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seeduso2ref",
+      "label": "Seed",
+      "nodePath": "150.inputs.seed",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnuso2ref",
+      "label": "Filename Prefix",
+      "nodePath": "73.inputs.filename_prefix",
+      "defValue": "Flux_USO_2refs",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgreference1uso2ref",
+      "label": "Reference 1",
+      "nodePath": "88.inputs.image"
+    },
+    {
+      "id": "imgreference2uso2ref",
+      "label": "Reference 2",
+      "nodePath": "91.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "checkpointuso2ref",
+      "label": "Checkpoint",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name",
+      "nodePath": "140.inputs.ckpt_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clipvisionuso2ref",
+      "label": "CLIP Vision",
+      "url": "CLIPVisionLoader",
+      "key": "clip_name",
+      "nodePath": "146.inputs.clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "lorauso2ref",
+      "label": "LoRA",
+      "url": "LoraLoaderModelOnly",
+      "key": "lora_name",
+      "nodePath": "144.inputs.lora_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "modelpatchuso2ref",
+      "label": "Model Patch",
+      "url": "ModelPatchLoader",
+      "key": "name",
+      "nodePath": "145.inputs.name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outuso2ref",
+      "label": "Save Image",
+      "nodeId": "73",
+      "type": "media"
+    }
+  ]
+}

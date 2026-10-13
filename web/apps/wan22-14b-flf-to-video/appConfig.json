@@ -1,0 +1,222 @@
+{
+  "id": "wan22flf",
+  "name": "Wan 2.2 14B First & Last Frame to Video",
+  "url": "wan22-14b-flf-to-video",
+  "description": "Generate a video between a first and a last frame with Wan 2.2 14B (high + low noise). HD and Turbo (LightX2V 4-step LoRA) modes.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
+      "other": []
+    },
+    "architecture": "WAN22_FLF_14B",
+    "models": [
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "wan_2.1_vae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptwan22flf",
+      "label": "Prompt",
+      "nodePath": "90.inputs.text",
+      "default": "A bearded man with red facial hair wearing a yellow straw hat and dark coat in Van Gogh's self-portrait style, slowly and continuously transforms into a space astronaut. The transformation flows like liquid paint - his beard fades away strand by strand, the yellow hat melts and reforms smoothly into a silver space helmet, dark coat gradually lightens and restructures into a white spacesuit. The background swirling brushstrokes slowly organize and clarify into realistic stars and space, with Earth appearing gradually in the distance. Every change happens in seamless waves, maintaining visual continuity throughout the metamorphosis.\n\nConsistent soft lighting throughout, medium close-up maintaining same framing, central composition stays fixed, gentle color temperature shift from warm to cool, gradual contrast increase, smooth style transition from painterly to photorealistic. Static camera with subtle slow zoom, emphasizing the flowing transformation process without abrupt changes.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stpwan22flfdur",
+      "label": "Duration (s)",
+      "nodePath": "203.inputs.value",
+      "minValue": 1,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "stpwan22flfsteps",
+      "label": "Total number of steps",
+      "nodePath": "200.inputs.value",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "stpwan22flfsplit",
+      "label": "Number of steps high pass",
+      "nodePath": "201.inputs.value",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 10,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "stpwan22flfcfg",
+      "label": "CFG",
+      "nodePath": "202.inputs.value",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 4,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "ddwan22flfhigh",
+      "label": "Model (high noise)",
+      "nodePath": "76.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 5
+      }
+    },
+    {
+      "id": "ddwan22flflow",
+      "label": "Model (low noise)",
+      "nodePath": "77.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "ddwan22flfclip",
+      "label": "CLIP",
+      "nodePath": "72.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "ddwan22flfvae",
+      "label": "VAE",
+      "nodePath": "79.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedwan22flf",
+      "label": "Seed",
+      "nodePath": "84.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgwan22flfstart",
+      "label": "First Frame",
+      "nodePath": "80.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 11
+      }
+    },
+    {
+      "id": "imgwan22flfend",
+      "label": "Last Frame",
+      "nodePath": "89.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 13
+      }
+    }
+  ],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "inwan22flffn",
+      "label": "Filename Prefix",
+      "nodePath": "83.inputs.filename_prefix",
+      "defValue": "video/Wan2.2_flf2v",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimwan22flf",
+      "label": "",
+      "nodePath": "81.inputs",
+      "defaultWidth": 640,
+      "defaultHeight": 640,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output83",
+      "label": "Save Video",
+      "nodeId": "83",
+      "type": "media"
+    }
+  ]
+}

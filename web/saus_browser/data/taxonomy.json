@@ -17,7 +17,7 @@
   ],
   "tags": {
     "type": ["base", "distilled-fast", "controlnet", "layout", "quantized", "remove"],
-    "base_models": ["SD1.5", "SDXL", "FLUX", "FLUX-2", "QWEN", "Z-image", "WAN", "WAN 2.2", "LTX-2"],
+    "base_models": ["SD1.5", "SDXL", "FLUX", "FLUX-2", "QWEN", "Z-image", "WAN", "WAN 2.2", "LTX-2", "LTX-2.5"],
     "other": ["edit", "(re-)styling", "try-on", "VACE", "animatediff", "controlnet", "image-to-image", "inpainting"]
   }
 }

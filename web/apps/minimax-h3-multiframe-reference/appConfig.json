@@ -1,0 +1,277 @@
+{
+  "id": "mmh3mf",
+  "name": "Minimax H3 Multiframe Reference",
+  "url": "minimax-h3-multiframe-reference",
+  "description": "Multiframe reference to Video with Minimax H3 (R2VA): a reference image plus 3 guide frames, with synchronized audio.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "Minimax H3"
+      ],
+      "other": []
+    },
+    "architecture": "Minimax R2VA",
+    "models": [
+      "minimax_h3_video_vae_int8_convrot.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors",
+      "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "pmf",
+      "label": "Prompt",
+      "nodePath": "138.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "default": "Fashion editorial with four keyframes. Use <Picture 1>..<Picture 4> as the four shots. Stylized soundscape, punchy electronic beat."
+    }
+  ],
+  "aspectRatioSelectors": [
+    {
+      "id": "arcmf",
+      "label": "Aspect Ratio",
+      "nodePath": "115.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "mpmf",
+      "label": "Megapixels",
+      "minValue": 0.1,
+      "maxValue": 4,
+      "step": 0.1,
+      "defValue": 0.4,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "115.inputs.megapixels",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "durmf",
+      "label": "Duration (s)",
+      "minValue": 2,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "132.inputs.value",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "stepsmf",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "143.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "fi1",
+      "label": "Frame index 1 (s)",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 1.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "154.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 13
+      }
+    },
+    {
+      "id": "fi2",
+      "label": "Frame index 2 (s)",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 3,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "160.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 14
+      }
+    },
+    {
+      "id": "fi3",
+      "label": "Frame index 3 (s)",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "168.inputs.value",
+      "layout": {
+        "region": "advanced",
+        "order": 15
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedmf",
+      "label": "Noise Seed",
+      "nodePath": "129.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnmf",
+      "label": "Filename Prefix",
+      "nodePath": "92.inputs.filename_prefix",
+      "defValue": "video/MiniMax_H3",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgmfref",
+      "label": "Reference image",
+      "nodePath": "164.inputs.image"
+    },
+    {
+      "id": "imgmf1",
+      "label": "Guide 1",
+      "nodePath": "157.inputs.image"
+    },
+    {
+      "id": "imgmf2",
+      "label": "Guide 2",
+      "nodePath": "159.inputs.image"
+    },
+    {
+      "id": "imgmf3",
+      "label": "Guide 3",
+      "nodePath": "167.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "unetmf",
+      "label": "Unet Name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "nodePath": "127.inputs.unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clipmf",
+      "label": "Clip Name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "nodePath": "128.inputs.clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "v1mf",
+      "label": "Vae Name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "119.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "v2mf",
+      "label": "Vae Name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "120.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "schedmf",
+      "label": "Scheduler",
+      "url": "BasicScheduler",
+      "key": "scheduler",
+      "nodePath": "124.inputs.scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "sampmf",
+      "label": "Sampler Name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name",
+      "nodePath": "123.inputs.sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "id": "output92",
+      "label": "Save Video",
+      "nodeId": "92",
+      "type": "media"
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": []
+}

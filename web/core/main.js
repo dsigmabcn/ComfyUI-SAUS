@@ -520,11 +520,17 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                     label: (clickedButton.textContent || mode).trim(),
                 };
 
+                // HD / Turbo pick the model themselves, so the *quick* model
+                // selectors are hidden then. That only concerns the Basic
+                // column: a component the app author placed in the Advanced
+                // region is "full control" and must stay visible once the fold
+                // is opened, whatever the mode is.
+                const inBasicRegion = (c) => ((c.layout && c.layout.region) || 'basic') === 'basic';
                 const modelWidgetConfigs = appConfig.dropdowns.filter(d =>
-                    d.label.startsWith('Model') || d.label === 'Checkpoint' || LOADER_TYPES.has(d.url));
+                    inBasicRegion(d) && (d.label.startsWith('Model') || d.label === 'Checkpoint' || LOADER_TYPES.has(d.url)));
                 const modelWidgetElements = modelWidgetConfigs.map(c => document.getElementById(c.id)).filter(el => el);
                 const typeWidgetElements = appConfig.dropdowns
-                    .filter(d => d.label === 'Type')
+                    .filter(d => d.label === 'Type' && inBasicRegion(d))
                     .map(d => document.getElementById(d.id))
                     .filter(el => el);
                 const loraWidgetElement = document.querySelector('.lora-component-container');
