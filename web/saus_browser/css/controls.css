@@ -62,7 +62,7 @@
     position: absolute;
     right: 10px;
     cursor: pointer;
-    color: #888;
+    color: var(--color-text-faint);
     display: none;
     transition: color 0.2s;
 }
@@ -92,13 +92,15 @@
     -webkit-user-select: none;
 }
 
-.tag-chip:hover, .tag-chip.selected { background-color: var(--color-accent); color: #ffffff; }
+/* The interactive accent is neutral in Night/Day, so the selected chip's text
+   takes the opposite end of the scale (like the mode buttons do). */
+.tag-chip:hover, .tag-chip.selected { background-color: var(--color-accent); color: var(--color-background-secondary); }
 
-.tag-chip.tag-type { border-color: #795548; color: #d7ccc8; background-color: rgba(121, 85, 72, 0.1); }
-.tag-chip.tag-type:hover, .tag-chip.tag-type.selected { background-color: #795548; color: #ffffff; }
+.tag-chip.tag-type { border-color: var(--tag-model); color: var(--color-primary-text); background-color: rgba(121, 85, 72, 0.1); }
+.tag-chip.tag-type:hover, .tag-chip.tag-type.selected { background-color: var(--tag-model); color: var(--color-text-on-accent); }
 
-.tag-chip.tag-base { border-color: #009688; color: #80cbc4; background-color: rgba(0, 150, 136, 0.1); }
-.tag-chip.tag-base:hover, .tag-chip.tag-base.selected { background-color: #009688; color: #ffffff; }
+.tag-chip.tag-base { border-color: var(--tag-arch); color: var(--color-primary-text); background-color: rgba(0, 150, 136, 0.1); }
+.tag-chip.tag-base:hover, .tag-chip.tag-base.selected { background-color: var(--tag-arch); color: var(--color-text-on-accent); }
 
-.tag-chip.tag-other { border-color: #2196f3; color: #64b5f6; background-color: rgba(33, 150, 243, 0.1); }
-.tag-chip.tag-other:hover, .tag-chip.tag-other.selected { background-color: #2196f3; color: #ffffff; }
+.tag-chip.tag-other { border-color: var(--color-info); color: var(--color-info); background-color: rgba(33, 150, 243, 0.1); }
+.tag-chip.tag-other:hover, .tag-chip.tag-other.selected { background-color: var(--color-info); color: var(--color-text-on-accent); }

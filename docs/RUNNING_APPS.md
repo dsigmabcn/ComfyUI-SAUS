@@ -7,7 +7,22 @@ After you have installed all models needed for an app, open the app by clicking 
 
 <img src="../web/core/media/git/running_apps/open-app.png">
 
+> An app page has **no SAUS chrome of its own** — no header, no navigation, no logo.
+> It is just the app's controls, the workspace and the version line at the bottom;
+> the navigation lives in the app browser (`/saus`) and the File Manager. Opening
+> `/saus/<app>` directly therefore looks exactly like the app does in a workspace tab.
+
 ## Configure Parameters - Basic
+
+The app's **name** sits at the top of the control column — the same size as the buttons
+below it — with an **(i)** next to it. That **(i)** opens a short *About this app* box: the
+description, the architecture, its category / tags and the model files it expects.
+
+Just below are the app's **modes**: **HD** is what the app runs as by default and
+**Custom** always stays (it exposes the parameters as they are). Any other button comes
+from the app's architecture — **Turbo** only appears where that architecture defines it,
+and named variants replace the HD / Turbo pair completely. A mode whose models are not
+installed is greyed out; hover it to see which file it is missing.
 
 Here you can adjust the basic controls for an app/workflow, which we discuss in more detail below.
 

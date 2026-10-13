@@ -61,9 +61,8 @@ const RAIL_TOOLS = [
     { target: 'settings', icon: 'fas fa-cog', label: 'Settings', title: 'SAUS settings' },
 ];
 
-// Hover only re-targets the section while the panel is open (see
-// previewSection); it never opens it by itself.
-const HOVER_SWITCH_DELAY = 90;
+// The rail only reacts to clicks: hovering an icon shows a tooltip and a
+// highlight, but it never changes which section the panel is showing.
 
 /** Build the section/category vocabulary from taxonomy.json, with fallbacks. */
 function taxonomyConfig() {
@@ -105,7 +104,6 @@ function taxonomyConfig() {
 let callbacks = {};
 let tooltipElement = null;
 let tooltipTarget = null;
-let hoverSwitchTimer = null;
 
 function debounce(fn, wait) {
     let timer = null;
@@ -128,16 +126,6 @@ export function initExplorer(handlers = {}) {
     const explorer = document.getElementById('explorer');
 
     if (rail) {
-        // Hovering a section icon switches the panel to it, but only while the
-        // panel is open: a hover never opens it by itself.
-        rail.addEventListener('mouseover', (event) => {
-            const btn = event.target.closest('.rail-btn[data-rail="section"]');
-            if (btn) previewSection(btn.dataset.target);
-        });
-        rail.addEventListener('focusin', (event) => {
-            const btn = event.target.closest('.rail-btn[data-rail="section"]');
-            if (btn) previewSection(btn.dataset.target);
-        });
         rail.addEventListener('click', (event) => {
             const btn = event.target.closest('.rail-btn');
             if (!btn) return;
@@ -152,6 +140,10 @@ export function initExplorer(handlers = {}) {
             applyPanelState();
         }
     });
+
+    // Opening an app hands the room to the workspace: the panel steps aside
+    // (the rail stays, so one click brings it back).
+    document.addEventListener('saus:app-activated', closePanel);
 
     if (explorer) {
         explorer.addEventListener('click', (event) => {
@@ -198,37 +190,55 @@ function toggleSection(sectionId) {
         setOpenSection(sectionId);       // open it, or move it to that section
     }
 
-    clearTimeout(hoverSwitchTimer);
     renderExplorer();
     applyPanelState();
     warmVisibleStatuses();
 }
 
-/** Hovering a section icon re-targets an already open panel. */
-function previewSection(sectionId) {
-    if (!sectionId || !isPanelOpen() || explorerState.openSection === sectionId) return;
-
-    clearTimeout(hoverSwitchTimer);
-    hoverSwitchTimer = setTimeout(() => {
-        setOpenSection(sectionId);
-        renderExplorer();
-        applyPanelState();
-        warmVisibleStatuses();
-    }, HOVER_SWITCH_DELAY);
+/** Close the panel - the same as clicking the open section's rail icon again. */
+export function closePanel() {
+    if (!isPanelOpen()) return;
+    setOpenSection(null);
+    applyPanelState();
 }
+
+/**
+ * Which section an app is filed under in the panel. Mirrors
+ * categoriesForSection(): a category belongs to the section that lists it, and
+ * one no section lists is filed under the last section, so an app can never
+ * silently disappear.
+ */
+function sectionOfApp(app, cfg) {
+    const sections = cfg.sections || [];
+    const category = app.category || 'other';
+    const owner = sections.find(section => (section.categories || []).includes(category));
+    if (owner) return owner.id;
+    const last = sections[sections.length - 1];
+    return last ? last.id : null;
+}
+
 
 /**
  * The favourite apps, pinned in the panel head between the search field and
  * the section (category) name. Hidden while there are no favourites.
+ *
+ * Only the favourites of what the panel is *showing* appear: the open section
+ * plus whatever search / tag filter is on. A favourite from another section
+ * would otherwise be pinned above a tree it is not part of.
  */
 function renderFavorites() {
     const section = document.getElementById('favoritesSection');
     const list = document.getElementById('favoritesList');
     if (!section || !list) return;
 
+    const cfg = taxonomyConfig();
+    const openSection = explorerState.openSection;
+    const visible = new Set(filterCurrentApps().map(app => app.id));
+
     const apps = Array.from(state.favorites)
         .map(id => state.allApps.find(app => app.id === id))
-        .filter(Boolean);
+        .filter(app => app && visible.has(app.id))
+        .filter(app => !openSection || sectionOfApp(app, cfg) === openSection);
 
     section.classList.toggle('hidden', apps.length === 0);
     list.innerHTML = '';

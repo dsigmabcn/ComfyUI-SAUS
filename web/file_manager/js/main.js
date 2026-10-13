@@ -1,7 +1,11 @@
 
 import { SettingsComponent } from '../../../core/js/common/components/settings.js';
-import { insertElement } from '../../../core/js/common/components/header.js';
+import { insertElement } from './header.js';
+import { initTheme } from '/core/js/common/scripts/theme.js';
 // NOTE: footer.js is deliberately NOT imported — the File Manager has no footer.
+
+// Night / Day / Fire, before the panes render (palette: /core/css/themes.css).
+initTheme();
 
 // Opened inside a workspace tab of the SAUS browser (see /saus/js/tabs.js)?
 // Then that page provides the chrome, so this one drops its own header.
@@ -9,9 +13,11 @@ if (new URLSearchParams(window.location.search).get('embed') === '1') {
     document.documentElement.classList.add('saus-embedded');
 }
 
-const IMAGE_RE = /\.(jpe?g|png|gif|webp|bmp)$/i;
+// avif included: browsers render it, and the thumbnail endpoint hands the
+// original back when Pillow cannot decode it.
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|avif|bmp)$/i;
 const VIDEO_RE = /\.(mp4|webm|ogg|mov|mkv)$/i;
-const MEDIA_RE = /\.(jpe?g|png|gif|webp|bmp|mp4|webm|ogg|mov|mkv)$/i;
+const MEDIA_RE = /\.(jpe?g|png|gif|webp|avif|bmp|mp4|webm|ogg|mov|mkv)$/i;
 
 // One state object per pane. Input / Output are the two (and only) roots.
 const panes = {
@@ -606,11 +612,21 @@ async function transferItems(sourceRoot, names, targetDir, copy) {
  * ------------------------------------------------------------------ */
 
 function onGlobalKeyDown(e) {
-    if (e.key !== 'F2') return;
+    if (e.key !== 'F2' && e.key !== 'Delete') return;
     const tag = (document.activeElement && document.activeElement.tagName) || '';
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
     const pane = panes[focusedPane];
     if (!pane) return;
+
+    // Del asks before it removes anything (showDeleteModal), so the key is as
+    // safe as the toolbar button it mirrors.
+    if (e.key === 'Delete') {
+        if (!pane.selected.size) return;
+        e.preventDefault();
+        doDelete(focusedPane);
+        return;
+    }
+
     const selected = selectedItems(pane);
     if (selected.length === 1 && selected[0].type === 'file') {
         e.preventDefault();

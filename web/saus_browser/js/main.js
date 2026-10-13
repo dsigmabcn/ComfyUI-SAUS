@@ -5,6 +5,10 @@ import { updateComponentStatus } from './models.js';
 import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
 import { setRenderHandler, renderTagsFilter } from './ui.js';
 import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.js';
+import { initTheme } from '/core/js/common/scripts/theme.js';
+
+// Night / Day / Fire, before the shell renders (palette: /core/css/themes.css).
+initTheme();
 
 const GUIDE_URL = 'https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md';
 

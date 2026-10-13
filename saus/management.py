@@ -9,15 +9,46 @@ from .constants import (
 
 SAUS_BROWSER_DATA_PATH = SAUS_BROWSER_PATH / "data"
 
+# The thumbnail names an app may ship, in tie-break order. The App Builder
+# writes ``media/thumbnail.jpg``; apps are free to bring webp / avif / png.
+APP_THUMBNAIL_NAMES = (
+    'thumbnail.webp',
+    'thumbnail.avif',
+    'thumbnail.png',
+    'thumbnail.jpg',
+    'thumbnail.jpeg',
+    'thumbnail.gif',
+)
+
+
+def _find_app_thumbnail(app_folder: Path) -> str:
+    """The app's thumbnail as a path inside the app folder ('' when it has none).
+
+    Only the known names in ``media/`` are considered, so an appConfig cannot
+    point the browser somewhere else. When an app ships several, the newest
+    wins - that is the one someone just dropped in.
+    """
+    media = app_folder / 'media'
+    found = [name for name in APP_THUMBNAIL_NAMES if (media / name).is_file()]
+    if not found:
+        return ''
+    newest = max(found, key=lambda name: (media / name).stat().st_mtime_ns)
+    return f'media/{newest}'
+
 
 def _load_app_configs():
     """Read every app's appConfig.json from disk (includes the ``metadata`` block)."""
     configs = []
     for conf_file in sorted(SAUS_APPS_PATH.rglob(APPS_CONFIG_FILE)):
         try:
-            configs.append(json.loads(conf_file.read_text(encoding='utf-8')))
+            config = json.loads(conf_file.read_text(encoding='utf-8'))
         except Exception as e:
             logger.warning(f"{SAUSMSG}: Skipping invalid appConfig {conf_file}: {e}")
+            continue
+        # Derived at read time, never written back: the browser needs to know
+        # which thumbnail file the app actually ships (jpg, webp, avif, ...).
+        config['thumbnail'] = _find_app_thumbnail(conf_file.parent)
+        configs.append(config)
     return configs
 
 

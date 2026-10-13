@@ -6,7 +6,7 @@ On the SAUS landing page, you can identify these main elements:
 <img src="../web/core/media/git/navigation/HOME SCREEN.png">
 
 ## Icon rail and explorer
-The far-left rail is always visible (with the SAUS logo on top). The three icons below it are the sections of Apps (AI Image, AI Video, Other): **click** one to open the explorer panel on that section, click it again to close it, and **hover** another one to switch the open panel to it. At the bottom of the rail are the tools: **ComfyUI** (new window), **Files** ([File Manager](FILE_MANAGER.md), as a tab), **Guide** (this guide), **Console** (the ComfyUI log feed, as a tab) and **Settings** (as a tab).
+The far-left rail is always visible (with the SAUS logo on top). The three icons below it are the sections of Apps (AI Image, AI Video, Other): **click** one to open the explorer panel on that section, click it again to close it, and click another one to move the open panel to it (hovering only highlights the icon). At the bottom of the rail are the tools: **ComfyUI** (new window), **Files** ([File Manager](FILE_MANAGER.md), as a tab), **Guide** (this guide), **Console** (the ComfyUI log feed, as a tab) and **Settings** (as a tab).
 
 The panel is only shown when you open it (Esc closes it), and it remembers the section and the subcategories you had unfolded.
 Check out: [App Browsing](APP_BROWSING.md)
@@ -42,6 +42,6 @@ When the update is complete, you must restart ComfyUI. You will see a 'Restart' 
 
 <img src="../web/core/media/git/navigation/Restart.png">
 
-After ComfyUI has restarted, refresh your browser (F5) and click the SAUS button again.
+After ComfyUI has restarted, refresh your browser (F5) and click the SAUS icon on the left toolbar again.
 
 [Return to User Guide](USER_GUIDE.md)

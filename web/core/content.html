@@ -1,6 +1,5 @@
     <!-- <div id="responsive-indicator"></div> -->
     <div id="container" class="container">
-        <header></header>
         <main class="content">
             <aside class="left-col" id="left-col">
                 <button id="toggle-left" class="toggle-button left-toggle" aria-label="Toggle Left Panel">
@@ -15,6 +14,17 @@
                              always visible, and the Advanced ones unfold below
                              the LoRA list ("Show Advanced"). -->
                         <div class="controls-body">
+                            <!-- Which app this is: same size as the mode buttons
+                                 below it, plus the (i) that explains what the
+                                 app needs. Both are filled by main.js. -->
+                            <div class="app-heading">
+                                <span id="app-heading-name" class="app-heading-name"></span>
+                                <button type="button" id="app-info-btn" class="app-info-btn"
+                                        title="About this app" aria-label="About this app">
+                                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                </button>
+                            </div>
+
                             <div id="mode-selector-container" class="mode-selector-container">
                                 <div class="mode-group-left">
                                     <button class="mode-button exclusive-mode" data-mode="hd">HD</button>
@@ -77,6 +87,22 @@
                 </div>
             </aside>
         </main>
+    <!-- "About this app": the facts the browser's information panel shows, so an
+         app can be understood without going back to the browser. Filled and
+         opened by setupAppHeading() in main.js. -->
+    <dialog id="app-info-dialog" class="app-info-dialog" aria-labelledby="app-info-name">
+        <div class="app-info-head">
+            <h3 id="app-info-name"></h3>
+            <button type="button" class="app-info-close" data-app-info-close aria-label="Close">&times;</button>
+        </div>
+        <p id="app-info-description" class="app-info-description"></p>
+        <p id="app-info-meta" class="app-info-meta"></p>
+        <h4 id="app-info-models-title" class="app-info-subtitle">Models</h4>
+        <ul id="app-info-models" class="app-info-models"></ul>
+        <div class="app-info-actions">
+            <button type="button" class="menuButtons" data-app-info-close>Close</button>
+        </div>
+    </dialog>
     <footer></footer>    
 </div>
 </body>

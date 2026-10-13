@@ -1,15 +1,73 @@
 import { app } from "../../scripts/app.js";
+
+const config = {
+    newTab: true,
+};
+
+const sausUrl = () => `${window.location.origin}/saus`;
+
+const openSaus = () => {
+    if (config.newTab) {
+        window.open(sausUrl(), '_blank');
+    } else {
+        window.location.href = sausUrl();
+    }
+};
+
+/* A little panel, only ever shown by a frontend that decides to open the tab
+ * instead of letting onToggle handle it. */
+const renderLaunchPanel = (container) => {
+    container.textContent = '';
+    const hint = document.createElement('p');
+    hint.textContent = 'SAUS opens in its own page.';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'comfyui-button primary';
+    button.textContent = 'Open SAUS';
+    button.addEventListener('click', openSaus);
+    container.append(hint, button);
+};
+
+/**
+ * SAUS lives on ComfyUI's own left toolbar (the same rail the App Builder uses),
+ * so there is no extra button on the top bar. The entry is action-only:
+ * onToggle opens SAUS and returns true, which tells ComfyUI not to open a panel.
+ */
+const registerSidebarTab = () => {
+    const manager = app && app.extensionManager;
+    if (!manager || typeof manager.registerSidebarTab !== 'function') return false;
+
+    try {
+        manager.registerSidebarTab({
+            id: 'saus-apps',
+            title: 'SAUS',
+            tooltip: 'Open the SAUS app browser',
+            icon: 'icon-[lucide--flame]',
+            type: 'custom',
+            render: (container) => renderLaunchPanel(container),
+            onToggle: () => {
+                openSaus();
+                return true;
+            },
+        });
+        return true;
+    } catch (error) {
+        console.warn('[SAUS] sidebar tab registration failed, keeping the toolbar button', error);
+        return false;
+    }
+};
+
 const extension = {
     name: "saus.widget",
     async setup() {
+        // Preferred: the rail entry. Only when that is not available do the
+        // buttons below get injected (older frontends, menu-based toolbars).
+        if (registerSidebarTab()) return;
         initializeWidgets();
     },
 };
 
 app.registerExtension(extension);
-const config = {
-    newTab: true,
-};
 
 const createWidget = ({ className, text, tooltip, includeIcon, svgMarkup }) => {
     const button = document.createElement('button');
@@ -32,17 +90,8 @@ const createWidget = ({ className, text, tooltip, includeIcon, svgMarkup }) => {
     const textNode = document.createTextNode(text);
     button.appendChild(textNode);
 
-    button.addEventListener('click', onClick);
+    button.addEventListener('click', openSaus);
     return button;
-};
-
-const onClick = () => {
-    const appUrl = `${window.location.origin}/saus`;
-    if (config.newTab) {
-        window.open(appUrl, '_blank');
-    } else {
-        window.location.href = appUrl;
-    }
 };
 
 const addWidgetMenuRight = (menuRight) => {

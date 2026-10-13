@@ -24,6 +24,7 @@ The old sidebar and the **'models' folder are gone**. Each panel browses one fol
 - **Shift + click** selects a whole range.
 - **Double-click** a folder to open it, or a file to preview it.
 - **F2** renames the selected file.
+- **Del** deletes the selected files — it asks first, exactly like the panel's **Delete** button.
 - **Drag and drop** a selection onto another folder, onto the other pane, or onto the pane's background to **move** it; hold **Ctrl / ⌘** while dropping to **copy** instead.
 
 The **Rename / Download / Delete** buttons sit at the right of each panel's title and act on the **selected** file(s). Rename works on a single file; Download and Delete work with any number of selected files.
@@ -33,7 +34,7 @@ The **Rename / Download / Delete** buttons sit at the right of each panel's titl
 ## Views and sorting
 
 - The **List** view shows **Name**, **Size** and **Last Modified** columns. Click a column header to sort by it (an arrow shows the direction); click again to reverse it.
-- The **medium icons** and **large icons** buttons switch to a grid; images show a compressed thumbnail.
+- The **medium icons** and **large icons** buttons switch to a grid; images show a compressed thumbnail. They are recognised by their extension — `jpg`, `jpeg`, `png`, `gif`, `webp`, `avif` and `bmp` — and everything else (videos included) simply has no thumbnail. An `avif` is handed to the browser untouched, since the thumbnail service cannot always decode it.
 
 ## The preview panel
 

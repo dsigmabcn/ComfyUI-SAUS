@@ -8,6 +8,17 @@
     <link rel="icon" href="/core/media/ui/saus_logo.png" type="image/png">
     <link rel="stylesheet" href="saus/css/styles.css">
 
+    <!-- Show the remembered theme before the first paint (see core/css/themes.css).
+         Night is what :root already gives, so only Day and Fire need setting. -->
+    <script>
+        try {
+            const theme = localStorage.getItem('SausTheme');
+            if (theme === 'day' || theme === 'fire') {
+                document.documentElement.dataset.theme = theme;
+            }
+        } catch (error) { /* storage blocked: keep the default */ }
+    </script>
+
 </head>
 <body>
     <div class="container">

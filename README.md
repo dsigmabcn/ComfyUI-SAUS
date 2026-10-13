@@ -155,7 +155,7 @@ To run SAUS, simply navigate to this address in your web browser:
 http://127.0.0.1:8188/saus
 ```
 ## 2. in ComfyUI
-Click over the SAUS button in the action bar of ComfyUI
+Click the **SAUS** icon on ComfyUI's left toolbar (the icon rail on the left edge)
 <img src="web/core/media/git/Access-button-ComfyUI.png">
 
 ## 3. in Runpod

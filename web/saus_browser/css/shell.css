@@ -291,7 +291,7 @@
 /* Number of active filters, on the panel's tags button. */
 .filters-badge {
     background-color: var(--color-primary);
-    color: #fff;
+    color: var(--color-text-on-accent);
     border-radius: 10px;
     padding: 0 6px;
     font-size: 0.7rem;
@@ -335,9 +335,19 @@
 
 .tab.active {
     background-color: var(--color-background-pattern);
-    color: #ffffff;
+    color: var(--color-primary-text);
     border-color: var(--color-accent);
     box-shadow: inset 0 2px 0 var(--color-primary);
+}
+
+/* Tab drag & drop: the tab in hand fades, the one it would land on is ringed. */
+.tab.dragging {
+    opacity: 0.45;
+}
+
+.tab.drop-target {
+    border-color: var(--color-accent);
+    box-shadow: inset 0 2px 0 var(--color-accent);
 }
 
 .tab-name {
@@ -391,7 +401,7 @@
     width: 100%;
     height: 100%;
     border: none;
-    background-color: #131312;
+    background-color: var(--color-surface-alt);
     display: block;
 }
 
@@ -424,7 +434,7 @@
     height: 34px;
     border-radius: 50%;
     border: 1px solid var(--color-border);
-    background-color: rgba(5, 10, 15, 0.78);
+    background-color: var(--color-surface);
     color: var(--color-primary-text);
     cursor: pointer;
     display: flex;
@@ -518,50 +528,13 @@
     margin: 0;
     padding: 12px;
     overflow: auto;
-    background-color: #050a0f;
-    color: #cfe8f5;
+    background-color: var(--color-header-background);
+    color: var(--color-primary-text);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.76rem;
     line-height: 1.45;
     white-space: pre-wrap;
     word-break: break-word;
-}
-
-/* --- SETTINGS INFO: version + project links (moved out of the footer) --- */
-.settings-info {
-    max-width: 600px;
-    margin: 24px auto 0 auto;
-    padding-top: 16px;
-    border-top: 1px dashed var(--color-border);
-}
-
-.settings-info-heading {
-    margin-bottom: 6px;
-    color: var(--color-primary);
-    font-size: 1rem;
-}
-
-.settings-info-version {
-    margin-bottom: 12px;
-    font-size: 0.85rem;
-    opacity: 0.85;
-}
-
-.settings-info-links {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.settings-info-links a {
-    display: inline-flex;
-    opacity: 0.75;
-    transition: opacity 0.2s, transform 0.2s;
-}
-
-.settings-info-links a:hover {
-    opacity: 1;
-    transform: translateY(-2px);
 }
 
 /* --- RESPONSIVE --- */

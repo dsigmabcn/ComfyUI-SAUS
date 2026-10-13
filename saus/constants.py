@@ -34,7 +34,6 @@ SAUS_APPS_PATH = WEBROOT / "apps"
 
 MODEL_MANAGER_PATH = WEBROOT / "model_manager"#Added to access the new model manager app - NOT ACTIVE, TO BE REPLACED BY LORA MANAGER IN FUTURE VERSIONS
 FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
-CUSTOM_THEMES_DIR = WEBROOT / 'custom-themes'
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
 COMFYUI_DIRECTORY = ROOT_DIR.parent.parent

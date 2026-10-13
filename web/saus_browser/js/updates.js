@@ -12,7 +12,8 @@ export async function getVersion() {
     }
 }
 
-/** The version is shown in the Settings tab (see settings_info.js). */
+/** The version is shown in the Settings tab (see the Version section of
+ *  core/js/common/components/settings.js). */
 
 function isNewerVersion(current, latest) {
     const currentParts = current.split('.').map(Number);

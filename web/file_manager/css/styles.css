@@ -1,3 +1,6 @@
+/* Theme palette: Night (default) / Day / Fire. See /core/css/themes.css. */
+@import url('/core/css/themes.css');
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -5,57 +8,11 @@
     font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial;
 }
 
-:root {
-    /* --- CORE BRANDING --- */
-    --color-primary: #ff4500;            /* Fire: Orange-Red */
-    --color-secondary: #00f2ff;          /* Ice: Electric Cyan */
-    --color-accent: #ff8c00;             /* Heat: Dark Orange */
-    --color-highlight: #00d4ff;          /* Glacial: Bright Blue */
-    --color-primary-text: #e0f7fa;       /* Frost: Very Pale Blue */
-    --color-border: #1e3f5a;             /* Deep Arctic Blue */
-
-    /* --- BACKGROUNDS --- */
-    --color-background: #0b1622;         /* Night: Deep Midnight Blue */
-    --color-background-secondary: #050a0f; /* Absolute Zero: Darkest Blue */
-    --color-background-pattern: #162a3d; /* Frozen Lake Texture */
-    --color-background-pattern-light: #1e3f5a; /* Frozen Lake Texture */
-
-    /* --- HEADER & NAVIGATION --- */
-    --color-header-background: #050a0f;
-    --color-header-logo-text: #ff4500;    /* The logo glows like fire */
-    --color-header-text: #00f2ff;        /* Menu items are cool ice */
-    --color-social-icons: #00f2ff;
-
-    /* --- PRIMARY BUTTON (FIRE) --- */
-    --color-button-primary: #ff4500; 
-    --color-button-primary-hover: #ff6347; 
-    --color-button-primary-text: #8d9399; 
-    --color-button-primary-text-hover: #ffffff; 
-    --color-button-primary-active: #cc3700; 
-    --color-button-primary-text-active: #ffffff; 
-
-    /* --- SECONDARY BUTTON (ICE) --- */
-    --color-button-secondary: #131312; 
-    --color-button-secondary-hover: #1e3f5a; 
-    --color-button-secondary-text: #00f2ff; 
-    --color-button-secondary-text-hover: #ffffff; 
-    --color-button-secondary-active: #00d4ff; 
-    --color-button-secondary-text-active: #f4b6ff; 
-
-    /* --- UI FEEDBACK --- */
-    --color-progress-background: #102a43;
-    --color-progress-value: #ff4500;     /* Progress bar fills like lava */
-    --color-scrollbar-track: #050a0f;
-    --color-scrollbar-thumb: #1e3f5a;
-    --color-input-range-thumb: #ff4500;
-    --color-input-range-background: #1e3f5a;
-    --color-spinner: #00f2ff;           /* Ice spinning into fire */
-    --color-spinner-highlight: #ff4500;
-}
+/* Palette comes from /core/css/themes.css (imported above). */
 
 html,
 body {
-    background-color: #131312;
+    background-color: var(--color-surface-alt);
     height: 100%;
     margin: 0;
     padding: 0;
@@ -330,7 +287,7 @@ footer {
 
 .app-card p {
     font-size: 0.8em;
-    color: #a18aaf;
+    color: var(--color-text-muted);
     margin: 0;
 }
 
@@ -485,7 +442,7 @@ footer {
 .category-tag:hover,
 .category-tag.selected {
     background-color: var(--color-accent);
-    color: #ffffff;
+    color: var(--color-text-on-accent);
 }
 
 .favorite-button {
@@ -569,7 +526,7 @@ footer {
 }
 
 .toggle-button:disabled {
-    color: #888888;
+    color: var(--color-text-faint);
     cursor: not-allowed;
 }
 
@@ -731,13 +688,13 @@ footer {
 .update-dot {
     width: 6px;
     height: 6px;
-    background: #fff;
+    background: var(--color-text-on-accent);
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
 
 .version-label {
-    color: #fff;
+    color: var(--color-text-on-accent);
     font-size: 0.7em;
     font-weight: bold;
 }
@@ -841,7 +798,7 @@ footer {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--color-overlay);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -905,7 +862,7 @@ footer {
 
 .version-info {
     font-size: 0.9em;
-    color: #666;
+    color: var(--color-text-faint);
     opacity: 0.8;
 }
 
@@ -918,7 +875,7 @@ footer {
 
 .update-now-btn {
     background: var(--color-button-primary);
-    color: white;
+    color: var(--color-text-on-accent);
     border: none;
     padding: 10px 24px;
     font-weight: 600;
@@ -946,7 +903,7 @@ footer {
 .remind-later-btn {
     background: transparent;
     border: none;
-    color: #666;
+    color: var(--color-text-faint);
     padding: 10px 20px;
     cursor: pointer;
     font-weight: 500;
@@ -977,9 +934,9 @@ footer {
 }
 
 .close-dialog-btn:hover {
-    background: white;
+    background: var(--color-surface);
     transform: scale(1.1);
-    color: var(--color-button-secondary-active);
+    color: var(--color-primary-text);
 }
 
 
@@ -1101,7 +1058,7 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--color-overlay);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1406,17 +1363,17 @@ footer {
 }
 
 .status-message.success {
-    color: #4caf50;
+    color: var(--color-success);
 }
 
 .status-message.error {
-    color: #f44336;
+    color: var(--color-danger);
 }
 
 .btn-action {
     background: var(--color-background);
-    color: white;
-    border: 1px solid #4caf50;
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-success);
     padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
@@ -1425,7 +1382,7 @@ footer {
 }
 
 .btn-action:hover {
-    background: #3c8b3e;
+    background: var(--color-success);
 }
 /* Embedded in a workspace tab of the SAUS browser (see /saus/js/tabs.js):
    that page owns the chrome, so this one hides its (empty) header. */
@@ -1516,8 +1473,8 @@ footer {
 }
 
 .fm-danger:hover:not(:disabled) {
-    color: #ff5252;
-    border-color: #ff5252;
+    color: var(--color-danger);
+    border-color: var(--color-danger);
 }
 
 .fm-sep {
@@ -1773,7 +1730,7 @@ footer {
 
 .fm-nav:hover:not(:disabled), .fm-close:hover { color: var(--color-accent); border-color: var(--color-accent); }
 .fm-nav:disabled { opacity: 0.35; cursor: not-allowed; }
-.fm-close:hover { color: #ff5252; border-color: #ff5252; }
+.fm-close:hover { color: var(--color-danger); border-color: var(--color-danger); }
 
 .fm-preview-body {
     flex: 1;

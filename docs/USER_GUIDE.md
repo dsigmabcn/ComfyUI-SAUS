@@ -84,4 +84,7 @@ A simple File Manager to access and perform basic management of the files in you
 
 ### Settings
 - **Settings**: the *Settings* icon at the bottom of the rail opens them as a tab.
+- **Theme**: choose **Night** (neutral dark grey/white, the default), **Day** (light) or **Fire** (the original orange and ice look). Status colours (red/green/amber) stay coloured in every theme. It applies to the whole UI — the browser, the apps and the File Manager — and is remembered by your browser. See [Settings](SETTINGS.md).
+- **Version**: the installed SAUS version.
+- **Social**: the ko-fi / GitHub / YouTube links.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed (e.g., after installing new custom nodes or updates).

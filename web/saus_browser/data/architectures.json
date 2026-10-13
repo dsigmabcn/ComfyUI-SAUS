@@ -269,12 +269,10 @@
         },
         "files": [
           {
-            "file": "z_image_bf16.safetensors",
-            "label": "Z-IMAGE BF16"
+            "file": "z_image_int8_convrot.safetensors"
           },
           {
-            "file": "z_image_turbo_bf16.safetensors",
-            "label": "Z-IMAGE TURBO BF16"
+            "file": "z_image_turbo_int8_convrot.safetensors"
           }
         ]
       }
@@ -283,7 +281,7 @@
       "BASE": {
         "label": "BASE",
         "pick": {
-          "Diffusion_model": "z_image_bf16.safetensors"
+          "Diffusion_model": "z_image_int8_convrot.safetensors"
         },
         "settings": {
           "steps": "30",
@@ -294,7 +292,7 @@
       "TURBO": {
         "label": "TURBO",
         "pick": {
-          "Diffusion_model": "z_image_turbo_bf16.safetensors"
+          "Diffusion_model": "z_image_turbo_int8_convrot.safetensors"
         },
         "settings": {
           "steps": "4",
@@ -1685,7 +1683,7 @@
             "file": "qwen3vl_8b_int8_convrot.safetensors"
           },
           {
-            "file": "Qwen-Image-2.1-PE-T2I.safetensors"
+            "file": "qwen3.5_9b_qwen_image_2.1_pe_t2i.int8_convrot.safetensors"
           }
         ]
       },
@@ -1703,7 +1701,8 @@
           }
         ]
       }
-    ]
+    ],
+    "variants": {}
   },
   "FLUX 2 KLEIN FAMILY": {
     "title": "Flux 2 Klein family",
@@ -1980,5 +1979,76 @@
         "loras": []
       }
     }
+  },
+  "KREA 2 TURBO": {
+    "title": "KREA 2 TURBO",
+    "description": "KREA 2 Turbo architecture for Text to Image and Reference sytle",
+    "categories": [
+      "Text to Image",
+      "Style"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "krea2_turbo_int8_convrot.safetensors",
+            "label": "krea2_turbo_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_4b_fp8_scaled.safetensors",
+            "label": "qwen3vl_4b_fp8_scaled.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "qwen_image_vae.safetensors",
+            "label": "qwen_image_vae.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "lora",
+        "type": "LORA",
+        "need": "all",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "krea2_style_reference.safetensors",
+            "label": "krea2_style_reference.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {}
   }
 }

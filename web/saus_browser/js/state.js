@@ -36,8 +36,7 @@ const defaultPreferences = {
     hideDescriptions: false,
     hideTitles: false,
     sortValue: 'nameAsc',
-    showHiddenOnly: false, 
-    selectedTheme: null,
+    showHiddenOnly: false,
 };
 
 export const preferencesManager = new PreferencesManager(defaultPreferences);

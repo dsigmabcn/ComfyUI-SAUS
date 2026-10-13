@@ -1,6 +1,6 @@
 {
   "id": "dfpv9",
-  "name": "QWEN Image Text to Image",
+  "name": "Qwen Image",
   "url": "qwen-image-text-to-image",
   "description": "Create Images using QWEN Image",
   "metadata": {

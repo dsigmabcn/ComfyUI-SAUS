@@ -463,11 +463,28 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 variantButtons.push(btn);
             });
         } else if (arch) {
-            setButton(staticButtons.hd, arch.base_settings ? arch.base_settings.name : 'HD', !!(arch.base_settings && checkModels(arch.base_settings)), 'Required models for this mode are not installed.');
-            setButton(staticButtons.turbo, arch.turbo_settings ? arch.turbo_settings.name : 'Turbo', !!(arch.turbo_settings && checkModels(arch.turbo_settings)), 'Required models for this mode are not installed.');
+            // No named variants: the architecture's base settings *are* the
+            // default, so the app simply runs as HD. Turbo only exists as a
+            // choice when the architecture defines turbo_settings; otherwise its
+            // button goes away instead of sitting there greyed out.
+            setButton(staticButtons.hd, arch.base_settings ? arch.base_settings.name : 'HD',
+                !arch.base_settings || checkModels(arch.base_settings),
+                'Required models for this mode are not installed.');
+            if (arch.turbo_settings) {
+                setButton(staticButtons.turbo, arch.turbo_settings.name || 'Turbo',
+                    checkModels(arch.turbo_settings),
+                    'Required models for this mode are not installed.');
+            } else {
+                staticButtons.turbo?.remove();
+                staticButtons.turbo = null;
+            }
         } else {
-            setButton(staticButtons.hd, null, false, 'Architecture not found.');
-            setButton(staticButtons.turbo, null, false, 'Architecture not found.');
+            // No architecture block at all: still a runnable app, and HD is what
+            // it runs as. There is nothing to offer as an alternative (Custom
+            // stays, so the parameters are always reachable).
+            setButton(staticButtons.hd, 'HD', true);
+            staticButtons.turbo?.remove();
+            staticButtons.turbo = null;
         }
     
         if (!modeSelectorContainer) {
@@ -1068,8 +1085,81 @@ function setupAdvancedToggle() {
         processQueue();
     });
 
+    /* ---------------------------------------------------------------------- *
+     * The heading above the mode buttons: which app this is (same size as the
+     * buttons, so it reads as a label) and the (i) that opens what the app
+     * needs - the facts the browser's information panel shows.
+     * ---------------------------------------------------------------------- */
+    function setupAppHeading(config = {}) {
+        const headingName = document.getElementById('app-heading-name');
+        if (headingName) headingName.textContent = config.name || '';
+
+        const dialog = document.getElementById('app-info-dialog');
+        const infoButton = document.getElementById('app-info-btn');
+        // <dialog> is everywhere modern browsers run this; without it the
+        // heading on its own is still correct.
+        if (!dialog || !infoButton || typeof dialog.showModal !== 'function') return;
+
+        // Callable twice (boot + DOMContentLoaded): the name refresh above runs
+        // every time, the listeners are only ever attached once.
+        if (dialog.dataset.wired === '1') return;
+        dialog.dataset.wired = '1';
+
+        const metadata = config.metadata || {};
+        const tags = metadata.tags || {};
+        const modelFiles = Array.isArray(metadata.models) ? metadata.models : [];
+
+        const fill = () => {
+            const name = document.getElementById('app-info-name');
+            if (name) name.textContent = config.name || '';
+
+            const description = document.getElementById('app-info-description');
+            if (description) {
+                const text = config.description || '';
+                description.textContent = text;
+                description.classList.toggle('hidden', !text);
+            }
+
+            const meta = document.getElementById('app-info-meta');
+            if (meta) {
+                const parts = [];
+                if (metadata.architecture) parts.push(metadata.architecture);
+                if (metadata.category) parts.push(metadata.category);
+                const flatTags = [...(tags.type || []), ...(tags.base_models || []), ...(tags.other || [])];
+                if (flatTags.length) parts.push(flatTags.join(', '));
+                meta.textContent = parts.join(' · ');
+                meta.classList.toggle('hidden', !parts.length);
+            }
+
+            const list = document.getElementById('app-info-models');
+            const title = document.getElementById('app-info-models-title');
+            if (list) {
+                list.innerHTML = '';
+                modelFiles.forEach((file) => {
+                    const item = document.createElement('li');
+                    item.textContent = file;
+                    list.appendChild(item);
+                });
+                list.classList.toggle('hidden', !modelFiles.length);
+            }
+            if (title) title.classList.toggle('hidden', !modelFiles.length);
+        };
+
+        infoButton.addEventListener('click', () => {
+            fill();
+            dialog.showModal();
+        });
+        dialog.querySelectorAll('[data-app-info-close]').forEach((button) =>
+            button.addEventListener('click', () => dialog.close()));
+        // A click on the dimmed area (the dialog element itself) closes it too.
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) dialog.close();
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         initialize(false, false, false, false, true);
+        setupAppHeading(appConfig);
         // Build the "Show Advanced" fold once the DOM is ready.
 
         const overlay = document.getElementById('css-loading-overlay');
@@ -1099,6 +1189,12 @@ function setupAdvancedToggle() {
         collectPromptValues(snapshot);
         return snapshot;
     };
+
+    // Wired here as well as on DOMContentLoaded: by the time this module runs,
+    // content.html is already in the page, so the heading is never left empty if
+    // the app's scripts happen to load after the document finished parsing
+    // (setupAppHeading only attaches its listeners once).
+    setupAppHeading(appConfig);
 
     // Everything an export needs is in place from here on.
     uiReady = true;

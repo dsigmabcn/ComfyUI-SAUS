@@ -49,7 +49,9 @@ export function createAppRow(app) {
     thumb.className = 'app-row-thumb';
     thumb.alt = '';
     thumb.loading = 'lazy';
-    thumb.src = `saus/${app.url}/media/thumbnail.jpg?t=${state.sessionTimestamp}`;
+    // The app ships whatever thumbnail name it likes (jpg / webp / avif): the
+    // API reports the one that exists, and this is the fallback.
+    thumb.src = `saus/${app.url}/${app.thumbnail || 'media/thumbnail.jpg'}?t=${state.sessionTimestamp}`;
     const onThumbError = () => {
         thumb.removeEventListener('error', onThumbError);
         thumb.src = '/core/media/ui/saus_logo.png';

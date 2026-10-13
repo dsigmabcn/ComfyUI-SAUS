@@ -16,8 +16,10 @@ from .helpers import allowed_file, resolve_within_roots, require_json, require_s
 TEMP_UPLOAD_DIR = "/tmp/app_uploads"
 
 # Extensions the thumbnail endpoint will try to shrink (everything else is
-# served as-is, or rejected).
-IMAGE_THUMB_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif'}
+# served as-is, or rejected). avif is here because the File Manager must at
+# least *recognise* it; Pillow usually cannot decode it, and the handler then
+# falls back to serving the original.
+IMAGE_THUMB_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.avif', '.bmp', '.gif'}
 
 # Uploads arrive in 20 MB chunks from the File Manager; refuse anything much
 # larger so a single request can never be buffered into memory.
@@ -134,8 +136,11 @@ async def thumbnail_handler(request: web.Request) -> web.Response:
             headers={'Cache-Control': 'max-age=600'},
         )
     except Exception as e:
-        logger.warning(f"{SAUSMSG}: thumbnail failed for {file_path}: {e}")
-        return web.json_response({'error': str(e)}, status=500)
+        # An image Pillow cannot open (avif without its plugin, or anything
+        # broken): hand the original back so the browser - which does decode
+        # avif - can still show it, instead of failing the tile outright.
+        logger.warning(f"{SAUSMSG}: thumbnail failed for {file_path} ({e}); serving the original")
+        return web.FileResponse(file_path, headers={'Cache-Control': 'max-age=600'})
 
 
 async def move_copy_handler(request: web.Request) -> web.Response:
@@ -417,7 +422,7 @@ async def list_input_files_handler(request: web.Request) -> web.Response:
         if INPUT_FILES_DIRECTORY.exists():
             for item in INPUT_FILES_DIRECTORY.iterdir():
                 if item.is_file() and not item.name.startswith('.'):
-                    if item.suffix.lower() in ['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif', '.mp4', '.webm', '.ogg', '.mov', '.mkv']:
+                    if item.suffix.lower() in ['.png', '.jpg', '.jpeg', '.webp', '.avif', '.bmp', '.gif', '.mp4', '.webm', '.ogg', '.mov', '.mkv']:
                         files.append(item.name)
         return web.json_response(files)
     except Exception as e:

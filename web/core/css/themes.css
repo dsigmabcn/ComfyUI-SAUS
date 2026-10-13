@@ -1,0 +1,267 @@
+/* ------------------------------------------------------------------ *
+ * The SAUS palette.
+ *
+ * Three themes, chosen in Settings (Night / Day / Fire); Night is the
+ * default. Every surface (the app browser, the apps themselves, the File
+ * Manager) imports this one file, so a colour is defined exactly once.
+ *
+ *   Night  neutral dark, the default
+ *   Day    light
+ *   Fire   the original SAUS look (orange + ice on midnight blue)
+ *
+ * Rules elsewhere only ever use var(--…): adding a theme means adding a
+ * block here, never touching a component.
+ * ------------------------------------------------------------------ */
+
+/* --- Night: the default ------------------------------------------------ */
+:root {
+    /* Interactive accents are neutral: white and greys. The colours that mean
+       something (danger / success / warning / info) keep their own values. */
+    --color-primary: #e8e8e8;
+    --color-secondary: #9a9a9a;
+    --color-accent: #d0d0d0;
+    --color-accent-hover: #ffffff;
+    --color-accent-soft: rgba(255, 255, 255, 0.12);
+    --color-highlight: #ffffff;
+    --color-primary-text: #e7eaee;
+    --color-text-muted: #9aa3ad;
+    --color-text-subtle: #7c8794;
+    --color-text-faint: #66707b;
+    --color-text-on-accent: #ffffff;
+    --color-border: #2b313a;
+    --color-border-strong: #3b434e;
+    --color-border-hover: #4a545f;
+    --color-border-muted: #2b313a;
+
+    /* Backgrounds and surfaces */
+    --color-background: #14171c;
+    --color-background-secondary: #0e1013;
+    --color-background-pattern: #1c2027;
+    --color-background-pattern-light: #262b33;
+    --color-surface: #1b1f26;
+    --color-surface-alt: #232830;
+    --color-surface-raised: #2b313a;
+    --color-surface-hover: #262b33;
+    --color-input-background: #191d23;
+
+    /* Header and navigation */
+    --color-header-background: #0e1013;
+    --color-header-logo-text: #e8e8e8;
+    --color-header-text: #c9d1d9;
+    --color-social-icons: #c9d1d9;
+
+    /* Primary button: a light button on the dark UI */
+    --color-button-primary: #e8e8e8;
+    --color-button-primary-hover: #ffffff;
+    --color-button-primary-text: #161616;
+    --color-button-primary-text-hover: #161616;
+    --color-button-primary-active: #c9c9c9;
+    --color-button-primary-text-active: #161616;
+
+    /* Secondary button */
+    --color-button-secondary: #232830;
+    --color-button-secondary-hover: #2b313a;
+    --color-button-secondary-text: #c9d1d9;
+    --color-button-secondary-text-hover: #ffffff;
+    --color-button-secondary-active: #343b45;
+    --color-button-secondary-text-active: #ffffff;
+
+    /* Progress, scrollbars, sliders, spinner */
+    --color-progress-background: #232830;
+    --color-progress-value: #e8e8e8;
+    --color-scrollbar-track: #0e1013;
+    --color-scrollbar-thumb: #2b313a;
+    --color-input-range-thumb: #e8e8e8;
+    --color-input-range-background: #2b313a;
+    --color-spinner: #e8e8e8;
+    --color-spinner-highlight: #8a8a8a;
+
+    /* Status colours */
+    --color-danger: #ef5350;
+    --color-danger-strong: #d84340;
+    --color-success: #4caf50;
+    --color-success-bg: #1c2f22;
+    --color-warning: #ffb74d;
+    --color-info: #64b5f6;
+    --color-neutral: #8a949f;
+
+    /* Alternate accent: the prompt / tag side of the UI */
+    --color-accent-alt: #8a8a8a;
+    --color-accent-alt-hover: #ababab;
+    --color-accent-alt-border: #3b434e;
+
+    /* Effects */
+    --color-focus: #5b8ad6;
+    --color-overlay: rgba(8, 11, 15, 0.6);
+    --color-loading-overlay: #14171c;
+    --shadow-hover: rgba(0, 0, 0, 0.5);
+
+    /* Tag chips */
+    --tag-model: #a1887f;
+    --tag-arch: #4db6ac;
+    --tag-other: #64b5f6;
+
+    --border-radius: 8px;
+}
+
+/* --- Day: light -------------------------------------------------------- */
+:root[data-theme="day"] {
+    /* Neutral again: near-black interactive accents, so only the semantic
+       colours (danger / success / warning / info) carry a hue. */
+    --color-primary: #1a1a1a;
+    --color-secondary: #5c5c5c;
+    --color-accent: #1a1a1a;
+    --color-accent-hover: #2b2b2b;
+    --color-accent-soft: rgba(0, 0, 0, 0.08);
+    --color-highlight: #1a1a1a;
+    --color-primary-text: #1b2430;
+    --color-text-muted: #5c6773;
+    --color-text-subtle: #6b7480;
+    --color-text-faint: #7b848f;
+    --color-text-on-accent: #ffffff;
+    --color-border: #cfd7e2;
+    --color-border-strong: #c3ccd6;
+    --color-border-hover: #b3bdc8;
+    --color-border-muted: #dfe4ed;
+
+    --color-background: #eef2f7;
+    --color-background-secondary: #e5eaf1;
+    --color-background-pattern: #d4dce6;
+    --color-background-pattern-light: #c6d0dc;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f1f4f8;
+    --color-surface-raised: #e9edf2;
+    --color-surface-hover: #e7ecf3;
+    --color-input-background: #ffffff;
+
+    --color-header-background: #f8fafc;
+    --color-header-logo-text: #1a1a1a;
+    --color-header-text: #33404d;
+    --color-social-icons: #33404d;
+
+    --color-button-primary: #1a1a1a;
+    --color-button-primary-hover: #2b2b2b;
+    --color-button-primary-text: #ffffff;
+    --color-button-primary-text-hover: #ffffff;
+    --color-button-primary-active: #0f0f0f;
+    --color-button-primary-text-active: #ffffff;
+
+    --color-button-secondary: #e4eaf2;
+    --color-button-secondary-hover: #dae1ea;
+    --color-button-secondary-text: #33404d;
+    --color-button-secondary-text-hover: #1b2430;
+    --color-button-secondary-active: #d0d9e4;
+    --color-button-secondary-text-active: #1b2430;
+
+    --color-progress-background: #d7dfe9;
+    --color-progress-value: #1a1a1a;
+    --color-scrollbar-track: #e5eaf1;
+    --color-scrollbar-thumb: #c8d2de;
+    --color-input-range-thumb: #1a1a1a;
+    --color-input-range-background: #cfd7e2;
+    --color-spinner: #1a1a1a;
+    --color-spinner-highlight: #5c5c5c;
+
+    --color-danger: #c62828;
+    --color-danger-strong: #b71c1c;
+    --color-success: #2e7d32;
+    --color-success-bg: #e6f4ea;
+    --color-warning: #b26a00;
+    --color-info: #1565c0;
+    --color-neutral: #6c757d;
+
+    --color-accent-alt: #5c5c5c;
+    --color-accent-alt-hover: #3f3f3f;
+    --color-accent-alt-border: #c3ccd6;
+
+    --color-focus: #2f6fd0;
+    --color-overlay: rgba(23, 32, 44, 0.45);
+    --color-loading-overlay: #ffffff;
+    --shadow-hover: rgba(16, 24, 40, 0.18);
+
+    --tag-model: #795548;
+    --tag-arch: #009688;
+    --tag-other: #2196f3;
+}
+
+
+/* --- Fire: the original SAUS look -------------------------------------- *
+ * These are the colours the UI shipped with, byte for byte, so choosing
+ * Fire gives exactly the old look back.
+ * ---------------------------------------------------------------------- */
+:root[data-theme="fire"] {
+    --color-primary: #ff4500;
+    --color-secondary: #00f2ff;
+    --color-accent: #ff8c00;
+    --color-accent-hover: #ffaa47;
+    --color-accent-soft: rgba(255, 140, 0, 0.18);
+    --color-highlight: #00d4ff;
+    --color-primary-text: #e0f7fa;
+    --color-text-muted: #bababa;
+    --color-text-subtle: #aaaaaa;
+    --color-text-faint: #888888;
+    --color-text-on-accent: #ffffff;
+    --color-border: #1e3f5a;
+    --color-border-strong: #7a7a7a;
+    --color-border-hover: #acabab;
+    --color-border-muted: #dddddd;
+
+    --color-background: #0b1622;
+    --color-background-secondary: #050a0f;
+    --color-background-pattern: #162a3d;
+    --color-background-pattern-light: #1e3f5a;
+    --color-surface: #1e1e1f;
+    --color-surface-alt: #131312;
+    --color-surface-raised: #222222;
+    --color-surface-hover: #363636;
+    --color-input-background: #333333;
+
+    --color-header-background: #050a0f;
+    --color-header-logo-text: #ff4500;
+    --color-header-text: #00f2ff;
+    --color-social-icons: #00f2ff;
+
+    --color-button-primary: #ff4500;
+    --color-button-primary-hover: #ff6347;
+    --color-button-primary-text: #8d9399;
+    --color-button-primary-text-hover: #ffffff;
+    --color-button-primary-active: #cc3700;
+    --color-button-primary-text-active: #ffffff;
+
+    --color-button-secondary: #131312;
+    --color-button-secondary-hover: #1e3f5a;
+    --color-button-secondary-text: #00f2ff;
+    --color-button-secondary-text-hover: #ffffff;
+    --color-button-secondary-active: #00d4ff;
+    --color-button-secondary-text-active: #f4b6ff;
+
+    --color-progress-background: #102a43;
+    --color-progress-value: #ff4500;
+    --color-scrollbar-track: #050a0f;
+    --color-scrollbar-thumb: #1e3f5a;
+    --color-input-range-thumb: #ff4500;
+    --color-input-range-background: #1e3f5a;
+    --color-spinner: #00f2ff;
+    --color-spinner-highlight: #ff4500;
+
+    --color-danger: #f44336;
+    --color-danger-strong: #c62828;
+    --color-success: #4caf50;
+    --color-success-bg: #2a4d3e;
+    --color-warning: #ff9800;
+    --color-info: #2196f3;
+    --color-neutral: #6c757d;
+
+    --color-accent-alt: #570d7b;
+    --color-accent-alt-hover: #8621b7;
+    --color-accent-alt-border: #320848;
+
+    --color-focus: #4a90e2;
+    --color-overlay: rgba(0, 0, 0, 0.65);
+    --color-loading-overlay: #ffffff;
+    --shadow-hover: rgba(0, 0, 0, 0.5);
+
+    --tag-model: #795548;
+    --tag-arch: #009688;
+    --tag-other: #2196f3;
+}

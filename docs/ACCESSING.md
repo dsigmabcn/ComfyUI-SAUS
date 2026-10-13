@@ -18,7 +18,7 @@ http://127.0.0.1:8188/saus
 
 
 ## 2. From ComfyUI graph
-Start ComfyUI as indicated before. In the action bar on your top right, you will see the SAUS button. Just click on it to open the interface
+Start ComfyUI as indicated before. On the **left toolbar** (the icon rail along the left edge) you will see the **SAUS** icon — next to the App Builder's hammer. Click it to open the interface
 <img src="../web/core/media/git/Access-button-ComfyUI.png">
 
 ## 3. From Runpod

@@ -1,3 +1,6 @@
+/* Theme palette: Night (default) / Day / Fire. See /core/css/themes.css. */
+@import url('/core/css/themes.css');
+
 /* Reset and Base Styles */
 * {
     box-sizing: border-box;
@@ -6,53 +9,7 @@
     font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial, sans-serif;
 }
 
-:root {
-    /* --- CORE BRANDING --- */
-    --color-primary: #ff4500;            /* Fire: Orange-Red */
-    --color-secondary: #00f2ff;          /* Ice: Electric Cyan */
-    --color-accent: #ff8c00;             /* Heat: Dark Orange */
-    --color-highlight: #00d4ff;          /* Glacial: Bright Blue */
-    --color-primary-text: #e0f7fa;       /* Frost: Very Pale Blue */
-    --color-border: #1e3f5a;             /* Deep Arctic Blue */
-
-    /* --- BACKGROUNDS --- */
-    --color-background: #0b1622;         /* Night: Deep Midnight Blue */
-    --color-background-secondary: #050a0f; /* Absolute Zero: Darkest Blue */
-    --color-background-pattern: #162a3d; /* Frozen Lake Texture */
-    --color-background-pattern-light: #1e3f5a; /* Frozen Lake Texture */
-
-    /* --- HEADER & NAVIGATION --- */
-    --color-header-background: #050a0f;
-    --color-header-logo-text: #ff4500;    /* The logo glows like fire */
-    --color-header-text: #00f2ff;        /* Menu items are cool ice */
-    --color-social-icons: #00f2ff;
-
-    /* --- PRIMARY BUTTON (FIRE) --- */
-    --color-button-primary: #ff4500; 
-    --color-button-primary-hover: #ff6347; 
-    --color-button-primary-text: #8d9399; 
-    --color-button-primary-text-hover: #ffffff; 
-    --color-button-primary-active: #cc3700; 
-    --color-button-primary-text-active: #ffffff; 
-
-    /* --- SECONDARY BUTTON (ICE) --- */
-    --color-button-secondary: #131312; 
-    --color-button-secondary-hover: #1e3f5a; 
-    --color-button-secondary-text: #00f2ff; 
-    --color-button-secondary-text-hover: #ffffff; 
-    --color-button-secondary-active: #00d4ff; 
-    --color-button-secondary-text-active: #f4b6ff; 
-
-    /* --- UI FEEDBACK --- */
-    --color-progress-background: #102a43;
-    --color-progress-value: #ff4500;     /* Progress bar fills like lava */
-    --color-scrollbar-track: #050a0f;
-    --color-scrollbar-thumb: #1e3f5a;
-    --color-input-range-thumb: #ff4500;
-    --color-input-range-background: #1e3f5a;
-    --color-spinner: #00f2ff;           /* Ice spinning into fire */
-    --color-spinner-highlight: #ff4500;
-}
+/* Palette comes from /core/css/themes.css (imported above). */
 
 html, body {
     height: 100%;
@@ -77,185 +34,15 @@ body {
     overflow: hidden;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    justify-content: flex-start;
-    align-items: center;
-    background-color: var(--color-header-background);
-    padding: 4px 20px;
-    padding: 10px 50px 0 0;
-    text-align: left;
-    border-bottom: 1px dashed var(--color-border);
-    position: relative; /* For positioning child elements if needed */
-}
-
 /* Embedded in a workspace tab of the SAUS browser (see /saus/js/tabs.js):
-   that page owns the logo, the navigation bar and the footer, so the app
-   drops its own and keeps the whole iframe for the workflow UI. */
-.saus-embedded header,
+   that page owns the footer, so the app drops its own and keeps the whole
+   iframe for the workflow UI. */
 .saus-embedded footer {
-    display: none;
-}
-
-.header-nav {
-    display: flex; /* Use flexbox for centering */
-    justify-content: flex-start; /* Center links horizontally */
-    align-items: center; /* Center links vertically */
-    gap: 30px; /* Increase space between links for better visibility */
-    background-color: var(--color-background-pattern); /* Use a solid background color */
-    padding: 0px 0; /* Add vertical padding */
-    margin-bottom: 5px; /* Add space below the nav bar */
-    border: 1px dashed var(--color-highlight); /* Add a more prominent border */
-}
-
-.header-nav a {
-    color: var(--color-button-primary-text); /* Ensure link color is visible */
-    text-decoration: none;
-    font-size: 1.1em; /* Increase font size */
-    font-weight: bold; /* Make the text bold */
-    padding: 10px 20px; /* Increase padding for a larger hit area */
-    transition: background-color 0.3s, color 0.3s;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-}
-
-.header-nav a:hover {
-    /*background-color: var(--color-button-primary-text); /* Change background on hover */
-    background-color: var(--color-background-secondary); /* Change background on hover */
-
-    /*color: #ffffff;*/
-    color: var(--color-accent);
-}
-
-.header-nav a i {
-    margin-right: 8px; /* Increase space between icon and text */
-}
-
-
-#logo {
-    width: 250px;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    padding-left: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#img-logo {
-    padding-right: 40px;
-}
-
-#img-logo img {
-    max-width: 100%;
-    height: auto;    
-}
-
-.logo-text {
-    display: inline-block;
-    position: relative;
-    font-family: Arial, sans-serif;
-    cursor: pointer;
-    color: var(--color-header-text);
-    user-select: none;
-}
-
-.logo-text .text {
-    overflow: hidden;
-    font-size: 30px;
-    text-align: center;
-    display: inline-block;
-    animation-name: animation-text;
-    animation-duration: 2s;
-}
-
-.logo-text .left,
-.logo-text .right {
-    position: absolute;
-    font-size: 30px;
-    line-height: 30px;
-    animation-duration: 1.5s;
-    font-weight: bold;
-}
-
-.logo-text .left {
-    left: -30px;
-    animation-name: animation-left;
-}
-
-.logo-text .right {
-    right: -30px;
-    animation-name: animation-right;
-}
-
-@keyframes animation-text {
-    0% { opacity: 0; }
-    40% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes animation-left {
-    from { left: 30px; }
-    to { left: -30px; }
-}
-
-@keyframes animation-right {
-    from { right: 30px; }
-    to { right: -30px; }
-}
-
-.appName {
-    padding: 10px;
-    color: var(--color-header-logo-text);
-    border-top: 1px dashed var(--color-border);
-    border-left: 1px dashed var(--color-border);
-    border-right: 1px dashed var(--color-border);
-    font-size: 16px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/*.appName h2 {
-    font-size: 16px;
-    font-weight: normal;
-}*/
-
-#right-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px;
-    margin-left: 0;
-    padding: 5px;
-}
-
-#Support {
-    color: var(--color-header-text);
-    margin: 10px;
-    font-size: 12px;
     display: none;
 }
 
 a {
     text-decoration: none;
-}
-
-#patreon, #github, #x, #discord {
-    display: flex;
-    align-items: center;
-}
-
-#patreon a, #github a, #x a, #discord a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#patreon a svg, #github a svg, #x a svg, #discord a svg {
-    width: 24px;
-    height: 24px;
 }
 
 .content {
@@ -406,6 +193,11 @@ a {
     transition: width 0.2s ease-in-out;
 }
 
+/* The progress readout sits on the bar itself, which is two colours at once: the
+   filled part (--color-progress-value) and the empty track behind the rest. No
+   single colour can contrast with both a near-white and a near-black bar, so the
+   glyph wears the page colour and the outline wears the *fill* colour: whichever
+   half of the bar is behind it, either the letter or its edge contrasts. */
 #progress-text {
     position: absolute;
     top: 0;
@@ -415,10 +207,11 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--color-background);
     font-size: 0.85em;
     font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    text-shadow: -1px -1px 0 var(--color-progress-value), 1px -1px 0 var(--color-progress-value),
+        -1px 1px 0 var(--color-progress-value), 1px 1px 0 var(--color-progress-value);
     pointer-events: none;
     z-index: 10;
 }
@@ -514,10 +307,16 @@ a {
     font-size: 12px;
     user-select: none;
     margin-top: 6px;
- 
+    /* The glyph is plain text (a ▼), so it needs an explicit theme colour. */
+    color: var(--color-primary-text);
     /*transition: transform 0.3s ease;*/
     border: 1px solid var(--color-border);
     border-radius: 0 0 4px 4px;
+}
+
+.expand-arrow-bottom:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 .expand-arrow-bottom.rotated {
@@ -861,9 +660,47 @@ input[type="number"] {
 .seeder-container button {
     width: 30px;
     height: 30px;
-    font-weight: bold;    
+    font-weight: bold;
     color: var(--color-button-secondary-text);
     background-color: var(--color-button-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease,
+        border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.seeder-container button:hover {
+    background-color: var(--color-button-secondary-hover);
+    border-color: var(--color-border-strong);
+}
+
+/* The R switch. Randomising the seed on every run (ON, the default) is filled
+   with a halo; keeping the seed in the field (OFF) is hollow, dashed and dimmed.
+   The two states have to be obvious at 30px in all three themes, so the ON label
+   is painted in the page colour on the accent fill. */
+.seeder-container button[id$="RandomSeedButton"] {
+    color: var(--color-text-faint);
+    background-color: transparent;
+    border-style: dashed;
+}
+
+.seeder-container button[id$="RandomSeedButton"]:hover {
+    color: var(--color-button-secondary-text-hover);
+    border-color: var(--color-border-strong);
+}
+
+.seeder-container button[id$="RandomSeedButton"].active {
+    color: var(--color-background);
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    border-style: solid;
+    box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+
+.seeder-container button[id$="RandomSeedButton"].active:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
 }
 
 .dimension-selector-container {
@@ -1293,7 +1130,7 @@ button:hover {
 }
 
 #buttonsgen button:hover {
-    background-color: #ffaa47;
+    background-color: var(--color-accent-hover);
     color: var(--color-button-primary-text-hover);
 
 }
@@ -1304,15 +1141,15 @@ button:hover {
     min-width: 40px;
     font-size: 18px;
     line-height: 1;
-    background-color: #c62828;
-    border-color: #c62828;
-    color: #ffffff;
+    background-color: var(--color-danger-strong);
+    border-color: var(--color-danger-strong);
+    color: var(--color-text-on-accent);
 }
 
 #buttonsgen #interruptButton:hover {
-    background-color: #e53935;
-    border-color: #e53935;
-    color: #ffffff;
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-text-on-accent);
 }
 
 #buttonsgen #runs-wrap {
@@ -1333,7 +1170,7 @@ button:hover {
     display: inline-flex;
     align-items: center;
     height: 38px;            /* same height as the Run / ✕ buttons */
-    background-color: #000;
+    background-color: var(--color-background-secondary);
     border: 1px solid var(--color-accent);
     border-radius: 5px;
     overflow: hidden;
@@ -1359,7 +1196,7 @@ button:hover {
 }
 
 #buttonsgen .runs-stepper button:hover {
-    background-color: rgba(255, 140, 0, 0.18);
+    background-color: var(--color-accent-soft);
     color: var(--color-accent);
 }
 
@@ -1440,9 +1277,6 @@ button:hover {
     height: 50%;
 }
 
-
-
-
 .canvas-container {
     display: flex;
     justify-content: center;
@@ -1454,7 +1288,7 @@ button:hover {
 }
 
 #canvasContainer:focus {
-    border: 2px solid #4A90E2;
+    border: 2px solid var(--color-focus);
 }
 /* Allow flex items to shrink properly */
 #canvasWrapper,
@@ -1482,7 +1316,6 @@ button:hover {
     box-sizing: border-box;
     position: relative;
     margin: 0; 
-
 
 } */
 #canvasWrapper {
@@ -1573,7 +1406,6 @@ button:hover {
 
 }
 
-
 .image-loader-title {
     display: flex;
     justify-content: center;
@@ -1591,7 +1423,6 @@ button:hover {
     border: 1px dashed var(--color-border);
     padding: 10px;
 
-
 }
 
 .image-loader {
@@ -1600,7 +1431,6 @@ button:hover {
     margin-bottom: 10px;
     padding-bottom: 10px;
 }
-
 
 /* Fix to load the video loading in the right size*/
 .image-loader img,
@@ -1617,7 +1447,6 @@ button:hover {
     border: 1px dashed var(--color-border);
 
 }
-
 
 /* #load-image-container img {
     max-width: 100%;
@@ -1676,7 +1505,6 @@ button:hover {
 #images-container,
 #side-workflow-controls,
 #load-image-container,
-#custom-theme-modal,
 .dropdownDialogContainer,
 .aspect-ratio-selector,
 .content { 
@@ -1746,7 +1574,6 @@ button:hover {
         display: none;
     }
 
-
 }
 
 /* Tablets (768px to 992px) */
@@ -1778,12 +1605,6 @@ button:hover {
     #responsive-indicator {
         background-color: green;
     }
-    #Support {
-        display: none;
-    }
-    .logo-text {
-        display: none;
-    }
     #dimension-selector {
         display: flex;
         width: 100%;
@@ -1804,39 +1625,14 @@ button:hover {
     #responsive-indicator {
         background-color: blue;
     }
-    #right-header,
     #left-col,
     #right-col {
         display: none;
     }
     
-    #mid {
-        display: none;
-    }
-    .logo-text {
-        display: none;
-    }
     
-    #logo {
-        padding-right: 10px;
-    }
-    .appName {
-        padding: 0;
-        border: none;
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
     
-    .appName h2 {
-        font-size: 14px; 
-    }
     
-    #img-logo img {
-        max-width: 80px; 
-    }
-
     #footer-content p {
         font-size:11px;
     }
@@ -1860,103 +1656,18 @@ button:hover {
     }
 }
 
-
-
-
-
-#theme-selector {
-    display: flex;
-    justify-content: center; 
-    align-items: center; 
-    border: none;
-    scrollbar-width: thin;
-    scrollbar-color:  #570d7b #1e1e1f;
-    overflow-y: auto;
-}
-#theme-selector-dropdown {
-    appearance: none; 
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    background-color: var(--color-header-background);
-    color: var(--color-header-text);
-    border: none;
-    cursor: pointer;
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 12px 7px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    padding-right: 5rem;
-}
-#theme-selector-dropdown optgroup  {
-    color: var(--color-header-text);
-    font-weight: bold;
-    /* font-style: italic; */
-    /* background-color: #1e1e1f; */
-}
-#theme-selector-dropdown:focus {
-    outline: none;
-}
-#theme-selector-dropdown:hover {
-    border-color: var(--color-accent);
-}
-#theme-selector-dropdown option {
-    color: var(--color-primary-text);
-
-    font-style: none;
-    background-color: var(--color-background);
-    
-}
-#theme-selector-dropdown option:disabled {
-    color: var(--color-primary-text);
-    background-color: var(--color-background);
-    font-weight: bold;
-    font-size: 14px;
-
-}
-#theme-option-create-custom {
-    color: var(--color-primary-text) !important;
-    font-weight:bolder !important;
-    font-size: 15px;
-    background-color: var(--color-background-secondary) !important;
-
-}
-.custom-theme-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 40%;
-    top: 8%;
-    max-height: 80%;
-    background-color: #1e1e1f !important;
-    padding: 0;
-
-    color: #bababa;
-    border: 1px dashed #320848;
-
-}
-.custom-theme-modal button {
-    background-color: #1e1e1f;
-    color: #bababa ;
-    font-size: 14px;
-    font-weight: normal;
-
-}
-.custom-theme-modal button:hover{
-    background-color: #7d0ab6;
-    /* color: #1e1e1f; */
-}
 .modal-content {
-  background-color: #fff;
+  background-color: var(--color-surface);
   /* width: 98%; */
   /* max-width: 900px; */
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background-color: #1e1e1f !important;
+  background-color: var(--color-surface) !important;
 }
 .modal-header {
   padding: 16px 24px;
-  background-color: #121212;
+  background-color: var(--color-surface-alt);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2019,63 +1730,17 @@ button:hover {
   font-size: 1rem;
   border: none;
   /* border-radius: 4px; */
-  color: #bababa !important;
-  background-color: #131312;
+  color: var(--color-text-muted) !important;
+  background-color: var(--color-surface-alt);
   border: none;
-  border-bottom: 1px solid #7a7a7a;
+  border-bottom: 1px solid var(--color-border-strong);
   margin-bottom: 10px;
 } 
 .form-group input[type="text"]:focus,
 .form-group select:focus {
     border: none;
-    border-bottom: 1px solid #acabab;
+    border-bottom: 1px solid var(--color-border-hover);
 } 
-.new-theme-set {
-    display: flex;
-    /* flex-direction: row; */
-    /* gap: 10px; */
-    padding: 10px;
-    background-color: #131312;
-    /* border-radius: 5px; */
-    /* margin: 10px; */
-    color: #bababa !important;
-}
-.variables-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-  padding: 8px 0;
-  height: 200px;
-  overflow: auto;
-  margin: 10px;
-
-}
-.color-field {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #131312;
-    padding: 8px;   
-
-}
-.color-field label {
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-  text-align: center;
-}
-.color-field input[type="color"] {
-  width: 50px;
-  height: 50px;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 0px;
-  transition: transform 0.2s ease;
-}
-.color-field input[type="color"]:hover {
-  transform: scale(1.1);
-}
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -2083,151 +1748,13 @@ button:hover {
 }
 .right-panel {
   flex: 1;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid var(--color-border-muted);
   padding-left: 16px;
 }
 .right-panel h3 {
   margin-top: 0;
   font-size: 1.2rem;
   margin-bottom: 12px;
-}
-#custom-themes-listing{
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-
-  gap: 16px;
-  width: 900px;
-  /* height: 200px; */
-    overflow: auto;
-}
-.form-section.css-variables {
-  padding: 16px;    
-}
-.custom-themes-section {
-  margin-bottom: 24px;
-  /* height: 250px; */
-  overflow: auto;
-  flex: 4;
-  /* background-color: #1976d2; */
-
-}
-#custom-themes-input {
-  padding: 8px;
-  font-size: 1rem;
-  /* border: 1px solid #ccc; */
-  border-radius: 4px;
-  /* width: 100px; */
-  flex: 1;
-  
-}
-#custom-themes-list-container {
-  height: 250px;
-  overflow: auto;
-
-}
-#custom-themes-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 14px;
-  
-}
-.custom-themes-list li {
-  padding: 8px 0;
-  /* border-bottom: 1px solid #f0f0f0; */
-  background-color: #222222;
-  margin: 4px 0;
-
-}
-@media (max-width: 768px) {
-  .modal-main {
-    flex-direction: column;
-  }
-  
-  .right-panel {
-    border-left: none;
-    padding-left: 0;
-    margin-top: 24px;
-  }
-  
-  .variables-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-}
-.new-theme-set input[type="text"] {
-    flex: 1;
-    color: #bababa !important;
-  
-  }
-#custom-theme-modal { 
-    scrollbar-width: thin;
-    scrollbar-color:  #570d7b #1e1e1f;
-    overflow-y: auto;
-}
-#custom-theme-modal::-webkit-scrollbar {
-    width: 1px;
-}
-#custom-theme-modal::-webkit-scrollbar-track {
-    background: #1e1e1f;
-    border-radius: 1px ;
-}
-#custom-theme-modal::-webkit-scrollbar-thumb {
-    background-color: #1e1e1f;
-    border-radius: 1px ;
-    border: 1px solid 570d7b;
-}
-#custom-theme-modal::-webkit-scrollbar-thumb:hover {
-    background-color: #1e1e1f;
-}
-#save-theme-button {
-    position: absolute;
-    background-color: #570d7b;
-    color: #bababa;
-    padding: 10px;
-    margin: 0 10px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    align-self: flex-end;
-}
-#save-and-continue-theme-button {
-    position: absolute;
-    right: 200px;
-    background-color: #570d7b;
-    color: #bababa;
-    padding: 10px;
-    margin: 0 10px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    align-self: flex-end;
-}
-#save-theme-set-button {
-    background-color: #570d7b;
-    color: #bababa;
-    padding: 10px;
-    margin: 0 10px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-#save-theme-button:hover, #save-and-continue-theme-button:hover ,#save-theme-set-button:hover {
-    background-color: #8621b7;
-    color: #bababa;
-}
-#theme-name {
-    flex: 1;
-    transition: border-color 0.3s ease-in-out;
-    padding: 8px;
-    background-color: #131312;
-    margin: 0;
-    width: 100%;
-}
-#theme-set-select {
-    border: none;
-    outline: none;
-
 }
 @keyframes fadeOut {
     from { opacity: 1; }
@@ -2274,7 +1801,7 @@ html:not(.css-loading) body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #ffffff;
+    background-color: var(--color-loading-overlay);
     opacity: 1;
     transition: opacity 0.3s ease-out;
     will-change: opacity;
@@ -2295,7 +1822,6 @@ html:not(.css-loading) body {
         transition: none;
     }
 }
-
 
 .lightbox-overlay {
     position: fixed;
@@ -2342,7 +1868,7 @@ html:not(.css-loading) body {
 }
 .lightbox-close:hover,
 .lightbox-close:focus {
-    color: #bbb;
+    color: var(--color-text-muted);
     text-decoration: none;
     cursor: pointer;
 }
@@ -2370,7 +1896,7 @@ html:not(.css-loading) body {
 }
 .lightbox-prev:hover,
 .lightbox-next:hover {
-    color: #bbb;
+    color: var(--color-text-muted);
 }
 .lightbox-media-container {
     width: 100%;
@@ -2406,14 +1932,6 @@ html:not(.css-loading) body {
     border: 1px dashed var(--color-border);
 }
 
-
-
-
-
-
-
-
-
 /* CSS Isolation: Prefix all classes with 'cbp-' */
 .cbp-brush-ui-container {
     background-color: var(--color-background);
@@ -2421,7 +1939,7 @@ html:not(.css-loading) body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     font-family: Arial, sans-serif;
     font-size: 14px;
-    color: var(--color-text);
+    color: var(--color-primary-text);
     position: absolute;
     top: 10%;
     left: 25%;
@@ -2456,7 +1974,7 @@ html:not(.css-loading) body {
     width: 24px;
     height: 24px;
     padding: 0;
-    color: var(--color-text);
+    color: var(--color-primary-text);
     display: none;
     }
     .cbp-brush-ui-content {
@@ -2481,7 +1999,7 @@ html:not(.css-loading) body {
     height: 30px;
     box-sizing: border-box;
     padding: 4px;
-    /* border: 1px solid #ccc; */
+    /* border: 1px solid var(--color-border-muted); */
     /* border-radius: 4px; */
     font-size: 14px;
     }
@@ -2581,21 +2099,20 @@ html:not(.css-loading) body {
     cursor: none !important;
     }
     
-    
-    
-    
     .mbp-container * {
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .mbp-container {
-        /* --mbp-primary: var(--color-button-primary);
+        /* Mapped onto the palette, so the panel follows the theme
+           (Night / Day / Fire - see /core/css/themes.css). */
+        --mbp-primary: var(--color-button-primary);
         --mbp-primary-hover: var(--color-button-primary-hover);
         --mbp-bg: var(--color-background-secondary);
         --mbp-border: var(--color-border);
         --mbp-text: var(--color-primary-text);
-        --mbp-icon: var(--color-primary); */
+        --mbp-icon: var(--color-primary);
         padding: 1rem;
     }
     .mbp-config-section {
@@ -2627,7 +2144,7 @@ html:not(.css-loading) body {
 
     }
     .mbp-config-item #DecrementButton,.mbp-config-item #IncrementButton{
-        /* background-color: #570d7b; */
+        /* background-color: var(--color-accent-alt); */
         flex: 1;
         color: var(--color-button-secondary-text);
     }
@@ -2644,7 +2161,7 @@ html:not(.css-loading) body {
 
     }
     .mbp-config-item .maskConfigInput{
-        /* background-color: #570d7b; */
+        /* background-color: var(--color-accent-alt); */
         width: 100%;
         flex: 2;
         text-align: center;
@@ -2684,7 +2201,7 @@ html:not(.css-loading) body {
 
     .mbp-button:hover {
         background: var(--color-button-primary-hover);
-        color: var(--mbp-primary);
+        color: var(--color-button-primary-text);
     }
     #saveMaskBtn{
  
@@ -2813,7 +2330,6 @@ html:not(.css-loading) body {
         transform: translateX(20px);
     }
 
-  
     .mbp-toggle input:checked + .mbp-toggle-slider:after {
         transform: translateX(20px);
         background-color: var(--color-button-primary-text);
@@ -2863,7 +2379,6 @@ html:not(.css-loading) body {
     /* background: red; */
     font-weight: bold;
 
-
 }
 
 .toggle-label-container img.toggle-icon {
@@ -2889,8 +2404,6 @@ html:not(.css-loading) body {
     height: 100%;
     padding: 6px 0;
     padding-left: 10px ;
-
-
 
 }
 .toggle-component:hover {
@@ -2946,8 +2459,8 @@ html:not(.css-loading) body {
 }
 
 .toggle:checked {
-    /* background: #2b7f3a; */
-    /* border-color: #2b7f3a; */
+    /* background: var(--color-success); */
+    /* border-color: var(--color-success); */
     /* background: transparent; */
     border-color: var(--color-button-secondary-text);
 
@@ -2979,7 +2492,6 @@ html:not(.css-loading) body {
     height: 1em;
     text-indent: -0.8em;
 
-
 }
 
 .slot__label:nth-child(2) {
@@ -3004,7 +2516,6 @@ html:not(.css-loading) body {
     top: 0;
     left: 0;
 }
-
 
 .toggle:checked ~ .curtain {
     transform: scaleX(1);
@@ -3032,7 +2543,10 @@ html:not(.css-loading) body {
     height: 80%;
 
     max-height: 80vh;
-    color: var(--color-button-primary-text);
+    /* The dialog holds the option lists (samplers, schedulers, LoRAs), so its
+       text is ordinary body text - --color-button-primary-text is the label of a
+       primary button and reads as "invisible" on this background in Day/Night. */
+    color: var(--color-primary-text);
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 16px var(--color-background-secondary);
@@ -3078,7 +2592,7 @@ html:not(.css-loading) body {
     flex: 1;
     padding: 6px 8px;
     border-bottom: 1px solid var(--color-border);
-    color: var(--color-button-primary-text);
+    color: var(--color-primary-text);
 }
 
 .dropdownDialogCheckboxLabel {
@@ -3101,7 +2615,7 @@ html:not(.css-loading) body {
     margin-left: 4px;
     padding: 2px 4px;
     border: none;
-    background: #333;
+    background: var(--color-input-background);
     color: var(--color-primary-text);
 }
 
@@ -3168,7 +2682,7 @@ html:not(.css-loading) body {
 .dropdownFolderTitle {
     font-size: 16px;
     font-weight: bold;
-    color: var(--color-button-primary-text);
+    color: var(--color-primary-text);
 }
 
 .dropdownFolderPath {
@@ -3214,7 +2728,6 @@ html:not(.css-loading) body {
     padding: 4px 8px;
 }
 
-
 .drop-down-element input[type="text"]::placeholder {
     /* color: var(--color-primary-text); */
 }
@@ -3242,11 +2755,11 @@ html:not(.css-loading) body {
 }
 
 .leanListItem:hover {
-    background-color: #363636;
+    background-color: var(--color-surface-hover);
 }
 
 .leanListItem-hover {
-    background-color: #363636 !important;
+    background-color: var(--color-surface-hover) !important;
 }
 
 .leanListItem-selected {
@@ -3291,20 +2804,19 @@ html:not(.css-loading) body {
     }
 }
 
-
 .drop-down-element.invalid {
-    background-color: #ff4444;
-    color: #fff;
+    background-color: var(--color-danger);
+    color: var(--color-text-on-accent);
 }
 .drop-down-element.invalid label {
     width: 100%;
-    color: white;
+    color: var(--color-text-on-accent);
 }
 
 .drop-down-element.invalid input[type="text"] {
     width: 100%;
-    color: white;
-    background-color: #ff4444;
+    color: var(--color-text-on-accent);
+    background-color: var(--color-danger);
 }
 
 /* ==================================== */
@@ -3383,6 +2895,117 @@ html:not(.css-loading) body {
     gap: 5px;
 }
 
+/* ---------------------------------------------------------- app heading */
+/* The app's own name, above the HD / Custom buttons: the same font size as
+   those buttons, so it labels them instead of competing with them. */
+.app-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--color-primary-text);
+}
+
+.app-heading-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: bold;
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+}
+
+.app-info-btn {
+    flex: none;
+    background: transparent;
+    border: 0;
+    padding: 2px 4px;
+    color: var(--color-accent);
+    cursor: pointer;
+    font-size: 1em;
+    line-height: 1;
+}
+
+.app-info-btn:hover {
+    color: var(--color-accent-hover);
+}
+
+/* "About this app", opened by that (i). */
+.app-info-dialog {
+    max-width: min(460px, 92vw);
+    max-height: 80vh;
+    padding: 18px 20px;
+    overflow: auto;
+    background-color: var(--color-surface);
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    font-size: 0.95em;
+}
+
+.app-info-dialog::backdrop {
+    background-color: var(--color-overlay);
+}
+
+.app-info-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.app-info-head h3 {
+    flex: 1;
+    min-width: 0;
+    font-size: 1.15em;
+    overflow-wrap: anywhere;
+}
+
+.app-info-close {
+    flex: none;
+    background: transparent;
+    border: 0;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1.3em;
+    line-height: 1;
+}
+
+.app-info-close:hover {
+    color: var(--color-primary-text);
+}
+
+.app-info-description { margin-top: 10px; }
+
+.app-info-meta {
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: var(--color-text-muted);
+}
+
+.app-info-subtitle {
+    margin: 14px 0 6px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.app-info-models {
+    padding-left: 18px;
+    max-height: 34vh;
+    overflow: auto;
+}
+
+.app-info-models li {
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+}
+
+.app-info-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
 .mode-group-right {
     margin-left: 15px;
     padding-left: 15px;
@@ -3412,15 +3035,15 @@ html:not(.css-loading) body {
 }
 
 .mode-button.disabled-saus {
-    background-color: #2a4d3e !important;
-    color: #8fbc8f !important;
+    background-color: var(--color-success-bg) !important;
+    color: var(--color-success) !important;
     cursor: not-allowed !important;
     opacity: 0.7;
 }
 
 .mode-button.disabled-saus:hover {
-    background-color: #2a4d3e !important;
-    color: #8fbc8f !important;
+    background-color: var(--color-success-bg) !important;
+    color: var(--color-success) !important;
 }
 
 /* Tooltip on mode buttons (e.g. "Missing models: …").
@@ -3435,7 +3058,7 @@ html:not(.css-loading) body {
     position: absolute;
     left: 0;
     top: calc(100% + 6px);
-    background-color: #000;
+    background-color: var(--color-surface);
     color: var(--color-primary-text);
     border: 1px solid var(--color-accent);
     border-radius: 4px;
@@ -3449,7 +3072,6 @@ html:not(.css-loading) body {
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
-
 
 /* --- SAUS: "Add Lora+" button + LoRA blocks ---
    The button adds a block per LoRA: a "LoRA" title on top, the regular
@@ -3529,9 +3151,9 @@ html:not(.css-loading) body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #000000;
-    color: #ff4444;
-    border: 1px solid #ff4444;
+    background-color: var(--color-surface);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
     border-radius: 50%;
     font-size: 15px;
     font-weight: bold;
@@ -3540,8 +3162,8 @@ html:not(.css-loading) body {
 }
 
 .lora-remove-btn:hover {
-    background-color: #ff4444;
-    color: #000000;
+    background-color: var(--color-danger);
+    color: var(--color-text-on-accent);
 }
 
 /* --- SAUS: clearer panel handles (a chevron, not a bar) --- */
@@ -3550,13 +3172,20 @@ html:not(.css-loading) body {
     justify-content: center;
     width: 22px;
     height: 34px;
-    color: #fff;
+    /* The handle is painted with --color-button-primary, so its glyph needs that
+       button's *text* colour: --color-primary-text is near-white in Night (on a
+       light handle) and near-black in Day (on a dark one) - invisible either way. */
+    color: var(--color-button-primary-text);
     border-radius: 6px;
 }
 
 .toggle-button .arrow {
     width: 12px;
     height: 12px;
+    /* currentColor, so the handle above decides - the chevron is a stroke icon
+       and a fixed fill would not follow the theme. */
+    fill: currentColor;
+    stroke: currentColor;
 }
 
 /* --- SAUS: Run / ✕ / runs sit inline next to the progress bar again --- */

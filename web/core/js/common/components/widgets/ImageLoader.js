@@ -204,7 +204,7 @@ export default class ImageLoader {
     }
   }*/
   displayMedia(file, src) {
-    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/bmp'];
     const safeVideos = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'];
 
     if (safeImages.includes(file.type)) {
@@ -403,7 +403,7 @@ export default class ImageLoader {
   guessMimeType(filename) {
     const ext = filename.split('.').pop().toLowerCase();
     if (ext === 'jpg') return 'image/jpeg';
-    if (['png', 'jpeg', 'webp', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
+    if (['png', 'jpeg', 'webp', 'avif', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
     if (ext === 'mov') return 'video/quicktime';
     if (ext === 'mkv') return 'video/x-matroska';
     if (['mp4', 'webm', 'ogg'].includes(ext)) return 'video/' + ext;

@@ -2,7 +2,7 @@ import { state, loadOpenApps, saveOpenApps } from './state.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
 import { renderConsolePane, teardownConsole } from './console.js';
 import { exportWorkflowToComfyUI } from './workflow_export.js';
-import { renderSettingsInfo } from './settings_info.js';
+import { currentTheme } from '/core/js/common/scripts/theme.js';
 
 /* ------------------------------------------------------------------ *
  * Workspace tabs. A tab is an app (iframe of /saus/<url>) or one of the
@@ -22,13 +22,44 @@ const tabId = (id) => `tab-btn-${id}`;
 // The tab currently using the whole browser area (enlarge button). Transient.
 let focusedTabId = null;
 
+// The tab being dragged along the strip (drag & drop reordering). Transient.
+let draggedTabId = null;
+
 function findTab(id) {
     return state.openApps.find(tab => tab.id === id);
 }
 
+/** Drop `fromId` in `toId`'s place: the strip order is state.openApps' order. */
+function moveTab(fromId, toId) {
+    const from = state.openApps.findIndex(tab => tab.id === fromId);
+    const to = state.openApps.findIndex(tab => tab.id === toId);
+    if (from < 0 || to < 0 || from === to) return;
+
+    const [tab] = state.openApps.splice(from, 1);
+    state.openApps.splice(to, 0, tab);
+
+    // The panes keep their own elements; only the strip is re-ordered.
+    renderTabStrip();
+    saveOpenApps();
+}
+
+/* The tab of an app wears the icon of the section it belongs to (AI Image /
+ * AI Video / Other), the same one the rail and the panel head use; a built-in
+ * pane keeps its own icon, and anything unknown falls back to a cube. */
 function tabIconClass(tab) {
     const spec = BUILT_INS[tab.kind];
-    return spec ? spec.icon : 'fas fa-cube';
+    if (spec) return spec.icon;
+
+    const app = state.allApps.find(candidate =>
+        candidate.id === tab.id || candidate.url === tab.url);
+    const category = (app && app.category) || '';
+    const taxonomy = state.TAXONOMY || {};
+    const entry = (taxonomy.categories || []).find(item => item.id === category);
+    if (entry) {
+        const section = (taxonomy.sections || []).find(item => item.id === entry.section);
+        return (section && section.icon) || entry.icon || 'fas fa-cube';
+    }
+    return 'fas fa-cube';
 }
 
 function tabButton(title, icon, onClick) {
@@ -58,6 +89,34 @@ function renderTabStrip() {
         btn.id = tabId(tab.id);
         btn.dataset.appId = tab.id;
         btn.title = tab.name;
+
+        // Tabs are dragged into a new order: drop one on another and it takes
+        // its place (the strip's order is what state.openApps holds).
+        btn.draggable = true;
+        btn.addEventListener('dragstart', (event) => {
+            draggedTabId = tab.id;
+            event.dataTransfer.effectAllowed = 'move';
+            // Firefox will not start a drag without some data set.
+            event.dataTransfer.setData('text/plain', tab.name || tab.id);
+            btn.classList.add('dragging');
+        });
+        btn.addEventListener('dragend', () => {
+            draggedTabId = null;
+            btn.classList.remove('dragging');
+        });
+        btn.addEventListener('dragover', (event) => {
+            if (!draggedTabId || draggedTabId === tab.id) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            btn.classList.add('drop-target');
+        });
+        btn.addEventListener('dragleave', () => btn.classList.remove('drop-target'));
+        btn.addEventListener('drop', (event) => {
+            btn.classList.remove('drop-target');
+            if (!draggedTabId || draggedTabId === tab.id) return;
+            event.preventDefault();
+            moveTab(draggedTabId, tab.id);
+        });
 
         const icon = document.createElement('i');
         icon.className = tabIconClass(tab);
@@ -138,10 +197,8 @@ function ensurePane(id) {
         host.className = 'settings-pane';
         pane.appendChild(host);
         container.appendChild(pane);
-        // core's component renders the settings form into its pane...
+        // The settings form (theme, version, social links, restart).
         new SettingsComponent('#settingsPane').show();
-        // ...and the SAUS block goes under it (version + project links).
-        renderSettingsInfo(host);
         return pane;
     }
 
@@ -155,7 +212,9 @@ function ensurePane(id) {
     frame.title = tab.name;
     frame.setAttribute('allow', 'clipboard-write');
     // embed=1 lets the page drop its own header/footer: the tab provides them.
-    frame.src = `saus/${tab.url}?embed=1`;
+    // The theme travels in the URL as well as in localStorage, so an app paints
+    // correctly the very first time (see core/js/common/scripts/theme.js).
+    frame.src = `saus/${tab.url}?embed=1&theme=${encodeURIComponent(currentTheme())}`;
     pane.appendChild(frame);
     container.appendChild(pane);
     return pane;
@@ -233,6 +292,14 @@ export function activateTab(id) {
     renderTabStrip();
     markActiveRow(id);
     saveOpenApps();
+
+    // An app gets the room to itself: sidebar.js listens for this and steps the
+    // explorer panel aside (built-in panes keep it).
+    if (tab.kind === 'app') {
+        document.dispatchEvent(new CustomEvent('saus:app-activated', {
+            detail: { id, url: tab.url },
+        }));
+    }
 }
 
 export function openApp(app) {

@@ -1,6 +1,6 @@
 {
   "id": "30kk2",
-  "name": "Flux Dev Text to Image",
+  "name": "Flux Dev",
   "url": "flux-dev-text-to-image",
   "description": "Image generation with Flux Dev",
   "metadata": {

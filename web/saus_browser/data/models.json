@@ -249,14 +249,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "gemma_3_12B_it_fp4_mixed.safetensors": {
-      "name": "GEMMA 3 12B FP4 ENCODER",
-      "type": "TEXT ENCODER",
-      "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
-      "directory": "/text_encoders/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "clip_vision_h.safetensors": {
       "name": "CLIPVISION H (for WAN)",
       "type": "Clipvision",
@@ -529,14 +521,6 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "Qwen-Image-2.1-PE-T2I.safetensors": {
-      "name": "Qwen-Image-2.1-PE-T2I.safetensors",
-      "type": "TEXT ENCODER",
-      "url": "",
-      "directory": "text_encoders",
-      "thumbnail": "",
-      "source": "builder"
-    },
     "full_encoder_small_decoder.safetensors": {
       "name": "full_encoder_small_decoder.safetensors",
       "type": "VAE",
@@ -568,6 +552,78 @@
       "directory": "/loras/",
       "thumbnail": "",
       "source": "migrated"
+    },
+    "gemma_3_12B_it_fp4_mixed.safetensors1": {
+      "name": "GEMMA 3 12B FP4 ENCODER",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+      "directory": "/text_encoders/",
+      "thumbnail": "",
+      "source": "migrated"
+    },
+    "krea2_turbo_fp8_scaled.safetensors": {
+      "name": "krea2_turbo_fp8_scaled.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_fp8_scaled.safetensors",
+      "directory": "diffusion_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen3vl_4b_fp8_scaled.safetensors": {
+      "name": "qwen3vl_4b_fp8_scaled.safetensors",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+      "directory": "text_encoders",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen_image_vae.safetensors": {
+      "name": "qwen_image_vae.safetensors",
+      "type": "VAE",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/vae/qwen_image_vae.safetensors",
+      "directory": "vae",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "krea2_darkbrush.safetensors": {
+      "name": "krea2_darkbrush.safetensors",
+      "type": "LORA",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/loras/krea2_darkbrush.safetensors",
+      "directory": "loras",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "krea2_turbo_int8_convrot.safetensors": {
+      "name": "krea2_turbo_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_int8_convrot.safetensors",
+      "directory": "diffusion_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "krea2_style_reference.safetensors": {
+      "name": "krea2_style_reference.safetensors",
+      "type": "LORA",
+      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/loras/krea2_style_reference.safetensors",
+      "directory": "loras",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "z_image_turbo_int8_convrot.safetensors": {
+      "name": "z_image_turbo_int8",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_int8_convrot.safetensors",
+      "directory": "/unet/",
+      "thumbnail": "",
+      "source": "manual"
+    },
+    "z_image_int8_convrot.safetensors": {
+      "name": "z_image_int8_convrot",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/z_image/resolve/main/split_files/diffusion_models/z_image_int8_convrot.safetensors",
+      "directory": "/unet/",
+      "thumbnail": "",
+      "source": "manual"
     }
   }
 }

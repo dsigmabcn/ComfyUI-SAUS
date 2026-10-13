@@ -57,3 +57,18 @@ The app runtime:
 - when `outputs` is present, only shows media produced by the listed `nodeId`s.
 
 Because all three keys are optional, components without them behave exactly as before — **existing apps are unaffected**.
+
+## Theme &amp; node types
+
+The builder's own chrome has **one look of its own**: a dark palette, deliberately
+independent of the theme picked here (**Night / Day / Fire** are for the apps and the
+browser). That single palette lives in `builder_assets/styles.css`, and nothing in the
+builder reads the theme SAUS stores, so the two can be themed separately.
+
+A picked parameter is recorded by **node class** (e.g. `UNETLoader`) — the class
+name, not ComfyUI's per-node uuid. That is what the runtime asks `/object_info`
+for when it fills a dropdown, so a uuid would show *"Missing input ..."* where
+the combo belongs. Apps saved by older builder versions may still carry a uuid;
+the runtime falls back to the class named in the app's `wf.json`, so their
+**Advanced** tab renders normally.
+

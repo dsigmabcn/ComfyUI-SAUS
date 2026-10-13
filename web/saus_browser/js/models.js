@@ -392,7 +392,7 @@ export async function showAppDetails(app) {
 
     let html = `
         <div class="app-details-top">
-            <img class="app-details-thumb" src="saus/${escapeHtml(app.url)}/media/thumbnail.jpg" alt=""
+            <img class="app-details-thumb" src="saus/${escapeHtml(app.url)}/${escapeHtml(app.thumbnail || 'media/thumbnail.jpg')}" alt=""
                  onerror="this.onerror=null; this.style.visibility='hidden';">
             <div class="app-details-toptext">
                 <h2 class="details-title">${escapeHtml(app.name)}</h2>

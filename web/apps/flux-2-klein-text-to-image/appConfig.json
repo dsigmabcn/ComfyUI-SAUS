@@ -1,6 +1,6 @@
 {
   "id": "saus8viv2i",
-  "name": "Flux 2 Klein Text to Image",
+  "name": "Flux 2 Klein",
   "url": "flux-2-klein-text-to-image",
   "description": "Generate images with the Flux 2 Klein Family (4B, 9B, base, distilled)",
   "metadata": {

@@ -95,7 +95,7 @@ export class CanvasScaleForSavePlugin extends CanvasPlugin {
             .csfs-scale-display {
                 margin-left: 0.5rem;
                 font-size: 0.9rem;
-                color: var(--color-secondary-text);
+                color: var(--color-text-muted);
                 font-weight: bold;
 
             }

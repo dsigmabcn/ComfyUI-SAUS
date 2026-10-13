@@ -69,7 +69,7 @@
 }
 
 .explorer-category.active > .explorer-category-head {
-    color: #ffffff;
+    color: var(--color-primary-text);
     border-left-color: var(--color-accent);
 }
 
@@ -135,14 +135,14 @@
     height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
-    background-color: #6c757d;
+    background-color: var(--color-neutral);
 }
 
-.app-row-dot.status-ready { background-color: #4caf50; }
-.app-row-dot.status-partial { background-color: #ff9800; }
-.app-row-dot.status-missing { background-color: #f44336; }
-.app-row-dot.status-checking { background-color: #6c757d; animation: status-pulse 1.2s infinite ease-in-out; }
-.app-row-dot.status-error { background-color: #9c27b0; }
+.app-row-dot.status-ready { background-color: var(--color-success); }
+.app-row-dot.status-partial { background-color: var(--color-warning); }
+.app-row-dot.status-missing { background-color: var(--color-danger); }
+.app-row-dot.status-checking { background-color: var(--color-neutral); animation: status-pulse 1.2s infinite ease-in-out; }
+.app-row-dot.status-error { background-color: var(--color-accent-alt); }
 
 @keyframes status-pulse {
     0%, 100% { opacity: 0.35; }
@@ -201,16 +201,16 @@
 
 /* Everything installed: green. */
 #explorerTooltip.ready {
-    border-left-color: #4caf50;
+    border-left-color: var(--color-success);
 }
 
 /* Some / all models missing: orange / red. */
 #explorerTooltip.partial {
-    border-left-color: #ff9800;
+    border-left-color: var(--color-warning);
 }
 
 #explorerTooltip.warn {
-    border-left-color: #f44336;
+    border-left-color: var(--color-danger);
 }
 
 #explorerTooltip .tip-title {
@@ -220,7 +220,7 @@
 }
 
 #explorerTooltip.ready .tip-title {
-    color: #7ee08a;
+    color: var(--color-success);
 }
 
 #explorerTooltip .tip-hint {

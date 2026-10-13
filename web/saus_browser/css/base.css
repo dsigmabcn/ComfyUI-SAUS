@@ -7,7 +7,7 @@
 
 html,
 body {
-    background-color: #131312;
+    background-color: var(--color-surface-alt);
     height: 100%;
     margin: 0;
     padding: 0;

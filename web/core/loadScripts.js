@@ -1,4 +1,8 @@
 import { coreScriptsPath } from '/core/js/common/scripts/corePath.js';
+import { initTheme } from '/core/js/common/scripts/theme.js';
+
+// Night / Day / Fire, before anything renders (palette: /core/css/themes.css).
+initTheme();
 
 const urlParams = new URLSearchParams(window.location.search);
 const appName = urlParams.get('app');
