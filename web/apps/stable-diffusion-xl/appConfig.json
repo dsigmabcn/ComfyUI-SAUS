@@ -11,14 +11,14 @@
         "base"
       ],
       "base_models": [
-        "SD1.5",
         "SDXL"
       ],
       "other": []
     },
-    "architecture": "SD15",
+    "architecture": "SDXL",
     "models": [
-      "RealVisXL_V5.0_fp16.safetensors"
+      "RealVisXL_V5.0_fp16.safetensors",
+      "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
     ]
   },
   "prompts": [

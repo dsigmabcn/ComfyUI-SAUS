@@ -1,23 +1,109 @@
 {
   "schemaVersion": 1,
   "sections": [
-    { "id": "AI Image", "icon": "fas fa-image" },
-    { "id": "AI Video", "icon": "fas fa-video" },
-    { "id": "Other", "icon": "fas fa-shapes" }
+    {
+      "id": "AI Image",
+      "icon": "fas fa-image"
+    },
+    {
+      "id": "AI Video",
+      "icon": "fas fa-video"
+    },
+    {
+      "id": "Other",
+      "icon": "fas fa-shapes"
+    }
   ],
   "categories": [
-    { "id": "text-to-image", "label": "text-to-image", "icon": "fas fa-paint-brush", "section": "AI Image", "order": 0 },
-    { "id": "image-to-image (editing)", "label": "image-to-image (editing)", "icon": "fas fa-cut", "section": "AI Image", "order": 1 },
-    { "id": "image-to-image (reference)", "label": "image-to-image (reference)", "icon": "fas fa-images", "section": "AI Image", "order": 2 },
-    { "id": "text-to-video", "label": "text-to-video", "icon": "fas fa-clapperboard", "section": "AI Video", "order": 3 },
-    { "id": "image-to-video", "label": "image-to-video", "icon": "fas fa-film", "section": "AI Video", "order": 4 },
-    { "id": "video-to-video", "label": "video-to-video", "icon": "fas fa-video", "section": "AI Video", "order": 5 },
-    { "id": "tools", "label": "tools", "icon": "fas fa-wrench", "section": "Other", "order": 6 },
-    { "id": "other", "label": "other", "icon": "fas fa-th-large", "section": "Other", "order": 9 }
+    {
+      "id": "text-to-image",
+      "label": "text-to-image",
+      "icon": "fas fa-paint-brush",
+      "section": "AI Image",
+      "order": 0
+    },
+    {
+      "id": "image-to-image (editing)",
+      "label": "image-to-image (editing)",
+      "icon": "fas fa-cut",
+      "section": "AI Image",
+      "order": 1
+    },
+    {
+      "id": "image-to-image (reference)",
+      "label": "image-to-image (reference)",
+      "icon": "fas fa-images",
+      "section": "AI Image",
+      "order": 2
+    },
+    {
+      "id": "text-to-video",
+      "label": "text-to-video",
+      "icon": "fas fa-clapperboard",
+      "section": "AI Video",
+      "order": 3
+    },
+    {
+      "id": "image-to-video",
+      "label": "image-to-video",
+      "icon": "fas fa-film",
+      "section": "AI Video",
+      "order": 4
+    },
+    {
+      "id": "video-to-video",
+      "label": "video-to-video",
+      "icon": "fas fa-video",
+      "section": "AI Video",
+      "order": 5
+    },
+    {
+      "id": "tools",
+      "label": "tools",
+      "icon": "fas fa-wrench",
+      "section": "Other",
+      "order": 6
+    },
+    {
+      "id": "other",
+      "label": "other",
+      "icon": "fas fa-th-large",
+      "section": "Other",
+      "order": 9
+    }
   ],
   "tags": {
-    "type": ["base", "distilled-fast", "controlnet", "layout", "quantized", "remove"],
-    "base_models": ["SD1.5", "SDXL", "FLUX", "FLUX-2", "QWEN", "Z-image", "WAN", "WAN 2.2", "LTX-2", "LTX-2.5"],
-    "other": ["edit", "(re-)styling", "try-on", "VACE", "animatediff", "controlnet", "image-to-image", "inpainting"]
+    "type": [
+      "base",
+      "distilled-fast",
+      "controlnet",
+      "layout",
+      "quantized",
+      "remove"
+    ],
+    "base_models": [
+      "SD1.5",
+      "SDXL",
+      "FLUX",
+      "FLUX-2",
+      "KREA 2",
+      "QWEN",
+      "Z-image",
+      "WAN",
+      "WAN 2.2",
+      "Minimax H3",
+      "LTX-2",
+      "LTX-2.5"
+    ],
+    "other": [
+      "edit",
+      "(re-)styling",
+      "try-on",
+      "VACE",
+      "animatediff",
+      "controlnet",
+      "image-to-image",
+      "inpainting"
+    ]
   }
 }

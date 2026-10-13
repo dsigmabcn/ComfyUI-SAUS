@@ -17,30 +17,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "dreamshaperXL10.safetensors": {
-      "name": "DreamShaper XL",
-      "type": "CHECKPOINT",
-      "url": "https://huggingface.co/jayparmr/DreamShaper_XL1_0_Alpha2/resolve/main/dreamshaperXL10.safetensors",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "epicrealism_pureEvolutionV5.safetensors": {
-      "name": "Epic Realism SD 1.5 V5",
-      "type": "CHECKPOINT",
-      "url": "https://huggingface.co/snugsewey/epicrealismv5/resolve/main/epicrealism_pureEvolutionV5.safetensors",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "rev-animated-v1-2-2.safetensors": {
-      "name": "REV Animated V2 Rebirth",
-      "type": "CHECKPOINT",
-      "url": "https://huggingface.co/danbrown/RevAnimated-v1-2-2/resolve/main/rev-animated-v1-2-2.safetensors",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "flux1-dev.safetensors": {
       "name": "FLUX-DEV",
       "type": "Diffusion model",
@@ -113,14 +89,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "z_image_turbo_bf16.safetensors": {
-      "name": "Z-IMAGE TURBO BF16",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors",
-      "directory": "/unet/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "z_image_bf16.safetensors": {
       "name": "Z-IMAGE BF16",
       "type": "Diffusion model",
@@ -169,59 +137,11 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "v3_sd15_mm.ckpt": {
-      "name": "AnimateDiff V3 MM",
-      "type": "MOTION_MODULE",
-      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_mm.ckpt",
-      "directory": "/animatediff_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "v3_sd15_adapter.ckpt": {
-      "name": "AnimateDiff V3 LORA ADAPTER",
-      "type": "LORA",
-      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_adapter.ckpt",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "umt5_xxl_fp8_e4m3fn_scaled.safetensors": {
       "name": "UMT5 XXL ENCODER",
       "type": "TEXT ENCODER",
       "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
       "directory": "/text_encoders/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_t2v_1.3B_fp16.safetensors": {
-      "name": "WAN 2.1 T2V 1.3B",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_t2v_14B_fp16.safetensors": {
-      "name": "WAN 2.1 T2V 14B",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_i2v_480p_14B_fp16.safetensors": {
-      "name": "WAN 2.1 T2V 480p",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_i2v_720p_14B_fp16.safetensors": {
-      "name": "WAN 2.1 T2V 720p",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
       "thumbnail": "",
       "source": "migrated"
     },
@@ -246,46 +166,6 @@
       "type": "Latent Upscaler",
       "url": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors",
       "directory": "/latent_upscale_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "clip_vision_h.safetensors": {
-      "name": "CLIPVISION H (for WAN)",
-      "type": "Clipvision",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors",
-      "directory": "/clip_vision/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors": {
-      "name": "CAUSVID 1.3B LORA",
-      "type": "LORA",
-      "url": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_bidirect2_T2V_1_3B_lora_rank32.safetensors",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "Wan21_CausVid_14B_T2V_lora_rank32.safetensors": {
-      "name": "CAUSVID 14B LORA",
-      "type": "LORA",
-      "url": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_CausVid_14B_T2V_lora_rank32.safetensors",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_vace_1.3B_fp16.safetensors": {
-      "name": "WAN VACE 1.3B",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_vace_1.3B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.1_vace_14B_fp16.safetensors": {
-      "name": "WAN VACE 14B",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
       "thumbnail": "",
       "source": "migrated"
     },
@@ -321,22 +201,6 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "wan2.2_t2v_high_noise_14B_fp16.safetensors": {
-      "name": "WAN 2.2 T2V HIGH",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.2_t2v_low_noise_14B_fp16.safetensors": {
-      "name": "WAN 2.2 T2V LOW",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors": {
       "name": "LIGHTX2V_LORA_2.2 I2V HIGH",
       "type": "LORA",
@@ -350,22 +214,6 @@
       "type": "LORA",
       "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
       "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.2_i2v_high_noise_14B_fp16.safetensors": {
-      "name": "WAN 2.2 I2V HIGH",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "wan2.2_i2v_low_noise_14B_fp16.safetensors": {
-      "name": "WAN 2.2 I2V LOW",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors",
-      "directory": "/diffusion_models/",
       "thumbnail": "",
       "source": "migrated"
     },
@@ -385,14 +233,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "wan2.2_vae.safetensors": {
-      "name": "VAE for WAN 2.2 TI2V (5B)",
-      "type": "VAE",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan2.2_vae.safetensors",
-      "directory": "/vae/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "sigclip_vision_patch14_384.safetensors": {
       "name": "SIG CLIP VISION 384",
       "type": "Clipvision",
@@ -406,22 +246,6 @@
       "type": "Style",
       "url": "https://huggingface.co/Comfy-Org/Flux1-Redux-Dev/resolve/main/flux1-redux-dev.safetensors",
       "directory": "/style_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "flux1-fill-dev.safetensors": {
-      "name": "FLUX-DEV-FILL",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/mp3pintyo/FLUX.1/resolve/main/flux1-fill-dev.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "qwen_image_edit_2511_bf16.safetensors": {
-      "name": "QWEN EDIT v2511",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
-      "directory": "/diffusion_models/",
       "thumbnail": "",
       "source": "migrated"
     },
@@ -441,22 +265,6 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "qwen_image_edit_2509_bf16.safetensors": {
-      "name": "QWEN EDIT v2509",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2509_bf16.safetensors",
-      "directory": "/diffusion_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "Qwen-Image-Lightning-4steps-V1.0.safetensors": {
-      "name": "QWEN LIGHTNING 4-steps LORA",
-      "type": "LORA",
-      "url": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-4steps-V1.0.safetensors",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "Qwen-Image-Lightning-8steps-V1.0.safetensors": {
       "name": "QWEN LIGHTNING 8-steps LORA",
       "type": "LORA",
@@ -472,62 +280,6 @@
       "directory": "/loras/",
       "thumbnail": "",
       "source": "migrated"
-    },
-    "controlnet_1": {
-      "name": "ControlNet Base Asset",
-      "type": "CONTROLNET",
-      "url": "",
-      "directory": "/controlnet/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "photon_v1.safetensors": {
-      "name": "photon_v1.safetensors",
-      "type": "CHECKPOINT",
-      "url": "",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "derived"
-    },
-    "vae-ft-mse-840000-ema-pruned.safetensors": {
-      "name": "vae-ft-mse-840000-ema-pruned.safetensors",
-      "type": "VAE",
-      "url": "",
-      "directory": "/vae/",
-      "thumbnail": "",
-      "source": "derived"
-    },
-    "helloyoung25d_V10f.safetensors": {
-      "name": "helloyoung25d_V10f.safetensors",
-      "type": "CHECKPOINT",
-      "url": "",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "derived"
-    },
-    "AnimateLCM_sd15_t2v_lora.safetensors": {
-      "name": "AnimateLCM_sd15_t2v_lora.safetensors",
-      "type": "LORA",
-      "url": "",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "derived"
-    },
-    "FluxDevVae.safetensors": {
-      "name": "FluxDevVae.safetensors",
-      "type": "VAE",
-      "url": "",
-      "directory": "/vae/",
-      "thumbnail": "",
-      "source": "derived"
-    },
-    "flux1-turbo-alpha-8step.safetensors": {
-      "name": "flux1-turbo-alpha-8step.safetensors",
-      "type": "LORA",
-      "url": "",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "derived"
     },
     "qwen_image_2.1_int8_convrot.safetensors": {
       "name": "qwen_image_2.1_int8_convrot.safetensors",
@@ -593,22 +345,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "gemma_3_12B_it_fp4_mixed.safetensors1": {
-      "name": "GEMMA 3 12B FP4 ENCODER",
-      "type": "TEXT ENCODER",
-      "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
-      "directory": "/text_encoders/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "krea2_turbo_fp8_scaled.safetensors": {
-      "name": "krea2_turbo_fp8_scaled.safetensors",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_fp8_scaled.safetensors",
-      "directory": "diffusion_models",
-      "thumbnail": "",
-      "source": "builder"
-    },
     "qwen3vl_4b_fp8_scaled.safetensors": {
       "name": "qwen3vl_4b_fp8_scaled.safetensors",
       "type": "TEXT ENCODER",
@@ -622,14 +358,6 @@
       "type": "VAE",
       "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/vae/qwen_image_vae.safetensors",
       "directory": "vae",
-      "thumbnail": "",
-      "source": "builder"
-    },
-    "krea2_darkbrush.safetensors": {
-      "name": "krea2_darkbrush.safetensors",
-      "type": "LORA",
-      "url": "https://huggingface.co/Comfy-Org/Krea-2/resolve/main/loras/krea2_darkbrush.safetensors",
-      "directory": "loras",
       "thumbnail": "",
       "source": "builder"
     },
@@ -800,6 +528,14 @@
       "directory": "/model_patches/",
       "thumbnail": "",
       "source": "builder"
+    },
+    "gemma_3_12B_it_fp4_mixed.safetensors": {
+      "name": "gemma_3_12B_it_fp4_mixed.safetensors",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+      "directory": "/text_encoders/",
+      "thumbnail": "",
+      "source": "migrated"
     }
   }
 }
