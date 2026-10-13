@@ -68,7 +68,7 @@ Check out the table of contents for detailed instructions. This is a summary ove
 
 ## Tools (rail and footer)
 
-The tools live at the bottom of the rail (the File Manager, the Console and the Settings open as tabs in the workspace; ComfyUI and the Guide open in a new window).
+The tools live at the bottom of the rail (the File Manager and Settings open as tabs in the workspace, the Console docks over the bottom of the workspace; ComfyUI and the Guide open in a new window).
 
 ### File Manager
 A simple File Manager to access and perform basic management of the files in your ComfyUI installation.

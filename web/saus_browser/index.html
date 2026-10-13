@@ -72,6 +72,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- The console docks over the bottom of the workspace; the
+                         panes keep their size (see console.js). The grip on the
+                         top edge is the divider: only it resizes the dock. -->
+                    <div class="console-dock hidden" id="consoleDock">
+                        <div class="console-dock-grip" id="consoleDockGrip" role="separator"
+                             aria-orientation="horizontal" aria-label="Resize the console"
+                             tabindex="0" title="Drag to resize the console"></div>
+                        <div class="console-dock-body" id="consoleDockBody"></div>
+                    </div>
                 </section>
             </div>
         </div>

@@ -152,6 +152,11 @@ def test_no_component_hardcodes_a_colour():
 
 
 def test_every_variable_used_is_defined():
+    # Room for ComfyUI's own tokens: the rail entry is styled *inside* ComfyUI,
+    # so it may legitimately read a tone from the ComfyUI frontend one day rather
+    # than from this palette. Empty today (it only sets --sidebar-icon-size).
+    comfyui_tokens = set()
+
     defined = _declared_variables()
     missing = {}
 
@@ -160,9 +165,11 @@ def test_every_variable_used_is_defined():
     for path in paths:
         if 'min.js' in path.name:
             continue
-        source = path.read_text(encoding='utf-8', errors='ignore')
+        # Comments talk about variables too ("ComfyUI's rule reads
+        # var(--sidebar-icon-size)") - only real usages count.
+        source = re.sub(r'/\*.*?\*/', '', path.read_text(encoding='utf-8', errors='ignore'), flags=re.S)
         for name in set(re.findall(r'var\((--[\w-]+)', source)):
-            if name not in defined:
+            if name not in defined and name not in comfyui_tokens:
                 missing.setdefault(name, []).append(path.name)
 
     assert not missing, f'used but never defined: {missing}'

@@ -19,11 +19,11 @@ const openSaus = () => {
 const renderLaunchPanel = (container) => {
     container.textContent = '';
     const hint = document.createElement('p');
-    hint.textContent = 'SAUS opens in its own page.';
+    hint.textContent = 'Simple App opens in its own page.';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'comfyui-button primary';
-    button.textContent = 'Open SAUS';
+    button.textContent = 'Open Simple App';
     button.addEventListener('click', openSaus);
     container.append(hint, button);
 };
@@ -40,8 +40,8 @@ const registerSidebarTab = () => {
     try {
         manager.registerSidebarTab({
             id: 'saus-apps',
-            title: 'SAUS',
-            tooltip: 'Open the SAUS app browser',
+            title: 'Simple App',
+            tooltip: 'Open Simple App U See\n(SAUS)',
             icon: 'icon-[lucide--flame]',
             type: 'custom',
             render: (container) => renderLaunchPanel(container),
@@ -57,12 +57,68 @@ const registerSidebarTab = () => {
     }
 };
 
+/**
+ * The rail entry is ours, so it can wear the app's look: a bigger, solid flame.
+ * Scoped to our own tab (ComfyUI gives every registered tab a "<id>-tab-button"
+ * test-id) and injected only once the tab exists - never at import time, since
+ * this file is loaded on every ComfyUI page.
+ *
+ * The size goes through --sidebar-icon-size rather than font-size: ComfyUI's own
+ * rule is `font-size: var(--sidebar-icon-size) !important` on the icon, so the
+ * variable reaches the icon and *nothing else* - a font-size here also grows the
+ * label, which then runs into the icon below it.
+ */
+const injectRailIconStyle = () => {
+    if (document.getElementById('saus-rail-icon')) return;
+
+    const style = document.createElement('style');
+    style.id = 'saus-rail-icon';
+    style.textContent = `
+/* Filled, instead of the outline lucide draws. ComfyUI's own 1rem size and its
+   icon tone are left alone. */
+[data-testid="saus-apps-tab-button"] .sidebar-icon-wrapper svg,
+[data-testid="saus-apps-tab-button"] .sidebar-icon-wrapper svg path {
+    fill: currentColor;
+    stroke: none;
+}
+/* Belt and braces: the label is clipped to the item height, so it may never be
+   taller than ComfyUI makes it. */
+[data-testid="saus-apps-tab-button"] .side-bar-button-label {
+    font-size: inherit;
+}`;
+    document.head.appendChild(style);
+};
+
+/**
+ * Opening SAUS is an action, not a panel. ComfyUI's tab API has no hook for that:
+ * clicking a rail tab toggles its side panel. So the click is taken at the
+ * document in the capture phase - which runs before the tab's own handler - and
+ * the app page is opened instead, with the panel toggle never happening.
+ */
+const bindRailEntry = () => {
+    if (document.documentElement.dataset.sausRailBound === '1') return;
+    document.documentElement.dataset.sausRailBound = '1';
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target || typeof target.closest !== 'function') return;
+        if (!target.closest('[data-testid="saus-apps-tab-button"]')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        openSaus();
+    }, true);
+};
+
 const extension = {
     name: "saus.widget",
     async setup() {
         // Preferred: the rail entry. Only when that is not available do the
         // buttons below get injected (older frontends, menu-based toolbars).
-        if (registerSidebarTab()) return;
+        if (registerSidebarTab()) {
+            bindRailEntry();
+            injectRailIconStyle();
+            return;
+        }
         initializeWidgets();
     },
 };
@@ -110,7 +166,7 @@ const addWidgetMenuRight = (menuRight) => {
     const sausButton = createWidget({
         className: 'comfyui-button comfyui-menu-mobile-collapse primary',
         text: '',
-        tooltip: 'Launch SAUS',
+        tooltip: 'Launch Simple App',
         includeIcon: true,
         svgMarkup: getSausIcon(), 
     });
@@ -126,8 +182,8 @@ const addWidgetMenu = (menu) => {
 
     const sausButton = createWidget({
         className: 'comfy-saus-button',
-        text: 'SAUS',
-        tooltip: 'Launch SAUS',
+        text: 'Simple App',
+        tooltip: 'Launch Simple App',
         includeIcon: false,
     });
 
@@ -167,7 +223,7 @@ const addWidgetActionBar = (actionBar) => {
         const sausButton = createWidget({
             className: 'comfyui-button comfyui-menu-mobile-collapse primary',
             text: '',
-            tooltip: 'Launch SAUS',
+            tooltip: 'Launch Simple App',
             includeIcon: true,
             svgMarkup: getSausIcon(), 
         });

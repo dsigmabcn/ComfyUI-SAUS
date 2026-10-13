@@ -850,7 +850,8 @@
           }
         ]
       }
-    ]
+    ],
+    "variants": {}
   },
   "WAN22_TEXT_TO_VIDEO": {
     "title": "Wan 2.2 T2V 14B",
@@ -2045,6 +2046,179 @@
           {
             "file": "krea2_style_reference.safetensors",
             "label": "krea2_style_reference.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "Minimax H3 text to video": {
+    "title": "Minimax H3 Text to video",
+    "description": "Models for Minimax H3 text to video. Shares same diffusers as FLF",
+    "categories": [
+      "text to video"
+    ],
+    "models": [
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_video_vae_int8_convrot.safetensors",
+            "label": "minimax_h3_video_vae_int8_convrot.safetensors"
+          },
+          {
+            "file": "minimax_h3_audio_vae_fp32.safetensors",
+            "label": "minimax_h3_audio_vae_fp32.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+            "label": "minimax_h3_fl2va_pruned_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+            "label": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "lora",
+        "type": "LORA",
+        "need": "none",
+        "node": {
+          "nodeType": "LoraLoader",
+          "input": "lora_name"
+        },
+        "files": [
+          {
+            "file": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
+            "label": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "VARIANT1": {
+        "label": "HD",
+        "pick": {},
+        "settings": {
+          "steps": "20"
+        },
+        "loras": []
+      },
+      "VARIANT2": {
+        "label": "Turbo",
+        "pick": {
+          "lora": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors"
+        },
+        "settings": {
+          "steps": "8"
+        },
+        "loras": []
+      }
+    }
+  },
+  "LTX-2.5": {
+    "title": "LTX-2.5",
+    "description": "LTX-2.5 architecture, with distilled diffusion model and prompt enhancer",
+    "categories": [
+      "Text to video",
+      "Image to video",
+      "FLF video"
+    ],
+    "models": [
+      {
+        "id": "latent_upscaler",
+        "type": "Latent Upscaler",
+        "need": "all",
+        "node": {
+          "nodeType": "LatentUpscaleModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
+            "label": "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+            "label": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "ltx-2.5-video-vae-bf16.safetensors",
+            "label": "ltx-2.5-video-vae-bf16.safetensors"
+          },
+          {
+            "file": "ltx-2.5-audio-vae-bf16.safetensors",
+            "label": "ltx-2.5-audio-vae-bf16.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+            "label": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors"
+          },
+          {
+            "file": "gemma4_e2b_it_int8_convrot.safetensors",
+            "label": "gemma4_e2b_it_int8_convrot.safetensors"
           }
         ]
       }

@@ -8,7 +8,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+    /* Above the app information modal (z-index 20000): a confirmation opened from
+       it - deleting a model, for instance - has to be readable, not hidden. */
+    z-index: 21000;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     animation: fadeIn 0.2s ease-out;

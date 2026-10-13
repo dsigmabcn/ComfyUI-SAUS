@@ -280,12 +280,92 @@
 
 /* --- WORKSPACE (toolbar + tabs + panes) --- */
 .workspace {
+    position: relative;      /* the console dock is anchored to it */
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background-color: var(--color-background);
+}
+
+/* The console docked over the bottom of the workspace: it floats in front of the
+   panes (which keep their size) so opening it never relayouts the app. */
+.console-dock {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 25%;
+    min-height: 160px;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background-secondary);
+    /* The seam with the workspace: solid and one step darker/stronger than the
+       faint dashed borders used inside the shell, so the floating dock reads at
+       a glance (and the drop shadow lifts it off the pane). */
+    border-top: 2px solid var(--color-border-hover);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.console-dock.hidden {
+    display: none;
+}
+
+/* The divider: a transparent strip straddling the seam. It is the only part of
+   the dock that resizes it - the body below stays a plain log viewer. */
+.console-dock-grip {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    cursor: ns-resize;
+    z-index: 1;
+}
+
+/* The affordance, on hover or when the grip has the keyboard focus (the pill is
+   the focus indicator, hence no outline). */
+.console-dock-grip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 56px;
+    height: 4px;
+    border-radius: 4px;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-primary);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.console-dock-grip:hover::after,
+.console-dock-grip:focus-visible::after {
+    opacity: 1;
+}
+
+.console-dock-grip:focus-visible {
+    outline: none;
+}
+
+/* While the divider is dragged: one cursor everywhere, no text selection, and
+   the pane iframes stop swallowing the moves that leave the grip. */
+body.resizing-console,
+body.resizing-console * {
+    cursor: ns-resize !important;
+    user-select: none !important;
+}
+
+body.resizing-console .panes {
+    pointer-events: none;
+}
+
+.console-dock-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Number of active filters, on the panel's tags button. */

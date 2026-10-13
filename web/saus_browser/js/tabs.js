@@ -1,18 +1,17 @@
 import { state, loadOpenApps, saveOpenApps } from './state.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
-import { renderConsolePane, teardownConsole } from './console.js';
 import { exportWorkflowToComfyUI } from './workflow_export.js';
 import { currentTheme } from '/core/js/common/scripts/theme.js';
 
 /* ------------------------------------------------------------------ *
  * Workspace tabs. A tab is an app (iframe of /saus/<url>) or one of the
- * built-in panes: Settings, Console, File Manager. The iframe is created
- * when the tab is first activated, so a restored tab costs nothing.
+ * built-in panes: Settings, File Manager. The iframe is created when the
+ * tab is first activated, so a restored tab costs nothing. The console is
+ * not a tab: it docks over the bottom of the workspace (see console.js).
  * ------------------------------------------------------------------ */
 
 const BUILT_INS = {
     settings: { name: 'Settings', icon: 'fas fa-cog' },
-    console: { name: 'Console', icon: 'fas fa-terminal' },
     filemanager: { name: 'File Manager', icon: 'fas fa-folder', url: 'file_manager' },
 };
 
@@ -202,12 +201,6 @@ function ensurePane(id) {
         return pane;
     }
 
-    if (tab.kind === 'console') {
-        pane.appendChild(renderConsolePane());
-        container.appendChild(pane);
-        return pane;
-    }
-
     const frame = document.createElement('iframe');
     frame.title = tab.name;
     frame.setAttribute('allow', 'clipboard-write');
@@ -312,7 +305,7 @@ export function openApp(app) {
     activateTab(id);
 }
 
-/** Settings / Console / File Manager live in the workspace too. */
+/** Settings / File Manager live in the workspace too. */
 export function openBuiltIn(kind) {
     const spec = BUILT_INS[kind];
     if (!spec) return;
@@ -350,7 +343,6 @@ export function closeTab(id) {
     const wasActive = state.activeAppId === id;
     state.openApps.splice(index, 1);
 
-    if (tab.kind === 'console') teardownConsole();
     if (focusedTabId === id) {
         focusedTabId = null;
         applyFocusState();

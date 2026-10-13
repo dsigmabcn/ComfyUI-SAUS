@@ -5,6 +5,7 @@ import { updateComponentStatus } from './models.js';
 import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
 import { setRenderHandler, renderTagsFilter } from './ui.js';
 import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.js';
+import { toggleConsoleDock } from './console.js';
 import { initTheme } from '/core/js/common/scripts/theme.js';
 
 // Night / Day / Fire, before the shell renders (palette: /core/css/themes.css).
@@ -78,7 +79,8 @@ function handleRailTool(target) {
             window.open(GUIDE_URL, '_blank', 'noopener');
             break;
         case 'console':
-            openBuiltIn('console');
+            // Docked over the bottom of the workspace, not a workspace tab.
+            toggleConsoleDock();
             break;
         case 'settings':
             openBuiltIn('settings');

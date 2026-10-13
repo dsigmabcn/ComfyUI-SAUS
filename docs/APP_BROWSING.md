@@ -65,7 +65,7 @@ Clicking an app row opens it in the **workspace** as a tab, next to the ones you
 - **⛶ enlarge**: that tab takes the whole browser area (the rail, the panel and the tab strip step aside). Click it again, or press **Esc**, to go back;
 - **✕**: closes the tab (and frees the app).
 
-Middle-clicking a tab also closes it. *Settings*, *Files* and *Console* are tabs as well, so they can stay open next to a running app. Open tabs come back if you reload the page.
+Middle-clicking a tab also closes it. *Settings* and *Files* are tabs as well, so they can stay open next to a running app; the *Console* instead docks over the bottom of the workspace (the rail's terminal icon toggles it, and its top edge can be dragged to resize it) and leaves the app at its full size. Open tabs come back if you reload the page.
 
 ### Apps
 

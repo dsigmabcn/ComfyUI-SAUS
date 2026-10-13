@@ -57,7 +57,7 @@ const RAIL_TOOLS = [
     { target: 'comfyui', svg: COMFYUI_LOGO_SVG, label: 'ComfyUI', title: 'Open ComfyUI in a new window' },
     { target: 'filemanager', icon: 'fas fa-folder', label: 'Files', title: 'File Manager' },
     { target: 'guide', icon: 'fas fa-circle-question', label: 'Guide', title: 'Open the user guide in a new window' },
-    { target: 'console', icon: 'fas fa-terminal', label: 'Console', title: 'ComfyUI console logs' },
+    { target: 'console', icon: 'fas fa-terminal', label: 'Console', title: 'ComfyUI console logs, docked at the bottom' },
     { target: 'settings', icon: 'fas fa-cog', label: 'Settings', title: 'SAUS settings' },
 ];
 
@@ -172,8 +172,13 @@ export function initExplorer(handlers = {}) {
 
     initializePanelFilters();
 
-    // A download or a delete changes what is installed: repaint the dots.
-    setStatusChangeHandler(() => refreshVisibleStatuses());
+    // A download or a delete changes what is installed: repaint the dots we can
+    // already answer, then re-check the rest. Without the warm-up the rows whose
+    // cache was just dropped would sit on "checking" until the panel is rebuilt.
+    setStatusChangeHandler(() => {
+        refreshVisibleStatuses();
+        warmVisibleStatuses();
+    });
 }
 
 /* ------------------------------------------------------------------ *

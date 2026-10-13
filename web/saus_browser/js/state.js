@@ -150,10 +150,12 @@ export function loadOpenApps() {
         const tabs = Array.isArray(data) ? data : data.tabs;
         if (!Array.isArray(tabs)) return;
 
-        // A tab is an app (needs a url) or a built-in pane: settings, console,
-        // file manager. Built-in panes are always restorable.
+        // A tab is an app (needs a url) or a built-in pane: settings, file
+        // manager. Built-in panes are always restorable; the console is not a
+        // tab any more (it docks over the workspace), so drop stale entries.
         state.openApps = tabs
             .filter(entry => entry && (entry.url || entry.kind))
+            .filter(entry => entry.kind !== 'console')
             .map(entry => ({
                 id: String(entry.id || entry.url || entry.kind),
                 url: String(entry.url || ''),
