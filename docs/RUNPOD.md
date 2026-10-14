@@ -2,18 +2,22 @@
 
 [Return to User Guide](USER_GUIDE.md)
 
-Runpod offers rental of GPU's at a good price that can be used to run the latest image and video models. This is convenient as you do not need to keep grinding and optimizing workflows to get a sub-optimal quality in your results.
+Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself.
 
 ## Setup
 
-After signing up in Runpod, create a Network Disk (with enough capacity to run the models) and use the ComfyUI SAUS template.
+After signing up, create a Network Disk (large enough for the models) and use the **ComfyUI SAUS template**.
 
 <img src="../web/core/media/git/RUNPOD-SAUS-template.png">
 
 > [!NOTE]
-> The template uses pytorch 2.8, the pod should have CUDA 12.8 or higher
+> The template uses PyTorch 2.8, so the pod should have CUDA 12.8 or higher.
 
 > [!WARNING]
-> If you already have ComfyUI in a Network Drive installed, the template will not install the custom node. Install it first via the manager, then later you can use the template to access the right ports.
+> If you already have ComfyUI installed on a Network Disk, the template will not install the custom node. Install SAUS first via ComfyUI-Manager, then use the template to reach the right ports.
+
+## Accessing SAUS on a pod
+
+SAUS is served on **port 7771**. Open that port from the pod panel, or open ComfyUI and click the **Simple App** icon on the left toolbar. See [Accessing SAUS](ACCESSING.md) for the walk-through.
 
 [Return to User Guide](USER_GUIDE.md)

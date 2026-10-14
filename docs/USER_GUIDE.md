@@ -1,6 +1,6 @@
 # SAUS UI User Guide
 
-Welcome to the SAUS UI user guide. This document provides instructions on how to navigate and use the interface effectively. In this page you have a quick explanation of the main features and description of the interface. However, more details can be explained in the detailed readme files for each section.
+Welcome to the SAUS UI user guide. This page gives a quick explanation of the main features and the interface; more detail is in the pages linked below.
 
 ## Detailed guide
 
@@ -15,6 +15,7 @@ For details of each step, look at:
 8. [ComfyUI](COMFYUI.md)
 9. [Settings](SETTINGS.md)
 10. [Runpod guide](RUNPOD.md)
+11. [Security](SECURITY.md)
 
 
 Here we have a quick reference:
@@ -27,7 +28,7 @@ To run SAUS, simply navigate to this address in your web browser:
 http://127.0.0.1:8188/saus
 ```
 
-or by clicking on the SAUS icon on the menu bar in ComfyUI.
+or by clicking the **Simple App** icon on ComfyUI's left toolbar.
 <img src="../web/core/media/git/Access-button-ComfyUI.png">
 
 
@@ -61,7 +62,7 @@ Check out the table of contents for detailed instructions. This is a summary ove
 2. **Configure Parameters - Basic**: Adjust the available settings (prompts, image size, seed, etc.) in the simplified interface.
 3. **Configure Parameters - Advanced**: Some Apps allow you to tune other advanced settings (CFG, sampler, scheduler, etc.). They are hidden behind the **Show Advanced** fold at the bottom of the control panel.
 4. **Configure Parameters - Masking**: Inpainting Apps have additional controls to draw a mask over the image you want to inpaint.
-5. **Generate**: Click the "Generate" button to start the generation process. Click the **✕** next to the progress bar to stop the generation.
+5. **Generate**: Click the **Run** button to start the generation process. Click the **✕** next to the progress bar to stop the generation.
 6. **Live Preview**: Watch the progress and see the result in the preview window.
 7. **Recent**: See the images you have generated earlier (in the same session) by clicking on the images in the Recent panel. The panel starts folded and opens by itself when the first image is generated.
 

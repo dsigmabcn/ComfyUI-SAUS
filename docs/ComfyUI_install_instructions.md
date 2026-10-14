@@ -6,7 +6,7 @@ This quick guide is based on the official information provided by ComfyUI in
 - [Installing ComfyUI](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#installing) 
 - [Installing ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#installing). 
 
-This guide is a brief summary focusing on Windows portable and debian based linux. However, the links and commands to install may change, so please always check the official documentation.
+This guide is a brief summary focusing on Windows portable and Debian-based Linux. However, the links and commands to install may change, so please always check the official documentation.
 
 ## Windows Portable
 Follow the instructions to install [ComfyUI Windows Portable](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#windows-portable) and in [ComfyUI-Manager Method 2](https://github.com/Comfy-Org/ComfyUI-Manager?tab=readme-ov-file#installationmethod2-installation-for-portable-comfyui-version-comfyui-manager-only)

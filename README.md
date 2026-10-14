@@ -28,12 +28,14 @@
     <li><a href="#how-to-use-saus">How to use SAUS</a></li>
     <li><a href="#installation">Installation</a></li>
     <li><a href="#accessing-saus">Accessing SAUS</a></li>
+    <li><a href="#runpod---pods">Runpod</a></li>
+    <li><a href="#credits">Credits</a></li>
   </ol>
 </details>
 
 # About SAUS
 
-SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI as backend Engine. 
+SAUS is a streamlined interface for AI image and video generation that uses ComfyUI as its backend engine. 
 "Spaghetti" node workflows converted into a clean, production-ready application environment.
 
 ## Why SAUS?
@@ -46,16 +48,16 @@ SAUS is a streamlined interface for AI Image and Video Generation using ComfyUI 
 
 ## What is SAUS?
 
-SAUS is a custom node for comfyui that works as a robust and simple User Interface to run different workflows, without messing and tinkering with all the spaghetti, parameters and options.
+SAUS is a custom node for ComfyUI that works as a robust and simple user interface to run different workflows, without messing and tinkering with all the spaghetti, parameters and options.
 
-ComfyUI is powerful for designing and understanding AI generation, as it lets you see 'inside' the process and tweak every parameter. However, this flexibility can also lead to complex and challenging workflows. SAUS simplifies this by converting popular and powerful workflows into 'apps'. These apps provide a clean user interface, allowing you to focus on creativity by adjusting only the most important parameters.
+ComfyUI is powerful for designing and understanding AI image and video generation. It lets you see 'inside' the process and tweak every parameter. However, this flexibility leads to complex and challenging workflows. **SAUS simplifies this by converting popular and powerful workflows into 'apps'**. These apps provide a clean user interface, allowing you to focus on creativity.
 
 <img src="web/core/media/git/SAUS-app-example.png" width="800">
 
 
 ## How to use SAUS
 
-For instructions on how to use the interface, check out the [User Guide](docs/USER_GUIDE.md).
+For detailed instructions, check out the [User Guide](docs/USER_GUIDE.md).
 
 <img src="web/core/media/ui/Saus quick start card.png" width="800">
 
@@ -71,27 +73,21 @@ For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please 
 
 ### Recommended Custom nodes
 
-I have tried that most of the apps work with native nodes only, but some use custom nodes. It is recommended to add the following custom nodes:
-- [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux): for to generate controlnet preprocessed video
-- [KJ Nodes](https://github.com/kijai/ComfyUI-KJNodes): quality of life nodes by kijai
-- [ComfyUI_essentials](https://github.com/cubiq/ComfyUI_essentials): quality of life nodes by cubiq (Matteo), currently in maintenance mode
-- [ComfyUI-RMBG](https://github.com/1038lab/ComfyUI-RMBG): To remove background from images
-- [ComfyUI-AnimateDiffEvolve](https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved): if you plan to use AnimateDiff
-- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF): To use quantized models
+SAUS itself needs **no extra custom nodes**. The installer scripts do fetch a few commonly-used node packs (ControlNet Aux, KJNodes, Essentials, RMBG, AnimateDiff Evolved, GGUF) so more of the shipped apps can run out of the box; if you install SAUS manually, add those through ComfyUI-Manager only if an app asks for them.
 
 ## From ComfyUI Manager
 
-If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager.
+If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager), the easiest way is to do it via the Manager.
 
 <img src="web/core/media/git/Manager button.png">
 <img src="web/core/media/git/custom nodes manager.png">
 
 
-Search for ComfyUI-SAUS, and install it together with the recommended custom nodes indicated above
+Search for ComfyUI-SAUS and install it.
 
 ## Manual Install
 
-It is required to you have git installed. 
+It is required that you have git installed. 
 
 1. Navigate to the `custom_nodes` folder inside your ComfyUI installation.
 2. Open a terminal (or type `cmd` in the address bar on Windows).
@@ -100,7 +96,6 @@ It is required to you have git installed.
 ```bash
 git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 ```
-Make also sure the custom nodes indicated in requirements (and their dependencies in requirements.txt) are installed.
 
 ## Automatic Install (scripts)
 
@@ -131,17 +126,11 @@ sudo apt install git-all
    ```
 
 ## Runpod - pods
-Runpod offers rental of GPU's at a good price that can be used to run the latest image and video models. This is convenient as you do not need to keep grinding and optimizing workflows to get a sub-optimal quality in your results.
-
-After signing up in Runpod, create a Network Disk (with enough capacity to run the models) and use the ComfyUI SAUS template.
+Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and use the **ComfyUI SAUS template**.
 
 <img src="web/core/media/git/RUNPOD-SAUS-template.png">
 
-> [!NOTE]
-> The template uses pytorch 2.8, the pod should have CUDA 12.8 or higher
-
-> [!WARNING]
-> If you already have ComfyUI in a Network Drive installed, the template will not install the custom node. Install it first via the manager, then later you can use the template to access the right ports.
+See the [Runpod guide](docs/RUNPOD.md) for the port to open and the first-run notes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -161,9 +150,9 @@ Click the **Simple App** icon on ComfyUI's left toolbar (the flame on the icon r
 ## 3. in Runpod
 After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is accessible in port 7771. This is visible in the HTTP services in the Pod control panel, and can be accessed by clicking there.
 
-<img src ="web/core/media/git/port 7771.png">
+<img src="web/core/media/git/port 7771.png">
 
-Alternatively, open ComfyUI and click on the SAUS button as idnicated in <a href="#2-in-comfyui">2. in ComfyUI</a>
+Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#2-in-comfyui">2. in ComfyUI</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

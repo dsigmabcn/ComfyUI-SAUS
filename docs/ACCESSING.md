@@ -33,4 +33,6 @@ During installation it may take a while. In second and subsequent runs it will t
 
 And in case that you navigate away, just click over the pod you have created and the panel will show up again:
 
+<img src="../web/core/media/git/accessing/Runpod pods running.png">
+
 [Return to User Guide](USER_GUIDE.md)
