@@ -1,6 +1,6 @@
 # Accessing SAUS
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#accessing-the-interface)
 
 ## 1. Direct Link (ComfyUI Portable)
 When you start ComfyUI Portable, you will normally access it as you do with ComfyUI.
@@ -40,4 +40,4 @@ And in case that you navigate away, just click over the pod you have created and
 
 <img src="../web/core/media/git/accessing/Runpod pods running.png">
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#accessing-the-interface)

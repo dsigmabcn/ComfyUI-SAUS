@@ -1,6 +1,6 @@
 # App Browsing
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#app-browsing)
 
 The browsing page has an **icon rail** on the far left and a **workspace** with tabs on the right. There is no header or footer: the SAUS logo sits at the top of the rail, and the project links plus the version live in the **Settings** tab.
 
@@ -87,4 +87,4 @@ The *Console* instead docks over the bottom of the workspace, while ComfyUI and 
 
 Ready? If you have installed the models and opened an app, you are ready to start [generating wonderful Images and Videos!](RUNNING_APPS.md)
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#app-browsing)

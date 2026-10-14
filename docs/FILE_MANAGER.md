@@ -1,6 +1,6 @@
 # File Manager
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#file-manager)
 
 A simple manager for files in your ComfyUI installation. Open it by clicking **Files** on the SAUS rail (it opens as a tab in the workspace).
 
@@ -40,9 +40,8 @@ Double-click an image or video and it opens in the panel on the right. Use **‹
 
 Generated videos can also be previewed in the panel.
 
-## Uploading and downloading from URL
+## Uploading files
 
 - **Upload**: upload files (images, videos) from your local computer to the (remote) ComfyUI input folder by clicking the **Upload** button.
-- **Download from URL**: paste a link to download a file straight into the current folder. For gated CivitAI / Hugging Face models you can paste an API token for that single download — tokens are never stored.
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#file-manager)

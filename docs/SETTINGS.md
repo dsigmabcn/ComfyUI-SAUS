@@ -1,6 +1,6 @@
 # Settings
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#settings)
 
 <img src="../web/core/media/git/settings.png">
 
@@ -27,4 +27,4 @@ Links to the project, as icons: **ko-fi** (support), **GitHub** (code, issues, r
 ## Restart Server
 - Restart the ComfyUI server directly from the UI (e.g. after updating custom nodes with ComfyUI-Manager).
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#settings)

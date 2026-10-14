@@ -73,7 +73,7 @@ For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please 
 
 ### Recommended Custom nodes
 
-SAUS itself needs **no extra custom nodes**. The installer scripts do fetch a few commonly-used node packs (ControlNet Aux, KJNodes, Essentials, RMBG, AnimateDiff Evolved, GGUF) so more of the shipped apps can run out of the box; if you install SAUS manually, add those through ComfyUI-Manager only if an app asks for them.
+SAUS itself needs **no extra custom nodes**, and the installer scripts install **only SAUS**. If an app asks for a community node pack, install that pack through ComfyUI-Manager.
 
 ## From ComfyUI Manager
 
@@ -158,7 +158,10 @@ After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is 
 
 <img src="web/core/media/git/port 7771.png">
 
-Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#2-in-comfyui">2. in ComfyUI</a>
+Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#2-in-comfyui">2. in ComfyUI</a>.
+
+> [!TIP]
+> **Now what?** The [User Guide](docs/USER_GUIDE.md) shows how to use SAUS — browsing apps, installing the models an app needs, adjusting the settings and running a generation.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

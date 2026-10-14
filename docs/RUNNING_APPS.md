@@ -1,11 +1,9 @@
 # Running an App
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#running-an-app)
 
 ## Open an App
 After you have installed all models needed for an app, open it by clicking on its row.
-
-<img src="../web/core/media/git/running_apps/open-app.png">
 
 ## Configure Parameters - Basic
 
@@ -40,8 +38,6 @@ Depending on the app:
 - Width and height
 - None (for image editing, normally)
 
-<img src="../web/core/media/git/running_apps/image presets.png">
-
 ### Duration (s)
 
 For video generation, the length of the clip that we want to generate. 
@@ -69,8 +65,6 @@ At the bottom, you will see an **Add Lora+** button, which lets you use LoRAs.
 
 When you click it, a new LoRA block appears: the LoRA dropdown, with the **strength** control below.
 
-<img src="../web/core/media/git/running_apps/Lora-button.png">
-
 As with model loading, just click on the dropdown, and a pop-up window listing your LoRA folder will appear. Navigate and select the LoRA you want to use. If the app accepts distillation LoRAs, they will appear here.
 
 Below the lora model, you have the strength slider, where you can set the strength between 0 and 2 (default is 1, typically in the range of 0.5-1).
@@ -90,17 +84,9 @@ You can add an image by:
 - Double clicking over the image space
 - Click over 'Image Loader' to open the 'input' folder and select the image you want to use
 
-<img src="../web/core/media/git/running_apps/input file.png">
-
 After dropping the image or selecting it from local or input folder, the image will be loaded and ready to be used in the app for transformation, editing or as reference.
 
 <img src="../web/core/media/git/running_apps/Load Image with image.png">
-
-### Masking (inpainting apps)
-
-Inpainting apps let you draw a mask over the reference image to choose what gets regenerated. The **Mask Settings** panel holds the brush size, the mask colour, the brush/erase tools, whether the mask is hidden or resized, and the mask size, blur and save mode.
-
-<img src="../web/core/media/git/running_apps/mask settings.png">
 
 ## Advanced Controls
 
@@ -111,8 +97,6 @@ The Advanced controls are hidden behind a **Show Advanced** fold at the bottom o
 The available controls will depend on the app you are running, but some common ones are:
 
 - **Model**: if you want to use a different model than the one provided in the variants, you can choose the one you prefer.
-
-<img src="../web/core/media/git/running_apps/model-selection.png">
 - **CLIP and VAE**: if you want to use different text encoder or VAE models, you can select them here.
 - **Sampler and scheduler**: you can change the sampler and scheduler for the diffusion process here.
 - **Number of steps and CFG**: in the advanced settings, you can also change the number of steps for the diffusion process and the Classifier-Free Guidance (CFG) value. In general, the default values are good, but if you are going to use **distilled or lightning LoRAs**, you will need to change them, normally by **reducing the steps to 4-8** (depending on the LoRA) and the **CFG to 1**.
@@ -126,11 +110,9 @@ The available controls will depend on the app you are running, but some common o
 
 The small rotating gears will start rotating, and the **number of queued runs left** appears right below the gears. Next to the progress bar you can see which nodes are being processed in the ComfyUI background. When the sampler starts, you will also see the progress bar progressing with the number of steps.
 
-<img src="../web/core/media/git/running_apps/generating image.png">
 
 More detailed logs can be accessed via the **Console** at the bottom of the SAUS rail. This is useful when a model takes too long, or for troubleshooting.
 
-<img src="../web/core/media/git/running_apps/comfyui logs.png">
 
 If you want to stop the generation process, just click the **✕** next to the progress bar, and the sampling will stop.
 
@@ -145,4 +127,4 @@ The images or videos can be seen here and can also be downloaded by right-clicki
 On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
 
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#running-an-app)

@@ -1,7 +1,5 @@
 # Security
 
-[Return to User Guide](USER_GUIDE.md)
-
 SAUS is served **by ComfyUI itself**, on ComfyUI's origin (`/saus/**`), so the SAUS
 shell, every app and ComfyUI share one origin. That shapes what SAUS can defend.
 
@@ -28,9 +26,9 @@ anything touches disk, then the path is resolved and checked against those roots
 ## Downloads
 
 Downloads only fetch http(s) URLs that resolve to public addresses, that check is
-repeated on every redirect, and the API token typed in the File Manager is attached
-only for the hosts listed in `saus/data/allowed_download_hosts.json`. SAUS never
-stores tokens.
+repeated on every redirect, and an API token is attached only for hosts on the
+allow-list kept in `saus/data/allowed_download_hosts.json`. SAUS never stores
+tokens.
 
 ## Reporting a vulnerability
 
@@ -43,5 +41,3 @@ otherwise.
 Contributors: the concrete invariants every route must keep — and the checks that
 enforce them — are documented in the developer skill at
 `.clinerules/skills/saus-developer/references/security-invariants.md`.
-
-[Return to User Guide](USER_GUIDE.md)

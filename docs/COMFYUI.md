@@ -1,6 +1,6 @@
 # ComfyUI
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#comfyui)
 
 The **ComfyUI** button in the navigation bar opens the standard ComfyUI interface in a separate window, allowing you to access the underlying node graph if needed.
 
@@ -17,4 +17,4 @@ workflow you already have.
 For how SAUS handles cross-site requests, filesystem access and downloads, see
 [Security](SECURITY.md).
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#comfyui)

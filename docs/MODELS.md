@@ -1,6 +1,6 @@
 # Managing Models for Apps
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#installing-and-uninstalling-models)
 
 Before running a SAUS app, the required models need to be installed, somewhere inside ComfyUI's model folders.
 
@@ -25,8 +25,6 @@ A variant needs what it is built on: the models it picks (including its own dist
 
 When an app has several variants, hovering the row shows one line per variant (e.g. `HD ✓`, `Turbo — 2 models missing`); with a single variant it simply lists the missing models.
 To install models, open the information panel: click the **(i)** button on the row.
-
-<img src="../web/core/media/git/models/info-button.png">
 
 The information panel opens as a window over the workspace:
 
@@ -53,4 +51,4 @@ If a model is missing, click over the 'download' icon and the model will start d
 ## Uninstalling Models
 If you want to free up space because you no longer use an app, you can delete its models by clicking over the 'trash bin' icon to **Uninstall**.
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#installing-and-uninstalling-models)

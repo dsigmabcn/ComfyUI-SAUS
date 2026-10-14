@@ -1,6 +1,6 @@
 # ComfyUI and ComfyUI-Manager Installation
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)
 
 This quick guide is based on the official information provided by ComfyUI in 
 - [Installing ComfyUI](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#installing) 
@@ -33,4 +33,4 @@ chmod +x install-comfyui-venv-linux.sh
 
 When you have ComfyUI and ComfyUI-Manager installed, you can follow the instructions to install ComfyUI-SAUS.
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)

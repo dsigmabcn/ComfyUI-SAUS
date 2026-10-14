@@ -1,6 +1,6 @@
 # Installation
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)
 
 ## Requirements - ComfyUI and ComfyUI-Manager
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
@@ -28,11 +28,11 @@ It is required that you have git installed.
 ```bash
 git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 ```
-SAUS itself has no Python dependencies beyond ComfyUI (`requirements.txt` is empty). If an app asks for a node pack, add it through ComfyUI-Manager.
+SAUS has no Python dependencies beyond ComfyUI. If an app asks for a node pack, add it through ComfyUI-Manager.
 
 ## Automatic Install (scripts)
 
-To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
+To simplify installation, we provide scripts for Windows and Linux that clone (or update) SAUS automatically.
 
 The SAUS installers assume you already have ComfyUI and ComfyUI-Manager installed.
 
@@ -73,4 +73,4 @@ Runpod offers GPU rental at a good price for running the latest image and video 
 
 See the [Runpod guide](RUNPOD.md) for the port to open and the first-run notes.
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)

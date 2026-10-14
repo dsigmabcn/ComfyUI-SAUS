@@ -1,6 +1,6 @@
 # Runpod Guide
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#accessing-the-interface)
 
 Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself.
 
@@ -20,4 +20,4 @@ After signing up, create a Network Disk (large enough for the models) and use th
 
 SAUS is served on **port 7771**. Open that port from the pod panel, or open ComfyUI and click the **Simple App** icon on the left toolbar. See [Accessing SAUS](ACCESSING.md) for the walk-through.
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#accessing-the-interface)
