@@ -6,15 +6,16 @@ The browsing page has an **icon rail** on the far left and a **workspace** with 
 
 ## The rail
 
-On the top of the rail, you can access the SAUS AI generation apps, per category:
-
-<img src="../web/core/media/git/app_browsing/app browsing start.png">
+<table>
+  <tr>
+    <td valign="middle"><img src="../web/core/media/git/app_browsing/app browsing start.png" width="58"></td>
+    <td>On the top of the rail you reach the three app sections; at the bottom sit the tools. <b>Click</b> a section to open its panel with its sub-categories, and <b>click the same icon again</b> to close it.</td>
+  </tr>
+</table>
 
 - **AI Image**: Create AI images from text, other images, or edit existing images, using the latest models available in ComfyUI (Qwen Image 2.1, Krea 2, etc.)
 - **AI Video**: Create AI videos from text or other images, with the latest video generation models available in ComfyUI (Minimax H3, LTX-2.5, etc)
 - **Other**: Image and video tools (remove background, upscaling, etc)
-
-**Click** on them to open the panel with different sub-categories and **click the same icon again** to close it.
 
 In the bottom part, you can find:
 

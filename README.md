@@ -143,9 +143,15 @@ To run SAUS, simply navigate to this address in your web browser:
 ```
 http://127.0.0.1:8188/saus
 ```
+
 ## 2. in ComfyUI
-Click the **Simple App** icon on ComfyUI's left toolbar (the flame on the icon rail at the left edge)
-<img src="web/core/media/git/Access-button-ComfyUI.png">
+
+<table>
+  <tr>
+    <td valign="middle"><img src="web/core/media/git/Access-button-ComfyUI.png" width="61"></td>
+    <td>Click the <b>Simple App</b> icon on ComfyUI's left toolbar &mdash; the flame on the icon rail at the left edge.</td>
+  </tr>
+</table>
 
 ## 3. in Runpod
 After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is accessible in port 7771. This is visible in the HTTP services in the Pod control panel, and can be accessed by clicking there.

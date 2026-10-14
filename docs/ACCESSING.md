@@ -18,8 +18,13 @@ http://127.0.0.1:8188/saus
 
 
 ## 2. From ComfyUI graph
-Start ComfyUI as indicated before. On the **left toolbar** (the icon rail along the left edge) you will see the **Simple App** icon — a flame, next to the App Builder's hammer. Click it to open the interface
-<img src="../web/core/media/git/Access-button-ComfyUI.png">
+
+<table>
+  <tr>
+    <td valign="middle"><img src="../web/core/media/git/Access-button-ComfyUI.png" width="61"></td>
+    <td>Start ComfyUI as indicated before. On the <b>left toolbar</b> (the icon rail along the left edge) you will see the <b>Simple App</b> icon &mdash; a flame, next to the App Builder's hammer. Click it to open the interface.</td>
+  </tr>
+</table>
 
 ## 3. From Runpod
 If using the SAUS template, access via port 7771 or through the ComfyUI interface.
