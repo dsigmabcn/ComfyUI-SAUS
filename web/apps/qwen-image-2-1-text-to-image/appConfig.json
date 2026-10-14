@@ -1,0 +1,226 @@
+{
+  "id": "sausd1pws3",
+  "name": "Qwen Image 2.1",
+  "url": "qwen-image-2-1-text-to-image",
+  "description": "Image Generation using Qwen Image 2.1 - includes prompt enhacement using prompt rewrite from Qwen",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "QWEN IMAGE 2.1",
+    "models": [
+      "qwen_image_2.1_int8_convrot.safetensors",
+      "qwen3vl_8b_int8_convrot.safetensors",
+      "qwen_image_2.1_vae_bf16.safetensors",
+      "qwen3.5_9b_qwen_image_2.1_pe_t2i.int8_convrot.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "compmgrr25",
+      "label": "Prompt",
+      "nodePath": "459_471.inputs.prompt",
+      "default": "Greyscale fashion editorial portrait of an avant-garde woman tilted upwards in profile, captured with striking high-contrast chiaroscuro lighting. She wears oversized, thick-rimmed circular black sunglasses with matte dark lenses, concealing her upward gaze. Her attire merges high couture with tactical abstraction: a high-necked structural dress tailored from heavyweight fabric featuring a disrupted optical camouflage pattern\u2014interlocking oversized polka dots, pixelated stippling, and organic contour blotches in stark monochrome that mimic military disruptive patterns in a refined runway style. Around her shoulders, asymmetric pleated webbing and tailored cargo straps are integrated seamlessly into the garment\u2019s architecture. In her gloved hand, she clutches a structured matte-leather geometric handbag accented with subtle tactical buckles, utility stitching, and dark brushed-metal hardware. Her skin texture is rendered with hyper-detailed clarity, sculpted by intense, razor-sharp studio key light and deep graphite shadows. The striking background is a vivid mixed-media graphic collage, composed of flat vibrant lime green planes, stark black and white overlapping circles, segmented semi-circles with bold zebra striping, dense micro-halftone dot matrices, and vector topographic contour lines. The clash between monochromatic disruptive camo elements on her clothing and the saturated, retro-futuristic pop-art backdrop creates an intense visual dissonance, emphasizing sharp silhouettes, paper cut-out edges, dynamic compositional balance, and clean graphic novel textures. Absolutely no text, no typography, no letters, no words, no numbers, no logos, no watermark, no captions, pure imagery only.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "comp7iv7ip",
+      "label": "Megapixels",
+      "nodePath": "13.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 2,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "compp2fyir",
+      "label": "Steps",
+      "nodePath": "459_458.inputs.steps",
+      "minValue": 1,
+      "maxValue": 10000,
+      "step": 10,
+      "defValue": 25,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    },
+    {
+      "id": "compxgd0k4",
+      "label": "Cfg",
+      "nodePath": "459_458.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 1,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "compz0c0dl",
+      "label": "Unet Name",
+      "nodePath": "459_451.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "qwen_image_2.1_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "compu313fi",
+      "label": "Clip Name",
+      "nodePath": "459_453.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen3vl_8b_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "comp6c8mv6",
+      "label": "Vae Name",
+      "nodePath": "459_454.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "qwen_image_2.1_vae_bf16.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "comp4xdhnz",
+      "label": "LLM CLIP",
+      "nodePath": "459_473.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen3.5_9b_qwen_image_2.1_pe_t2i.int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "comp7tfkg8",
+      "label": "Sampler Name",
+      "nodePath": "459_458.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "default": "euler",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    },
+    {
+      "id": "compru46lx",
+      "label": "Scheduler",
+      "nodePath": "459_458.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "default": "simple",
+      "layout": {
+        "region": "advanced",
+        "order": 13
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "comp5fhj4h",
+      "label": "Seed",
+      "nodePath": "459_458.inputs.seed",
+      "initialSeed": 447606998181262,
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [
+    {
+      "id": "comp8wf8lu",
+      "label": "Prompt rewrite",
+      "nodePath": "459_474.inputs.switch",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "comp6r9o6x",
+      "label": "Filename Prefix",
+      "nodePath": "461.inputs.filename_prefix",
+      "defValue": "Qwen_image_2.1",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "comp42x2oi",
+      "label": "Aspect Ratio",
+      "nodePath": "13.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output461",
+      "label": "Save Image (Advanced)",
+      "nodeId": "461",
+      "type": "media"
+    }
+  ]
+}

@@ -7,7 +7,24 @@ After you have installed all models needed for an app, open the app by clicking 
 
 <img src="../web/core/media/git/running_apps/open-app.png">
 
+> An app page has **no SAUS chrome of its own** — no header, no navigation, no logo.
+> It is just the app's controls, the workspace and the version line at the bottom;
+> the navigation lives in the app browser (`/saus`) and the File Manager. Opening
+> `/saus/<app>` directly therefore looks exactly like the app does in a workspace tab.
+
 ## Configure Parameters - Basic
+
+The app's **name** sits at the top of the control column — the same size as the buttons
+below it — with an **(i)** next to it. Outside the browser that **(i)** opens a short
+*About this app* box (the description, the architecture, its category / tags and the model
+files it expects); opened as a tab of the SAUS browser it hands you to the browser's
+[information panel](MODELS.md) instead, so the models can be installed from there.
+
+Just below are the app's **modes**: **HD** is what the app runs as by default and
+**Custom** always stays (it exposes the parameters as they are). Any other button comes
+from the app's architecture — **Turbo** only appears where that architecture defines it,
+and named variants replace the HD / Turbo pair completely. A mode whose models are not
+installed is greyed out; hover it to see which file it is missing.
 
 Here you can adjust the basic controls for an app/workflow, which we discuss in more detail below.
 
@@ -32,7 +49,7 @@ By clicking on it, a new window pops up, that opens a navigation browser in the 
 
 As for the standard navigation for the models installed with SAUS: checkpoints and diffusion models of the same family are placed in the same subfolder. VAEs and checkpoints are not generally downloaded into subfolders, as they might be used for more than one image/video generation architechture
 
-Click on the model you want to use and it will be loaded in the app.
+Click on the model you want to use and it will be loaded in the app. The list shows **names** (with their folder, so two models that share a name stay apart): no thumbnails, but the subfolders are still grouped and searchable.
 
 > [!NOTE]
 > Generally, there is one diffusion model per app, but Wan 2.2 uses two diffusion models, so the first one corresponds to the 'high' model, and the second for the 'low' model.
@@ -81,14 +98,16 @@ By default, the seed is random and it changes after you run the image/video gene
 - Click and hold for a couple of seconds to convert your seed from random to fixed. When fixed, your seed will not change after you run the generation. - Click and hold again to convert it back to random.
 
 ### Lora
-At the bottom, you will see a 'Lora' button, which allows you to use LoRAs.
+At the bottom, you will see an **Add Lora+** button, which lets you use LoRAs.
 <img src="../web/core/media/git/running_apps/Lora-button.png">
 
-When you click on it, a LoRA model selection widget will appear. Typically, this will be shown in red, as you need to indicate which LoRA model you want to use. 
+When you click it, a new LoRA block appears: the LoRA dropdown, with the **strength** control below.
 
-As with model loading, just click on it, and a pop-up window with the content of your LoRA folder will appear. Navigate and select the LoRA you want to use. If the app accepts distillation LoRAs, they will appear here.
+As with model loading, just click on the dropdown, and a pop-up window listing your LoRA folder will appear — it shows **just the names** (like the sampler / scheduler lists). Navigate and select the LoRA you want to use. If the app accepts distillation LoRAs, they will appear here.
 
-Below the lora model, you have the strength slider, where you can set the strength between 0 an 2 (default is 1, typically is in the range of 0.5-1)
+Below the lora model, you have the strength slider, where you can set the strength between 0 and 2 (default is 1, typically in the range of 0.5-1).
+
+To add another LoRA, click **Add Lora+** again; use the **✕** on a block to remove it.
 
 If you do not want to use the lora anymore, click on the 'X' button on the corner
 
@@ -125,19 +144,19 @@ After uploading the image, just click on the 'mask' button and start drawing the
 
 ## Generate (image or video)
 
-At the bottom right you can see the 'Generate' button. When your basic settings are defined, you can just click and start generating the image.
+**Run**, the number of runs and the **✕** cancel button sit **inline next to the progress bar**. When your basic settings are defined, click **Run** to start generating (set the number of runs first if you want the workflow queued several times).
 
 <img src="../web/core/media/git/running_apps/generate image.png">
 
-After generating, the small gears will start rotating, and next to the progress bar you can see which nodes are being processed in the ComfyUI background. When the sampler starts, you will also see the progress bar progresssing with the number of steps.
+After generating, the small spinner (the rotating gears) next to the progress bar will start rotating, and the **number of queued runs left** appears right below the gears. Next to the progress bar you can see which nodes are being processed in the ComfyUI background. When the sampler starts, you will also see the progress bar progresssing with the number of steps.
 
 <img src="../web/core/media/git/running_apps/generating image.png">
 
-Take into account that the models need to be loaded, so depending on how 'heavy' your model is, this will take more or less time. If you want to see more details, you can access the ComfyUI console logs by clicking over the 'gear' icons, which may provide some more information of the progress of the workflow
+Take into account that the models need to be loaded, so depending on how 'heavy' your model is, this will take more or less time. If you want to see more details, open the **Console** tab from the SAUS rail (the *Console* icon at the bottom of the rail), which follows the ComfyUI console logs live.
 
 <img src="../web/core/media/git/running_apps/comfyui logs.png">
 
-If you want to stop the generation process, just click the 'Interrupt' button, and the sampling will stop.
+If you want to stop the generation process, just click the **✕** next to the progress bar, and the sampling will stop.
 
 ## Image visualization and Recent images
 
@@ -147,11 +166,11 @@ When the image or video generation process is finished, you can see the results:
 
 The images or videos can be seen here and can also be downloaded by right-clicking and selecting 'Save As'. All images and videos are saved in the 'output' folder of ComfyUI, which you can access with the File Manager.
 
-On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
+On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. It starts **folded** and opens by itself as soon as the first image or video is generated (use the handle on its edge to fold/unfold it manually). You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
 
 ## Advanced Controls
 
-Next to the 'Basic Controls' tab, you can activate the 'Advanced Controls' tab to access some advanced settings.
+The Advanced controls are hidden behind a **Show Advanced** fold at the bottom of the control panel (below the LoRA list): click it to reveal the advanced settings, and **Show less** to fold them back.
 
 <img src="../web/core/media/git/running_apps/advanced controls.png">
 

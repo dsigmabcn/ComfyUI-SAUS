@@ -3,6 +3,45 @@ export function uuidv4() {
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
+
+/**
+ * Escape a value so it is safe to place inside HTML text or a quoted
+ * attribute. Use it for anything that comes from data (model/file names,
+ * app config fields, taxonomy, registry entries) before putting it in a
+ * template string that is assigned to innerHTML.
+ */
+export function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
+ * Elements under ``root`` whose ``data-model-path`` equals ``path`` -- or, when
+ * ``descendantSelector`` is given, those descendants inside them.
+ *
+ * Model names come from ComfyUI's file listings, so they may contain quotes or
+ * brackets that would be parsed as CSS syntax inside a
+ * ``[data-model-path="…"]`` selector. Comparing the attribute value directly
+ * avoids that entirely.
+ */
+export function modelPathElements(root, path, descendantSelector = null) {
+    if (!root || path === null || path === undefined) return [];
+    const wanted = String(path);
+    const matches = [];
+    root.querySelectorAll('[data-model-path]').forEach((node) => {
+        if (node.getAttribute('data-model-path') !== wanted) return;
+        if (descendantSelector) {
+            matches.push(...node.querySelectorAll(descendantSelector));
+        } else {
+            matches.push(node);
+        }
+    });
+    return matches;
+}
 export function showSpinner() {
     document.getElementById('spinner').classList.add('spin');
 }

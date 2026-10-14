@@ -52,10 +52,7 @@ class Seeder {
         this.incrementButton = document.getElementById(`${this.config.id}IncrementButton`);
         this.decrementButton = document.getElementById(`${this.config.id}DecrementButton`);
 
-        if (this.autoRandomSeed) {
-            this.randomSeedButton.classList.add('active');
-        }
-
+        this.syncRandomSeedButton();
         this.addEventListeners();
     }
 
@@ -114,14 +111,30 @@ class Seeder {
         });
     }
 
+    /**
+     * The R button is a two-state switch: randomise the seed on every run (the
+     * default) or keep the seed in the field. Both states have to be readable at
+     * a glance, so the class drives the styling (filled + dotted = ON, hollow +
+     * dashed = OFF) while aria-pressed and the title say the same thing to
+     * screen readers and tooltips. A short press still draws a new seed, a long
+     * press flips the switch.
+     */
+    syncRandomSeedButton() {
+        const button = this.randomSeedButton;
+        if (!button) {
+            return;
+        }
+        const on = this.autoRandomSeed;
+        button.classList.toggle('active', on);
+        button.setAttribute('aria-pressed', String(on));
+        button.title = on
+            ? 'Random seed each run: ON (click for a new seed, long press to keep the seed)'
+            : 'Random seed each run: OFF (click for a new seed, long press to randomise each run)';
+    }
+
     toggleAutoRandomSeed() {
         this.autoRandomSeed = !this.autoRandomSeed;
-        if (this.autoRandomSeed) {
-            this.randomSeedButton.classList.add('active');
-        } else {
-            this.randomSeedButton.classList.remove('active');
-        }
-        // console.log(`Auto Random Seed is now ${this.autoRandomSeed ? 'ON' : 'OFF'}`);
+        this.syncRandomSeedButton();
     }
 
     generateRandomSeed() {

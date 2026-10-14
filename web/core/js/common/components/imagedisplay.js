@@ -112,10 +112,21 @@ class HistoryManager {
 
         this.history.unshift(imageUrl);
         this.renderThumbnail(imageUrl);
+        this.revealPanel();
 
         if (this.history.length > this.maxItems) {
             this.history.pop();
             this.historyContainer.removeChild(this.historyContainer.lastChild);
+        }
+    }
+
+    /** The "Recent" panel starts folded and unfolds on the first result. */
+    revealPanel() {
+        const rightCol = document.getElementById('right-col');
+        const toggle = document.getElementById('toggle-right');
+        if (rightCol && rightCol.classList.contains('minimized')) {
+            rightCol.classList.remove('minimized');
+            if (toggle) toggle.classList.remove('active');
         }
     }
 
@@ -430,11 +441,12 @@ class Lightbox {
     initiateDrag(e) {
         this.bringToFront(); 
 
+        // The media itself is draggable too (not just the border area). Video
+        // keeps its native controls usable, so it is left out.
         if (
             e.target.classList.contains('lightbox-prev') ||
             e.target.classList.contains('lightbox-next') ||
             e.target.classList.contains('lightbox-close') ||
-            e.target.tagName.toLowerCase() === 'img' ||
             e.target.tagName.toLowerCase() === 'video' ||
             e.target.classList.contains('lightbox-resize-handle')
         ) {
@@ -560,6 +572,29 @@ class Lightbox {
         this.content.style.top = '50%';
         this.content.style.transform = 'translate(-50%, -50%)';
     }
+
+    /** Size the modal to the media, proportionally, within the viewport. */
+    fitContentToMedia() {
+        const nw = this.mediaNaturalWidth;
+        const nh = this.mediaNaturalHeight;
+        if (!nw || !nh) return;
+
+        const pad = 20;   // content padding (10px each side)
+        const nav = 50;   // room for the navigation bar
+        const maxW = Math.max(320, window.innerWidth * 0.85) - pad;
+        const maxH = Math.max(240, window.innerHeight * 0.85) - pad - nav;
+        const ar = nw / nh;
+
+        let w = maxW;
+        let h = w / ar;
+        if (h > maxH) {
+            h = maxH;
+            w = h * ar;
+        }
+
+        this.content.style.width = `${Math.round(w + pad)}px`;
+        this.content.style.height = `${Math.round(h + pad + nav)}px`;
+    }
     setMedia(index) {
         this.currentIndex = index;
         this.displayMedia();
@@ -621,22 +656,13 @@ class Lightbox {
             this.mediaElement.onloadedmetadata = () => {
                 this.mediaNaturalWidth = this.mediaElement.videoWidth;
                 this.mediaNaturalHeight = this.mediaElement.videoHeight;
-
-                const currentWidth = this.content.offsetWidth;
-                const currentHeight = this.content.offsetHeight;
-
-                if (currentWidth > this.mediaNaturalWidth) {
-                    this.content.style.width = `${this.mediaNaturalWidth}px`;
-                }
-
-                if (currentHeight > this.mediaNaturalHeight) {
-                    this.content.style.height = `${this.mediaNaturalHeight}px`;
-                }
+                this.fitContentToMedia();
             };
         } else {
             this.mediaElement = document.createElement('img');
             this.mediaElement.src = mediaUrl;
             this.mediaElement.alt = 'Lightbox Image';
+            this.mediaElement.draggable = false;   // drag moves the modal, not the file
             this.mediaElement.style.maxWidth = '100%';
             this.mediaElement.style.maxHeight = '100%';
             this.mediaElement.style.outline = 'none'; 
@@ -644,17 +670,7 @@ class Lightbox {
             this.mediaElement.onload = () => {
                 this.mediaNaturalWidth = this.mediaElement.naturalWidth;
                 this.mediaNaturalHeight = this.mediaElement.naturalHeight;
-
-                const currentWidth = this.content.offsetWidth;
-                const currentHeight = this.content.offsetHeight;
-
-                if (currentWidth > this.mediaNaturalWidth) {
-                    this.content.style.width = `${this.mediaNaturalWidth}px`;
-                }
-
-                if (currentHeight > this.mediaNaturalHeight) {
-                    this.content.style.height = `${this.mediaNaturalHeight}px`;
-                }
+                this.fitContentToMedia();
             };
         }
 

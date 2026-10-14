@@ -1,4 +1,4 @@
-import { showSpinner, hideSpinner } from '../utils.js';
+import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
 
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
@@ -31,7 +31,7 @@ export default class ImageLoader {
 
     // The button now acts as the title and browse trigger.
     this.browseButton = document.createElement('button');
-    this.browseButton.innerHTML = `📂 ${this.config.label || 'Browse'}`;
+    this.browseButton.innerHTML = `📂 ${escapeHtml(this.config.label || 'Browse')}`;
     this.browseButton.classList.add('image-loader-title');
     this.browseButton.style.width = '100%';
     this.browseButton.style.cursor = 'pointer';
@@ -204,7 +204,7 @@ export default class ImageLoader {
     }
   }*/
   displayMedia(file, src) {
-    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+    const safeImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/bmp'];
     const safeVideos = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'];
 
     if (safeImages.includes(file.type)) {
@@ -403,7 +403,7 @@ export default class ImageLoader {
   guessMimeType(filename) {
     const ext = filename.split('.').pop().toLowerCase();
     if (ext === 'jpg') return 'image/jpeg';
-    if (['png', 'jpeg', 'webp', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
+    if (['png', 'jpeg', 'webp', 'avif', 'bmp', 'gif'].includes(ext)) return 'image/' + ext;
     if (ext === 'mov') return 'video/quicktime';
     if (ext === 'mkv') return 'video/x-matroska';
     if (['mp4', 'webm', 'ogg'].includes(ext)) return 'video/' + ext;

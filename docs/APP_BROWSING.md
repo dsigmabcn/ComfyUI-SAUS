@@ -2,70 +2,73 @@
 
 [Return to User Guide](USER_GUIDE.md)
 
-In your home page, you will see several options in your sidebar. These are used to navigate through the different apps of SAUS.
+The browsing page has an **icon rail** on the far left and a **workspace** with tabs on the right. There is no header or footer: the SAUS logo sits at the top of the rail, and the project links plus the version live in the **Settings** tab.
 
-If you are in the File Manager or Settings, you can return to the SAUS apps by clicking on the "SAUS Apps" button in the top navigation bar.
+<!-- TODO: refresh the screenshots after the explorer/tab redesign -->
 
-<img src="../web/core/media/git/app_browsing/app browsing start.png">
+## The rail
 
-## Sidebar
-- Home: return to the home page
-- AI Image: click to unfold the apps for AI Image generation
-    - Text-to-Image: apps using text prompts to generate images
-    - Image-to-Image (editing): apps to modify existing images (I2I, inpainting, edit)
-    - Image-to-Image (reference): apps to create images from reference images (styling, IP Adapter, controlnet)
-- AI Video: click to unfold the apps for AI Video generation
-    - text-to-video: apps using text prompts to generate videos
-    - image-to-video: apps using a reference image to create a video
-    - video-to-video: apps using a reference video to create another video (styling, controlnet)
-- Other: collection of other and tools (remove background, generate controlnet reference videos, cropping...)
+Reading from the top:
 
-<img src="../web/core/media/git/app_browsing/sidebar full.png">
+- **AI Image**, **AI Video**, **Other**: the three sections of apps. **Click** one and the panel opens on that section; **click the same icon again** to close it, or **click another icon** to move the panel to that section. Hovering only highlights the icon.
+- **ComfyUI**: opens ComfyUI in a new window.
+- **Files**: the [File Manager](FILE_MANAGER.md), as a tab in the workspace.
+- **Guide**: this user guide, in a new window.
+- **Console**: the ComfyUI console/log feed, as a tab in the workspace.
+- **Settings**: the [Settings](SETTINGS.md), as a tab in the workspace. That tab holds the theme picker, the installed SAUS version (the *Version* section) and the project links (the *Social* section: ko-fi, GitHub, YouTube).
 
-Click on each of the different categories for image or video AI generation and the selected apps for that category will appear in the main content of the page.
+The panel is only open while you want it: nothing appears on hover alone, and **Esc** closes it too. Which section you had open, and which subcategories you unfolded, are remembered.
 
-## App Browsing
+### The panel head
 
-When a category is selected, the apps for that category appear on the screen. Above the apps, you will see a series of filters that will help you screen the apps. Here is an example for image-to-image apps:
+- **Search** — filters apps by name, description, category or tag.
+- **Tags** — unfolds the tag chips (base / distilled-fast / quantized, FLUX / SDXL / QWEN / WAN, image-to-image / inpainting / (re-)styling...). The little number next to the button counts the active search + tag filters.
+- **Favorites** — your favourite apps are listed right there, in the panel head between the search field and the section name. The list appears only while you have favourites, and it only shows the ones belonging to the section you are looking at (plus the active search / tag filter), so it never pins an app that is not in the tree below.
 
-<img src="../web/core/media/git/app_browsing/App browsing example.png">
+Below them is the **section name** (AI Image / AI Video / Other) — what the tree below is listing. While a search or tag filter is active, that name disappears and the panel shows a flat **"N apps found"** list with the matches from every section.
 
-### Filtering by tags
-You can see a series of tags, that can be used to filter the different apps, depending on different subcategories:
-- base (model), quantized (model), distilled-fast (model)
-- model (FLUX, SD/SDXL, Qwen...)
-- type: image-to-image, inpainting, (re-)styling, controlnet...
+## The tree
 
-## Search bar
-Simply type there any text to find specific Apps.
+The panel only lists the section you picked:
 
-### App type
-Apps are categorized by:
-- Open (box)
-- Gold (crown)
-- Beta (erlenmeyer)
-- User (person)
+1. **Subcategory** (text-to-image, image-to-image (editing), image-to-image (reference), text-to-video, image-to-video, video-to-video, tools...). The number next to it is how many apps it holds.
+2. **Apps**: click a subcategory and its rows unfold right there.
 
-All **Open** apps are free. I will try to convert into easy-to-use apps the most popular and commonly used ComfyUI workflows. But ComfyUI provides endless possibilities, so more complex or 'niche' workflows will be available as 'gold' or 'beta' Apps via my [ko-fi](https://ko-fi.com/s/f242d26788). 
+Which subcategories are unfolded is remembered between visits.
 
-The Gold apps are generally specific Apps with some extra features and generally do not require extra custom nodes. Beta apps are still under development, are not fool-proof and may require additional custom nodes. They are also available to subscribers on my [Ko-fi page](https://ko-fi.com/koalanation). As a subscriber, you can suggest that some comfyui workflows are converted into Apps.
+## App rows
 
-The User category is, for the moment, a placeholder for special apps.
+Each app is a row with a thumbnail and its **name**. Long names wrap onto a second line, so they are always fully visible.
 
-### Favorites
-Use the star toggle can filter by favorites, which can be activated in the app card.
+- **Thumbnail**: a file in the app folder, next to its `appConfig.json` — `thumbnail.webp` first, then `.avif`, `.png`, `.jpg` or `.gif` (the newest one wins when an app ships several); the *information panel* shows that master. The row itself uses the small **`thumbnail.row.webp`** copy (128 px, written by `tools/thumbnail.py`), so opening the panel does not pull the full-size picture for every app. An app with no thumbnail at all - or one whose file will not load - shows the SAUS logo. Click the row to open the app.
+- **Name**: the app title (hover for the full text when cut short).
+- **Status dot**: <span style="color:green">green</span> = every variant of the app has all of its models, <span style="color:orange">orange</span> = at least one variant is complete but another is not, <span style="color:red">red</span> = no variant is complete, grey = still checking.
+- **(i)**: the app information panel, where models can be [installed/uninstalled](MODELS.md).
+- **☆**: marks the app as a favorite. Favorites are listed first inside their subcategory.
 
-## App cards
-The app cards contain several elements that are here described:
+### Hovering a row
 
-<img src="../web/core/media/git/app_browsing/app cards.png">
+The tooltip is short — one of three states, plus a call to action:
 
-- [Thumbnail](RUNNING_APPS.md): I have tried to use as much as possible the ComfyUI thumbnail for easy identification. Click on it to open the app.
-- Title: the title of the App (hopefully descriptive enough)
-- Tags: tags (used in the filters) with the main characteristics in relation to type/model/subcategories
-- Type of app and favorites: on the top right of the card, the type of app (open/gold/beta/user) and a toggle to select as favorite.
-- [Model (status)](MODELS.md): It shows how many of the required models to run the app are installed. If none are installed, it will be shown in <span style="color:red">Red</span>.If all requried models are installed, in <span style="color:green">Green</span>. If only some of the required models are installed, in <span style="color:orange">Orange</span>.
-- Information button: this button will open the information panel where the models can be [installed/uninstalled](MODELS.md).
+- Everything installed: *"All models installed"* (green).
+- Some variants still need models: *"Some variants still need models"* (orange).
+- Nothing installed: *"No models installed"* (red).
 
+In every case, click **(i)** to see the details and install the missing models.
+
+## Opening apps: tabs
+
+Clicking an app row opens it in the **workspace** as a tab, next to the ones you already have open. Opening an app also closes the explorer panel, so the app gets the room (the rail stays — one click brings the panel back). Each tab carries:
+
+- the **app name**, its **icon** (the one of its section: AI Image, AI Video or Other) and, while you drag it, a faded look — **drag a tab onto another to re-order the strip** (the order is remembered for the session);
+- **⤴ open the workflow in ComfyUI**: the graph the app is running **right now is loaded in a new workflow tab** of a new ComfyUI window — its settings and the variant you selected included, ready to run, next to whatever was already open on that canvas. The graph is also saved as `<App name> · <mode>.json` (`<mode>` being the app's **Custom / HD / Turbo** button, or the variant you picked) in ComfyUI's workflow list. An app that cannot be read (still starting, or one that ships only a base graph) falls back to its `wf.json`;
+- **⛶ enlarge**: that tab takes the whole browser area (the rail, the panel and the tab strip step aside). Click it again, or press **Esc**, to go back;
+- **✕**: closes the tab (and frees the app).
+
+Middle-clicking a tab also closes it. *Settings* and *Files* are tabs as well, so they can stay open next to a running app; the *Console* instead docks over the bottom of the workspace (the rail's terminal icon toggles it, and its top edge can be dragged to resize it) and leaves the app at its full size. Open tabs come back if you reload the page.
+
+### Apps
+
+All Apps ship with SAUS and are freely available. You can also drop your own Apps directly into the `web/apps/` folder and they will appear here.
 
 [Return to User Guide](USER_GUIDE.md)

@@ -6,9 +6,15 @@
 __pycache__/
 saus/__pycache__/
 # other
-web/apps/
+# All apps live directly under web/apps/ and are shipped in the repo
 .ipynb_checkpoints/
 saus/data/settings.json
 saus/data/.secret.key
 *.py[cod]
 node.zip
+
+# Migration / backup artifacts
+*.bak
+web/saus_browser/data/migration_report.json
+# Cline project config (skill symlink into the canonical file)
+.clinerules/

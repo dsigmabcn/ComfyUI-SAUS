@@ -1,0 +1,213 @@
+{
+  "id": "ltx25flf",
+  "name": "LTX-2.5 First & Last Frame",
+  "url": "ltx25-flf-to-video",
+  "description": "Generate a video between a first and a last frame with the LTX-2.5 22B distilled transformer, with synchronized audio.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "distilled-fast"
+      ],
+      "base_models": [
+        "LTX-2.5"
+      ],
+      "other": []
+    },
+    "architecture": "LTX-2.5",
+    "models": [
+      "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "ltx-2.5-video-vae-bf16.safetensors",
+      "ltx-2.5-audio-vae-bf16.safetensors",
+      "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "gemma4_e2b_it_int8_convrot.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptltx25flf",
+      "label": "Prompt",
+      "nodePath": "297.inputs.value",
+      "default": "Use the provided start image as the first frame and the provided end image as the final frame anchor. The video opens on the back of the robotic hand, four fingers slightly curled, joints glowing faintly in the darkness, a low electrical hum filling the space. The hand rotates slowly at the wrist, turning from the back view toward the palm side, the four visible fingers uncurling gently one by one, starting with the index finger, then the middle, ring, and pinky, each joint clicking softly. As the palm turns upward, the thumb swings out from the side of the hand into view, clearly separate from the four fingers, all five fingers spreading open. A blue energy crystal fades into existence above the palm, its hum rising into a resonant tone, thin energy threads coiling around it, particles crackling softly as they spiral away like sparks. The crystal rotates slowly, hovering above the fully open hand, light spilling between the five spread fingers, the crystal's steady hum filling the silence as the video ends on the open palm with the glowing crystal.\n",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepperltx25flfw",
+      "label": "Width",
+      "nodePath": "291.inputs.value",
+      "minValue": 64,
+      "maxValue": 4096,
+      "step": 32,
+      "defValue": 1280,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "stepperltx25flfh",
+      "label": "Height",
+      "nodePath": "292.inputs.value",
+      "minValue": 64,
+      "maxValue": 4096,
+      "step": 32,
+      "defValue": 720,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "dropdownltx25flfmodel",
+      "label": "Model",
+      "nodePath": "285.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "dropdownltx25flftype",
+      "label": "Type",
+      "nodePath": "285.inputs.weight_dtype",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "dropdownltx25flfclip",
+      "label": "CLIP",
+      "nodePath": "288.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "dropdownltx25flfclipenh",
+      "label": "CLIP (Prompt Enhancer)",
+      "nodePath": "289.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "dropdownltx25flfvae",
+      "label": "Video VAE",
+      "nodePath": "286.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "dropdownltx25flfavae",
+      "label": "Audio VAE",
+      "nodePath": "287.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seederltx25flf",
+      "label": "Seed",
+      "nodePath": "274.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imageLoaderltx25flffirst",
+      "label": "First Frame",
+      "nodePath": "31.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    },
+    {
+      "id": "imageLoaderltx25flflast",
+      "label": "Last Frame",
+      "nodePath": "39.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 7
+      }
+    }
+  ],
+  "toggles": [
+    {
+      "id": "toggleltx25flfpe",
+      "label": "Prompt Enhance",
+      "nodePath": "290.inputs.value",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "inputltx25flffn",
+      "label": "Filename Prefix",
+      "nodePath": "68.inputs.filename_prefix",
+      "defValue": "video/ltx2.5_flf2v",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output68",
+      "label": "Save Video",
+      "nodeId": "68",
+      "type": "media"
+    }
+  ]
+}

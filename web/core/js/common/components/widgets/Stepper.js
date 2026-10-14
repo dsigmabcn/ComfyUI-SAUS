@@ -72,6 +72,12 @@ class StepperComponent {
             target = target[pathParts[i]] = target[pathParts[i]] || {};
         }
         target[pathParts[pathParts.length - 1]] = parseFloat(this.value);
+
+        // Tell the rest of the app (e.g. the aspect-ratio size preview) that
+        // this value changed -- writing the workflow alone is silent.
+        window.dispatchEvent(new CustomEvent('workflowValueUpdate', {
+            detail: { path, value: parseFloat(this.value) }
+        }));
     }
 
     increment() {

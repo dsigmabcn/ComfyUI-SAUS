@@ -1,9 +1,9 @@
 import { updateWorkflow, getValueFromWorkflow } from '../workflowManager.js';
+import { escapeHtml, modelPathElements } from '../utils.js';
 
 const ADVANCED_WORKFLOW_PATHS = [
     'ckpt_name',
     'vae_name',
-    'lora_name',
     'unet_name',
     'clip_name1',
     'clip_name2',
@@ -14,9 +14,12 @@ const ADVANCED_WORKFLOW_PATHS = [
     'face_restore_model',
 ];
 
+// Models whose previews are fetched, and whose dropdown *row* shows a thumbnail.
+// The lists themselves are names only for every dropdown: the cards used to carry
+// a 100x100 image, which pushed the names ("just the list") out of sight. LoRAs are
+// left out on purpose: their list was always a plain name list.
 const DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = [
     'ckpt_name',
-    'lora_name',
     'unet_name',
 ];
 
@@ -45,9 +48,6 @@ function getDisplayName(fullPath) {
     return modelName;
 }
 function updateVisibleUI() {
-    document.querySelectorAll('.dropdownDialogContainer .dropdownDialogListContainer')
-        .forEach(listContainer => applyPreviewImagesToList(listContainer));
-
     document.querySelectorAll('.drop-down-element').forEach(element => {
         const loaderId = element.getAttribute('data-loader-id');
         if (loaderId && isPreviewWorkflowPath(loaderId)) {
@@ -59,17 +59,6 @@ function updateVisibleUI() {
                     imgElem.src = modelImagePreviews[key];
                 }
             }
-        }
-    });
-}
-
-function applyPreviewImagesToList(parentUl) {
-    parentUl.querySelectorAll('li.dropdownItemCard').forEach(li => {
-        const originalPath = li.getAttribute('data-model-path');
-        const key = pathToKey(originalPath);
-        const imgElem = li.querySelector('.dropdownCardImage');
-        if (imgElem) {
-            imgElem.src = modelImagePreviews[key] || DEFAULT_PREVIEW_THUMBNAIL;
         }
     });
 }
@@ -163,19 +152,52 @@ async function doPostRequestForSlice(pathsSlice) {
     }
 }
 
+/**
+ * Nearest scrollable ancestor that is *not* the page itself. Returns null when
+ * only the document could scroll, so we never move the whole app.
+ */
+function findScrollableAncestor(element) {
+    let node = element;
+    while (node && node !== document.body && node !== document.documentElement) {
+        const overflowY = window.getComputedStyle(node).overflowY;
+        if (/(auto|scroll)/.test(String(overflowY)) && node.scrollHeight > node.clientHeight + 1) {
+            return node;
+        }
+        node = node.parentElement;
+    }
+    return null;
+}
+
 function scrollToSelectedItem(listContainer, selectedValue) {
     if (!selectedValue) return;
-    const selectedItem = listContainer.querySelector(`li[data-model-path="${selectedValue}"]`);
-    if (selectedItem) {
-        selectedItem.scrollIntoView({ behavior: scrollAnimationEnabled ? 'smooth' : 'auto', block: 'center' });
-        
-        if (scrollAnimationEnabled) {
-            // Add a temporary highlight effect
-            selectedItem.classList.add('selected-item-scroll');
-            setTimeout(() => {
-                selectedItem.classList.remove('selected-item-scroll');
-            }, 1000);
+    // Match by attribute value: a model name can contain quotes/brackets that
+    // would otherwise be parsed as CSS.
+    const selectedItem = modelPathElements(listContainer, selectedValue)[0];
+    if (!selectedItem) return;
+
+    // Scroll the list itself instead of calling scrollIntoView(), which also
+    // scrolls the page -- that yanks the whole app to the top when the dropdown
+    // is opened near the bottom of the screen.
+    const scroller = findScrollableAncestor(listContainer);
+    if (scroller) {
+        const scrollerRect = scroller.getBoundingClientRect();
+        const itemRect = selectedItem.getBoundingClientRect();
+        const delta = (itemRect.top - scrollerRect.top) - (scrollerRect.height - itemRect.height) / 2;
+        const maxTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+        const top = Math.max(0, Math.min(scroller.scrollTop + delta, maxTop));
+        if (typeof scroller.scrollTo === 'function') {
+            scroller.scrollTo({ top, behavior: scrollAnimationEnabled ? 'smooth' : 'auto' });
+        } else {
+            scroller.scrollTop = top;
         }
+    }
+
+    if (scrollAnimationEnabled) {
+        // Add a temporary highlight effect
+        selectedItem.classList.add('selected-item-scroll');
+        setTimeout(() => {
+            selectedItem.classList.remove('selected-item-scroll');
+        }, 1000);
     }
 }
 
@@ -206,9 +228,9 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
                     <path d="M10 4H2v16h20V6H12l-2-2z"/>
                   </svg>
                 </span>
-                <span class="dropdownFolderTitle">${key}</span>
+                <span class="dropdownFolderTitle">${escapeHtml(key)}</span>
               </div>
-              <div class="dropdownFolderPath">${currentPath}</div>
+              <div class="dropdownFolderPath">${escapeHtml(currentPath)}</div>
             </div>
             <ul class="dropdownSubList" style="display: none;"></ul>
           </li>
@@ -222,9 +244,7 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
         if (autoExpand) {
             subUl.style.display = 'block';
             const childPaths = gatherLeafPaths(nestedData[key], currentPath);
-            fetchThumbnailsForPaths(childPaths).then(() => {
-                applyPreviewImagesToList(subUl);
-            });
+            fetchThumbnailsForPaths(childPaths);
         }
 
         folderDiv.addEventListener('click', async e => {
@@ -235,7 +255,6 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
             if (hidden) {
                 const childPaths = gatherLeafPaths(nestedData[key], currentPath);
                 await fetchThumbnailsForPaths(childPaths);
-                applyPreviewImagesToList(subUl);
             }
         });
 
@@ -251,15 +270,13 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
         //const currentPath = parentPath ? `${parentPath}\\${key}` : key;
         //const mk = pathToKey(currentPath);
         const currentPath = buildPath(parentPath,key); //New to correct the paths for linux system
-        const mk = currentPath; //NEW to correct the path for linux system
 
         const liHtml = `
-          <li class="dropdownItemCard" data-model-path="${currentPath}">
+          <li class="dropdownItemCard" data-model-path="${escapeHtml(currentPath)}">
             <div class="dropdownCardTopRow">
-              <img class="dropdownCardImage" src="${modelImagePreviews[mk] || getImageUrl(currentPath)}" />
-              <span class="dropdownCardTitle">${key}</span>
+              <span class="dropdownCardTitle">${escapeHtml(key)}</span>
             </div>
-            <div class="dropdownCardSubtext">${currentPath}</div>
+            <div class="dropdownCardSubtext">${escapeHtml(currentPath)}</div>
           </li>
         `;
         parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -281,14 +298,12 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
     items.forEach(item => {
         if (!filterTerm || item.toLowerCase().includes(filterTerm.toLowerCase())) {            
             visiblePaths.push(item);
-            const mk = pathToKey(item);
             const liHtml = `
-              <li class="dropdownItemCard" data-model-path="${item}">
+              <li class="dropdownItemCard" data-model-path="${escapeHtml(item)}">
                 <div class="dropdownCardTopRow">
-                  <img class="dropdownCardImage" src="${modelImagePreviews[mk] || getImageUrl(item)}" />
-                  <span class="dropdownCardTitle">${item}</span>
+                  <span class="dropdownCardTitle">${escapeHtml(item)}</span>
                 </div>
-                <div class="dropdownCardSubtext">${item}</div>
+                <div class="dropdownCardSubtext">${escapeHtml(item)}</div>
               </li>
             `;
             parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -304,7 +319,6 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
     });
 
     fetchThumbnailsForPaths(visiblePaths).then(() => {
-        applyPreviewImagesToList(parentUl);
         scrollToSelectedItem(parentUl, selectedValue);
     });
 }
@@ -318,8 +332,8 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
             visiblePaths.push(item);
             const displayName = DISPLAY_MODEL_NAME_ONLY ? getDisplayName(item) : item;
             const liHtml = `
-              <li class="leanListItem" data-model-path="${item}">
-                <span>${displayName}</span>
+              <li class="leanListItem" data-model-path="${escapeHtml(item)}">
+                <span>${escapeHtml(displayName)}</span>
               </li>
             `;
             parentUl.insertAdjacentHTML('beforeend', liHtml);
@@ -344,26 +358,52 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
     });
 
     fetchThumbnailsForPaths(visiblePaths).then(() => {
-        applyPreviewImagesToList(parentUl);
         scrollToSelectedItem(parentUl, selectedValue);
     });
 
-    if (dialogContainer) {
-        const itemCount = items.filter(it => it.toLowerCase().includes(filterTerm.toLowerCase())).length;
-        const itemHeight = 40; 
-        const maxHeight = 600; 
-        const calculatedHeight = Math.min(itemCount * itemHeight + 100, maxHeight); 
-        dialogContainer.style.height = `${calculatedHeight}px`;
+    positionDialogNearPointer(dialogContainer, mousePosition);
+}
 
-        dialogContainer.style.width = 'auto';
-        dialogContainer.style.maxWidth = '300px'; 
+/**
+ * Size and place the dropdown list so it always fits on screen: it opens
+ * downwards, flips upwards when there is no room below, and stays inside the
+ * viewport (it must never end up above the top of the canvas).
+ */
+function positionDialogNearPointer(dialogContainer, mousePosition) {
+    if (!dialogContainer) return;
 
-        if (mousePosition) {
-            dialogContainer.style.top = `${mousePosition.y}px`;
-            dialogContainer.style.left = `${mousePosition.x}px`;
-            dialogContainer.style.transform = 'translate(0, 0)'; 
-        }
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+    const margin = 8;
+    const gap = 6;
+
+    dialogContainer.style.width = 'auto';
+    dialogContainer.style.maxWidth = '300px';
+
+    // Measure the real content rather than estimating a per-item height.
+    const contentHeight = dialogContainer.scrollHeight || 0;
+    const anchorY = mousePosition ? mousePosition.y : viewportHeight / 2;
+    const roomBelow = viewportHeight - anchorY - margin - gap;
+    const roomAbove = anchorY - margin - gap;
+    const available = Math.max(160, Math.max(roomBelow, roomAbove));
+    const height = Math.min(contentHeight || available, available);
+    dialogContainer.style.height = `${height}px`;
+
+    if (!mousePosition) return;
+
+    let top;
+    if (height + gap <= roomBelow) {
+        top = mousePosition.y + gap;                 // opens downwards
+    } else if (height + gap <= roomAbove) {
+        top = mousePosition.y - height - gap;        // flips upwards
+    } else {
+        // Fits neither way: pin it inside the viewport -- the list scrolls in.
+        top = Math.max(margin, Math.min(mousePosition.y + gap, viewportHeight - height - margin));
     }
+
+    dialogContainer.style.top = `${top}px`;
+    dialogContainer.style.bottom = 'auto';
+    dialogContainer.style.left = `${mousePosition.x}px`;
+    dialogContainer.style.transform = 'translate(0, 0)';
 }
 
 function addDragAndDropHandlers(element, originalPath) {
@@ -476,9 +516,6 @@ async function clearImageSelector(originalPath) {
         }
         delete modelImagePreviews[pathToKey(originalPath)];
 
-        document.querySelectorAll(`[data-model-path="${originalPath}"] .dropdownCardImage`)
-            .forEach(img => { img.src = DEFAULT_PREVIEW_THUMBNAIL; });
-
         const dropdownElements = document.querySelectorAll('.drop-down-element');
         dropdownElements.forEach(element => {
             const loaderId = element.getAttribute('data-loader-id');
@@ -530,8 +567,6 @@ function handleImageFile(file, originalPath) {
 
 function setModelImagePreview(originalPath, imageUrl) {
     modelImagePreviews[pathToKey(originalPath)] = imageUrl;
-    document.querySelectorAll(`[data-model-path="${originalPath}"] .dropdownCardImage`)
-        .forEach(img => { img.src = imageUrl; });
 
     const dropdownElements = document.querySelectorAll('.drop-down-element');
     dropdownElements.forEach(element => {
@@ -565,8 +600,8 @@ export function populateDropdown(
     const shouldShowPreview = isPreviewWorkflowPath(workflowPath);
 
     const clickableHtml = `
-        <div class="drop-down-element" data-loader-id="${workflowPath}">
-            <label>${customLabel}</label>
+        <div class="drop-down-element" data-loader-id="${escapeHtml(workflowPath)}">
+            <label>${escapeHtml(customLabel)}</label>
             <input type="text" readonly ${DISPLAY_MODEL_NAME_ONLY ? 'title=""' : ''} />
             ${shouldShowPreview ? `<img class="dropdownElementPreviewImage" src="/core/media/ui/plus_icon_n.png" alt="Preview" />` : ''}
         </div>
@@ -619,27 +654,13 @@ export function populateDropdown(
 
         if (initialValue && initialValue !== '') {
             setSelection(initialValue);
-            if (shouldShowPreview) {
-                fetch(`/saus/api/model-preview?modelPath=${encodeURIComponent(initialValue)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Preview not found');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const previewUrl = data[initialValue];
-                        if (previewUrl && previewImageElem) {
-                            previewImageElem.src = previewUrl;
-                            modelImagePreviews[pathToKey(initialValue)] = previewUrl;
-                        }
-                    })
-                    .catch(err => {
-                        console.warn(`No preview found for modelPath: ${initialValue}`);
-                        if (previewImageElem) {
-                            previewImageElem.src = DEFAULT_PREVIEW_THUMBNAIL;
-                        }
-                    });
+            if (shouldShowPreview && previewImageElem) {
+                // One batched request - the same path the lists use - instead of a
+                // GET per model, which 404'd for every model without a preview.
+                fetchThumbnailsForPaths([initialValue]).then(() => {
+                    previewImageElem.src = modelImagePreviews[pathToKey(initialValue)]
+                        || DEFAULT_PREVIEW_THUMBNAIL;
+                });
             }
         } else {
             if (shouldShowPreview && previewImageElem) {
@@ -704,7 +725,7 @@ export function populateDropdown(
         const dialogHtml = `
           <div class="dropdownDialogContainer custom-scrollbar">
             <div class="dropdownDialogTitleBar">
-              <div class="dropdownDialogTitleText">${customLabel}</div>
+              <div class="dropdownDialogTitleText">${escapeHtml(customLabel)}</div>
               <button class="dropdownDialogCloseButton">X</button>
             </div>
             <div class="dropdownDialogTopControls">
@@ -724,7 +745,7 @@ export function populateDropdown(
                         <input type="checkbox" checked />Nesting:
                     </label>
                     <span class="dropdownDialogNestingTriggerLabel">Nesting Trigger:</span>
-                    <input type="number" value="${DEFAULT_NESTING_TRIGGER_VALUE}" class="dropdownDialogNestingTriggerInput" />
+                    <input type="number" value="${Number(DEFAULT_NESTING_TRIGGER_VALUE) || 0}" class="dropdownDialogNestingTriggerInput" />
                     `
                     : ''
                 }
@@ -811,7 +832,7 @@ export function populateDropdown(
                         const nested = buildNestedStructure(filteredItems);
                         createNestedList(nested, listContainer, '', handleSelection, getImageUrl, selectedValue, isAllExpanded);
                         const leaves = gatherLeafPaths(nested, '');
-                        fetchThumbnailsForPaths(leaves).then(() => applyPreviewImagesToList(listContainer));
+                        fetchThumbnailsForPaths(leaves);
                         dialogContainer.classList.remove('leanListMode');
                         toggleButton.style.display = 'block';
                     }

@@ -31,4 +31,7 @@ function createFaviconLink() {
     return link;
 }
 
-setFaviconStatus.Default();
+/* Note: nothing happens on import on purpose. This file sits in the node's
+ * WEB_DIRECTORY, so ComfyUI imports it as an extension on every ComfyUI page —
+ * a call here would replace ComfyUI's own favicon with SAUS's. The app pages
+ * ask for it explicitly instead (see web/core/main.js). */

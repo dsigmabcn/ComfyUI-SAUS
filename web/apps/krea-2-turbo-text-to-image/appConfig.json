@@ -1,0 +1,216 @@
+{
+  "id": "saus14ik9a",
+  "name": "Krea 2 Turbo",
+  "url": "krea-2-turbo-text-to-image",
+  "description": "Text to Image generation with the fantastic KREA 2 Turbo Image",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "distilled-fast"
+      ],
+      "base_models": [
+        "KREA 2"
+      ],
+      "other": []
+    },
+    "architecture": "KREA 2 TURBO",
+    "models": [
+      "krea2_turbo_int8_convrot.safetensors",
+      "qwen3vl_4b_fp8_scaled.safetensors",
+      "qwen_image_vae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "compsvvh1i",
+      "label": "Prompt",
+      "nodePath": "64.inputs.value",
+      "default": "Ultra low angle action shot, male soccer player jumping mid-air high kick, clear vivid blue sky background, forced perspective blurry foreground cleat (white & electric yellow), sharp focused upper body, maroon jersey + white shorts, fully outstretched leg striking a standard soccer ball, harsh direct sunlight, heavy dark shadows, stadium poles & treetops at frame bottom, high contrast sports photography, visible coarse film grain, dynamic movement",
+      "defValue": "Ultra low angle action shot, male soccer player jumping mid-air high kick, clear vivid blue sky background, forced perspective blurry foreground cleat (white & electric yellow), sharp focused upper body, maroon jersey + white shorts, fully outstretched leg striking a standard soccer ball, harsh direct sunlight, heavy dark shadows, stadium poles & treetops at frame bottom, high contrast sports photography, visible coarse film grain, dynamic movement",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "compzlrjz7",
+      "label": "Megapixels",
+      "nodePath": "49.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "compohuu84",
+      "label": "Steps",
+      "nodePath": "54.inputs.steps",
+      "minValue": 1,
+      "maxValue": 10000,
+      "step": 10,
+      "defValue": 8,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    },
+    {
+      "id": "compodngbc",
+      "label": "Cfg",
+      "nodePath": "54.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 1,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "compefmcnr",
+      "label": "Unet Name",
+      "nodePath": "56.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "krea2_turbo_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "compr96sia",
+      "label": "Clip Name",
+      "nodePath": "57.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen3vl_4b_fp8_scaled.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "compxmnqbp",
+      "label": "Vae Name",
+      "nodePath": "58.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "qwen_image_vae.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "comp0iqoaa",
+      "label": "Sampler Name",
+      "nodePath": "54.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "default": "euler",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "comp3u3enw",
+      "label": "Scheduler",
+      "nodePath": "54.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "default": "simple",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "comp19bp8v",
+      "label": "Seed",
+      "nodePath": "54.inputs.seed",
+      "initialSeed": 45862206397178,
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [
+    {
+      "id": "compcs4uqj",
+      "label": "Prompt rewrite",
+      "nodePath": "69.inputs.value",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "compm42wxm",
+      "label": "Filename Prefix",
+      "nodePath": "29.inputs.filename_prefix",
+      "defValue": "Krea2_turbo",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "compoi2m52",
+      "label": "Aspect Ratio",
+      "nodePath": "49.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output29",
+      "label": "Save Image",
+      "nodeId": "29",
+      "type": "media"
+    }
+  ]
+}

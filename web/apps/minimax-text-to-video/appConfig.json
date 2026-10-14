@@ -1,0 +1,213 @@
+{
+  "id": "saus8s8ng6",
+  "name": "Minimax H3",
+  "url": "minimax-text-to-video",
+  "description": "Generate videos with Minimax text to video",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-video",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "Minimax FL2VA",
+    "models": [
+      "minimax_h3_video_vae_int8_convrot.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors",
+      "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "compr7zwi2",
+      "label": "Prompt",
+      "nodePath": "153.inputs.prompt",
+      "default": "Realistic live-action cinematic look, action movie trailer: practical film photography style, a post-rain dusk metropolis, anamorphic lens, shallow depth of field, film grain, city volumetric fog, flying-car traffic between the towers, restrained grading for a premium feel, powerful natural movement.\n\nScene overview: at dusk on a cluster of skyscrapers, the protagonist is being chased, sprinting and leaping across rooftops, jumping from one building's roof to the next with pursuers closing in behind. This is the escape sequence of an action movie trailer: every leap is life-or-death, thrilling and fluid.\n\nStoryboard (each shot a separate scene, rapid cuts, all landing on the musical beats):\n[0s-1.5s] Shot 1: high side angle: the protagonist sprinting at the roof edge, pursuers appearing in the rooftop doorway behind him, wind catching his coat.\n[1s-2.5s] Shot 2: the protagonist leaps across the gap between buildings, body stretching mid-air, towers and flying-car light trails behind him, a slight slow-motion feel.\n[2.5s-4s] Shot 3: he lands, rolls and rises, low-angle shot, tower shadows and fog behind him, he keeps running.\n[4s-5s] Shot 4: freeze: the instant he hits the edge of the next roof and launches into the jump, silhouette, holding.\n\nCamera: each shot its own angle, cuts clean and hard, no dissolves, a slight frame jitter on the jumps.\n\nAudio: wind, rapid footsteps, city ambience, low score underneath, an accent hit on each leap, the score bursting at 4s, closing the last 1s.\n\nNo text, subtitles, logos or watermarks of any kind, no animation or cartoon rendering, no overly-CG look, keep the live-action texture.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "compbpui9c",
+      "label": "Megapixels",
+      "nodePath": "115.inputs.megapixels",
+      "minValue": 0.4,
+      "maxValue": 4,
+      "step": 0.1,
+      "defValue": 0.4,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "compt2t5k4",
+      "label": "Duration(s)",
+      "nodePath": "155.inputs.value",
+      "minValue": 2,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    },
+    {
+      "id": "compt4saj7",
+      "label": "Steps",
+      "nodePath": "146.inputs.steps",
+      "minValue": 1,
+      "maxValue": 10000,
+      "step": 10,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "comptdbvy4",
+      "label": "Scheduler",
+      "nodePath": "146.inputs.scheduler",
+      "url": "BasicScheduler",
+      "key": "scheduler",
+      "default": "simple",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "comptouo50",
+      "label": "Vae Name",
+      "nodePath": "141.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "minimax_h3_video_vae_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "comp5zhwbe",
+      "label": "Vae Name",
+      "nodePath": "142.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "minimax_h3_audio_vae_fp32.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "comp8cu23q",
+      "label": "Unet Name",
+      "nodePath": "149.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "compjwsjau",
+      "label": "Clip Name",
+      "nodePath": "150.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "compzvsy4p",
+      "label": "Sampler Name",
+      "nodePath": "145.inputs.sampler_name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name",
+      "default": "res_multistep",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "comphjbadn",
+      "label": "Noise Seed",
+      "nodePath": "151.inputs.noise_seed",
+      "initialSeed": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "comp5aroae",
+      "label": "Filename Prefix",
+      "nodePath": "92.inputs.filename_prefix",
+      "defValue": "video/MiniMax_H3",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "comp85y7iq",
+      "label": "Aspect Ratio",
+      "nodePath": "115.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output92",
+      "label": "Save Video",
+      "nodeId": "92",
+      "type": "media"
+    }
+  ]
+}

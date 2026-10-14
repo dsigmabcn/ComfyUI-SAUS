@@ -1,0 +1,9 @@
+{
+  "_comment": "Hosts that may receive the API token typed in the File Manager 'Download from URL' dialog. SAUS never stores tokens. A bare domain also matches its sub-domains (e.g. 'huggingface.co' matches 'cdn-lfs.huggingface.co'). Tokens are never sent to any other host. Edit this file to add your own download provider.",
+  "hosts": [
+    "civitai.com",
+    "huggingface.co",
+    "hf.co",
+    "hf-mirror.com"
+  ]
+}

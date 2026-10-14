@@ -21,13 +21,6 @@ export class UIUpdater {
     static updateTitle(title) {
         document.title = title;
     }
-
-    static updateHeader(headerText) {
-        const headerElement = document.querySelector('header h2');
-        if (headerElement) {
-            headerElement.textContent = headerText;
-        }
-    }
 }
 
 (async function initApp() {
@@ -36,7 +29,6 @@ export class UIUpdater {
         const configLoader = new ConfigurationLoader();
         const config = await configLoader.load();
         UIUpdater.updateTitle(config.name);
-        UIUpdater.updateHeader(config.name);
     } catch (error) {
         console.error('Initialization failed:', error);
     }

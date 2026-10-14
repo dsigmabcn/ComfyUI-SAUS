@@ -8,34 +8,46 @@ If you are in a local installation, you will likely handle the file more easily 
 
 <img src= "../web/core/media/git/file_manager/navigation file manager.png">
 
-## Navigation
+## Layout
 
-In the file manager, you have:
-- Favorite folders
-- File and folders area
-- Upload/Download
+The manager is split into **two side-by-side panels**:
 
-## Favorite folders
-These are direct access to the 'input', 'output' and 'models' folders in ComfyUI
+- **Input** (left) — the files you feed into apps.
+- **Output** (right) — the images/videos the apps generate.
 
-## File and folders area
-In a simple file browser structure, you can navigate through the different folders.
+The old sidebar and the **'models' folder are gone**. Each panel browses one folder tree; the current path is shown under its title, with an **↑** button to go one level up (and double-clicking a folder opens it).
 
-- Click on 'Go up' to go one level higher in the folder structure
-- Click on a folder to open it
-- Click on the filename of an image and video and you can visualize it on the right panel.
-- Icons next to the files (basic functions):
-    - Rename: click on the pencil button to edit the name of the file
-    - Download file: if you are in Runpod, you can download the file to your local computer by clicking on the download button
-    - Delete: click on the trash bin icon to delete the file
+## Selecting files
+
+- **Click** a file to select it.
+- **Ctrl / ⌘ + click** adds or removes a file from the selection.
+- **Shift + click** selects a whole range.
+- **Double-click** a folder to open it, or a file to preview it.
+- **F2** renames the selected file.
+- **Del** deletes the selected files — it asks first, exactly like the panel's **Delete** button.
+- **Drag and drop** a selection onto another folder, onto the other pane, or onto the pane's background to **move** it; hold **Ctrl / ⌘** while dropping to **copy** instead.
+
+The **Rename / Download / Delete** buttons sit at the right of each panel's title and act on the **selected** file(s). Rename works on a single file; Download and Delete work with any number of selected files.
+
+<img src= "../web/core/media/git/file_manager/navigation file manager.png">
+
+## Views and sorting
+
+- The **List** view shows **Name**, **Size** and **Last Modified** columns. Click a column header to sort by it (an arrow shows the direction); click again to reverse it.
+- The **medium icons** and **large icons** buttons switch to a grid; images show a compressed thumbnail. They are recognised by their extension — `jpg`, `jpeg`, `png`, `gif`, `webp`, `avif` and `bmp` — and everything else (videos included) simply has no thumbnail. An `avif` is handed to the browser untouched, since the thumbnail service cannot always decode it.
+
+## The preview panel
+
+Double-click an image or video and it opens in the panel on the right. Use **‹ ›** to move to the previous/next file and the **✕** to close it.
 
 <img src="../web/core/media/git/file_manager/file manager with preview.png">
 
 The navigation within this File Manager only covers your ComfyUI installation, so it will not access anything which is 'outside' of the ComfyUI folder and subfolders.
 
-## Downloading and uploading from URL
+## Uploading and downloading from URL
 
-- Uploading files: you can upload files (images, loras, etc.) from your local computer to the (remote) ComfyUI by clicking that button
+- **Upload** and **From URL** are at the right of the *Input* panel title; both place the file in the folder the *Input* panel is currently showing.
+- Uploading files: you can upload files (images, loras, etc.) from your local computer to the (remote) ComfyUI by clicking the **Upload** button.
 - Download from URL: while SAUS provides you with the models to run the apps, you will probably want to download Loras, other models or other resources from the internet. You can do that by clicking and using 'Download from URL'
 <img src="../web/core/media/git/file_manager/Download URL.png">
 
@@ -48,8 +60,7 @@ If this is the case, click in the dropdown list that is below the URL text box:
 <img src="../web/core/media/git/file_manager/list of api token options.png">
 
 - No API token: no api token is used to download the file (default)
-- Custom token: paste the api token in the field to download the file for gated models/files. A new text box will appear, where you can paste the token provided by HF or Civit (or the provider of the gated model/file)
-- Stored Hugging Face/Civit.ai token: in [settings](SETTINGS.md), you can store your tokens for HF/Civit, so you do not need to paste them for every download
+- Custom token: paste the api token in the field to download the file for gated models/files. A new text box will appear, where you can paste the token provided by HF or Civit (or the provider of the gated model/file). The token is used for that download only and is sent only to the hosts listed in `saus/data/allowed_download_hosts.json`; SAUS does not store it.
 
 ### API token from Hugging Face
 
@@ -71,7 +82,7 @@ For the creation of the new token, select 'Read', give a name to your token and 
 
 <img src="../web/core/media/git/file_manager/new token form.png">
 
-The new token is created. A pop up window with the token appears. Click on Copy to copy the token, and paste it into the 'custom' token in the File Manager, or save it somewhere in your computer, on paper, or in ['settings'](SETTINGS.md) if you want to use it again.
+The new token is created. A pop up window with the token appears. Click on Copy to copy the token, and paste it into the 'custom' token field in the File Manager. SAUS does not store tokens, so save it somewhere safe in your computer or on paper if you want to reuse it.
 
 The tokens are only shown once, so when you click on done and close the window, you cannot see the token anymore. If you forget or lose it, to access you will need to generate a new token. 
 
@@ -89,7 +100,7 @@ In the new screen, scroll down until the bottom, where you can see the API KEYS 
 
 <img src="../web/core/media/git/file_manager/API list Civit AI.png">
 
-A small pop up to create your key will appear. Give it a name and press 'Save'. You API key will appear. Copy it and paste it in the Custom API token field in the File Manager, or save it in ['settings'](SETTINGS.md). Same as for the Hugging Face token.
+A small pop up to create your key will appear. Give it a name and press 'Save'. You API key will appear. Copy it and paste it in the Custom token field in the File Manager. Same as for the Hugging Face token.
 
 <img src="../web/core/media/git/file_manager/CIVIT AI API key.png">
 

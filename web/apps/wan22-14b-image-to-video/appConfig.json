@@ -1,0 +1,213 @@
+{
+  "id": "wan22i2v",
+  "name": "Wan 2.2 14B Image to Video",
+  "url": "wan22-14b-image-to-video",
+  "description": "Image to Video with Wan 2.2 14B (high + low noise). HD and Turbo (LightX2V 4-step LoRA) modes.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-video",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "WAN 2.2"
+      ],
+      "other": []
+    },
+    "architecture": "WAN22_I2V_14B",
+    "models": [
+      "wan_2.1_vae.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptwan22i2v",
+      "label": "Prompt",
+      "nodePath": "171.inputs.text",
+      "default": "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stpwan22i2vdur",
+      "label": "Duration (s)",
+      "nodePath": "192.inputs.value",
+      "minValue": 1,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
+      "id": "stpwan22i2vsteps",
+      "label": "Total number of steps",
+      "nodePath": "169.inputs.value",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "stpwan22i2vsplit",
+      "label": "Number of steps high pass",
+      "nodePath": "177.inputs.value",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 10,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "stpwan22i2vcfg",
+      "label": "CFG",
+      "nodePath": "178.inputs.value",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 3.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "ddwan22i2vhigh",
+      "label": "Model (high noise)",
+      "nodePath": "176.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 5
+      }
+    },
+    {
+      "id": "ddwan22i2vlow",
+      "label": "Model (low noise)",
+      "nodePath": "175.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    },
+    {
+      "id": "ddwan22i2vclip",
+      "label": "CLIP",
+      "nodePath": "174.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "ddwan22i2vvae",
+      "label": "VAE",
+      "nodePath": "173.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedwan22i2v",
+      "label": "Seed",
+      "nodePath": "181.inputs.noise_seed",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgwan22i2v",
+      "label": "Start Frame",
+      "nodePath": "97.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 11
+      }
+    }
+  ],
+  "toggles": [],
+  "inputs": [
+    {
+      "id": "inwan22i2vfn",
+      "label": "Filename Prefix",
+      "nodePath": "108.inputs.filename_prefix",
+      "defValue": "video/Wan2.2_i2v",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    }
+  ],
+  "dimensionSelectors": [
+    {
+      "id": "dimwan22i2v",
+      "label": "",
+      "nodePath": "165.inputs",
+      "defaultWidth": 640,
+      "defaultHeight": 640,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    }
+  ],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output108",
+      "label": "Save Video",
+      "nodeId": "108",
+      "type": "media"
+    }
+  ]
+}

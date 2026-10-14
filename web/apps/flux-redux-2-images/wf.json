@@ -1,0 +1,306 @@
+{
+  "27": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "EmptySD3LatentImage"
+    }
+  },
+  "17": {
+    "inputs": {
+      "model": [
+        "30",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "41": {
+    "inputs": {
+      "conditioning": [
+        "26",
+        0
+      ],
+      "style_model": [
+        "42",
+        0
+      ],
+      "clip_vision_output": [
+        "39",
+        0
+      ],
+      "strength": 1,
+      "strength_type": "multiply"
+    },
+    "class_type": "StyleModelApply",
+    "_meta": {
+      "title": "StyleModelApply"
+    }
+  },
+  "45": {
+    "inputs": {
+      "conditioning": [
+        "41",
+        0
+      ],
+      "style_model": [
+        "42",
+        0
+      ],
+      "clip_vision_output": [
+        "46",
+        0
+      ],
+      "strength": 1,
+      "strength_type": "multiply"
+    },
+    "class_type": "StyleModelApply",
+    "_meta": {
+      "title": "StyleModelApply"
+    }
+  },
+  "12": {
+    "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "11": {
+    "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "10": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "42": {
+    "inputs": {
+      "style_model_name": "flux1-redux-dev.safetensors"
+    },
+    "class_type": "StyleModelLoader",
+    "_meta": {
+      "title": "StyleModelLoader"
+    }
+  },
+  "38": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "46": {
+    "inputs": {
+      "clip_vision": [
+        "38",
+        0
+      ],
+      "image": [
+        "47",
+        0
+      ],
+      "crop": "center"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "39": {
+    "inputs": {
+      "clip_vision": [
+        "38",
+        0
+      ],
+      "image": [
+        "40",
+        0
+      ],
+      "crop": "center"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "25",
+        0
+      ],
+      "guider": [
+        "22",
+        0
+      ],
+      "sampler": [
+        "16",
+        0
+      ],
+      "sigmas": [
+        "17",
+        0
+      ],
+      "latent_image": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "16": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "22": {
+    "inputs": {
+      "model": [
+        "30",
+        0
+      ],
+      "conditioning": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "25": {
+    "inputs": {
+      "noise_seed": 1006963725794704
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "30": {
+    "inputs": {
+      "model": [
+        "12",
+        0
+      ],
+      "width": 1024,
+      "height": 1024,
+      "max_shift": 1.15,
+      "base_shift": 0.5
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "ModelSamplingFlux"
+    }
+  },
+  "26": {
+    "inputs": {
+      "conditioning": [
+        "6",
+        0
+      ],
+      "guidance": 3.5
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "6": {
+    "inputs": {
+      "clip": [
+        "11",
+        0
+      ],
+      "text": "A girl is walking in the natural wilderness."
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "9": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "40": {
+    "inputs": {
+      "image": "flux_redux_model_example_reference_image_1.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "47": {
+    "inputs": {
+      "image": "flux_redux_model_example_reference_image_2.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  }
+}

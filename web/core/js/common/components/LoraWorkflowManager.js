@@ -1,4 +1,8 @@
 import DropdownStepper from './widgets/DropdownStepper.js';
+import { updateWorkflow } from './workflowManager.js';
+
+/** Just the file name of a ComfyUI model path ("QWEN/a.safetensors" -> "a.safetensors"). */
+const fileName = (fullPath) => String(fullPath).split(/[\\/]/).pop();
 
 class LoraWorkflowManager {
 
@@ -11,132 +15,125 @@ class LoraWorkflowManager {
         this.highestId = this._getHighestNodeId();
 
         this.appConfig = appConfig;
-        this.container = document.getElementById('side-workflow-controls');
-        this.addButton = null;
+        // The LoRAs render into their own slot so the "Show Advanced" fold can
+        // sit below them. The fallback keeps an older content.html working.
+        this.container = document.getElementById('lora-slot')
+            || document.getElementById('side-workflow-controls');
+        this.picker = null;
         this.initializeUI();
     }
 
+    /**
+     * One "Add Lora+" button per model loader. Clicking it adds a LoRA block
+     * (LoRA label on top, the regular LoRA dropdown, then Strength below).
+     */
     initializeUI() {
         const modelLoaders = this._findModelLoaders();
+        if (!modelLoaders.length) return;
 
-        if (modelLoaders.length > 1) {
-            modelLoaders.forEach(loader => {
-                const loaderWrapper = document.createElement('div');
-                loaderWrapper.style.display = 'flex';
-                loaderWrapper.style.flexDirection = 'column';
-                loaderWrapper.style.marginBottom = '10px';
-                this.container.appendChild(loaderWrapper);
-
-                const btn = document.createElement('button');
-
-                const updateButtonLabel = () => {
-                    let modelName = '';
-                    if (loader.inputs) {
-                        // Heuristic to find the model name from the loader's inputs.
-                        // It looks for an input property ending with '_name'.
-                        const modelInputKey = Object.keys(loader.inputs).find(key => key.endsWith('_name'));
-                        if (modelInputKey && typeof loader.inputs[modelInputKey] === 'string') {
-                            let fullPath = loader.inputs[modelInputKey];
-                            // Extract just the filename from a potential full path.
-                            modelName = fullPath.split('/').pop().split('\\').pop();
-                        }
-                    }
-
-                    // Construct a descriptive label.
-                    // If a model name was found, use it. Otherwise, use the node's ID for uniqueness.
-                    const label = modelName || `Model #${loader.id}`;
-                    btn.innerHTML = `+LoRA<br><span style="font-size: 0.85em; opacity: 0.8;">${label}</span>`;
-                };
-
-                updateButtonLabel();
-
-                window.addEventListener('workflowValueUpdate', (e) => {
-                    if (e.detail.path.startsWith(`${loader.id}.`)) {
-                        updateButtonLabel();
-                    }
-                });
-
-                btn.classList.add('add-lora-button');
-                btn.style.marginBottom = '5px';
-                loaderWrapper.appendChild(btn);
-                btn.addEventListener('click', () => this.handleAddLora(loader, loaderWrapper));
-            });
-        } else {
+        const multiple = modelLoaders.length > 1;
+        modelLoaders.forEach(loader => {
             const loaderWrapper = document.createElement('div');
-            loaderWrapper.style.display = 'flex';
-            loaderWrapper.style.flexDirection = 'column';
-            loaderWrapper.style.marginBottom = '10px';
-            this.container.appendChild(loaderWrapper);
+            loaderWrapper.className = 'lora-loader-wrapper';
 
-            this.addButton = document.createElement('button');
-            this.addButton.textContent = '+LoRA';
-            this.addButton.classList.add('add-lora-button');
-            this.addButton.style.marginBottom = '5px';
-            loaderWrapper.appendChild(this.addButton);
-            this.addButton.addEventListener('click', () => this.handleAddLora(modelLoaders[0], loaderWrapper));
-        }
+            if (multiple) {
+                const caption = document.createElement('span');
+                caption.className = 'lora-loader-caption';
+                caption.textContent = this._loaderLabel(loader);
+                loaderWrapper.appendChild(caption);
+            }
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'add-lora-button';
+            btn.textContent = 'Add Lora+';
+            btn.addEventListener('click', () => {
+                try {
+                    this.addLoraBlock(null, loader, loaderWrapper);
+                } catch (error) {
+                    console.error('Error adding LoRA:', error);
+                    alert(`Failed to add LoRA: ${error.message}`);
+                }
+            });
+            loaderWrapper.appendChild(btn);
+            this.container.appendChild(loaderWrapper);
+        });
     }
 
-    handleAddLora(targetModelLoader, targetContainer) {
-        try {
-            if (!targetModelLoader) {
-                const modelLoaders = this._findModelLoaders();
-                if (modelLoaders.length === 0) {
-                    throw new Error('No model loader found in the workflow to attach LoRA.');
-                }
-                targetModelLoader = modelLoaders[0];
+    /**
+     * Which loader a LoRA belongs to when there are several (e.g. Wan 2.2
+     * high + low noise). The variant flow passes a file name, so match it to the
+     * loader whose model shares a noise keyword ("high"/"low"); fall back to the
+     * first loader when there is nothing to go on.
+     */
+    _pickLoaderForLora(file, modelLoaders) {
+        if (!file || modelLoaders.length <= 1) return modelLoaders[0];
+        const loraName = fileName(file).toLowerCase();
+        const keywords = ['high', 'low'].filter((k) => loraName.includes(k));
+        if (!keywords.length) return modelLoaders[0];
+        const match = modelLoaders.find((loader) => {
+            const modelName = this._loaderLabel(loader).toLowerCase();
+            return keywords.some((k) => modelName.includes(k));
+        });
+        return match || modelLoaders[0];
+    }
+
+    /** The model a loader holds, used as a caption when there are several. */
+    _loaderLabel(loader) {
+        if (loader.inputs) {
+            const key = Object.keys(loader.inputs).find(k => k.endsWith('_name'));
+            if (key && typeof loader.inputs[key] === 'string') {
+                return fileName(loader.inputs[key]);
             }
-
-            const newNodeId = this.addLora(targetModelLoader.id);
-            const updatedWorkflow = this.getWorkflow();
-
-            const dynamicConfig = this.createDynamicConfig(newNodeId);
-            const loraContainer = document.createElement('div');
-            loraContainer.id = dynamicConfig.id;
-            loraContainer.classList.add('dropdown-stepper-container');
-            loraContainer.style.position = 'relative';
-            
-            const controlsHeader = document.createElement('div');
-            controlsHeader.style.position = 'absolute';
-            controlsHeader.style.top = '0';
-            controlsHeader.style.right = '0';
-            controlsHeader.style.zIndex = '100';
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '&times;';
-            deleteBtn.title = 'Remove LoRA';
-            deleteBtn.style.background = '#000000';
-            deleteBtn.style.border = '1px solid #ff4444';
-            deleteBtn.style.color = '#ff4444';
-            deleteBtn.style.cursor = 'pointer';
-            deleteBtn.style.fontSize = '16px';
-            deleteBtn.style.fontWeight = 'bold';
-            deleteBtn.style.padding = '0';
-            deleteBtn.style.borderRadius = '50%';
-            deleteBtn.style.width = '22px';
-            deleteBtn.style.height = '22px';
-            deleteBtn.style.display = 'flex';
-            deleteBtn.style.alignItems = 'center';
-            deleteBtn.style.justifyContent = 'center';
-            deleteBtn.style.margin = '4px';
-            deleteBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-            
-            deleteBtn.addEventListener('click', () => this.handleRemoveLora(newNodeId, loraContainer));
-            
-            controlsHeader.appendChild(deleteBtn);
-            loraContainer.appendChild(controlsHeader);
-            if (targetContainer) {
-                targetContainer.appendChild(loraContainer);
-            } else {
-                this.container.appendChild(loraContainer);
-            }
-            new DropdownStepper(dynamicConfig, updatedWorkflow);
-
-            // console.log(`LoRA node ${newNodeId} added successfully to model loader ${targetModelLoader.id}.`);
-        } catch (error) {
-            console.error('Error adding LoRA:', error);
-            alert(`Failed to add LoRA: ${error.message}`);
         }
+        return `Model #${loader.id}`;
+    }
+
+    /**
+     * Add a LoRA node. `file` (optional) is written to the new node first, so
+     * the block's dropdown shows it (used by the HD/Turbo variant flow).
+     */
+    addLoraBlock(file = null, targetModelLoader = null, targetContainer = null) {
+        if (!targetModelLoader) {
+            const modelLoaders = this._findModelLoaders();
+            if (modelLoaders.length === 0) {
+                throw new Error('No model loader found in the workflow to attach LoRA.');
+            }
+            targetModelLoader = this._pickLoaderForLora(file, modelLoaders);
+        }
+
+        const newNodeId = this.addLora(targetModelLoader.id);
+        if (file) {
+            updateWorkflow(this.workflow, `${newNodeId}.inputs.lora_name`, file);
+        }
+
+        const dynamicConfig = this.createDynamicConfig(newNodeId);
+        const loraContainer = this._createLoraBlock(dynamicConfig, targetContainer);
+        new DropdownStepper(dynamicConfig, this.workflow);
+
+        return { nodeId: newNodeId, container: loraContainer };
+    }
+
+    /** The dropdown and the Strength below, with a remove ✕ in the corner. */
+    _createLoraBlock(dynamicConfig, targetContainer) {
+        const block = document.createElement('div');
+        block.id = dynamicConfig.id;
+        block.classList.add('dropdown-stepper-container', 'lora-block');
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'lora-remove-btn';
+        deleteBtn.innerHTML = '&times;';
+        deleteBtn.title = 'Remove LoRA';
+        deleteBtn.addEventListener('click', () => {
+            this.handleRemoveLora(dynamicConfig.id.split('_')[1], block);
+        });
+        // Absolutely positioned top-right (see .lora-remove-btn in main.css).
+        block.appendChild(deleteBtn);
+
+        const parent = targetContainer || this.container;
+        parent.appendChild(block);
+        return block;
     }
 
     handleRemoveLora(nodeId, container) {

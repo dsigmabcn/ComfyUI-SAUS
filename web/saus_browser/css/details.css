@@ -33,7 +33,7 @@
 
 .details-arch {
     font-size: 0.9em;
-    color: #888;
+    color: var(--color-text-faint);
     margin-bottom: 10px;
     font-weight: bold;
 }
@@ -60,8 +60,11 @@
 }
 
 .component-info { flex: 1; margin-right: 10px; min-width: 0; }
-.component-name { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 4px; }
-.component-filename { font-size: 0.8em; color: #aaa; display: block; margin-bottom: 0; word-break: break-all; }
+/* A model name is often a bare filename with nowhere to break
+   ("qwen_image_2.1_int8_convrot.safetensors"), so it wraps anywhere instead of
+   running out of the card. */
+.component-name { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 4px; overflow-wrap: anywhere; }
+.component-filename { font-size: 0.8em; font-style: italic; color: var(--color-text-subtle); display: block; margin-bottom: 0; word-break: break-all; }
 
 .component-actions {
     display: flex;
@@ -73,14 +76,14 @@
 }
 
 .status-badge { font-size: 0.85em; padding: 6px 12px; border-radius: 4px; text-align: center; }
-.status-badge.ready { background: #4caf50; color: white; }
-.status-badge.missing { background: #f44336; color: white; }
-.status-badge.downloading { background: #2196f3; color: white; }
+.status-badge.ready { background: var(--color-success); color: var(--color-text-on-accent); }
+.status-badge.missing { background: var(--color-danger); color: var(--color-text-on-accent); }
+.status-badge.downloading { background: var(--color-info); color: var(--color-text-on-accent); }
 
 .btn-action {
     background: var(--color-background);
-    color: white;
-    border: 1px solid #4caf50;
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-success);
     padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
@@ -88,30 +91,30 @@
     transition: background 0.2s;
 }
 
-.btn-action:hover { background: #3c8b3e; }
-.btn-action.delete { background: var(--color-background); border: 1px solid var(--color-button-primary-active); color: white; }
-.btn-action.delete:hover { background: #b71c1c; }
+.btn-action:hover { background: var(--color-success); }
+.btn-action.delete { background: var(--color-background); border: 1px solid var(--color-button-primary-active); color: var(--color-primary-text); }
+.btn-action.delete:hover { background: var(--color-danger-strong); }
 
 .progress-bar { width: 100%; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--color-accent); transition: width 0.3s ease; }
 
 .btn-action.open-app-btn.status-ready {
-    border-color: #4caf50;
+    border-color: var(--color-success);
 }
 .btn-action.open-app-btn.status-ready:hover {
-    background-color: #4caf50;
+    background-color: var(--color-success);
 }
 .btn-action.open-app-btn.status-partial {
-    border-color: #ff9800;
+    border-color: var(--color-warning);
 }
 .btn-action.open-app-btn.status-partial:hover {
-    background-color: #ff9800;
+    background-color: var(--color-warning);
 }
 .btn-action.open-app-btn.status-missing {
-    border-color: #f44336;
+    border-color: var(--color-danger);
 }
 .btn-action.open-app-btn.status-missing:hover {
-    background-color: #f44336;
+    background-color: var(--color-danger);
 }
 
 .component-item.required-missing {
@@ -121,4 +124,159 @@
 .component-item.required-installed,
 .component-item.optional-installed {
     background-color: rgba(76, 175, 80, 0.2);
+}
+
+/* ------------------------------------------------ App details modal */
+.app-details-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-overlay);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4vh 4vw;
+}
+
+.app-details-modal {
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    width: min(1500px, 96vw);
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.app-details-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.app-details-modal-head .details-title { margin: 0; }
+
+.app-details-modal-head .details-arch {
+    margin: 0;
+    font-size: 0.85em;
+    color: var(--color-text-faint);
+    font-weight: bold;
+}
+
+.app-details-close { padding: 4px 10px; }
+
+.app-details-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.app-details-actions { margin: 12px 0 0; }
+
+.app-details-toptext .details-title { margin: 0 0 6px; }
+.app-details-toptext .details-description { margin-bottom: 8px; }
+
+.app-details-top {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+.details-instructions {
+    font-size: 0.92em;
+    color: var(--color-text-faint);
+    margin: 0 0 16px;
+}
+
+.app-details-thumb {
+    width: 240px;
+    height: 140px;
+    object-fit: cover;
+    flex: none;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+}
+
+.app-details-toptext { flex: 1; min-width: 0; }
+
+/* Variants overview inside the details modal. */
+.variant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.variant-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    /* Belt and braces for the wrapping above: nothing may leave the card. */
+    overflow: hidden;
+}
+
+.variant-models {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 6px;
+}
+
+/* The type label sits directly on top of its model box (no gap in between). */
+.variant-models .component-item {
+    margin-bottom: 0;
+    padding: 8px;
+}
+
+.variant-models .component-name { margin-bottom: 0; }
+
+/* Model-type label shown above the (colored) model box. */
+.model-type {
+    display: inline-block;
+    margin: 5px 0 0;
+    padding: 6px 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: none;
+    /* Body text, not a button label: --color-button-primary-text is the colour
+       that goes *on* a primary button and vanishes on this background in
+       Day/Night. */
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: transparent;
+}
+
+.variant-models .model-type:first-child { margin-top: 0; }
+
+.variant-card-title {
+    color: var(--color-accent);
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.variant-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.85em;
+    margin-bottom: 3px;
+}
+
+.variant-key { color: var(--color-text-faint); }
+.variant-val { color: var(--color-primary-text); word-break: break-all; text-align: right; }
+
+.variant-settings {
+    margin-top: 8px;
+    font-size: 0.8em;
+    color: var(--color-text-subtle);
+    border-top: 1px solid var(--color-border);
+    padding-top: 6px;
 }

@@ -1,0 +1,183 @@
+{
+  "id": "kontext2",
+  "name": "Flux Kontext (2 images)",
+  "url": "flux-kontext-2-images",
+  "description": "Edit with FLUX.1 Kontext dev (fp8), stitching two inputs side by side.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "FLUX"
+      ],
+      "other": [
+        "edit"
+      ]
+    },
+    "architecture": "FLUX KONTEXT",
+    "models": [
+      "flux1-dev-kontext_fp8_scaled.safetensors",
+      "clip_l.safetensors",
+      "t5xxl_fp8_e4m3fn.safetensors",
+      "ae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "pkontext2",
+      "label": "Prompt",
+      "nodePath": "205.inputs.text",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "default": "Using this elegant style, create a portrait of a swan wearing a pearl tiara and lace collar, maintaining the same refined quality and soft color tones."
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepskontext2",
+      "label": "Steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 20,
+      "precision": 0,
+      "scaleFactor": 1,
+      "nodePath": "204.inputs.steps",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    },
+    {
+      "id": "fluxguidancekontext2",
+      "label": "Flux Guidance",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 2.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "nodePath": "198.inputs.guidance",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedkontext2",
+      "label": "Seed",
+      "nodePath": "204.inputs.seed",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnkontext2",
+      "label": "Filename Prefix",
+      "nodePath": "136.inputs.filename_prefix",
+      "defValue": "flux.1_kontext_dev",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimage1kontext2",
+      "label": "Image 1",
+      "nodePath": "190.inputs.image"
+    },
+    {
+      "id": "imgimage2kontext2",
+      "label": "Image 2",
+      "nodePath": "191.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "modelkontext2",
+      "label": "Model",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "nodePath": "199.inputs.unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clip1kontext2",
+      "label": "CLIP 1",
+      "url": "DualCLIPLoader",
+      "key": "clip_name1",
+      "nodePath": "194.inputs.clip_name1",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "clip2kontext2",
+      "label": "CLIP 2",
+      "url": "DualCLIPLoader",
+      "key": "clip_name2",
+      "nodePath": "194.inputs.clip_name2",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "vaekontext2",
+      "label": "VAE",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "nodePath": "193.inputs.vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "typekontext2",
+      "label": "Type",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "nodePath": "199.inputs.weight_dtype",
+      "style": {
+        "display": "none"
+      }
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outkontext2",
+      "label": "Save Image",
+      "nodeId": "136",
+      "type": "media"
+    }
+  ]
+}

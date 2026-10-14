@@ -1,0 +1,230 @@
+{
+  "88": {
+    "inputs": {
+      "image": "flux1_dev_uso_reference_image_gen_input_image.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "91": {
+    "inputs": {
+      "image": "flux1_dev_uso_reference_image_gen_input_image.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "73": {
+    "inputs": {
+      "images": [
+        "143",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "140": {
+    "inputs": {
+      "ckpt_name": "flux1-dev-fp8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "141": {
+    "inputs": {
+      "conditioning": [
+        "148",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "142_115": {
+    "inputs": {
+      "clip_vision": [
+        "146",
+        0
+      ],
+      "image": [
+        "88",
+        0
+      ],
+      "crop": "center"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "142_116": {
+    "inputs": {
+      "model": [
+        "144",
+        0
+      ],
+      "model_patch": [
+        "145",
+        0
+      ],
+      "clip_vision_output": [
+        "142_115",
+        0
+      ]
+    },
+    "class_type": "USOStyleReference",
+    "_meta": {
+      "title": "USOStyleReference"
+    }
+  },
+  "143": {
+    "inputs": {
+      "samples": [
+        "150",
+        0
+      ],
+      "vae": [
+        "140",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "144": {
+    "inputs": {
+      "model": [
+        "140",
+        0
+      ],
+      "lora_name": "uso-flux1-dit-lora-v1.safetensors",
+      "strength_model": 1
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "145": {
+    "inputs": {
+      "name": "uso-flux1-projector-v1.safetensors"
+    },
+    "class_type": "ModelPatchLoader",
+    "_meta": {
+      "title": "ModelPatchLoader"
+    }
+  },
+  "146": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "147_52": {
+    "inputs": {
+      "clip_vision": [
+        "146",
+        0
+      ],
+      "image": [
+        "91",
+        0
+      ],
+      "crop": "center"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "147_54": {
+    "inputs": {
+      "model": [
+        "142_116",
+        0
+      ],
+      "model_patch": [
+        "145",
+        0
+      ],
+      "clip_vision_output": [
+        "147_52",
+        0
+      ]
+    },
+    "class_type": "USOStyleReference",
+    "_meta": {
+      "title": "USOStyleReference"
+    }
+  },
+  "148": {
+    "inputs": {
+      "clip": [
+        "140",
+        1
+      ],
+      "text": "A man dressed fashionably stands on the forest."
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "149": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "EmptyLatentImage"
+    }
+  },
+  "150": {
+    "inputs": {
+      "model": [
+        "147_54",
+        0
+      ],
+      "positive": [
+        "148",
+        0
+      ],
+      "negative": [
+        "141",
+        0
+      ],
+      "latent_image": [
+        "149",
+        0
+      ],
+      "seed": 594838223597516,
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  }
+}
