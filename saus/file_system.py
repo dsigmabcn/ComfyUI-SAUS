@@ -119,7 +119,7 @@ async def thumbnail_handler(request: web.Request) -> web.Response:
         logger.warning(f"{SAUSMSG}: thumbnail denied for {path_param!r}: {e}")
         return web.json_response({'error': 'Access denied'}, status=403)
 
-    if not file_path.is_file():
+    if not file_path.is_file():  # confined by resolve_within_roots() - security-invariants.md
         return web.json_response({'error': 'File not found'}, status=404)
 
     if file_path.suffix.lower() not in IMAGE_THUMB_EXTENSIONS:
