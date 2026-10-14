@@ -4,6 +4,8 @@ import io
 import shutil
 import json
 from pathlib import Path
+from typing import Optional
+
 from aiohttp import web
 
 from .constants import (
@@ -44,6 +46,22 @@ async def read_part_capped(part, limit: int) -> bytes:
             raise ValueError(f"part exceeds {limit} bytes")
         blocks.append(block)
     return b"".join(blocks)
+
+
+def scratch_dir_for(file_id: str) -> Optional[Path]:
+    """The scratch folder for an upload's ``fileId``, or ``None`` when unusable.
+
+    ``.`` and ``..`` survive the handler's character filter but would put the
+    scratch folder outside the upload root (``/tmp/app_uploads/..`` *is* ``/tmp``),
+    so they are refused here - as is anything that resolves away from that root.
+    """
+    if not file_id or file_id in ('.', '..'):
+        return None
+    root = Path(TEMP_UPLOAD_DIR)
+    candidate = root / file_id
+    if candidate.resolve().parent != root.resolve():
+        return None
+    return candidate
 
 async def directory_listing_handler(request: web.Request) -> web.Response:
     path_param = request.query.get("path")
@@ -377,7 +395,10 @@ async def upload_chunk_handler(request: web.Request) -> web.Response:
     if not file_id or not data.get('chunk'):
         return web.json_response({'error': 'Missing fileId or chunk data'}, status=400)
     
-    temp_file_dir = Path(TEMP_UPLOAD_DIR) / file_id
+    temp_file_dir = scratch_dir_for(file_id)
+    if temp_file_dir is None:
+        logger.warning(f"{SAUSMSG}: upload rejected: unusable fileId")
+        return web.json_response({'error': 'Invalid fileId'}, status=400)
     temp_file_dir.mkdir(parents=True, exist_ok=True)
     
     chunk_path = temp_file_dir / f"chunk_{chunk_index}.part"
