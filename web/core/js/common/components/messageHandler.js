@@ -275,7 +275,12 @@ export class MessageHandler {
             if (this.lastImageFilenames.includes(filename)) return null;
 
             newImageFilenames.push(filename);
-            const imageUrl = `/view?filename=${encodeURIComponent(filename)}`;
+            // ComfyUI reports the subfolder and the type with the file, and /view
+            // needs both: without them every image that is not in the output root
+            // is a 404 (the app then re-fetched it through the search fallback).
+            const imageUrl = `/view?filename=${encodeURIComponent(filename)}`
+                + `&subfolder=${encodeURIComponent(image.subfolder || '')}`
+                + `&type=${encodeURIComponent(image.type || 'output')}`;
             //console.log('processImages Image URL:', imageUrl);
             return imageUrl;
         }).filter(url => url !== null);
@@ -305,7 +310,9 @@ export class MessageHandler {
     processFinalVideoOutput(videos) {
         const videosUrls = videos.map(video => {
             const { filename } = video;
-            return `/view?filename=${encodeURIComponent(filename)}`;
+            return `/view?filename=${encodeURIComponent(filename)}`
+                + `&subfolder=${encodeURIComponent(video.subfolder || '')}`
+                + `&type=${encodeURIComponent(video.type || 'output')}`;
         });
 
         this.previewManager.displayFinalMediaOutput(videosUrls); 

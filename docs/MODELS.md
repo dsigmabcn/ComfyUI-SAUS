@@ -45,6 +45,8 @@ Even if not all models are installed, you can access the App. You can still manu
 
 Below the App information, you will see a list of models, showing if the model is <span style="color:green">Installed</span> or <span style="color:red">Missing</span> and a button to install/uninstall them. When you click on install, the model will start downloading (you will see a progress bar)
 
+A model being downloaded stays **red with its progress bar** — closing and reopening the panel does not make it look installed. It turns green only when the file is complete: the download is written as `<name>.part` first and renamed at the end, so a half-written model is never reported as ready (by SAUS or by ComfyUI itself). A download or a deletion shows up on **every** variant that needs that model, not just the one you clicked.
+
 The models are shown in three groups:
 - **Compulsory**: These models are strictly required to run the app.
 - **At least One Required**: In some apps, we can have model versions or variants. You only need to install one of them. For example, you can choose to use the Qwen Image model (original one) or the version 2512. Obviously, you can download both and later choose the one you like in the app.

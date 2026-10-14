@@ -14,8 +14,10 @@ const ADVANCED_WORKFLOW_PATHS = [
     'face_restore_model',
 ];
 
-// Models that show a thumbnail in the dropdown row / list. LoRAs are left out
-// on purpose: their list is a plain name list, like the sampler / scheduler.
+// Models whose previews are fetched, and whose dropdown *row* shows a thumbnail.
+// The lists themselves are names only for every dropdown: the cards used to carry
+// a 100x100 image, which pushed the names ("just the list") out of sight. LoRAs are
+// left out on purpose: their list was always a plain name list.
 const DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = [
     'ckpt_name',
     'unet_name',
@@ -46,9 +48,6 @@ function getDisplayName(fullPath) {
     return modelName;
 }
 function updateVisibleUI() {
-    document.querySelectorAll('.dropdownDialogContainer .dropdownDialogListContainer')
-        .forEach(listContainer => applyPreviewImagesToList(listContainer));
-
     document.querySelectorAll('.drop-down-element').forEach(element => {
         const loaderId = element.getAttribute('data-loader-id');
         if (loaderId && isPreviewWorkflowPath(loaderId)) {
@@ -60,17 +59,6 @@ function updateVisibleUI() {
                     imgElem.src = modelImagePreviews[key];
                 }
             }
-        }
-    });
-}
-
-function applyPreviewImagesToList(parentUl) {
-    parentUl.querySelectorAll('li.dropdownItemCard').forEach(li => {
-        const originalPath = li.getAttribute('data-model-path');
-        const key = pathToKey(originalPath);
-        const imgElem = li.querySelector('.dropdownCardImage');
-        if (imgElem) {
-            imgElem.src = modelImagePreviews[key] || DEFAULT_PREVIEW_THUMBNAIL;
         }
     });
 }
@@ -256,9 +244,7 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
         if (autoExpand) {
             subUl.style.display = 'block';
             const childPaths = gatherLeafPaths(nestedData[key], currentPath);
-            fetchThumbnailsForPaths(childPaths).then(() => {
-                applyPreviewImagesToList(subUl);
-            });
+            fetchThumbnailsForPaths(childPaths);
         }
 
         folderDiv.addEventListener('click', async e => {
@@ -269,7 +255,6 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
             if (hidden) {
                 const childPaths = gatherLeafPaths(nestedData[key], currentPath);
                 await fetchThumbnailsForPaths(childPaths);
-                applyPreviewImagesToList(subUl);
             }
         });
 
@@ -285,12 +270,10 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
         //const currentPath = parentPath ? `${parentPath}\\${key}` : key;
         //const mk = pathToKey(currentPath);
         const currentPath = buildPath(parentPath,key); //New to correct the paths for linux system
-        const mk = currentPath; //NEW to correct the path for linux system
 
         const liHtml = `
           <li class="dropdownItemCard" data-model-path="${escapeHtml(currentPath)}">
             <div class="dropdownCardTopRow">
-              <img class="dropdownCardImage" src="${escapeHtml(modelImagePreviews[mk] || getImageUrl(currentPath))}" />
               <span class="dropdownCardTitle">${escapeHtml(key)}</span>
             </div>
             <div class="dropdownCardSubtext">${escapeHtml(currentPath)}</div>
@@ -315,11 +298,9 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
     items.forEach(item => {
         if (!filterTerm || item.toLowerCase().includes(filterTerm.toLowerCase())) {            
             visiblePaths.push(item);
-            const mk = pathToKey(item);
             const liHtml = `
               <li class="dropdownItemCard" data-model-path="${escapeHtml(item)}">
                 <div class="dropdownCardTopRow">
-                  <img class="dropdownCardImage" src="${escapeHtml(modelImagePreviews[mk] || getImageUrl(item))}" />
                   <span class="dropdownCardTitle">${escapeHtml(item)}</span>
                 </div>
                 <div class="dropdownCardSubtext">${escapeHtml(item)}</div>
@@ -338,7 +319,6 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
     });
 
     fetchThumbnailsForPaths(visiblePaths).then(() => {
-        applyPreviewImagesToList(parentUl);
         scrollToSelectedItem(parentUl, selectedValue);
     });
 }
@@ -378,7 +358,6 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
     });
 
     fetchThumbnailsForPaths(visiblePaths).then(() => {
-        applyPreviewImagesToList(parentUl);
         scrollToSelectedItem(parentUl, selectedValue);
     });
 
@@ -537,9 +516,6 @@ async function clearImageSelector(originalPath) {
         }
         delete modelImagePreviews[pathToKey(originalPath)];
 
-        modelPathElements(document, originalPath, '.dropdownCardImage')
-            .forEach(img => { img.src = DEFAULT_PREVIEW_THUMBNAIL; });
-
         const dropdownElements = document.querySelectorAll('.drop-down-element');
         dropdownElements.forEach(element => {
             const loaderId = element.getAttribute('data-loader-id');
@@ -591,8 +567,6 @@ function handleImageFile(file, originalPath) {
 
 function setModelImagePreview(originalPath, imageUrl) {
     modelImagePreviews[pathToKey(originalPath)] = imageUrl;
-    modelPathElements(document, originalPath, '.dropdownCardImage')
-        .forEach(img => { img.src = imageUrl; });
 
     const dropdownElements = document.querySelectorAll('.drop-down-element');
     dropdownElements.forEach(element => {
@@ -680,27 +654,13 @@ export function populateDropdown(
 
         if (initialValue && initialValue !== '') {
             setSelection(initialValue);
-            if (shouldShowPreview) {
-                fetch(`/saus/api/model-preview?modelPath=${encodeURIComponent(initialValue)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Preview not found');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const previewUrl = data[initialValue];
-                        if (previewUrl && previewImageElem) {
-                            previewImageElem.src = previewUrl;
-                            modelImagePreviews[pathToKey(initialValue)] = previewUrl;
-                        }
-                    })
-                    .catch(err => {
-                        console.warn(`No preview found for modelPath: ${initialValue}`);
-                        if (previewImageElem) {
-                            previewImageElem.src = DEFAULT_PREVIEW_THUMBNAIL;
-                        }
-                    });
+            if (shouldShowPreview && previewImageElem) {
+                // One batched request - the same path the lists use - instead of a
+                // GET per model, which 404'd for every model without a preview.
+                fetchThumbnailsForPaths([initialValue]).then(() => {
+                    previewImageElem.src = modelImagePreviews[pathToKey(initialValue)]
+                        || DEFAULT_PREVIEW_THUMBNAIL;
+                });
             }
         } else {
             if (shouldShowPreview && previewImageElem) {
@@ -872,7 +832,7 @@ export function populateDropdown(
                         const nested = buildNestedStructure(filteredItems);
                         createNestedList(nested, listContainer, '', handleSelection, getImageUrl, selectedValue, isAllExpanded);
                         const leaves = gatherLeafPaths(nested, '');
-                        fetchThumbnailsForPaths(leaves).then(() => applyPreviewImagesToList(listContainer));
+                        fetchThumbnailsForPaths(leaves);
                         dialogContainer.classList.remove('leanListMode');
                         toggleButton.style.display = 'block';
                     }

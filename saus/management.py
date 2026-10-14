@@ -9,9 +9,12 @@ from .constants import (
 
 SAUS_BROWSER_DATA_PATH = SAUS_BROWSER_PATH / "data"
 
-# The thumbnail names an app may ship, in tie-break order. The App Builder
-# writes ``media/thumbnail.jpg``; apps are free to bring webp / avif / png.
+# The thumbnail names an app may ship, in tie-break order. They sit *next to*
+# appConfig.json: a folder of its own (``media/``) only ever held these, so the app
+# is a flat set of files now. The App Builder writes ``thumbnail.jpg``; apps are
+# free to bring webp / avif / png.
 APP_THUMBNAIL_NAMES = (
+    'thumbnail.row.webp',
     'thumbnail.webp',
     'thumbnail.avif',
     'thumbnail.png',
@@ -20,20 +23,22 @@ APP_THUMBNAIL_NAMES = (
     'thumbnail.gif',
 )
 
+# The small copy the explorer row paints (tools/thumbnail.py writes it, 128px): the
+# row must not download the ~23 KB master to draw a 40px square.
+ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'
 
-def _find_app_thumbnail(app_folder: Path) -> str:
-    """The app's thumbnail as a path inside the app folder ('' when it has none).
 
-    Only the known names in ``media/`` are considered, so an appConfig cannot
-    point the browser somewhere else. When an app ships several, the newest
-    wins - that is the one someone just dropped in.
+def _find_app_thumbnail(app_folder: Path, names=APP_THUMBNAIL_NAMES, exclude=()) -> str:
+    """The app's thumbnail as a file name in the app folder ('' when it has none).
+
+    Only the known names are considered, so an appConfig cannot point the browser
+    somewhere else. When an app ships several, the newest wins - that is the one
+    someone just dropped in.
     """
-    media = app_folder / 'media'
-    found = [name for name in APP_THUMBNAIL_NAMES if (media / name).is_file()]
+    found = [name for name in names if (app_folder / name).is_file() and name not in exclude]
     if not found:
         return ''
-    newest = max(found, key=lambda name: (media / name).stat().st_mtime_ns)
-    return f'media/{newest}'
+    return max(found, key=lambda name: (app_folder / name).stat().st_mtime_ns)
 
 
 def _load_app_configs():
@@ -46,8 +51,11 @@ def _load_app_configs():
             logger.warning(f"{SAUSMSG}: Skipping invalid appConfig {conf_file}: {e}")
             continue
         # Derived at read time, never written back: the browser needs to know
-        # which thumbnail file the app actually ships (jpg, webp, avif, ...).
-        config['thumbnail'] = _find_app_thumbnail(conf_file.parent)
+        # which thumbnail file the app actually ships (jpg, webp, avif, ...) - and
+        # which small copy it may use for the explorer row.
+        config['thumbnail'] = _find_app_thumbnail(conf_file.parent, exclude=(ROW_THUMBNAIL_NAME,))
+        config['thumbnailRow'] = (_find_app_thumbnail(conf_file.parent, names=(ROW_THUMBNAIL_NAME,))
+                                  or config['thumbnail'])
         configs.append(config)
     return configs
 

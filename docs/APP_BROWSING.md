@@ -40,7 +40,7 @@ Which subcategories are unfolded is remembered between visits.
 
 Each app is a row with a thumbnail and its **name**. Long names wrap onto a second line, so they are always fully visible.
 
-- **Thumbnail**: from the app's media folder — `thumbnail.jpg` by default, but `thumbnail.webp`, `.avif`, `.png` or `.gif` works too (the newest one wins when an app ships several). Click the row to open the app.
+- **Thumbnail**: a file in the app folder, next to its `appConfig.json` — `thumbnail.webp` first, then `.avif`, `.png`, `.jpg` or `.gif` (the newest one wins when an app ships several); the *information panel* shows that master. The row itself uses the small **`thumbnail.row.webp`** copy (128 px, written by `tools/thumbnail.py`), so opening the panel does not pull the full-size picture for every app. An app with no thumbnail at all - or one whose file will not load - shows the SAUS logo. Click the row to open the app.
 - **Name**: the app title (hover for the full text when cut short).
 - **Status dot**: <span style="color:green">green</span> = every variant of the app has all of its models, <span style="color:orange">orange</span> = at least one variant is complete but another is not, <span style="color:red">red</span> = no variant is complete, grey = still checking.
 - **(i)**: the app information panel, where models can be [installed/uninstalled](MODELS.md).

@@ -23,6 +23,11 @@ ALLOWED_HOSTS_FILE = DATA_DIR / "allowed_download_hosts.json"
 # batch so a single request can never turn into an unbounded disk scan loop.
 MAX_STATUS_BATCH_FILES = 500
 
+# A download is written to a sibling ``<name>.part`` file and renamed onto the real
+# name only when it is complete. Without that a half-written model *is* a file: the
+# information panel would report it installed (and ComfyUI could try to load it).
+PART_SUFFIX = '.part'
+
 # Hosts that may receive the user-supplied API token. Kept in a file on disk so
 # the list can be reviewed or extended without touching the code.
 DEFAULT_ALLOWED_DOWNLOAD_HOSTS = [
@@ -143,8 +148,10 @@ async def _download_worker(
                 mode = 'wb'
                 downloaded_size = 0
                 
-                if save_path and os.path.exists(save_path):
-                    downloaded_size = os.path.getsize(save_path)
+                part_path = save_path.with_name(save_path.name + PART_SUFFIX) if save_path else None
+
+                if part_path and part_path.exists():
+                    downloaded_size = part_path.stat().st_size
                     if downloaded_size > 0:
                         request_headers['Range'] = f'bytes={downloaded_size}-'
                         mode = 'ab'
@@ -188,6 +195,7 @@ async def _download_worker(
                             error_sender(filename or "unknown", "Server returned an unsafe file name")
                             return False
                         save_path = Path(target_path) / current_filename
+                        part_path = save_path.with_name(save_path.name + PART_SUFFIX)
                         logger.info(f"[Downloader] Resolved filename: {current_filename}, Saving to: {save_path}")
 
                     save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -205,7 +213,7 @@ async def _download_worker(
                         mode = 'wb'
                         logger.warning("[Downloader] Server ignored Range header, restarting download.")
 
-                    with open(save_path, mode) as f:
+                    with open(part_path, mode) as f:
                         bytes_read_in_attempt = 0
                         last_progress_update = -1
                         
@@ -224,6 +232,8 @@ async def _download_worker(
                                     last_progress_update = progress
                                     progress_sender(current_filename, current_total, total_size, progress)
                     
+                    # Only now does the partial file appear under its real name.
+                    os.replace(part_path, save_path)
                     logger.info(f"[Downloader] Complete: {current_filename}")
                     completion_sender(current_filename, str(save_path))
                     return True
@@ -233,8 +243,8 @@ async def _download_worker(
                 if attempt == max_retries - 1:
                     error_sender(filename or "unknown", str(e))
                 
-                if downloaded_size == 0 and save_path and save_path.exists():
-                    os.remove(save_path)
+                if downloaded_size == 0 and part_path and part_path.exists():
+                    os.remove(part_path)
                     
                 await asyncio.sleep(retry_sleep)
     
@@ -394,9 +404,14 @@ async def download_model_handler(request: web.Request) -> web.Response:
             })
 
         def error_sender(filename, error):
-            # The original function did not send an error notification via WebSocket.
-            # Logging is handled by the worker.
-            pass
+            # A failed download has to say so: the card would otherwise sit on
+            # "Downloading N%" for ever.
+            PromptServer.instance.send_sync("model_download_error", {
+                "component_type": component_type,
+                "model_path": model_path,
+                "file_name": filename,
+                "error": error
+            })
 
         asyncio.create_task(_download_worker(
             url=url_model,

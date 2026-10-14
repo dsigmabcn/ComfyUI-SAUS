@@ -269,8 +269,10 @@ async def get_model_preview_handler(request: web.Request) -> web.Response:
 
 
             return web.json_response({rawPath: data_url})
-        else:
-            return web.Response(status=404, text="Preview not found")
+
+        # "This model has no preview" is a normal answer, not an error: the client
+        # asks about many models, and a 404 per model is just console noise.
+        return web.json_response({})
 
     except Exception as e:
         logger.error(f"{SAUSMSG}: Error in get_model_preview_handler: {e}")

@@ -3,7 +3,7 @@ import { THEMES, applyTheme, currentTheme } from '../scripts/theme.js';
 /* The project links of the Settings pane. The icons are inline SVG that inherit
  * their colour (currentColor), so they follow the theme like everything else. */
 const SOCIAL_LINKS = `
-    <a href="https://ko-fi.com/s/f242d26788" target="_blank" rel="noopener noreferrer"
+    <a href="https://ko-fi.com/koalanation/shop" target="_blank" rel="noopener noreferrer"
        title="Support SAUS on ko-fi" aria-label="Support SAUS on ko-fi">
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 504.36 504.36" fill="currentColor" aria-hidden="true">
         <circle cx="252.18" cy="252.18" r="252.18" opacity="0.2" />

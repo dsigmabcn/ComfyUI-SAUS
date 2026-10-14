@@ -15,8 +15,10 @@ After you have installed all models needed for an app, open the app by clicking 
 ## Configure Parameters - Basic
 
 The app's **name** sits at the top of the control column — the same size as the buttons
-below it — with an **(i)** next to it. That **(i)** opens a short *About this app* box: the
-description, the architecture, its category / tags and the model files it expects.
+below it — with an **(i)** next to it. Outside the browser that **(i)** opens a short
+*About this app* box (the description, the architecture, its category / tags and the model
+files it expects); opened as a tab of the SAUS browser it hands you to the browser's
+[information panel](MODELS.md) instead, so the models can be installed from there.
 
 Just below are the app's **modes**: **HD** is what the app runs as by default and
 **Custom** always stays (it exposes the parameters as they are). Any other button comes
@@ -47,7 +49,7 @@ By clicking on it, a new window pops up, that opens a navigation browser in the 
 
 As for the standard navigation for the models installed with SAUS: checkpoints and diffusion models of the same family are placed in the same subfolder. VAEs and checkpoints are not generally downloaded into subfolders, as they might be used for more than one image/video generation architechture
 
-Click on the model you want to use and it will be loaded in the app.
+Click on the model you want to use and it will be loaded in the app. The list shows **names** (with their folder, so two models that share a name stay apart): no thumbnails, but the subfolders are still grouped and searchable.
 
 > [!NOTE]
 > Generally, there is one diffusion model per app, but Wan 2.2 uses two diffusion models, so the first one corresponds to the 'high' model, and the second for the 'low' model.

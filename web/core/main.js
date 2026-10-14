@@ -1096,6 +1096,26 @@ function setupAdvancedToggle() {
      * buttons, so it reads as a label) and the (i) that opens what the app
      * needs - the facts the browser's information panel shows.
      * ---------------------------------------------------------------------- */
+    /**
+     * Ask the SAUS browser (our parent window) to open its information panel for
+     * this app: the shell owns that panel, with every model of the app and the
+     * buttons to install them. False when there is no shell to ask, so the app
+     * falls back to its own dialog.
+     */
+    function askParentForAppInfo(url) {
+        if (!url || window.parent === window) return false;
+        try {
+            window.parent.document.dispatchEvent(new CustomEvent('saus:app-info', {
+                detail: { url },
+            }));
+            return true;
+        } catch (error) {
+            // A cross-origin parent (never the case for SAUS) cannot be reached.
+            console.warn('[SAUS] the browser could not be asked for the app info:', error);
+            return false;
+        }
+    }
+
     function setupAppHeading(config = {}) {
         const headingName = document.getElementById('app-heading-name');
         if (headingName) headingName.textContent = config.name || '';
@@ -1152,8 +1172,12 @@ function setupAdvancedToggle() {
         };
 
         infoButton.addEventListener('click', () => {
-            fill();
-            dialog.showModal();
+            // Inside the browser (a workspace tab) the rich information panel lives
+            // in the shell; on its own, the local dialog is the whole story.
+            if (!askParentForAppInfo(config.url)) {
+                fill();
+                dialog.showModal();
+            }
         });
         dialog.querySelectorAll('[data-app-info-close]').forEach((button) =>
             button.addEventListener('click', () => dialog.close()));

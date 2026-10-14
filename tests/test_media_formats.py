@@ -43,10 +43,11 @@ def _thumbnail_helper():
 
     namespace = {'Path': Path}
     exec(block, namespace)
-    return namespace['APP_THUMBNAIL_NAMES'], namespace['_find_app_thumbnail']
+    return (namespace['APP_THUMBNAIL_NAMES'], namespace['_find_app_thumbnail'],
+            namespace['ROW_THUMBNAIL_NAME'])
 
 
-APP_THUMBNAIL_NAMES, _find_app_thumbnail = _thumbnail_helper()
+APP_THUMBNAIL_NAMES, _find_app_thumbnail, ROW_THUMBNAIL_NAME = _thumbnail_helper()
 
 
 def _js_regex(name):
@@ -90,49 +91,97 @@ def test_the_app_runtime_accepts_avif_as_an_input():
 def test_an_app_thumbnail_is_found_under_any_of_its_names():
     with tempfile.TemporaryDirectory() as tmp:
         app = Path(tmp)
-        assert _find_app_thumbnail(app) == '', 'no media folder, no thumbnail'
+        assert _find_app_thumbnail(app) == '', 'no thumbnail file, no thumbnail'
 
-        media = app / 'media'
-        media.mkdir()
-        (media / 'thumbnail.webp').write_bytes(b'x')
-        assert _find_app_thumbnail(app) == 'media/thumbnail.webp', 'a webp counts'
+        (app / 'thumbnail.webp').write_bytes(b'x')
+        assert _find_app_thumbnail(app) == 'thumbnail.webp', 'a webp counts'
 
 
 def test_the_newest_thumbnail_wins():
     with tempfile.TemporaryDirectory() as tmp:
         app = Path(tmp)
-        media = app / 'media'
-        media.mkdir()
-        webp = media / 'thumbnail.webp'
-        jpg = media / 'thumbnail.jpg'
+        webp = app / 'thumbnail.webp'
+        jpg = app / 'thumbnail.jpg'
         webp.write_bytes(b'x')
         jpg.write_bytes(b'x')
 
         # Timestamps are set explicitly: writing order is not a contract.
         os.utime(webp, ns=(1_000, 1_000))
         os.utime(jpg, ns=(2_000, 2_000))
-        assert _find_app_thumbnail(app) == 'media/thumbnail.jpg', 'the newest wins'
+        assert _find_app_thumbnail(app) == 'thumbnail.jpg', 'the newest wins'
 
         os.utime(jpg, ns=(500, 500))
-        assert _find_app_thumbnail(app) == 'media/thumbnail.webp', 'either way round'
+        assert _find_app_thumbnail(app) == 'thumbnail.webp', 'either way round'
 
 
 def test_only_the_known_names_are_considered():
     with tempfile.TemporaryDirectory() as tmp:
         app = Path(tmp)
-        media = app / 'media'
-        media.mkdir()
-        (media / 'anything.webp').write_bytes(b'x')
+        (app / 'anything.webp').write_bytes(b'x')
 
         assert _find_app_thumbnail(app) == '', 'an app may not point anywhere it likes'
         assert {'thumbnail.jpg', 'thumbnail.webp', 'thumbnail.avif'} <= set(APP_THUMBNAIL_NAMES)
 
+        # The thumbnails live next to appConfig.json: a folder of their own is no
+        # longer consulted, which is why tools/thumbnail.py has --flatten-old.
+        media = app / 'media'
+        media.mkdir()
+        (media / 'thumbnail.webp').write_bytes(b'x')
+        assert _find_app_thumbnail(app) == '', 'a media/ folder is ignored now'
+
 
 def test_the_browser_uses_the_thumbnail_it_is_given():
+    """A guessed name is a 404: the API says what the app ships, or reports nothing."""
     for path in (UI_JS, MODELS_JS):
         source = path.read_text(encoding='utf-8')
-        assert 'app.thumbnail' in source, f'{path.name} still guesses the file name'
-        assert 'media/thumbnail.jpg' in source, 'but the old name stays as the fallback'
+        assert 'app.thumbnail' in source, f'{path.name} does not use the reported name'
+        assert "'thumbnail.jpg'" not in source, \
+            f'{path.name} guesses a file name - that is a 404 for a webp master'
+        assert 'saus_logo.png' in source, f'{path.name} needs the logo for apps without one'
+
+    # The explorer row asks for the small copy first; the details modal keeps the master.
+    assert 'app.thumbnailRow' in UI_JS.read_text(encoding='utf-8'), \
+        'the row should not download the master to draw a 40px square'
+
+
+def test_the_row_copy_is_resolved_separately():
+    """The explorer row gets the 128px copy, the information panel keeps the master."""
+    with tempfile.TemporaryDirectory() as tmp:
+        app = Path(tmp)
+        master = app / 'thumbnail.webp'
+        row = app / ROW_THUMBNAIL_NAME
+        master.write_bytes(b'x')
+        row.write_bytes(b'x')
+        os.utime(master, ns=(2_000, 2_000))
+        os.utime(row, ns=(1_000, 1_000))
+
+        assert ROW_THUMBNAIL_NAME in APP_THUMBNAIL_NAMES, 'the row name is a known one'
+        assert _find_app_thumbnail(app, exclude=(ROW_THUMBNAIL_NAME,)) == 'thumbnail.webp', \
+            'the master is the information panel\'s'
+        assert _find_app_thumbnail(app, names=(ROW_THUMBNAIL_NAME,)) == ROW_THUMBNAIL_NAME, \
+            'and the row copy is the explorer row\'s, even though it is older'
+
+
+def test_no_shipped_app_keeps_a_thumbnail_in_a_media_folder():
+    """The thumbnails were flattened on purpose: a leftover media/ loses the picture.
+
+    Every shipped app must also still *resolve* a master and a row copy - this is the
+    end-to-end net for `tools/thumbnail.py --flatten-old` and `--rebuild-rows`.
+    """
+    apps = ROOT / 'web' / 'apps'
+    stragglers, unresolved = [], []
+    for app in sorted(apps.iterdir()):
+        media = app / 'media'
+        if media.is_dir() and any(f.name.startswith('thumbnail') for f in media.iterdir()):
+            stragglers.append(app.name)
+        if not _find_app_thumbnail(app, exclude=(ROW_THUMBNAIL_NAME,)):
+            unresolved.append(app.name + ' (no master)')
+        elif not _find_app_thumbnail(app, names=(ROW_THUMBNAIL_NAME,)):
+            unresolved.append(app.name + ' (no row copy)')
+    assert not stragglers, ('these apps still keep a thumbnail in media/ - run '
+                            'python tools/thumbnail.py --flatten-old: ' + ', '.join(stragglers))
+    assert not unresolved, ('these apps have no flat thumbnail next to appConfig.json - run '
+                            'python tools/thumbnail.py --rebuild-rows: ' + ', '.join(unresolved))
 
 
 def main():

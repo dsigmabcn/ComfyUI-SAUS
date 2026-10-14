@@ -1,7 +1,7 @@
 import { PromptServerClient } from './websocket.js';
 import { state, loadFavorites } from './state.js';
 import { checkForUpdate } from './updates.js';
-import { updateComponentStatus } from './models.js';
+import { updateComponentStatus, showAppDetails } from './models.js';
 import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
 import { setRenderHandler, renderTagsFilter } from './ui.js';
 import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.js';
@@ -102,6 +102,25 @@ function initializeWebSocket() {
         const { file_name } = e.detail;
         updateComponentStatus(file_name, 'ready');
     });
+
+    // A download that fails says so, so the card clears (red, installable again)
+    // instead of sitting on "Downloading N%" for ever.
+    client.on('model_download_error', (e) => {
+        const { file_name } = e.detail;
+        updateComponentStatus(file_name, 'missing');
+    });
+}
+
+/**
+ * The (i) of an app page, relayed by the app itself: it runs inside a tab's
+ * iframe, so it asks the shell to open the information panel it cannot draw - the
+ * one with every model of the app and the buttons to install them.
+ */
+function handleAppInfoEvent(event) {
+    const url = String((event && event.detail && event.detail.url) || '');
+    if (!url) return;
+    const app = state.allApps.find((candidate) => candidate.url === url || candidate.id === url);
+    if (app) showAppDetails(app);
 }
 
 export function initializeUI() {
@@ -112,6 +131,7 @@ export function initializeUI() {
     initExplorer({ onTool: handleRailTool });
 
     document.addEventListener('saus:open-app', handleOpenAppEvent);
+    document.addEventListener('saus:app-info', handleAppInfoEvent);
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') exitFocus();
     });

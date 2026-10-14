@@ -2650,13 +2650,6 @@ html:not(.css-loading) body {
     align-items: center;
 }
 
-.dropdownCardImage {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    margin-right: 12px;
-}
-
 .dropdownCardTitle {
     font-size: 1.3rem; 
     font-weight: 600;

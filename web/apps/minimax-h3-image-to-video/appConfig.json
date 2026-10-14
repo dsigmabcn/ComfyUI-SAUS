@@ -29,24 +29,10 @@
       "id": "promptmmh3i2v",
       "label": "Prompt",
       "nodePath": "139.inputs.prompt",
+      "default": "Editorial tech product film. The transparent gaming mouse from <Picture 1> in its original scene: a pitch-black studio void with a dark, subtle reflective surface, lit by dramatic duotone vibrant blue and warm neon orange rim lighting, deep soft shadow falloff into pure black. Monochromatic dark palette with electric blue and amber accents. Material motif: glowing internal metallic micro-components and glossy acrylic refractions. The environment is constant throughout.\nSHOT 1: The scene opens exactly on image 1, the mouse resting confidently on the dark surface; the blue and orange lights slowly pulse brighter, refracting deeply through the transparent acrylic shell as the camera executes a slow, deliberate push-in to reveal the intricate circuitry.\nSHOT 2: Cut to an extreme macro profile of the ridged scroll wheel and layered internal micro-components; the camera glides slowly along the side as a sharp beam of warm orange light sweeps across the metallic textures, contrasting perfectly against the deep blue ambient glow.\nSHOT 3: Cut to a low-angle beauty shot: the mouse levitates weightlessly a few centimeters above the dark reflective surface, rotating in a slow, precise orbit; the duotone lighting flares gently along the glassy transparent edges before fading slowly into a sleek silhouette.\nAudio: deep pulsing sub-bass room tone, sharp tactile mechanical clicks, a sweeping glassy whoosh on cuts, and a rising electronic swell that resolves to near-silence on the final fade.\u2028",
       "layout": {
         "region": "basic",
         "order": 0
-      },
-      "default": "Vaporwave title sequence look: pink and blue gradient palette, VHS tracking artifacts, Greek statue motifs, chrome palm trees, RGB chromatic aberration, lo-fi retro atmosphere."
-    }
-  ],
-  "aspectRatioSelectors": [
-    {
-      "id": "arcmmh3i2v",
-      "label": "Aspect Ratio",
-      "nodePath": "115.inputs.aspect_ratio",
-      "url": "ResolutionSelector",
-      "key": "aspect_ratio",
-      "quickRatios": "1:1, 16:9, 9:16",
-      "layout": {
-        "region": "basic",
-        "order": 1
       }
     }
   ],
@@ -54,13 +40,13 @@
     {
       "id": "stpmmh3i2vmp",
       "label": "Megapixels",
+      "nodePath": "115.inputs.megapixels",
       "minValue": 0.1,
       "maxValue": 4,
       "step": 0.1,
       "defValue": 0.4,
       "precision": 1,
       "scaleFactor": 1,
-      "nodePath": "115.inputs.megapixels",
       "layout": {
         "region": "basic",
         "order": 2
@@ -69,13 +55,13 @@
     {
       "id": "stpmmh3i2vdur",
       "label": "Duration (s)",
+      "nodePath": "141.inputs.value",
       "minValue": 2,
       "maxValue": 20,
       "step": 0.5,
       "defValue": 5,
       "precision": 1,
       "scaleFactor": 1,
-      "nodePath": "141.inputs.value",
       "layout": {
         "region": "basic",
         "order": 3
@@ -84,16 +70,84 @@
     {
       "id": "stpmmh3i2vsteps",
       "label": "Steps",
+      "nodePath": "145.inputs.value",
       "minValue": 1,
       "maxValue": 100,
       "step": 1,
       "defValue": 20,
       "precision": 0,
       "scaleFactor": 1,
-      "nodePath": "145.inputs.value",
       "layout": {
         "region": "advanced",
         "order": 6
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "ddmmh3i2vunet",
+      "label": "Unet Name",
+      "nodePath": "135.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "ddmmh3i2vclip",
+      "label": "Clip Name",
+      "nodePath": "136.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "ddmmh3i2vvae",
+      "label": "Vae Name",
+      "nodePath": "127.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "ddmmh3i2vavae",
+      "label": "Vae Name",
+      "nodePath": "128.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "ddmmh3i2vsched",
+      "label": "Scheduler",
+      "nodePath": "132.inputs.scheduler",
+      "url": "BasicScheduler",
+      "key": "scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "ddmmh3i2vsamp",
+      "label": "Sampler Name",
+      "nodePath": "131.inputs.sampler_name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name",
+      "layout": {
+        "region": "advanced",
+        "order": 13
       }
     }
   ],
@@ -108,6 +162,18 @@
       }
     }
   ],
+  "imageLoaders": [
+    {
+      "id": "imgmmh3i2v",
+      "label": "First Frame",
+      "nodePath": "114.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 12
+      }
+    }
+  ],
+  "toggles": [],
   "inputs": [
     {
       "id": "inmmh3i2vfn",
@@ -120,89 +186,19 @@
       }
     }
   ],
-  "imageLoaders": [
-    {
-      "id": "imgmmh3i2v",
-      "label": "First Frame",
-      "nodePath": "114.inputs.image"
-    }
-  ],
-  "dropdowns": [
-    {
-      "id": "ddmmh3i2vunet",
-      "label": "Unet Name",
-      "url": "UNETLoader",
-      "key": "unet_name",
-      "nodePath": "135.inputs.unet_name",
-      "layout": {
-        "region": "advanced",
-        "order": 7
-      }
-    },
-    {
-      "id": "ddmmh3i2vclip",
-      "label": "Clip Name",
-      "url": "CLIPLoader",
-      "key": "clip_name",
-      "nodePath": "136.inputs.clip_name",
-      "layout": {
-        "region": "advanced",
-        "order": 8
-      }
-    },
-    {
-      "id": "ddmmh3i2vvae",
-      "label": "Vae Name",
-      "url": "VAELoader",
-      "key": "vae_name",
-      "nodePath": "127.inputs.vae_name",
-      "layout": {
-        "region": "advanced",
-        "order": 9
-      }
-    },
-    {
-      "id": "ddmmh3i2vavae",
-      "label": "Vae Name",
-      "url": "VAELoader",
-      "key": "vae_name",
-      "nodePath": "128.inputs.vae_name",
-      "layout": {
-        "region": "advanced",
-        "order": 10
-      }
-    },
-    {
-      "id": "ddmmh3i2vsched",
-      "label": "Scheduler",
-      "url": "BasicScheduler",
-      "key": "scheduler",
-      "nodePath": "132.inputs.scheduler",
-      "layout": {
-        "region": "advanced",
-        "order": 11
-      }
-    },
-    {
-      "id": "ddmmh3i2vsamp",
-      "label": "Sampler Name",
-      "url": "KSamplerSelect",
-      "key": "sampler_name",
-      "nodePath": "131.inputs.sampler_name",
-      "layout": {
-        "region": "advanced",
-        "order": 12
-      }
-    }
-  ],
-  "toggles": [],
   "dimensionSelectors": [],
-  "outputs": [
+  "aspectRatioSelectors": [
     {
-      "id": "output92",
-      "label": "Save Video",
-      "nodeId": "92",
-      "type": "media"
+      "id": "arcmmh3i2v",
+      "label": "Aspect Ratio",
+      "nodePath": "115.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
     }
   ],
   "dataComponents": [],
@@ -213,5 +209,13 @@
   "canvasCroppedMaskOutputs": [],
   "canvasCroppedImageOutputs": [],
   "canvasCroppedAlphaOnImageOutputs": [],
-  "multiComponents": []
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output92",
+      "label": "Save Video",
+      "nodeId": "92",
+      "type": "media"
+    }
+  ]
 }

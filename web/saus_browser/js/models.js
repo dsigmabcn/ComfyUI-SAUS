@@ -390,9 +390,17 @@ export async function showAppDetails(app) {
     const appStatus = await getAppStatus(app);
     const statusClass = `status-${appStatus.state}`;
 
+    // The thumbnail the app actually ships; the API reports '' when it has none and the
+    // logo stands in. Never guess a file name here: a wrong guess is a 404 in the console
+    // that hides why nothing loaded (see the note in ui.js).
+    const thumbFallbackUrl = '/core/media/ui/saus_logo.png';
+    const thumbUrl = app.thumbnail
+        ? `saus/${escapeHtml(app.url)}/${escapeHtml(app.thumbnail)}`
+        : thumbFallbackUrl;
+
     let html = `
         <div class="app-details-top">
-            <img class="app-details-thumb" src="saus/${escapeHtml(app.url)}/${escapeHtml(app.thumbnail || 'media/thumbnail.jpg')}" alt=""
+            <img class="app-details-thumb" src="${thumbUrl}" alt=""
                  onerror="this.onerror=null; this.style.visibility='hidden';">
             <div class="app-details-toptext">
                 <h2 class="details-title">${escapeHtml(app.name)}</h2>
@@ -462,18 +470,57 @@ function prettyType(type) {
     return TYPE_LABELS[type] || type;
 }
 
+/* ------------------------------------------------------------------ *
+ * Downloads in flight
+ *
+ * The panel is rebuilt every time it is opened, and a file being written
+ * *exists* on disk, so the server reports it "ready" from the first megabyte.
+ * The cards therefore need a memory of their own: a download is red (and shows
+ * its progress) until the backend says it finished - whether the panel was open
+ * at the time or not.
+ * ------------------------------------------------------------------ */
+
+const activeDownloads = new Map();
+
+function rememberDownload(fileId, status, progress = 0) {
+    if (status === 'downloading') {
+        activeDownloads.set(fileId, Math.max(0, Math.min(100, Number(progress) || 0)));
+    } else if (status === 'ready' || status === 'missing') {
+        activeDownloads.delete(fileId);
+    }
+}
+
+/** Progress of the download in flight for a file, or null when there is none. */
+function downloadProgressOf(fileId) {
+    return activeDownloads.has(fileId) ? activeDownloads.get(fileId) : null;
+}
+
+function downloadingHtml(progress) {
+    const pct = Math.max(0, Math.min(100, Number(progress) || 0));
+    return `
+        <span class="status-badge downloading">Downloading ${pct}%</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    `;
+}
+
 function componentItemHtml(filename, listType, isReady, label = '') {
     const model = state.MODELS_DATA[filename] || { name: filename };
     const hasUrl = !!model.url;
+    // A download in flight outranks what the disk says, so a reopened panel shows
+    // the card as it was: not ready, red, with its progress bar.
+    const progress = downloadProgressOf(filename);
+    const ready = isReady && progress === null;
     const backgroundClass = listType === 'optional'
-        ? (isReady ? 'optional-installed' : '')
-        : (isReady ? 'required-installed' : 'required-missing');
+        ? (ready ? 'optional-installed' : '')
+        : (ready ? 'required-installed' : 'required-missing');
 
-    const action = isReady
-        ? `<button class="btn-action delete" data-action="delete-model" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>`
-        : (hasUrl
-            ? `<button class="btn-action" data-action="download-model" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>`
-            : `<span class="status-badge missing" title="No download URL configured">no URL</span>`);
+    const action = progress !== null
+        ? downloadingHtml(progress)
+        : (ready
+            ? `<button class="btn-action delete" data-action="delete-model" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>`
+            : (hasUrl
+                ? `<button class="btn-action" data-action="download-model" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>`
+                : `<span class="status-badge missing" title="No download URL configured">no URL</span>`));
 
     const typeHeader = label ? `<div class="model-type">${escapeHtml(prettyType(label))}</div>` : '';
 
@@ -635,7 +682,9 @@ export function updateComponentStatus(fileId, status, progress = 0) {
         console.warn("[SAUS] Received update without fileId. Please restart your ComfyUI server to apply backend changes.");
         return;
     }
-    //console.log(`[SAUS] updateComponentStatus: ${fileId} -> ${status} (${progress}%)`);
+    // Remembered before any DOM work: the panel may be closed right now, and when
+    // it opens again the cards have to know about the download still in flight.
+    rememberDownload(fileId, status, progress);
 
     if (status === 'ready' || status === 'missing') {
         // A model appeared or vanished: drop the cached app summaries so the
@@ -643,62 +692,59 @@ export function updateComponentStatus(fileId, status, progress = 0) {
         invalidateStatusCache();
     }
 
-    // Lookup by property (a crafted file name can never be parsed as a selector).
+    // Every variant that needs this model lists it, so *all* the matching cards are
+    // updated - stopping at the first one left the other variants showing stale
+    // buttons. Lookup by property: a crafted name can never be parsed as a selector.
     const scope = document.getElementById('app-details-content');
-    let item = null;
-    if (scope) {
-        for (const el of scope.querySelectorAll('.component-item')) {
-            if (el.dataset.fileId === fileId) { item = el; break; }
-        }
-    }
-    if (!item) return;
+    const items = scope
+        ? [...scope.querySelectorAll('.component-item')].filter((el) => el.dataset.fileId === fileId)
+        : [];
+    if (!items.length) return;
+    items.forEach((item) => applyStatusToItem(item, status, progress));
 
+    refreshVariantDots();
+    updateOpenAppButtonStatus();
+}
+
+
+/** Paint one card for a status: its classes, its badge and its section header. */
+function applyStatusToItem(item, status, progress) {
     const actions = item.querySelector('.component-actions');
-    
-    const model = state.MODELS_DATA[fileId];
-    if (!model) return;
+    if (!actions) return;
+
+    const listType = item.dataset.listType;
 
     if (status === 'downloading') {
-        const pct = Math.max(0, Math.min(100, Number(progress) || 0));
-        actions.innerHTML = `
-            <span class="status-badge downloading">Downloading ${pct}%</span>
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        `;
-    } else if (status === 'ready') {
+        actions.innerHTML = downloadingHtml(progress);
+        return;
+    }
+
+    if (status === 'ready') {
         actions.innerHTML = `
             <button class="btn-action delete" data-action="delete-model" title="Uninstall" style="padding:4px 8px;"><i class="fas fa-trash-alt"></i></button>
         `;
-
-        const listType = item.dataset.listType;
         if (listType === 'compulsory' || listType === 'at_least_one') {
             item.classList.remove('required-missing');
             item.classList.add('required-installed');
         } else if (listType === 'optional') {
             item.classList.add('optional-installed');
         }
-
-        const section = item.closest('.component-section');
-        if (section && listType) updateSectionHeader(section, listType);
-
     } else if (status === 'missing') {
         actions.innerHTML = `
             <button class="btn-action" data-action="download-model" title="Install" style="padding:4px 8px;"><i class="fas fa-download"></i></button>
         `;
-
-        const listType = item.dataset.listType;
         if (listType === 'compulsory' || listType === 'at_least_one') {
             item.classList.remove('required-installed');
             item.classList.add('required-missing');
         } else if (listType === 'optional') {
             item.classList.remove('optional-installed');
         }
-
-        const section = item.closest('.component-section');
-        if (section && listType) updateSectionHeader(section, listType);
+    } else {
+        return;
     }
 
-    refreshVariantDots();
-    updateOpenAppButtonStatus();
+    const section = item.closest('.component-section');
+    if (section && listType) updateSectionHeader(section, listType);
 }
 
 // Helper function for Modal

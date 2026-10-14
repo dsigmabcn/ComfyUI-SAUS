@@ -8,6 +8,12 @@ const createElement = (type, className, textContent = '') => {
     return element;
 };
 
+// Shown when an app ships no thumbnail (the API reports '') or its file will not load.
+// Never *guess* a file name instead: requesting `thumbnail.jpg` for an app whose master
+// is a webp is a 404 in the console, and it hides the real reason (see the lesson on
+// guessed fallbacks in the saus-developer skill).
+const APP_THUMB_FALLBACK = '/core/media/ui/saus_logo.png';
+
 /* ------------------------------------------------------------------ *
  * Re-render hook. ui.js never imports the explorer directly (that would
  * be a cycle), so main.js registers the tree renderer here and anything
@@ -49,14 +55,24 @@ export function createAppRow(app) {
     thumb.className = 'app-row-thumb';
     thumb.alt = '';
     thumb.loading = 'lazy';
-    // The app ships whatever thumbnail name it likes (jpg / webp / avif): the
-    // API reports the one that exists, and this is the fallback.
-    thumb.src = `saus/${app.url}/${app.thumbnail || 'media/thumbnail.jpg'}?t=${state.sessionTimestamp}`;
-    const onThumbError = () => {
-        thumb.removeEventListener('error', onThumbError);
-        thumb.src = '/core/media/ui/saus_logo.png';
-    };
-    thumb.addEventListener('error', onThumbError);
+    thumb.decoding = 'async';
+    // The API reports the file the app actually ships (.webp, .jpg, .avif, ...) next to
+    // its appConfig.json, and `thumbnailRow` is the 128px copy, so a 40px square never
+    // pulls the ~23 KB master. With no name reported there is nothing to fetch: show the
+    // logo rather than request a file that is probably not there. The URL carries no
+    // cache-buster any more - with one, every session re-downloaded every thumbnail
+    // (see saus/static_cache.py for the cache policy).
+    const rowThumb = app.thumbnailRow || app.thumbnail;
+    if (rowThumb) {
+        const onThumbError = () => {
+            thumb.removeEventListener('error', onThumbError);
+            thumb.src = APP_THUMB_FALLBACK;
+        };
+        thumb.addEventListener('error', onThumbError);
+        thumb.src = `saus/${app.url}/${rowThumb}`;
+    } else {
+        thumb.src = APP_THUMB_FALLBACK;
+    }
 
     // The name may wrap onto a second line so long titles are fully visible.
     const name = createElement('span', 'app-row-name', app.name || app.id);

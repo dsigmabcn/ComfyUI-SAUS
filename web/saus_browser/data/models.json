@@ -536,6 +536,14 @@
       "directory": "/text_encoders/",
       "thumbnail": "",
       "source": "migrated"
+    },
+    "flux-2-klein-base-9b-fp8.safetensors": {
+      "name": "flux-2-klein-base-9b-fp8.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9b-fp8",
+      "directory": "diffusion_models",
+      "thumbnail": "",
+      "source": "builder"
     }
   }
 }

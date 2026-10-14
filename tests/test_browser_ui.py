@@ -32,6 +32,13 @@ BROWSER_HTML = ROOT / 'web' / 'saus_browser' / 'index.html'
 THEMES_CSS = ROOT / 'web' / 'core' / 'css' / 'themes.css'
 TAXONOMY_JSON = ROOT / 'web' / 'saus_browser' / 'data' / 'taxonomy.json'
 CONSOLE_HARNESS = ROOT / 'tests' / 'js' / 'console_dock.harness.mjs'
+MODEL_CARDS_HARNESS = ROOT / 'tests' / 'js' / 'model_status_cards.harness.mjs'
+DROPDOWN_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets' / 'dropdownHandler.js'
+SETTINGS_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'settings.js'
+FM_HEADER_JS = ROOT / 'web' / 'file_manager' / 'js' / 'header.js'
+DOWNLOADS_PY = ROOT / 'saus' / 'downloads.py'
+MODELS_JS = BROWSER / 'models.js'
+BROWSER_MAIN_JS = BROWSER / 'main.js'
 
 
 class SkippedTest(Exception):
@@ -439,6 +446,139 @@ def test_console_dock_harness():
                             capture_output=True, text=True)
     assert result.returncode == 0, \
         f'{CONSOLE_HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
+
+
+def test_the_app_info_button_asks_the_browser_for_the_panel():
+    """The (i) in an app tab opens the shell's information panel.
+
+    The app runs in an iframe and cannot draw the model list with its install
+    buttons, so it asks the shell for it - keeping its own small dialog for the case
+    where the page is opened on its own (no shell around it).
+    """
+    app = APP_MAIN_JS.read_text(encoding='utf-8')
+    assert 'askParentForAppInfo' in app, 'the app needs a way to ask the shell'
+    assert re.search(r"if \(!url \|\| window\.parent === window\) return false;", app), \
+        'and it only asks when it really is embedded'
+    assert "'saus:app-info'" in app, 'the request travels as a document event'
+    assert 'window.parent.document.dispatchEvent' in app, 'dispatched on the shell document'
+    assert re.search(r"if \(!askParentForAppInfo\(config\.url\)\) \{\s*\n\s*fill\(\);\s*\n\s*dialog\.showModal\(\);", app), \
+        'the local dialog stays as the fallback'
+
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert 'showAppDetails' in shell, 'the shell owns the panel'
+    assert "document.addEventListener('saus:app-info', handleAppInfoEvent)" in shell, \
+        'and listens for the request'
+    assert 'state.allApps.find' in shell, 'to find the app that asked'
+
+
+def test_the_model_picker_lists_names_only():
+    """No pictures in the picker lists; nesting, search and the row thumbnail stay."""
+    handler = DROPDOWN_JS.read_text(encoding='utf-8')
+
+    assert 'dropdownCardImage' not in handler, \
+        'the list cards are the name (and its folder), not a 100x100 image'
+    assert 'applyPreviewImagesToList' not in handler, 'and the code that filled them is gone'
+    assert 'dropdownElementPreviewImage' in handler, 'the row thumbnail is untouched'
+    assert re.search(r"DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = \[\s*\n\s*'ckpt_name',\s*\n\s*'unet_name',", handler), \
+        'the paths whose previews are fetched are unchanged'
+    assert 'createNestedList' in handler and 'createLeanList' in handler, \
+        'both list shapes survive'
+    assert 'leanListItem' in handler, 'so does the CLIP/VAE style plain list'
+    assert 'dropdownCardImage' not in APP_CSS.read_text(encoding='utf-8'), \
+        'and its dead rule left the stylesheet'
+
+
+def test_a_model_in_several_variants_updates_every_card():
+    """A download or a delete has to reach every card that lists the model.
+
+    The same file appears once per variant (plus the shared compulsory section), so
+    stopping at the first match left the other cards stale - one red where three
+    should be. The in-flight download is remembered too, so a panel that is closed
+    and reopened shows the card as it was.
+    """
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert 'const activeDownloads = new Map();' in source, 'downloads in flight are remembered'
+    assert re.search(r"rememberDownload\(fileId, status, progress\);[\s\S]*?const items = scope", source), \
+        'and remembered before any card is looked up, so a closed panel keeps it'
+    assert re.search(r"const items = scope\s*\n\s*\? \[\.\.\.scope\.querySelectorAll\('\.component-item'\)\]\.filter", source), \
+        'every matching card is collected'
+    assert 'items.forEach((item) => applyStatusToItem(item, status, progress));' in source, \
+        'and each of them is painted'
+    assert 'function applyStatusToItem(item, status, progress)' in source, \
+        'the per-card painting is its own function'
+    assert 'if (el.dataset.fileId === fileId) { item = el; break; }' not in source, \
+        'nothing stops at the first match any more'
+    assert 'const progress = downloadProgressOf(filename);' in source, \
+        'the card renderer asks about a download in flight'
+    assert 'const ready = isReady && progress === null;' in source, \
+        'and such a card is not ready, whatever the disk says'
+
+
+def test_a_download_is_written_as_a_part_file():
+    """A half-written model must never look installed (nor be loaded by ComfyUI)."""
+    source = DOWNLOADS_PY.read_text(encoding='utf-8')
+
+    assert "PART_SUFFIX = '.part'" in source, 'the partial name is declared once'
+    assert 'with open(part_path, mode) as f:' in source, 'the bytes go to the .part file'
+    assert re.search(r"os\.replace\(part_path, save_path\)", source), \
+        'and it takes the real name only when it is complete'
+    assert 'downloaded_size = part_path.stat().st_size' in source, 'resume measures the .part file'
+    assert 'with open(save_path, mode)' not in source, 'the real name is never written into'
+    assert 'model_download_error' in source, 'a failure is announced'
+    assert "'model_download_error'" in BROWSER_MAIN_JS.read_text(encoding='utf-8'), \
+        'and the browser clears the card when it arrives'
+
+
+def test_the_kofi_link_points_at_the_shop():
+    for path in (SETTINGS_JS, FM_HEADER_JS):
+        source = path.read_text(encoding='utf-8')
+        assert 'https://ko-fi.com/koalanation/shop' in source, \
+            '%s should link to the ko-fi shop' % path.name
+        assert 'ko-fi.com/s/f242d26788' not in source, \
+            '%s still carries the old ko-fi link' % path.name
+
+
+def test_model_status_cards_harness():
+    """The multi-card update, executed: one model, three variant cards."""
+    node = shutil.which('node') or shutil.which('nodejs')
+    if node is None:
+        _skip(f'{MODEL_CARDS_HARNESS.name} needs node, which is not installed here')
+
+    result = subprocess.run([node, str(MODEL_CARDS_HARNESS)], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.returncode == 0, \
+        f'{MODEL_CARDS_HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
+
+
+def test_the_explorer_thumbnail_is_small_and_cacheable():
+    """The row paints a small copy, and the browser may keep it.
+
+    It used to ask for the ~23 KB master with a per-session cache-buster, while the
+    shell marked every /saus/ file no-cache - so opening the panel re-downloaded all
+    the thumbnails every time (29 apps, ~666 KB).
+    """
+    ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
+    assert 'app.thumbnailRow' in ui, 'the row asks for the small copy'
+    assert "thumb.loading = 'lazy'" in ui and "thumb.decoding = 'async'" in ui, \
+        'and still loads it lazily and off the main thread'
+    assert '?t=${state.sessionTimestamp}' not in ui, 'the per-session cache-buster is gone'
+
+    cache = (ROOT / 'saus' / 'static_cache.py').read_text(encoding='utf-8')
+    assert 'MEDIA_MAX_AGE = 3600' in cache, 'images may be reused for an hour'
+    assert re.search(r"if path\.lower\(\)\.endswith\(MEDIA_SUFFIXES\):\s*\n\s*return 'public, max-age=%d'", cache), \
+        'which is what the middleware hands them'
+    assert "return 'no-cache'" in cache, 'while html / js / css keep revalidating'
+
+
+def test_the_app_list_reports_both_thumbnail_sizes():
+    source = (ROOT / 'saus' / 'management.py').read_text(encoding='utf-8')
+    assert "ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'" in source, 'the row name is declared'
+    assert "'thumbnail.row.webp'," in source, 'and is one of the known names'
+    assert 'exclude=(ROW_THUMBNAIL_NAME,)' in source, \
+        'the master never resolves to the small copy'
+    assert "config['thumbnailRow']" in source and "or config['thumbnail']" in source, \
+        'and the row falls back to the master when an app ships only one'
 
 
 def main():
