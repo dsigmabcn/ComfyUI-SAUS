@@ -370,11 +370,20 @@ async def download_model_handler(request: web.Request) -> web.Response:
         target_path = None
         if model_path:
             candidate = (MODELS_DIRECTORY / model_path.strip('/\\')).resolve()
+            # Confinement stated twice on purpose: relative_to is the primary guard,
+            # and realpath + startswith is the form CodeQL's path-injection query
+            # models (it cannot see a guard outside that form, and there is no helper
+            # here for a model pack to describe). The path used below is rebuilt from
+            # the checked text so the query can follow it too.
+            models_root = os.path.realpath(str(MODELS_DIRECTORY))
+            candidate_text = os.path.realpath(str(candidate))
             try:
                 candidate.relative_to(MODELS_DIRECTORY.resolve())
-                target_path = candidate
+                confined = (candidate_text == models_root
+                            or candidate_text.startswith(models_root + os.sep))
             except ValueError:
-                target_path = None
+                confined = False
+            target_path = Path(candidate_text) if confined else None
 
         if target_path is None:
             target_path = destination_for(component_type, model_path)
