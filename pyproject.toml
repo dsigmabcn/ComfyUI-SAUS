@@ -32,8 +32,8 @@ Repository = "https://github.com/dsigmabcn/ComfyUI-SAUS"
 [tool.comfy]
 PublisherId = "koalanation"
 DisplayName = "ComfyUI-SAUS"
-Icon = "https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/web/core/media/ui/saus_logo.png"
+Icon = "https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/web/core/media/ui/saus_icon.png"
 Banner = "https://raw.githubusercontent.com/dsigmabcn/ComfyUI-SAUS/refs/heads/main/web/core/media/git/cover_SAUS.jpg"
 includes = [] 
-# "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
+requires-comfyui = ">=0.39.0"  # the core nodes the shipped apps use are in 0.39.0
 
