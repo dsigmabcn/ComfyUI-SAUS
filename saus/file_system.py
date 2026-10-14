@@ -119,7 +119,12 @@ async def thumbnail_handler(request: web.Request) -> web.Response:
         logger.warning(f"{SAUSMSG}: thumbnail denied for {path_param!r}: {e}")
         return web.json_response({'error': 'Access denied'}, status=403)
 
-    if not file_path.is_file():  # confined by resolve_within_roots() - security-invariants.md
+    # Probe: keep the call on its own line so the sink's location is *new* in the
+    # diff. A trailing comment leaves the location unchanged, and CodeQL then
+    # matches the alert to the pre-existing one - which would report "no new
+    # alerts" whether or not the model pack works.
+    file_exists = file_path.is_file()  # confined by resolve_within_roots()
+    if not file_exists:
         return web.json_response({'error': 'File not found'}, status=404)
 
     if file_path.suffix.lower() not in IMAGE_THUMB_EXTENSIONS:
