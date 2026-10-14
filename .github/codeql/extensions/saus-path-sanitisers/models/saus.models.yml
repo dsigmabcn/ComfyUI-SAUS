@@ -1,0 +1,7 @@
+extensions:
+  - addsTo:
+      pack: codeql/python-all
+      extensible: neutralModel
+    data:
+      - ["saus.helpers", "Member[resolve_within_roots]", "Argument[0]", "ReturnValue", "value"]
+      - ["saus.file_system", "Member[scratch_dir_for]", "Argument[0]", "ReturnValue", "value"]
