@@ -36,28 +36,30 @@
 # About SAUS
 
 SAUS is a streamlined interface for AI image and video generation that uses ComfyUI as its backend engine. 
-"Spaghetti" node workflows converted into a clean, production-ready application environment.
+Workflows converted into a clean, production-ready application environment.
 
 ## Why SAUS?
 * **Simple:** Built for creators who need results without the node-induced headaches.
 * **App:** A powerful wrapper that extends ComfyUI's capabilities into a standalone-app feel.
-* **U See:** A clean, expansive "view" of your creative output—not just your backend.
+* **U See:** A clean, expansive "view" of your creative output - not just your backend.
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## What is SAUS?
 
-SAUS is a custom node for ComfyUI that works as a robust and simple user interface to run different workflows, without messing and tinkering with all the spaghetti, parameters and options.
+ComfyUI is a powerful and flexible tool to use the latest OSS AI image and video generation workflows. However, its flexibility makes it complex and challenging to use.
 
-ComfyUI is powerful for designing and understanding AI image and video generation. It lets you see 'inside' the process and tweak every parameter. However, this flexibility leads to complex and challenging workflows. **SAUS simplifies this by converting popular and powerful workflows into 'apps'**. These apps provide a clean user interface, allowing you to focus on creativity.
+**SAUS simplifies this by converting popular and powerful workflows into 'apps'**. These apps provide a clean user interface, allowing you to focus on creativity.
+
+SAUS is a custom node for ComfyUI that works as a robust and simple user interface to run the most interesting workflows of ComfyUI, so you can focus on the generation of images. **ComfyUI runs in the background**, so you can always access it to understand how the image generation process works, use more advanced features, and create more advanced workflows. 
 
 <img src="web/core/media/git/SAUS-app-example.png" width="800">
 
 
 ## How to use SAUS
 
-For detailed instructions, check out the [User Guide](docs/USER_GUIDE.md).
+For detailed instructions, check out the **[User Guide](docs/USER_GUIDE.md).**
 
 <img src="web/core/media/ui/Saus quick start card.png" width="800">
 
@@ -73,7 +75,7 @@ For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please 
 
 ### Recommended Custom nodes
 
-SAUS itself needs **no extra custom nodes**, and the installer scripts install **only SAUS**. If an app asks for a community node pack, install that pack through ComfyUI-Manager.
+SAUS itself needs **no extra custom nodes**, and the installer scripts install **only SAUS**.
 
 ## From ComfyUI Manager
 
@@ -82,10 +84,9 @@ If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyU
 <img src="web/core/media/git/Manager button.png">
 <img src="web/core/media/git/custom nodes manager.png">
 
-
 Search for ComfyUI-SAUS and install it.
 
-## Manual Install
+## Manual Install - git clone
 
 It is required that you have git installed. 
 

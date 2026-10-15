@@ -126,6 +126,21 @@ TYPE_FOLDER_NAMES: Dict[str, List[str]] = {
 # Registry types whose ComfyUI folder name differs from the type itself.
 _TYPE_FOLDER_OVERRIDES = {"lora": "loras"}
 
+# ComfyUI folder types that hold model weights. Only these may be searched for a
+# model, receive a download or have a model deleted from them. ``custom_nodes``
+# and ``datasets`` are deliberately absent -- ComfyUI registers them in the same
+# ``folder_names_and_paths`` table, but they hold code / data, so a download
+# there (plus ``/saus/api/restart``) would be remote code execution. Adding a
+# folder type here is a deliberate act, not an accident.
+MODEL_FOLDER_TYPES = frozenset({
+    "checkpoints", "loras", "vae", "text_encoders", "clip",
+    "diffusion_models", "unet", "clip_vision", "style_models", "embeddings",
+    "diffusers", "vae_approx", "controlnet", "t2i_adapter", "gligen",
+    "upscale_models", "latent_upscale_models", "hypernetworks", "photomaker",
+    "model_patches", "audio_encoders", "background_removal",
+    "frame_interpolation", "geometry_estimation", "optical_flow", "detection",
+})
+
 
 def candidate_folder_types(model_type: str = "", hint: str = "",
                            known: Iterable[str] = ()) -> List[str]:

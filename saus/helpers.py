@@ -77,6 +77,41 @@ def _check_user_path_shape(user_path: str) -> str:
     return raw
 
 
+def reject_unc_path(raw: str) -> str:
+    """Refuse a UNC path supplied as *text*, before anything resolves it.
+
+    ``Path('\\\\host\\share\\file').resolve()`` makes Windows contact that host, so
+    the check has to run on the string, not on the resolved path. Covers the plain
+    ``\\\\host\\share`` / ``//host/share`` forms and the ``\\\\?\\`` device-prefixed
+    ones. Single-slash absolute and drive-letter paths are left alone: the
+    download-file endpoint legitimately receives those from ComfyUI's executor.
+    """
+    text = (raw or '').strip()
+    if text.startswith('//') or text.startswith('\\\\'):
+        raise ValueError("UNC paths are not allowed")
+    return text
+
+
+def is_root_path(path) -> bool:
+    """True when ``path`` resolves to one of the user-data roots themselves.
+
+    ``resolve_within_roots()`` accepts a root (it is *inside* itself), so without
+    this a rename / delete / move could act on ``input``, ``output`` or ``models``
+    as a whole.
+    """
+    try:
+        target = Path(path).resolve()
+    except Exception:
+        return False
+    for root in ALLOWED_FILE_ROOTS:
+        try:
+            if target == Path(root).resolve():
+                return True
+        except Exception:
+            continue
+    return False
+
+
 def resolve_within_roots(user_path: str, roots=None) -> Path:
     """Resolve a caller-supplied path and confine it to the allowed user-data
     folders (input / output / models) using realpath + commonpath.

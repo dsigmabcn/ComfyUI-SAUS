@@ -9,6 +9,10 @@ SAUS therefore never hardcodes where a model lives: it asks ComfyUI. The
 registry's ``directory`` field is only a *hint* (search priority and download
 destination). A future Model Manager can drive the layout without the API
 endpoints having to change.
+
+Only ComfyUI's *model* folder types are consulted (``MODEL_FOLDER_TYPES``):
+``custom_nodes`` and ``datasets`` are registered in the same table but hold
+code / data, so they are never searched, downloaded into or deleted from.
 """
 
 from __future__ import annotations
@@ -17,7 +21,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .constants import SAUSMSG, logger
-from .model_scan import candidate_folder_types, match_folder_names
+from .model_scan import candidate_folder_types, match_folder_names, MODEL_FOLDER_TYPES
 
 try:  # ComfyUI is always present at runtime; stay importable without it.
     import folder_paths
@@ -54,20 +58,16 @@ def _directories(folder_type: str) -> List[Path]:
         return []
 
 
-def find_model(filename: str, model_type: str = "", hint_dir: str = "") -> Optional[dict]:
-    """Locate ``filename`` anywhere ComfyUI looks for models.
+def model_folder_candidates(model_type: str = "", hint_dir: str = "") -> List[str]:
+    """ComfyUI *model* folder types to search, most likely first.
 
-    Both the folder *and* any sub-folder are ignored, so a diffusion model in
-    ``unet/`` is found just like one in ``diffusion_models/``, and a LoRA in
-    ``loras/my-style/`` like one in ``loras/``.
-
-    Returns ``{"folder_type", "relative_name", "path", "directories"}`` for the
-    first match, otherwise ``None``.
+    Only folder types that hold weights are ever returned -- see
+    ``MODEL_FOLDER_TYPES``. ComfyUI registers ``custom_nodes`` and ``datasets`` in
+    the same ``folder_names_and_paths`` table, so without this filter a request's
+    ``model_path`` hint (or the unknown-type fallback) could name one of them:
+    a download there plus the restart route is code execution, and a delete there
+    is sabotage. Neither is model management.
     """
-    wanted = str(filename or "").strip()
-    if not wanted:
-        return None
-
     types = candidate_folder_types(model_type, hint_dir, known_folder_types())
     if folder_paths is not None:
         map_legacy = getattr(folder_paths, "map_legacy", None)
@@ -77,6 +77,37 @@ def find_model(filename: str, model_type: str = "", hint_dir: str = "") -> Optio
                 types = [map_legacy(t) for t in types]
             except Exception:
                 pass
+    return [t for t in types if t in MODEL_FOLDER_TYPES]
+
+
+def model_folder_directories() -> List[Path]:
+    """Every directory ComfyUI registered for a model folder type.
+
+    The allowed roots for a download: a target has to sit inside one of these (or
+    the models root), never in a folder ComfyUI registered for something else.
+    """
+    directories: List[Path] = []
+    for folder_type in known_folder_types():
+        if folder_type in MODEL_FOLDER_TYPES:
+            directories.extend(_directories(folder_type))
+    return directories
+
+
+def find_model(filename: str, model_type: str = "", hint_dir: str = "") -> Optional[dict]:
+    """Locate ``filename`` anywhere ComfyUI looks for models.
+
+    Both the folder *and* any sub-folder are ignored, so a diffusion model in
+    ``unet/`` is found just like one in ``diffusion_models/``, and a LoRA in
+    ``loras/my-style/`` like one in ``loras/``.
+
+    Returns ``{"folder_type", "relative_name", "path", "directories"}`` for the
+    first match, otherwise ``None``. Only model folder types are searched.
+    """
+    wanted = str(filename or "").strip()
+    if not wanted:
+        return None
+
+    types = model_folder_candidates(model_type, hint_dir)
 
     seen = set()
     for folder_type in types:
@@ -120,7 +151,7 @@ def destination_for(model_type: str = "", hint_dir: str = "") -> Optional[Path]:
     and ``extra_model_paths.yaml`` are respected); the caller falls back to
     ``<ComfyUI>/models`` when nothing is registered.
     """
-    for folder_type in candidate_folder_types(model_type, hint_dir, known_folder_types()):
+    for folder_type in model_folder_candidates(model_type, hint_dir):
         directories = _directories(folder_type)
         if directories:
             return directories[0]

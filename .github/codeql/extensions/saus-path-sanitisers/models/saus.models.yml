@@ -6,3 +6,4 @@ extensions:
       - ["saus.helpers", "Member[resolve_within_roots]", "summary"]
       - ["saus.file_system", "Member[scratch_dir_for]", "summary"]
       - ["saus.model_lookup", "Member[destination_for]", "summary"]
+      - ["saus.downloads", "Member[safe_download_name]", "summary"]
