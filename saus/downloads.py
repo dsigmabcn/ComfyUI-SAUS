@@ -5,6 +5,7 @@ import asyncio
 import ipaddress
 from urllib.parse import urlparse, urljoin
 from pathlib import Path
+from typing import Optional
 from aiohttp import web
 import aiohttp
 from server import PromptServer
@@ -13,9 +14,11 @@ from .constants import (
     SAUSMSG, logger, MODELS_DIRECTORY, COMFYUI_DIRECTORY, DATA_DIR
 )
 from .helpers import (
-    extract_filename_from_response, resolve_within_roots, require_json
+    allowed_file, extract_filename_from_response, resolve_within_roots, require_json
 )
-from .model_lookup import find_model, destination_for, resolves_inside
+from .model_lookup import (
+    find_model, destination_for, model_folder_directories, resolves_inside
+)
 
 ALLOWED_HOSTS_FILE = DATA_DIR / "allowed_download_hosts.json"
 
@@ -107,6 +110,19 @@ def validate_public_url(url: str) -> None:
             raise ValueError(f"Access to private/local address {ip} is denied")
 
 
+def safe_download_name(filename) -> Optional[str]:
+    """Base-name a caller/remote supplied name, or ``None`` when it is unusable.
+
+    The destination folder is confined, but a name is still data: reduce it to a
+    base name, refuse ``.`` / ``..`` (a traversal name) and refuse script /
+    native-library extensions exactly as uploads do.
+    """
+    name = os.path.basename(str(filename or '').replace('\\', '/'))
+    if not name or name in ('.', '..') or not allowed_file(name):
+        return None
+    return name
+
+
 async def _download_worker(
     url,
     headers,
@@ -123,9 +139,15 @@ async def _download_worker(
 ):
     logger.info(f"[Downloader] Background task started for URL: {url}")
 
-    # Never trust a caller/remote supplied name.
+    # Never trust a caller/remote supplied name: base-name it, refuse traversal
+    # and refuse script / native-library extensions, exactly as uploads do.
     if filename:
-        filename = os.path.basename(str(filename).replace('\\', '/'))
+        safe_name = safe_download_name(filename)
+        if safe_name is None:
+            logger.error(f"[Downloader] Refused unsafe download name: {filename!r}")
+            error_sender(str(filename), "File name not allowed")
+            return False
+        filename = safe_name
 
     # Validate the URL to prevent Server Side Request Forgery (SSRF).
     try:
@@ -188,10 +210,10 @@ async def _download_worker(
                             current_filename = extract_filename_from_response(resp, url)
                         else:
                             current_filename = Path(url).name
-                        # Reduce the remote-supplied name to a base name and refuse
-                        # empty / traversal names.
-                        current_filename = os.path.basename(str(current_filename).replace('\\', '/'))
-                        if not current_filename or current_filename in ('.', '..'):
+                        # Reduce the remote-supplied name to a base name, and
+                        # refuse traversal / script names exactly as uploads do.
+                        current_filename = safe_download_name(current_filename)
+                        if not current_filename:
                             error_sender(filename or "unknown", "Server returned an unsafe file name")
                             return False
                         save_path = Path(target_path) / current_filename
@@ -349,6 +371,15 @@ async def download_model_handler(request: web.Request) -> web.Response:
                 'message': f'Missing model URL or component type. Received: type={component_type}, url={url_model}'
             }, status=400)
 
+        # The saved name is caller-supplied data: base-name it and refuse script /
+        # native-library extensions. The worker checks the response-sourced name
+        # the same way, so a URL cannot smuggle one in either.
+        if file_name and safe_download_name(file_name) is None:
+            return web.json_response(
+                {'status': 'error', 'message': 'File name not allowed'},
+                status=400,
+            )
+
         # Already installed in *any* folder ComfyUI looks at? Then the registry
         # folder is only a hint and there is nothing to fetch (no duplicate copy).
         if file_name:
@@ -370,18 +401,42 @@ async def download_model_handler(request: web.Request) -> web.Response:
         target_path = None
         if model_path:
             candidate = (MODELS_DIRECTORY / model_path.strip('/\\')).resolve()
+            # Confinement stated twice on purpose: relative_to is the primary guard,
+            # and realpath + startswith is the form CodeQL's path-injection query
+            # models (it cannot see a guard outside that form, and there is no helper
+            # here for a model pack to describe). The path used below is rebuilt from
+            # the checked text so the query can follow it too.
+            models_root = os.path.realpath(str(MODELS_DIRECTORY))
+            candidate_text = os.path.realpath(str(candidate))
             try:
                 candidate.relative_to(MODELS_DIRECTORY.resolve())
-                target_path = candidate
+                confined = (candidate_text == models_root
+                            or candidate_text.startswith(models_root + os.sep))
             except ValueError:
-                target_path = None
+                confined = False
+            target_path = Path(candidate_text) if confined else None
 
         if target_path is None:
             target_path = destination_for(component_type, model_path)
         if target_path is None:
             target_path = MODELS_DIRECTORY / 'diffusion_models'
 
-        target_path = Path(target_path)
+        # Confinement stated the way CodeQL's path-injection query models it: the
+        # target has to be the models root or a directory ComfyUI registered for a
+        # model folder type -- never anything else. ``custom_nodes`` above all: a
+        # written .py there would run after /saus/api/restart.
+        target_text = os.path.realpath(str(target_path))
+        model_roots = [os.path.realpath(str(d)) for d in model_folder_directories()]
+        model_roots.append(os.path.realpath(str(MODELS_DIRECTORY)))
+        if not any(target_text == root or target_text.startswith(root + os.sep)
+                   for root in model_roots):
+            logger.warning(f"{SAUSMSG}: download target refused: {target_path}")
+            return web.json_response(
+                {'status': 'error', 'message': 'Refusing to download outside the model folders.'},
+                status=403,
+            )
+
+        target_path = Path(target_text)
         try:
             target_path.mkdir(parents=True, exist_ok=True)
         except Exception as e:

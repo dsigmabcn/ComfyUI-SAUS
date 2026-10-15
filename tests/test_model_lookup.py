@@ -44,6 +44,10 @@ def _tree():
         'loras/sdxl/style.safetensors',
         'clip/t5xxl.safetensors',
         'checkpoints/sd15.safetensors',
+        # ComfyUI registers these in the same folder table, but they are code /
+        # data: SAUS must never search them or write a download into them.
+        'custom_nodes/Some-Node/evil.py',
+        'datasets/data.csv',
     ):
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -58,6 +62,8 @@ def _install_fake(root):
         'text_encoders': [root / 'text_encoders', root / 'clip'],
         'checkpoints': [root / 'checkpoints'],
         'vae': [root / 'vae'],
+        'custom_nodes': [root / 'custom_nodes'],
+        'datasets': [root / 'datasets'],
     }
     listings = {
         'diffusion_models': ['flux-dev.safetensors', 'flux2-klein.safetensors'],
@@ -65,6 +71,8 @@ def _install_fake(root):
         'text_encoders': ['t5xxl.safetensors'],
         'checkpoints': ['sd15.safetensors'],
         'vae': [],
+        'custom_nodes': ['Some-Node/evil.py'],
+        'datasets': ['data.csv'],
     }
     model_lookup.folder_paths = FakeFolderPaths(dirs, listings)
 
@@ -143,6 +151,43 @@ def test_destination_and_delete_safety():
     assert model_lookup.resolves_inside(hit['path'], hit['directories'])
     assert not model_lookup.resolves_inside(Path('/etc/passwd'), hit['directories'])
     assert model_lookup.destination_for('Diffusion model').name in ('unet', 'diffusion_models')
+
+
+def test_code_folders_are_never_searched():
+    """custom_nodes / datasets hold code and data, not models."""
+    _install_fake(_tree())
+    for filename, hint in (('evil.py', 'custom_nodes'),
+                           ('evil.py', ''),
+                           ('data.csv', 'datasets'),
+                           ('data.csv', '')):
+        assert model_lookup.find_model(filename, '', hint) is None, \
+            f'{filename!r} ({hint!r}) must never be found in a model folder'
+
+
+def test_a_hostile_hint_cannot_aim_the_destination():
+    """A request's model_path hint must not redirect a download into code."""
+    _install_fake(_tree())
+    for hint in ('custom_nodes', 'custom_nodes/Some-Node', 'datasets'):
+        dest = model_lookup.destination_for('', hint)
+        assert dest is not None, 'a model destination must still be found'
+        assert 'custom_nodes' not in dest.parts, f'{hint!r} chose custom_nodes'
+        assert 'datasets' not in dest.parts, f'{hint!r} chose datasets'
+
+
+def test_the_allowlist_excludes_code_folders():
+    from saus.model_scan import MODEL_FOLDER_TYPES
+    assert 'custom_nodes' not in MODEL_FOLDER_TYPES
+    assert 'datasets' not in MODEL_FOLDER_TYPES
+    for name in ('checkpoints', 'loras', 'diffusion_models', 'vae', 'text_encoders'):
+        assert name in MODEL_FOLDER_TYPES, f'{name!r} must stay a model folder type'
+
+
+def test_model_folder_directories_excludes_code_folders():
+    _install_fake(_tree())
+    text = [str(d) for d in model_lookup.model_folder_directories()]
+    assert text, 'model directories must be reported'
+    assert all('custom_nodes' not in part for part in text)
+    assert all('datasets' not in part for part in text)
 
 
 if __name__ == '__main__':

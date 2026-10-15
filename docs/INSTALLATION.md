@@ -1,6 +1,6 @@
 # Installation
 
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)
 
 ## Requirements - ComfyUI and ComfyUI-Manager
  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
@@ -8,24 +8,14 @@
 
 For detailed instructions on how to install ComfyUI and ComfyUI-Manager, please refer to [ComfyUI Installation Instructions](ComfyUI_install_instructions.md).
 
-### Recommended Custom nodes
-
-I have tried to ensure that most apps work with native nodes only, but some require custom nodes. It is recommended to add the following custom nodes:
-- [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux): to generate controlnet preprocessed video
-- [KJ Nodes](https://github.com/kijai/ComfyUI-KJNodes): quality-of-life nodes by kijai
-- [ComfyUI_essentials](https://github.com/cubiq/ComfyUI_essentials): quality of life nodes by cubiq (Matteo), currently in maintenance mode
-- [ComfyUI-RMBG](https://github.com/1038lab/ComfyUI-RMBG): To remove background from images
-- [ComfyUI-AnimateDiffEvolve](https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved): if you plan to use AnimateDiff
-- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF): To use quantized models
-
 ## From ComfyUI Manager
 
-If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/), the easiest way is to do it via the Manager.
+If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager), the easiest way is to do it via the Manager.
 
-<img src="web/core/media/git/Manager button.png">
-<img src="web/core/media/git/custom nodes manager.png">
+<img src="../web/core/media/git/navigation/manager button.png">
+<img src="../web/core/media/git/navigation/Comfyui manager main.png">
 
-Search for ComfyUI-SAUS, and install it together with the recommended custom nodes indicated above
+Search for ComfyUI-SAUS, and install it.
 
 ## Manual Install
 
@@ -38,13 +28,13 @@ It is required that you have git installed.
 ```bash
 git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 ```
-Make also sure the custom nodes indicated in requirements (and their dependencies in requirements.txt) are installed.
+SAUS has no Python dependencies beyond ComfyUI. If an app asks for a node pack, add it through ComfyUI-Manager.
 
 ## Automatic Install (scripts)
 
-To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
+To simplify installation, we provide scripts for Windows and Linux that clone (or update) SAUS automatically.
 
-The SAUS installers consider you already have ComfyUI and ComfyUI-Manager already installed.
+The SAUS installers assume you already have ComfyUI and ComfyUI-Manager installed.
 
 ### Windows (Portable Version)
 
@@ -53,7 +43,7 @@ The SAUS installers consider you already have ComfyUI and ComfyUI-Manager alread
 3. Double-click `install-saus-windows.bat` to run it.
 
 ### Linux
-Git needs to be installed in your system. If you do not have it
+Git needs to be installed on your system. If you do not have it:
 
 ```bash
 sudo apt install git-all
@@ -68,17 +58,19 @@ sudo apt install git-all
    ./install-saus-linux.sh
    ```
 
-## Runpod - pods
-Runpod offers rental of GPU's at a good price that can be used to run the latest image and video models. This is convenient as you do not need to keep grinding and optimizing workflows to get a sub-optimal quality in your results.
+## Updating SAUS
 
-After signing up in Runpod, create a Network Disk (with enough capacity to run the models) and use the ComfyUI SAUS template.
+ComfyUI-Manager lists SAUS among the installed custom nodes. Use **Try update** to pull the latest version, then **Restart** when Manager asks for it — the SAUS **Settings** tab also has a Restart button.
+
+<img src="../web/core/media/git/navigation/Filter.png">
+<img src="../web/core/media/git/navigation/Restart.png">
+
+## Runpod - pods
+
+Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and use the **ComfyUI SAUS template**.
 
 <img src="../web/core/media/git/RUNPOD-SAUS-template.png">
 
-> [!NOTE]
-> The template uses pytorch 2.8, the pod should have CUDA 12.8 or higher
+See the [Runpod guide](RUNPOD.md) for the port to open and the first-run notes.
 
-> [!WARNING]
-> If you already have ComfyUI in a Network Drive installed, the template will not install the custom node. Install it first via the manager, then later you can use the template to access the right ports.
-
-[Return to User Guide](USER_GUIDE.md)
+[Return to User Guide](USER_GUIDE.md#detailed-guide)

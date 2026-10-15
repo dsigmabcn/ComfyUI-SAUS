@@ -13,7 +13,10 @@ from .constants import (
     INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY,
     COMFUI_LOGS_PATH
 )
-from .helpers import allowed_file, resolve_within_roots, require_json, require_saus_header
+from .helpers import (
+    allowed_file, is_root_path, reject_unc_path, resolve_within_roots,
+    require_json, require_saus_header,
+)
 
 TEMP_UPLOAD_DIR = "/tmp/app_uploads"
 
@@ -190,6 +193,11 @@ async def move_copy_handler(request: web.Request) -> web.Response:
         logger.warning(f"{SAUSMSG}: transfer denied (target): {e}")
         return web.json_response({'error': 'Access denied'}, status=403)
 
+    # A root is not a valid transfer target: input -> output would nest a whole
+    # user-data folder inside another.
+    if is_root_path(target_dir):
+        return web.json_response({'error': 'Access denied'}, status=403)
+
     if not target_dir.exists() or not target_dir.is_dir():
         return web.json_response({'error': 'Target folder not found'}, status=404)
 
@@ -200,6 +208,10 @@ async def move_copy_handler(request: web.Request) -> web.Response:
             src = resolve_within_roots(source)
         except ValueError as e:
             errors.append(f'{source}: access denied')
+            continue
+
+        if is_root_path(src):
+            errors.append(f'{src.name}: cannot move a root folder')
             continue
 
         if not src.exists():
@@ -266,6 +278,12 @@ async def rename_file_handler(request: web.Request) -> web.Response:
             logger.warning(f"{SAUSMSG}: rename denied: {e}")
             return web.json_response({"error": "Access denied"}, status=403)
 
+        # A root (input / output / models) resolves inside itself, so it must be
+        # refused explicitly: renaming it would move a whole user-data folder.
+        if is_root_path(current_path):
+            logger.warning(f"{SAUSMSG}: rename denied: refusing to rename a root folder")
+            return web.json_response({"error": "Access denied"}, status=403)
+
         if not current_path.exists():
             return web.json_response({"error": "File not found"}, status=404)
 
@@ -294,6 +312,12 @@ async def delete_file_handler(request: web.Request) -> web.Response:
             logger.warning(f"{SAUSMSG}: delete denied: {e}")
             return web.json_response({"error": "Access denied"}, status=403)
 
+        # Never delete a root itself: `filePath: "output"` would rmtree the whole
+        # user-data folder -- resolve_within_roots accepts a root as "inside".
+        if is_root_path(file_path):
+            logger.warning(f"{SAUSMSG}: delete denied: refusing to delete a root folder")
+            return web.json_response({"error": "Access denied"}, status=403)
+
         if not file_path.exists():
             return web.json_response({"error": "File not found"}, status=404)
 
@@ -317,6 +341,14 @@ async def download_file_handler(request: web.Request) -> web.Response:
 
     if not file_path_str:
         return web.json_response({'error': 'Missing filePath parameter'}, status=400)
+
+    # Reject UNC paths as *text* first: Path().resolve() on "\\host\share" (or
+    # "//host/share") makes Windows contact that host before any check runs.
+    try:
+        reject_unc_path(file_path_str)
+    except ValueError as e:
+        logger.warning(f"{SAUSMSG}: download denied: {e}")
+        return web.json_response({'error': 'Invalid file path'}, status=403)
 
     if request.query.get('force_find'):
         target_filename = os.path.basename(file_path_str)

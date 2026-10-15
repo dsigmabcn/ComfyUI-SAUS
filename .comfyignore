@@ -1,0 +1,12 @@
+# Files kept in git but left out of the published registry archive.
+# The registry packages everything git tracks, so this only trims the download.
+# Runtime code and assets live under web/ and must stay in the archive.
+
+# Development / documentation only
+.github/
+docs/
+tests/
+
+# Documentation screenshots. The guides load them from the GitHub raw URL
+# (as do the registry Icon/Banner), so the archive does not need 5 MB of PNGs.
+web/core/media/git/
