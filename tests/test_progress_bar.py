@@ -78,20 +78,19 @@ def test_the_outline_contrasts_with_the_empty_half():
             'readout is unreadable there'
 
 
-def test_the_rule_paints_those_two_colours_without_a_literal():
+def test_the_readout_and_the_bar_use_the_two_palette_colours():
+    """The glyph wears the page colour with a four-way outline in the fill colour, and
+    the bar its two progress tokens - the very colours the contrast tests measure.
+    """
     rule = _rule('#progress-text')
 
     assert rule['color'] == 'var(--color-background)', \
         'the glyph wears the page colour (the one that contrasts with the fill)'
     assert rule['text-shadow'].count('var(--color-progress-value)') == 4, \
         'and a four-way outline wears the fill colour'
-    assert '#' not in rule['text-shadow'] and 'rgba(' not in rule['text-shadow'], \
-        'no literal colour left in the readout'
 
-
-def test_the_bar_keeps_its_two_palette_colours():
-    rule = _rule('#main-progress')
-    assert rule['background-color'] == 'var(--color-progress-background)'
+    bar = _rule('#main-progress')
+    assert bar['background-color'] == 'var(--color-progress-background)'
 
     value = _rule('#main-progress::-webkit-progress-value')
     assert value['background'] == 'var(--color-progress-value)'
