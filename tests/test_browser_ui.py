@@ -35,6 +35,8 @@ CONSOLE_HARNESS = ROOT / 'tests' / 'js' / 'console_dock.harness.mjs'
 MODEL_CARDS_HARNESS = ROOT / 'tests' / 'js' / 'model_status_cards.harness.mjs'
 DROPDOWN_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets' / 'dropdownHandler.js'
 SETTINGS_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'settings.js'
+TOGGLE_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets' / 'ToggleComponent.js'
+NOTICES_CSS = ROOT / 'web' / 'core' / 'css' / 'notices.css'
 FM_HEADER_JS = ROOT / 'web' / 'file_manager' / 'js' / 'header.js'
 DOWNLOADS_PY = ROOT / 'saus' / 'downloads.py'
 MODELS_JS = BROWSER / 'models.js'
@@ -336,6 +338,59 @@ def test_a_confirmation_opened_from_the_information_modal_stays_in_front():
         'both are overlays'
     assert int(modal['z-index']) > int(details['z-index']), \
         f"the confirmation ({modal['z-index']}) is behind the information modal ({details['z-index']})"
+
+
+def test_a_toast_reports_in_front_of_the_information_modal():
+    """A toast says what a button inside the information modal just did.
+
+    The panel sits at 20000 and a confirmation opened from it at 21000, so every
+    surface that shows a toast has to clear both. ``#toast-container`` used to sit at
+    2100 and ``#saus-notices`` at 10000, so "deleted successfully" arrived *behind* the
+    panel it was about.
+    """
+    details = int(_rule(DETAILS_CSS, '.app-details-overlay')['z-index'])
+    confirm = int(_rule(MODALS_CSS, '.modal-overlay')['z-index'])
+
+    for path, selector in ((MODALS_CSS, '#toast-container'), (NOTICES_CSS, '#saus-notices')):
+        layer = int(_rule(path, selector)['z-index'])
+        assert layer > details, \
+            f'{selector} ({layer}) is behind the information panel ({details})'
+        assert layer > confirm, \
+            f'{selector} ({layer}) is behind a confirmation opened from it ({confirm})'
+
+
+def test_the_information_panel_closes_when_the_app_opens_in_a_tab():
+    """The panel is the way *to* an app, not a place to stay.
+
+    ``handleModelActionClick`` opens the app by dispatching ``saus:open-app`` - the same
+    route an explorer row takes - so the panel subscribes to that event and takes itself
+    down; otherwise the tab the user asked for stays hidden behind the panel.
+    """
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert "document.addEventListener('saus:open-app', close);" in source, \
+        'the panel listens for the event its own Open App button dispatches'
+    assert "document.removeEventListener('saus:open-app', close);" in source, \
+        'and unsubscribes when it closes, instead of leaving a dead listener behind'
+
+
+def test_the_app_toggle_takes_a_click_anywhere_on_it():
+    """A click on the visible switch has to reach its checkbox.
+
+    The checkbox is stretched invisibly behind the track, and the track painted over it
+    with no ``pointer-events: none`` - so it swallowed every click and the app toggles
+    (Prompt Enhance, every pose switch) answered only the keyboard. The row is a
+    ``<label>`` now too, like the Settings switch, so its text toggles it as well.
+    """
+    track = _rule(APP_CSS, '.toggle-track')
+    assert track.get('pointer-events') == 'none', \
+        'the track must not take the click away from the checkbox behind it'
+
+    widget = TOGGLE_JS.read_text(encoding='utf-8')
+    assert '<label class="toggle-component-wrapper">' in widget, \
+        'the row is a label, so its text toggles the switch too'
+    assert _rule(APP_CSS, '.toggle-component .toggle:checked + .toggle-track'), \
+        'and the visual still follows the checkbox'
 
 
 def test_the_dots_recover_after_a_delete():

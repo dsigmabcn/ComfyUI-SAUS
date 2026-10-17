@@ -389,10 +389,13 @@ export async function showAppDetails(app) {
     const close = () => {
         overlay.remove();
         document.removeEventListener('keydown', onKey);
+        document.removeEventListener('saus:open-app', close);
     };
     modal.querySelector('.app-details-close').addEventListener('click', close);
     overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
+    // Opening the app in a tab replaces this panel: it was only the way to get there.
+    document.addEventListener('saus:open-app', close);
 
     const detailsContent = document.getElementById('app-details-content');
     detailsContent.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading details...</div>';

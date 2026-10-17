@@ -1511,6 +1511,9 @@ body.saus-dragging .image-loader {
     border-radius: 999px;
     background-color: var(--color-neutral);
     transition: background-color 0.15s ease;
+    /* The invisible checkbox behind this is the control; the track must not swallow
+       the click, or the switch only responds to the keyboard. */
+    pointer-events: none;
 }
 
 .toggle-track::after {

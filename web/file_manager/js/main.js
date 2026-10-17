@@ -810,7 +810,7 @@ function showToast(message, type = 'info') {
         style.innerHTML = `
             .saus-toast {
                 position: fixed; top: 20px; right: 20px; background-color: #333;
-                color: white; padding: 15px 20px; border-radius: 5px; z-index: 10000;
+                color: white; padding: 15px 20px; border-radius: 5px; z-index: 22000;
                 opacity: 0; transform: translateY(-20px);
                 transition: opacity 0.3s ease, transform 0.3s ease;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-family: sans-serif;

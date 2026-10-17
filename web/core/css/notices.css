@@ -1,21 +1,7 @@
-/* ------------------------------------------------------------------ *
- * The completion notice (the "breadcrumb").
- *
- * It deliberately looks exactly like the toasts the Settings pane shows:
- * top-right, 20px in, `--color-surface` card, 15px/20px padding, 5px radius,
- * green with `--color-text-on-accent` for a success - those are the
- * breadcrumbs the app already puts on screen, so this one should not be a
- * new species of notice.
- *
- * Two differences, both because the **shell** renders this one:
- *
- * * the host is a single fixed flex column, so several notices stack instead
- *   of landing on top of each other (each toast is static inside it);
- * * the rules are stated here instead of being injected by `settings.js` on
- *   the first toast, so this one looks right even before a Settings toast has
- *   ever appeared - and the shell never loads `core/css/main.css`, which is
- *   why this is its own file imported by both stylesheets.
- * ------------------------------------------------------------------ */
+/* The completion notice (the "breadcrumb"): the same card the Settings toasts use,
+   styled here because the shell renders it and never loads core/css/main.css.
+   In front of the app-information overlay (20000) and the confirmation modal
+   (21000): a notice must not hide behind the panel that caused it. */
 
 #saus-notices {
     position: fixed;
@@ -25,7 +11,7 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
-    z-index: 10000;
+    z-index: 22000;
     pointer-events: none;
 }
 

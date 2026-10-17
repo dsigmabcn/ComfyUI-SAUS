@@ -27,8 +27,11 @@ class ToggleComponent {
     buildUI() {
         const toggleId = `${this.config.id}Toggle`;
 
+        // A <label>, not a <div>: a click anywhere on the row toggles the switch, the
+        // same as the Settings switch. (The track is pointer-events:none, so the
+        // invisible checkbox under it still takes the click.)
         const html = `
-            <div class="toggle-component-wrapper">
+            <label class="toggle-component-wrapper">
                 ${this.config.labelPosition === 'left' ? this.getLabelHTML() : ''}
                 <div class="toggle-component">
                     <input 
@@ -44,7 +47,7 @@ class ToggleComponent {
                     <span class="toggle-track" aria-hidden="true"></span>
                 </div>
                 ${this.config.labelPosition === 'right' ? this.getLabelHTML() : ''}
-            </div>
+            </label>
         `;
         this.container.innerHTML = html;
 

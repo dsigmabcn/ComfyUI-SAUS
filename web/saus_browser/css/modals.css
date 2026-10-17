@@ -124,7 +124,9 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 2100;
+    /* In front of the app-information overlay (20000) and of the confirmation modal
+       (21000): a toast reports what a button in one of them just did. */
+    z-index: 22000;
     display: flex;
     flex-direction: column;
     gap: 10px;
