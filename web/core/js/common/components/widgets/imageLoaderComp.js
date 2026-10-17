@@ -40,6 +40,10 @@ export default function imageLoaderComp(appConfig, workflow) {
             allowedFileType: 'image',
             defaultImageSrc: '/core/media/ui/drop_image_rect_no_border_trans.png',
             label: imageConfig.label,
+            // What the app actually loads: a LoadVideo input gets the video glyph,
+            // anything else the image one (the same node lookup the dropdowns use).
+            placeholderIcon: (workflow?.[String(imageConfig.nodePath).split('.')[0]]
+                ?.class_type === 'LoadVideo') ? 'fas fa-video' : 'fas fa-image',
             showIndicator: true,
         }, (localSrc, serverResult) => {
             console.log(`Image ${index + 1} loaded:`, serverResult);

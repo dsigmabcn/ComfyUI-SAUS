@@ -15,7 +15,8 @@ const CATEGORY_ICONS = {
     "text-to-video": "fas fa-clapperboard",
     "image-to-video": "fas fa-film",
     "video-to-video": "fas fa-video",
-    "tools": "fas fa-wrench",
+    "Image tools": "fas fa-wand-magic-sparkles",
+    "Video tools": "fas fa-photo-video",
     "other": "fas fa-th-large"
 };
 
@@ -26,7 +27,8 @@ const CATEGORY_ORDER = [
     "text-to-video",
     "image-to-video",
     "video-to-video",
-    "tools",
+    "Image tools",
+    "Video tools",
     "other"
 ];
 
@@ -41,7 +43,7 @@ const SECTIONS_CONFIG = {
     },
     "Other": {
         icon: "fas fa-shapes",
-        categories: ["tools", "other"]
+        categories: ["Image tools", "Video tools", "other"]
     }
 };
 

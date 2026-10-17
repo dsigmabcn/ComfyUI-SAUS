@@ -1,0 +1,89 @@
+{
+  "667": {
+    "inputs": {
+      "image": "dancer.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "669": {
+    "inputs": {
+      "images": [
+        "675_672",
+        0
+      ],
+      "filename_prefix": "SDPose"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "675_671": {
+    "inputs": {
+      "model": [
+        "675_673",
+        0
+      ],
+      "vae": [
+        "675_673",
+        2
+      ],
+      "image": [
+        "675_674",
+        0
+      ],
+      "batch_size": 16
+    },
+    "class_type": "SDPoseKeypointExtractor",
+    "_meta": {
+      "title": "SDPoseKeypointExtractor"
+    }
+  },
+  "675_674": {
+    "inputs": {
+      "input": [
+        "667",
+        0
+      ],
+      "resize_type.longer_size": 1024,
+      "scale_method": "area",
+      "resize_type": "scale longer dimension"
+    },
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "ResizeImageMaskNode"
+    }
+  },
+  "675_672": {
+    "inputs": {
+      "keypoints": [
+        "675_671",
+        0
+      ],
+      "draw_body": true,
+      "draw_hands": true,
+      "draw_face": true,
+      "draw_feet": true,
+      "stick_width": 4,
+      "face_point_size": 2,
+      "score_threshold": 0.5,
+      "draw_head": true
+    },
+    "class_type": "SDPoseDrawKeypoints",
+    "_meta": {
+      "title": "SDPoseDrawKeypoints"
+    }
+  },
+  "675_673": {
+    "inputs": {
+      "ckpt_name": "sdpose_wholebody_fp16.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  }
+}

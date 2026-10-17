@@ -2,6 +2,7 @@ import { state, loadOpenApps, saveOpenApps } from './state.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
 import { exportWorkflowToComfyUI } from './workflow_export.js';
 import { currentTheme } from '/core/js/common/scripts/theme.js';
+import { isMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 /* ------------------------------------------------------------------ *
  * Workspace tabs. A tab is an app (iframe of /saus/<url>) or one of the
@@ -23,6 +24,48 @@ let focusedTabId = null;
 
 // The tab being dragged along the strip (drag & drop reordering). Transient.
 let draggedTabId = null;
+
+/* ------------------------------------------------------------------ *
+ * Hovering a tab with media in hand opens that app.
+ *
+ * A file dragged out of Recent belongs to the *previous* app, so the tab the
+ * pointer rests on has to come forward before the drop - the loader of the app
+ * behind it is not even on screen. A short dwell avoids swapping the workspace
+ * while the pointer is merely passing over the strip.
+ * ------------------------------------------------------------------ */
+
+const MEDIA_HOVER_MS = 550;
+let mediaHoverTimer = null;
+let mediaHoverTabId = null;
+
+function clearMediaHoverMark() {
+    document.querySelectorAll('.tab.media-hover')
+        .forEach((el) => el.classList.remove('media-hover'));
+}
+
+function cancelMediaHover() {
+    if (mediaHoverTimer) clearTimeout(mediaHoverTimer);
+    mediaHoverTimer = null;
+    mediaHoverTabId = null;
+    clearMediaHoverMark();
+}
+
+function armMediaHover(tabId_, btn) {
+    if (mediaHoverTabId === tabId_) return;   // already armed for this tab
+    cancelMediaHover();
+    mediaHoverTabId = tabId_;
+    btn.classList.add('media-hover');
+    mediaHoverTimer = setTimeout(() => {
+        mediaHoverTimer = null;
+        // The arming above proved a media drag is in flight, and the source document's
+        // flag is not readable from here - so only re-check that the pointer is still
+        // on this tab.
+        if (mediaHoverTabId === tabId_) activateTab(tabId_);
+    }, MEDIA_HOVER_MS);
+}
+
+// Any drag ending anywhere clears the pending switch.
+document.addEventListener('dragend', cancelMediaHover);
 
 function findTab(id) {
     return state.openApps.find(tab => tab.id === id);
@@ -104,17 +147,35 @@ function renderTabStrip() {
             btn.classList.remove('dragging');
         });
         btn.addEventListener('dragover', (event) => {
-            if (!draggedTabId || draggedTabId === tab.id) return;
+            if (draggedTabId) {
+                if (draggedTabId === tab.id) return;
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+                btn.classList.add('drop-target');
+                return;
+            }
+            // A *media* drag (an image from the Recent panel or the File Manager) can
+            // be dropped on whichever app's load input is in front, so hovering a tab
+            // opens it. This runs in the parent document while the drag comes from an
+            // app's iframe, so it asks dataTransfer.types - the module flag lives in
+            // the source document and is not visible here.
+            if (!isMediaDrag(event.dataTransfer)) return;
             event.preventDefault();
-            event.dataTransfer.dropEffect = 'move';
-            btn.classList.add('drop-target');
+            event.dataTransfer.dropEffect = 'copy';
+            armMediaHover(tab.id, btn);
         });
-        btn.addEventListener('dragleave', () => btn.classList.remove('drop-target'));
+        btn.addEventListener('dragleave', () => {
+            btn.classList.remove('drop-target');
+            cancelMediaHover();
+        });
         btn.addEventListener('drop', (event) => {
             btn.classList.remove('drop-target');
-            if (!draggedTabId || draggedTabId === tab.id) return;
-            event.preventDefault();
-            moveTab(draggedTabId, tab.id);
+            cancelMediaHover();
+            if (draggedTabId) {
+                if (draggedTabId === tab.id) return;
+                event.preventDefault();
+                moveTab(draggedTabId, tab.id);
+            }
         });
 
         const icon = document.createElement('i');
@@ -197,7 +258,7 @@ function ensurePane(id) {
         pane.appendChild(host);
         container.appendChild(pane);
         // The settings form (theme, version, social links, restart).
-        new SettingsComponent('#settingsPane').show();
+        new SettingsComponent('#settingsPane', { showDeprecatedSwitch: true }).show();
         return pane;
     }
 

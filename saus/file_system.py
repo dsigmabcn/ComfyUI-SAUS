@@ -193,11 +193,6 @@ async def move_copy_handler(request: web.Request) -> web.Response:
         logger.warning(f"{SAUSMSG}: transfer denied (target): {e}")
         return web.json_response({'error': 'Access denied'}, status=403)
 
-    # A root is not a valid transfer target: input -> output would nest a whole
-    # user-data folder inside another.
-    if is_root_path(target_dir):
-        return web.json_response({'error': 'Access denied'}, status=403)
-
     if not target_dir.exists() or not target_dir.is_dir():
         return web.json_response({'error': 'Target folder not found'}, status=404)
 
@@ -212,6 +207,13 @@ async def move_copy_handler(request: web.Request) -> web.Response:
 
         if is_root_path(src):
             errors.append(f'{src.name}: cannot move a root folder')
+            continue
+
+        if src.is_dir() and is_root_path(target_dir):
+            # A root may hold loose files - dragging a generated image from the output
+            # root into the input root is the normal way to feed it back in - but a
+            # *folder* dropped on a root would nest one user-data folder inside another.
+            errors.append(f'{src.name}: a folder cannot be moved into a root')
             continue
 
         if not src.exists():

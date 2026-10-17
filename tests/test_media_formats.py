@@ -169,15 +169,20 @@ def test_no_shipped_app_keeps_a_thumbnail_in_a_media_folder():
     end-to-end net for `tools/thumbnail.py --flatten-old` and `--rebuild-rows`.
     """
     apps = ROOT / 'web' / 'apps'
+    # Keyed on appConfig.json and walked recursively: apps parked in
+    # web/apps/deprecated/ must stay covered too, and the deprecated/ folder itself
+    # is not an app.
+    app_folders = sorted(conf.parent for conf in apps.rglob('appConfig.json'))
     stragglers, unresolved = [], []
-    for app in sorted(apps.iterdir()):
+    for app in app_folders:
+        label = app.relative_to(apps).as_posix()
         media = app / 'media'
         if media.is_dir() and any(f.name.startswith('thumbnail') for f in media.iterdir()):
-            stragglers.append(app.name)
+            stragglers.append(label)
         if not _find_app_thumbnail(app, exclude=(ROW_THUMBNAIL_NAME,)):
-            unresolved.append(app.name + ' (no master)')
+            unresolved.append(label + ' (no master)')
         elif not _find_app_thumbnail(app, names=(ROW_THUMBNAIL_NAME,)):
-            unresolved.append(app.name + ' (no row copy)')
+            unresolved.append(label + ' (no row copy)')
     assert not stragglers, ('these apps still keep a thumbnail in media/ - run '
                             'python tools/thumbnail.py --flatten-old: ' + ', '.join(stragglers))
     assert not unresolved, ('these apps have no flat thumbnail next to appConfig.json - run '

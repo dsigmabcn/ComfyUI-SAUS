@@ -581,6 +581,109 @@ def test_the_app_list_reports_both_thumbnail_sizes():
         'and the row falls back to the master when an app ships only one'
 
 
+def test_the_information_panels_open_app_button_opens_a_workspace_tab():
+    """The "Open App" button of the details modal must not leave the shell.
+
+    It opened a new browser window, which stranded the user in a bare app page -
+    no rail, no tabs, no console. The shell's own route is the ``saus:open-app``
+    document event, the same one the explorer row dispatches.
+    """
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert "'saus:open-app'" in source, \
+        'the panel asks the shell to open the app, the way the explorer row does'
+    assert 'document.dispatchEvent(new CustomEvent(' in source, \
+        'through a document event, so models.js needs no tabs.js import'
+    assert "state.allApps.find" in source, \
+        'and the catalog entry is resolved, not taken from the data attribute'
+    assert not re.search(r"window\.open\(\s*`saus/", source), \
+        'no window.open() on an app url: that is the new-window bug'
+    assert 'openAppByUrl' not in source, \
+        'tabs.js owns the tab; models.js only asks for it'
+
+
+def test_open_app_reaches_the_tab_strip():
+    """The event the panel dispatches is the one tabs.js turns into a tab.
+
+    Read together: models.js emits ``saus:open-app``, main.js listens for it and
+    tabs.js implements the handler, so the chain the button relies on is whole.
+    """
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert "document.addEventListener('saus:open-app', handleOpenAppEvent)" in shell, \
+        'main.js wires the event to the tab handler'
+
+    tabs = (BROWSER / 'tabs.js').read_text(encoding='utf-8')
+    assert 'export function handleOpenAppEvent(event)' in tabs, \
+        'tabs.js owns the handler'
+    assert re.search(r"openAppByUrl\(detail\.url, detail\.name, detail\.id\)", tabs), \
+        'which opens the app in the workspace, not a new window'
+
+
+def test_deprecated_apps_are_hidden_until_the_switch_is_on():
+    """Apps in web/apps/deprecated/ stay out of every explorer list by default.
+
+    The API keeps reporting them (`deprecated: true`) - that is what lets the switch
+    bring them back - so the filter belongs in `filterCurrentApps()`, the single
+    place the explorer asks for its list, and the switch must reach the shell through
+    a document event (core/ must not import the browser's modules).
+    """
+    state = (BROWSER / 'state.js').read_text(encoding='utf-8')
+    assert 'showDeprecatedApps: false' in state, \
+        'deprecated apps are hidden unless the user opts in'
+
+    ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
+    assert "preferencesManager.get('showDeprecatedApps')" in ui, \
+        'the explorer consults the preference'
+    assert 'filteredApps.filter(app => !app.deprecated)' in ui, \
+        'and drops the apps the API flagged deprecated'
+
+    settings = SETTINGS_JS.read_text(encoding='utf-8')
+    assert 'show-deprecated-apps' in settings, 'the Settings pane owns the switch'
+    assert 'showDeprecatedSwitch' in settings, \
+        'and offers it only where it means something (the browser, not the File Manager)'
+    assert "'saus:preference-changed'" in settings, \
+        'flipping it tells the shell through a document event'
+
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert "document.addEventListener('saus:preference-changed'" in shell, 'the shell listens'
+    assert 'preferencesManager.reload()' in shell, 're-reads its stale copy'
+    assert 'renderExplorer();' in shell, 'and repaints the side panel'
+
+    tabs = (BROWSER / 'tabs.js').read_text(encoding='utf-8')
+    assert '{ showDeprecatedSwitch: true }' in tabs, \
+        'the app browser is the host that opts in'
+
+
+def test_the_settings_switch_actually_renders():
+    """The switch must survive the host's own `.settings-form label` rule.
+
+    `web/saus_browser/css/settings.css` sets `.settings-form label { display: block }`
+    (specificity 0,1,1), which beats a bare `.settings-switch` (0,1,0): the label stops
+    being a flex row, the track span stays `inline` so its width/height are ignored, and
+    the knob ends up floating over the label text - a switch that is not there. So the
+    component's rules must be scoped at least as specifically, and the text comes first
+    with the track after it (hence `~`, not `+`, for the checked state).
+    """
+    settings = SETTINGS_JS.read_text(encoding='utf-8')
+
+    for selector in ('.settings-form .settings-switch {',
+                     '.settings-form .settings-switch-track {'):
+        assert selector in settings, \
+            f'{selector} must be scoped, or .settings-form label wins and collapses it'
+    assert '.settings-form .settings-switch input:checked ~ .settings-switch-track' in settings, \
+        'the checked state needs `~`: the text sits between the input and the track'
+    assert 'var(--color-neutral)' in settings, 'off is grey'
+    assert 'var(--color-success)' in settings, 'on is green'
+
+    text_at = settings.index('<span class="settings-switch-text">')
+    track_at = settings.index('<span class="settings-switch-track"')
+    assert text_at < track_at, 'the label reads "Show deprecated apps" and then the toggle'
+
+    block = settings.split('showDeprecatedSwitch ?')[1].split('` : ')[0]
+    assert 'settings-switch-text' in block, 'the Apps section holds the switch'
+    assert 'settings-hint' not in block, 'and no explanatory paragraph under it'
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

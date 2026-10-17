@@ -1,0 +1,145 @@
+{
+  "id": "vidsam3",
+  "name": "Video Segmentation (SAM3)",
+  "url": "video-segmentation",
+  "description": "Segment a video from a text prompt with SAM3.1 and save the masks as images.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "SAM3 SEGMENT",
+    "models": [
+      "sam3.1_multiplex_fp16.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "ppromptvidsam3",
+      "label": "Prompt",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "114_100.inputs.text",
+      "default": "unicorn"
+    }
+  ],
+  "steppers": [
+    {
+      "id": "starttimesvidsam3",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "950.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidsam3",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "950.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "thresholdvidsam3",
+      "label": "Threshold",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "114_101.inputs.threshold",
+      "defValue": 0.5,
+      "minValue": 0,
+      "maxValue": 1,
+      "step": 0.05,
+      "precision": 2,
+      "scaleFactor": 1
+    },
+    {
+      "id": "refineiterationsvidsam3",
+      "label": "Refine Iterations",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "114_101.inputs.refine_iterations",
+      "defValue": 2,
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidsam3",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "901.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidsam3",
+      "label": "Video",
+      "nodePath": "115.inputs.file"
+    }
+  ],
+  "dropdowns": [],
+  "toggles": [
+    {
+      "id": "individualmasksvidsam3",
+      "label": "Individual Masks",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "defaultValue": false,
+      "nodePath": "114_101.inputs.individual_masks"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidsam3",
+      "label": "Save Image",
+      "nodeId": "901",
+      "type": "media"
+    }
+  ]
+}

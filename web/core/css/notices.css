@@ -1,0 +1,61 @@
+/* ------------------------------------------------------------------ *
+ * The completion notice (the "breadcrumb").
+ *
+ * It deliberately looks exactly like the toasts the Settings pane shows:
+ * top-right, 20px in, `--color-surface` card, 15px/20px padding, 5px radius,
+ * green with `--color-text-on-accent` for a success - those are the
+ * breadcrumbs the app already puts on screen, so this one should not be a
+ * new species of notice.
+ *
+ * Two differences, both because the **shell** renders this one:
+ *
+ * * the host is a single fixed flex column, so several notices stack instead
+ *   of landing on top of each other (each toast is static inside it);
+ * * the rules are stated here instead of being injected by `settings.js` on
+ *   the first toast, so this one looks right even before a Settings toast has
+ *   ever appeared - and the shell never loads `core/css/main.css`, which is
+ *   why this is its own file imported by both stylesheets.
+ * ------------------------------------------------------------------ */
+
+#saus-notices {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+#saus-notices .saus-toast {
+    position: static;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--color-surface);
+    color: var(--color-primary-text);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+    font-family: sans-serif;
+    font-size: 1em;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#saus-notices .saus-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#saus-notices .saus-toast.toast-success {
+    background-color: var(--color-success);
+    color: var(--color-text-on-accent);
+}
+
+#saus-notices .saus-toast i {
+    margin-right: 8px;
+}
+

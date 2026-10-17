@@ -379,6 +379,12 @@ body.resizing-console .panes {
 }
 
 /* --- TAB STRIP --- */
+/* A tab that a media drag is hovering: it is about to open itself (see tabs.js). */
+.tab.media-hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-hover);
+}
+
 .tab-strip {
     display: flex;
     align-items: stretch;

@@ -5,7 +5,9 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial;
+    /* Generic last - see the note in /core/css/main.css. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Palette comes from /core/css/themes.css (imported above). */
@@ -1552,9 +1554,12 @@ footer {
 
 .fm-list.view-list { display: flex; flex-direction: column; }
 
+/* Medium and large have to be tellable apart at a glance: column width, thumbnail height
+   and caption size all move together, because on a wide pane the old 150px vs 220px pair
+   produced the same number of columns and read as one mode. */
 .fm-list.view-medium {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     grid-auto-rows: min-content;
     gap: 10px;
     align-content: start;
@@ -1562,9 +1567,9 @@ footer {
 
 .fm-list.view-large {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     grid-auto-rows: min-content;
-    gap: 12px;
+    gap: 16px;
     align-content: start;
 }
 
@@ -1654,7 +1659,12 @@ footer {
     background-color: var(--color-background-secondary);
 }
 
+.fm-list.view-medium .fm-tile-thumb { height: 110px; }
 .fm-list.view-large .fm-tile-thumb { height: 200px; }
+
+/* Captions scale with the tiles, so the two icon modes cannot be mistaken for each other. */
+.fm-list.view-medium .fm-tile-name { font-size: 0.75rem; }
+.fm-list.view-large .fm-tile-name { font-size: 0.95rem; }
 
 .fm-tile-thumb img {
     width: 100%;

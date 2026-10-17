@@ -1,0 +1,112 @@
+{
+  "id": "depth3",
+  "name": "Depth Anything",
+  "url": "image-depth-anything",
+  "description": "Estimate a depth map from one image with Depth Anything 3.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Image tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "DEPTH ANYTHING 3",
+    "models": [
+      "depth_anything_3_mono_large.safetensors"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "resolutiondepth3",
+      "label": "Resolution",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "14_5.inputs.resolution",
+      "defValue": 504,
+      "minValue": 64,
+      "maxValue": 2048,
+      "step": 16,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixdepth3",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "900.inputs.filename_prefix",
+      "defValue": "Depth"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimagedepth3",
+      "label": "Image",
+      "nodePath": "85.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "resizemethoddepth3",
+      "label": "Resize Method",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "14_5.inputs.resize_method",
+      "url": "DA3Inference",
+      "key": "resize_method"
+    },
+    {
+      "id": "outputdepth3",
+      "label": "Output",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "14_7.inputs.output",
+      "url": "DA3Render",
+      "key": "output"
+    },
+    {
+      "id": "normalizationdepth3",
+      "label": "Normalization",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "14_7.inputs.output.normalization",
+      "url": "DA3Render",
+      "key": "output.normalization"
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outdepth3",
+      "label": "Save Image",
+      "nodeId": "900",
+      "type": "media"
+    }
+  ]
+}

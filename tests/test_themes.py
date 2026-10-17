@@ -211,6 +211,35 @@ def test_theme_harness():
     assert result.returncode == 0, f'{HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
 
 
+def test_a_generic_font_family_never_hides_the_named_ones():
+    """`sans-serif` in second place made the rest of the stack unreachable.
+
+    A generic family ends the search, so the old `'Roboto', sans-serif, 'Arial Narrow',
+    Arial` never consulted the last two - and because nothing ships or links 'Roboto'
+    (no `@font-face`, no font file, no <link>), the whole UI was quietly rendered in
+    whatever the browser defaults to. The platform families now come first and the
+    generic family last.
+    """
+    generics = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'}
+    checked = 0
+
+    for path in sorted((ROOT / 'web').rglob('*.css')):
+        for declaration in path.read_text(encoding='utf-8').split('font-family:')[1:]:
+            value = declaration.split(';')[0].split('}')[0]
+            names = [n.strip().strip('"\'') for n in value.split(',') if n.strip()]
+            if not names:
+                continue
+            checked += 1
+            first = next((i for i, n in enumerate(names) if n.lower() in generics), None)
+            assert first in (None, len(names) - 1), (
+                '%s: %s - a generic family is not last, so everything after it is '
+                'unreachable' % (path.relative_to(ROOT), names))
+
+    assert checked >= 5, f'the scan only found {checked} font stacks - it is broken'
+    assert 'Roboto' in APP_CSS.read_text(encoding='utf-8'), \
+        'the family the stack always meant to prefer has to stay listed'
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

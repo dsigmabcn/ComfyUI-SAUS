@@ -1,4 +1,5 @@
 import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
+import { getMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
@@ -31,7 +32,10 @@ export default class ImageLoader {
 
     // The button now acts as the title and browse trigger.
     this.browseButton = document.createElement('button');
-    this.browseButton.innerHTML = `📂 ${escapeHtml(this.config.label || 'Browse')}`;
+    // The File Manager's folder glyph rather than an emoji: the two sit in the same
+    // window, inches apart.
+    this.browseButton.innerHTML =
+      `<i class="fas fa-folder"></i> ${escapeHtml(this.config.label || 'Browse')}`;
     this.browseButton.classList.add('image-loader-title');
     this.browseButton.style.width = '100%';
     this.browseButton.style.cursor = 'pointer';
@@ -43,9 +47,12 @@ export default class ImageLoader {
     });
     this.container.appendChild(this.browseButton);
 
-    this.imgElement = document.createElement('img');
-    this.imgElement.src = this.config.defaultImageSrc;
-    this.setElementStyles(this.imgElement);
+    // The empty state is a Font Awesome glyph, like the File Manager's - the old
+    // dashed PNG drew its own frame *inside* the card and fought the panel styling.
+    // The first real load replaces this element with an <img> or <video>.
+    this.imgElement = document.createElement('i');
+    this.imgElement.className = (this.config.placeholderIcon || 'fas fa-image')
+      + ' image-loader-placeholder';
 
     this.imageDropArea.appendChild(this.imgElement);
     this.container.appendChild(this.imageDropArea);
@@ -149,10 +156,87 @@ export default class ImageLoader {
 
   onDrop(e) {
     this.imageDropArea.classList.remove('highlight');
+
+    // A file dragged in from SAUS itself (the Recent panel, the File Manager) is
+    // already on the server, so it is *referenced* rather than uploaded again.
+    const dragged = getMediaDrag(e.dataTransfer);
+    if (dragged) {
+      this.useExistingMedia(dragged);
+      return;
+    }
+
     const file = e.dataTransfer.files[0];
     if (file) {
       this.handleFile(file);
     }
+  }
+
+  /**
+   * Point this loader at a file SAUS already has.
+   *
+   * `LoadImage` / `LoadVideo` read ComfyUI's `input/` folder while a Recent result
+   * lives in `output/`, so anything that is not already an input is copied there
+   * first - through the File Manager's own endpoint, which also refuses paths outside
+   * the allowed roots and never overwrites an existing file. The workflow is then
+   * written the same way an upload writes it (via `onImageLoaded`), so the control,
+   * the preview and the app config stay in step.
+   */
+  async useExistingMedia(payload) {
+    if (!payload || !payload.filename) return;
+
+    let name;
+    try {
+      name = await this.ensureInputFile(payload);
+    } catch (error) {
+      this.showErrorMessage(`Could not use that file: ${error.message}`);
+      return;
+    }
+
+    const src = `/view?filename=${encodeURIComponent(name.split('/').pop())}`
+        + (name.includes('/') ? `&subfolder=${encodeURIComponent(name.split('/').slice(0, -1).join('/'))}` : '')
+        + '&type=input';
+
+    // The media is displayed *and* handed on: the component's callback writes the
+    // filename into the graph (`updateWorkflow(... nodePath, name)`).
+    this.displayMedia({ type: this.guessMimeType(name) }, src);
+    if (typeof this.onImageLoaded === 'function') {
+      this.onImageLoaded(src, { name });
+    }
+    endMediaDrag();
+  }
+
+  /**
+   * The name this file has inside ComfyUI's `input/` folder.
+   *
+   * `LoadImage` / `LoadVideo` only read `input/`, while a Recent result lives in
+   * `output/`, so the bytes are handed to ComfyUI's own upload endpoint - the same route
+   * the browse button and an OS drag & drop take.
+   *
+   * The File Manager's move/copy endpoint is deliberately **not** used: it refuses a
+   * root as a target ("moving a folder into one would nest user data"), and `input/` is
+   * exactly such a root - which is the HTTP 403 the first version of this hit. A file
+   * that is already in `input/` needs nothing at all.
+   */
+  async ensureInputFile(payload) {
+    if (payload.type === 'input') {
+      return payload.subfolder ? `${payload.subfolder}/${payload.filename}` : payload.filename;
+    }
+
+    const source = `/view?filename=${encodeURIComponent(payload.filename)}`
+      + (payload.subfolder ? `&subfolder=${encodeURIComponent(payload.subfolder)}` : '')
+      + `&type=${encodeURIComponent(payload.type)}`;
+
+    const media = await fetch(source);
+    if (!media.ok) throw new Error(`HTTP ${media.status}`);
+    const blob = await media.blob();
+
+    const form = new FormData();
+    form.append('image', blob, payload.filename);
+    // No `overwrite`: a name clash makes ComfyUI save a copy, never clobber an input.
+    const response = await fetch('/upload/image', { method: 'POST', body: form });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const saved = await response.json();
+    return saved.subfolder ? `${saved.subfolder}/${saved.name}` : saved.name;
   }
 
   onDoubleClick(e) {

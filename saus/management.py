@@ -27,6 +27,27 @@ APP_THUMBNAIL_NAMES = (
 # row must not download the ~23 KB master to draw a 40px square.
 ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'
 
+# Apps may be parked in a ``web/apps/deprecated/`` folder when a newer model
+# supersedes them. They are still discovered and still get their route - the
+# explorer just hides them until "Show deprecated apps" is switched on.
+DEPRECATED_DIR_NAME = 'deprecated'
+
+
+def _is_deprecated(app_folder: Path) -> bool:
+    """True when the app sits inside a ``deprecated/`` folder under ``web/apps``.
+
+    Derived from the folder rather than an appConfig flag, so moving an app in or
+    out of ``deprecated/`` is the only action needed and there is nothing to drift
+    out of step. The *nearest* ancestors below the apps root decide, so a nested
+    ``deprecated`` anywhere in the chain counts, while an app that merely happens
+    to be named ``deprecated`` is not one itself (its own name is excluded).
+    """
+    try:
+        relative = app_folder.relative_to(SAUS_APPS_PATH)
+    except ValueError:
+        return False
+    return DEPRECATED_DIR_NAME in relative.parts[:-1]
+
 
 def _find_app_thumbnail(app_folder: Path, names=APP_THUMBNAIL_NAMES, exclude=()) -> str:
     """The app's thumbnail as a file name in the app folder ('' when it has none).
@@ -56,6 +77,10 @@ def _load_app_configs():
         config['thumbnail'] = _find_app_thumbnail(conf_file.parent, exclude=(ROW_THUMBNAIL_NAME,))
         config['thumbnailRow'] = (_find_app_thumbnail(conf_file.parent, names=(ROW_THUMBNAIL_NAME,))
                                   or config['thumbnail'])
+        # An app in the deprecated/ folder is still listed and still routable; the
+        # explorer filters it out unless the user has switched on "Show deprecated
+        # apps" (see web/saus_browser/js/ui.js -> filterCurrentApps).
+        config['deprecated'] = _is_deprecated(conf_file.parent)
         configs.append(config)
     return configs
 

@@ -58,11 +58,18 @@
       "order": 5
     },
     {
-      "id": "tools",
-      "label": "tools",
-      "icon": "fas fa-wrench",
+      "id": "Image tools",
+      "label": "Image tools",
+      "icon": "fas fa-wand-magic-sparkles",
       "section": "Other",
-      "order": 6
+      "order": 7
+    },
+    {
+      "id": "Video tools",
+      "label": "Video tools",
+      "icon": "fas fa-photo-video",
+      "section": "Other",
+      "order": 8
     },
     {
       "id": "other",
@@ -86,6 +93,7 @@
       "SDXL",
       "FLUX",
       "FLUX-2",
+      "FLUX-3",
       "KREA 2",
       "QWEN",
       "Z-image",

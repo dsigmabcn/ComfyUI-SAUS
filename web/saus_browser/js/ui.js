@@ -195,6 +195,14 @@ export function filterCurrentApps() {
 
     let filteredApps = state.allApps.filter(app => app.id !== 'menu' && !noshowAppIds.includes(app.id));
 
+    // Apps parked in web/apps/deprecated/ (the API reports `deprecated: true`) are
+    // hidden until the Settings switch is on. Filtered here - the one place the
+    // explorer asks for its list - so the tree, favourites and search results
+    // cannot disagree about it.
+    if (!preferencesManager.get('showDeprecatedApps')) {
+        filteredApps = filteredApps.filter(app => !app.deprecated);
+    }
+
     if (searchTerm) {
         filteredApps = filteredApps.filter(app => matchesSearch(app, searchTerm));
     }

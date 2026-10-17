@@ -1,0 +1,186 @@
+{
+  "id": "flux3klein2img",
+  "name": "Flux 3 Klein Edit (2 Images)",
+  "url": "flux3-klein-edit-2-images",
+  "description": "Compose from two reference images with FLUX 3 Image Klein, Base or distilled.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "image-to-image (reference)",
+    "tags": {
+      "type": [
+        "base",
+        "distilled-fast"
+      ],
+      "base_models": [
+        "FLUX-3"
+      ],
+      "other": [
+        "edit"
+      ]
+    },
+    "architecture": "FLUX 3 KLEIN EDIT",
+    "models": [
+      "flux3_image_klein_base_int8_convrot.safetensors",
+      "flux3_image_klein_sd_int8_convrot.safetensors",
+      "qwen3vl_4b_int8_convrot.safetensors",
+      "qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+      "flux2-vae.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "ppromptflux3klein2img",
+      "label": "Prompt",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "61.inputs.value",
+      "default": "Create an editorial fashion photograph of the woman from <ref_image_1> wearing the voluminous blue ruffled silk gown from <ref_image_0> in place of her own top, keeping her braided hair, her gold statement earrings, her face and skin tone exactly as they are. Place her on the wet stone steps and vertical strip lights of <ref_image_0>, keep the rainy night lighting and its reflections unchanged, and keep the camera angle, framing and overall composition unchanged."
+    }
+  ],
+  "steppers": [
+    {
+      "id": "stepsflux3klein2img",
+      "label": "Steps",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "7.inputs.steps",
+      "defValue": 50,
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    },
+    {
+      "id": "cfgflux3klein2img",
+      "label": "CFG",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "7.inputs.cfg",
+      "defValue": 1,
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "precision": 1,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedseedflux3klein2img",
+      "label": "Seed",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "7.inputs.seed"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixflux3klein2img",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      },
+      "nodePath": "9.inputs.filename_prefix",
+      "defValue": "Flux3-Klein-2Images"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimage1flux3klein2img",
+      "label": "Image 1",
+      "nodePath": "54.inputs.image"
+    },
+    {
+      "id": "imgimage2flux3klein2img",
+      "label": "Image 2",
+      "nodePath": "60.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "modelflux3klein2img",
+      "label": "Model",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "59.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "clipflux3klein2img",
+      "label": "CLIP",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "2.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name"
+    },
+    {
+      "id": "clippromptupsamplerflux3klein2img",
+      "label": "CLIP (Prompt Upsampler)",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "46.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name"
+    },
+    {
+      "id": "vaeflux3klein2img",
+      "label": "VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 4
+      },
+      "nodePath": "3.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    }
+  ],
+  "toggles": [
+    {
+      "id": "promptenhanceflux3klein2img",
+      "label": "Prompt Enhance",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "defaultValue": true,
+      "nodePath": "51.inputs.switch"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outflux3klein2img",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

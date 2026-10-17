@@ -1,5 +1,6 @@
 
 import { SettingsComponent } from '../../../core/js/common/components/settings.js';
+import { setMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 import { insertElement } from './header.js';
 import { initTheme } from '/core/js/common/scripts/theme.js';
 // NOTE: footer.js is deliberately NOT imported — the File Manager has no footer.
@@ -21,8 +22,8 @@ const MEDIA_RE = /\.(jpe?g|png|gif|webp|avif|bmp|mp4|webm|ogg|mov|mkv)$/i;
 
 // One state object per pane. Input / Output are the two (and only) roots.
 const panes = {
-    input: { root: 'input', path: 'input', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
-    output: { root: 'output', path: 'output', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
+    input: { root: 'input', path: 'input', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: rememberedViewMode('input') },
+    output: { root: 'output', path: 'output', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: rememberedViewMode('output') },
 };
 
 let settingsComponent = null;
@@ -381,12 +382,44 @@ function setupPanes() {
         el.querySelectorAll('.fm-view-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 panes[root].viewMode = btn.dataset.view;
+                saveViewModes();
                 renderPane(root);
             });
         });
     });
 
     document.addEventListener('keydown', onGlobalKeyDown);
+}
+
+/**
+ * The view mode (list / medium / large) each pane was last left in.
+ *
+ * `rememberedViewMode` runs while the pane objects above are being built, so the first
+ * render already paints the remembered layout and the matching button comes up active -
+ * which is why it is a hoisted `function` with the key and the allowed values written
+ * *inside* it: a `const` up here would still be in its dead zone at that moment.
+ *
+ * The key is the File Manager's own (`SausFileManagerViews`), not one of the shell's
+ * preferences, and the two panes remember theirs independently.
+ */
+function rememberedViewMode(root) {
+    try {
+        const saved = JSON.parse(localStorage.getItem('SausFileManagerViews') || '{}');
+        return ['list', 'medium', 'large'].includes(saved[root]) ? saved[root] : 'list';
+    } catch (_) {
+        return 'list';
+    }
+}
+
+function saveViewModes() {
+    try {
+        localStorage.setItem('SausFileManagerViews', JSON.stringify({
+            input: panes.input.viewMode,
+            output: panes.output.viewMode,
+        }));
+    } catch (error) {
+        console.warn('[SAUS] Could not remember the File Manager view mode:', error);
+    }
 }
 
 function onPaneClick(root, e) {
@@ -533,6 +566,20 @@ function onDragStart(root, e) {
 
     dragState = { root, names: Array.from(pane.selected) };
     focusedPane = root;
+    // Also publish the dragged file as a SAUS media drag, so it can be dropped onto an
+    // app's "Load Image" / "Video" input (see core/js/common/scripts/appDrag.js).
+    if (item.type !== 'folder') {
+        const subfolder = pane.path.startsWith(root)
+            ? pane.path.slice(root.length).replace(/^\/+/, '') : '';
+        setMediaDrag({
+            filename: item.name,
+            subfolder,
+            type: root,
+            path: joinPath(pane.path, item.name),
+        }, e.dataTransfer);
+    } else {
+        endMediaDrag();
+    }
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'copyMove';
         try { e.dataTransfer.setData('text/plain', item.name); } catch (_) { /* ignore */ }

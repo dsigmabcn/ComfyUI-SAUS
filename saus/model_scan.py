@@ -142,22 +142,39 @@ MODEL_FOLDER_TYPES = frozenset({
 })
 
 
+def normalise_folder_name(value) -> str:
+    """A folder name however the registry happens to spell it.
+
+    The registry's ``directory`` values are not uniform: some are bare
+    (``unet``), some are wrapped in slashes (``/unet/``) and some are a
+    sub-path (``loras/sdxl``). Only the first segment names a ComfyUI folder
+    *type*, so ``/unet/`` has to mean ``unet``. Splitting on ``/`` first turned
+    ``/unet/`` into an empty string and the hint was dropped without a word --
+    the two spellings of one folder then behaved differently.
+
+    Returns ``""`` when nothing usable is left, so a caller can tell "no hint"
+    from "a hint".
+    """
+    text = str(value or "").strip().replace("\\", "/").strip("/")
+    name = text.split("/")[0].strip().lower()
+    return _TYPE_FOLDER_OVERRIDES.get(name, name)
+
+
 def candidate_folder_types(model_type: str = "", hint: str = "",
                            known: Iterable[str] = ()) -> List[str]:
     """ComfyUI folder types to search for a model, most likely first.
 
     ``model_type`` is the registry's ``type`` ("Diffusion model", "LORA", ...),
-    ``hint`` is the registry's ``directory`` (a folder name or sub-path) and
-    ``known`` is whatever folder types ComfyUI registered. Anything not covered
-    by the map is searched too (last), so an unknown/empty ``type`` -- or a
-    folder registered by another custom node -- still resolves.
+    ``hint`` is the registry's ``directory`` (a folder name or sub-path, with or
+    without surrounding slashes) and ``known`` is whatever folder types ComfyUI
+    registered. Anything not covered by the map is searched too (last), so an
+    unknown/empty ``type`` -- or a folder registered by another custom node --
+    still resolves.
     """
     ordered: List[str] = []
 
     def add(name) -> None:
-        text = str(name or "").strip().replace("\\", "/")
-        text = text.split("/")[0].strip().lower()
-        text = _TYPE_FOLDER_OVERRIDES.get(text, text)
+        text = normalise_folder_name(name)
         if text and text not in ordered:
             ordered.append(text)
 

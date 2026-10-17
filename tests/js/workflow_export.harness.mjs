@@ -110,7 +110,7 @@ function reset(overrides = {}) {
 /* 1. the happy path: blank window reserved, then pointed at ComfyUI */
 {
     reset();
-    const result = await exportWorkflowToComfyUI({ url: '65j5u-background-remover', name: 'Background Remover' });
+    const result = await exportWorkflowToComfyUI({ url: 'image-upscale-with-model', name: 'Upscale with Model' });
 
     assert.equal(result, true);
     assert.equal(state.opened.length, 1, 'exactly one window');
@@ -124,13 +124,13 @@ function reset(overrides = {}) {
     assert.equal(parsed.pathname, '/');
     const param = parsed.searchParams.get('saus_workflow');
     assert.ok(param, 'ComfyUI is told which workflow to open');
-    assert.equal(param, copyUrl('Background Remover.json'));
+    assert.equal(param, copyUrl('Upscale with Model.json'));
 
     assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'],
         'the app workflow is read, any stored copy checked, then the copy saved');
-    assert.ok(state.fetch[0].url.startsWith('/saus/65j5u-background-remover/wf.json?cacheSaus='),
+    assert.ok(state.fetch[0].url.startsWith('/saus/image-upscale-with-model/wf.json?cacheSaus='),
         `unexpected first request: ${state.fetch[0].url}`);
-    assert.equal(state.fetch[2].url, `${copyUrl('Background Remover.json')}?overwrite=false`,
+    assert.equal(state.fetch[2].url, `${copyUrl('Upscale with Model.json')}?overwrite=false`,
         'nothing is overwritten');
     console.log('1. reserves a window, saves to userdata, hands over ?saus_workflow=: OK');
 }

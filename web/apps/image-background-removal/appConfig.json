@@ -1,0 +1,62 @@
+{
+  "id": "birefnet1",
+  "name": "Background Removal",
+  "url": "image-background-removal",
+  "description": "Remove the background with BiRefNet and save the cut-out with alpha.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Image tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "BIREFNET REMOVE BG",
+    "models": [
+      "birefnet.safetensors"
+    ]
+  },
+  "prompts": [],
+  "steppers": [],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixbirefnet1",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "900.inputs.filename_prefix",
+      "defValue": "Background-Removed"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimagebirefnet1",
+      "label": "Image",
+      "nodePath": "17.inputs.image"
+    }
+  ],
+  "dropdowns": [],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outbirefnet1",
+      "label": "Save Image",
+      "nodeId": "900",
+      "type": "media"
+    }
+  ]
+}

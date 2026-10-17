@@ -14,7 +14,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from saus.model_scan import candidate_folder_types, match_folder_names  # noqa: E402
+from saus.model_scan import (  # noqa: E402
+    candidate_folder_types,
+    match_folder_names,
+    normalise_folder_name,
+)
 from saus import model_lookup  # noqa: E402
 
 
@@ -188,6 +192,86 @@ def test_model_folder_directories_excludes_code_folders():
     assert text, 'model directories must be reported'
     assert all('custom_nodes' not in part for part in text)
     assert all('datasets' not in part for part in text)
+
+
+def test_a_folder_name_is_parsed_the_same_however_it_is_written():
+    """The registry writes the same folder as 'unet', '/unet/' and 'unet/x'.
+
+    Splitting on '/' before trimming the outer ones turned '/unet/' into an empty
+    string, so the hint vanished and the two spellings of one folder gave
+    different answers.
+    """
+    for written, wanted in (('unet', 'unet'), ('/unet/', 'unet'), ('unet/', 'unet'),
+                            ('/unet', 'unet'), ('/UNET/', 'unet'),
+                            ('loras/sdxl', 'loras'), ('/loras/sdxl/', 'loras'),
+                            # Only the registry's own aliases live here; ComfyUI's
+                            # (unet/clip) are applied later by folder_paths.map_legacy.
+                            ('lora', 'loras'), ('clip', 'clip'),
+                            ('', ''), (None, ''), ('/', ''), ('  ', '')):
+        assert normalise_folder_name(written) == wanted, \
+            f'{written!r} must normalise to {wanted!r}'
+
+
+def test_a_slash_wrapped_hint_keeps_its_priority():
+    """A hint written '/unet/' has to steer the search like 'unet' does.
+
+    The folder type adds nothing here (an unknown model type) and the known list
+    is the fallback, so the hint landing first is the whole assertion.
+    """
+    known = ['checkpoints', 'loras']
+    for hint in ('/upscale_models/', 'upscale_models'):
+        got = candidate_folder_types('', hint, known)
+        assert got[0] == 'upscale_models', f'{hint!r} was ignored: {got}'
+
+
+def test_a_hint_is_parsed_the_same_with_or_without_slashes():
+    known = ['checkpoints', 'diffusion_models', 'unet', 'loras']
+    expected = candidate_folder_types('Diffusion model', 'unet', known)
+    for hint in ('/unet/', 'unet/', '/unet'):
+        assert candidate_folder_types('Diffusion model', hint, known) == expected, \
+            f'{hint!r} must be read exactly like "unet"'
+
+
+def test_the_alias_mapping_does_not_duplicate_a_folder_type():
+    """unet -> diffusion_models collides with the model's own folder type.
+
+    The alias is applied *after* the list is built, so without a second pass the
+    same folder type is searched twice.
+    """
+    _install_fake(_tree())
+    got = model_lookup.model_folder_candidates('Diffusion model', 'unet')
+    assert got == list(dict.fromkeys(got)), f'a folder type is listed twice: {got}'
+    assert got[0] == 'diffusion_models', f'the alias must still lead: {got}'
+
+
+def test_the_hint_chooses_the_registered_directory_of_that_name():
+    """A folder type covers several directories, so the hint has to pick one.
+
+    ComfyUI registers ``diffusion_models`` as models/unet *and*
+    models/diffusion_models. Always taking the first sent every diffusion model
+    to ``unet/`` however the registry named the folder -- which is how a catalog
+    saying ``diffusion_models`` ended up with its files in ``unet/``.
+    """
+    root = _tree()
+    _install_fake(root)
+
+    assert model_lookup.destination_for('Diffusion model', 'diffusion_models') == root / 'diffusion_models'
+    assert model_lookup.destination_for('Diffusion model', '/diffusion_models/') == root / 'diffusion_models'
+    assert model_lookup.destination_for('Diffusion model', 'unet') == root / 'unet'
+    # The hint chooses among the *leading* folder type's directories. A hint
+    # naming a folder type of its own that the model's type does not lead with is
+    # contradictory metadata, and falls back rather than aiming somewhere odd.
+    assert model_lookup.destination_for('Diffusion model', 'loras') == root / 'unet'
+
+    # Still only ever a directory ComfyUI registered: a hint naming a folder that
+    # is not a model folder (or no known folder at all) falls back, it never
+    # aims the path.
+    assert model_lookup.destination_for('Diffusion model', 'nonexistent_folder') == root / 'unet'
+    # No hint at all keeps the old answer: the first registered directory.
+    assert model_lookup.destination_for('Diffusion model') == root / 'unet'
+    # A LoRA's sub-path still resolves to the loras folder, not to a sub-folder
+    # of it: only the first segment names a folder type.
+    assert model_lookup.destination_for('LORA', 'loras/sdxl') == root / 'loras'
 
 
 if __name__ == '__main__':

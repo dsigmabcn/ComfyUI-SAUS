@@ -1,0 +1,176 @@
+{
+  "id": "vidpose1",
+  "name": "Video to Pose (SDPose)",
+  "url": "video-to-pose",
+  "description": "Draw a whole-body pose map (body, hands, face, feet) on every frame with SDPose.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "SDPOSE",
+    "models": [
+      "sdpose_wholebody_fp16.safetensors"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesvidpose1",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "950.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidpose1",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "950.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "resizetargetvidpose1",
+      "label": "Resize Target",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "675_674.inputs.resize_type.longer_size",
+      "defValue": 1024,
+      "minValue": 256,
+      "maxValue": 4096,
+      "step": 64,
+      "precision": 0,
+      "scaleFactor": 1
+    },
+    {
+      "id": "scorethresholdvidpose1",
+      "label": "Score Threshold",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "675_672.inputs.score_threshold",
+      "defValue": 0.5,
+      "minValue": 0,
+      "maxValue": 1,
+      "step": 0.05,
+      "precision": 2,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidpose1",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      },
+      "nodePath": "680.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidpose1",
+      "label": "Video",
+      "nodePath": "679.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "scalemethodvidpose1",
+      "label": "Scale Method",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "675_674.inputs.scale_method",
+      "url": "ResizeImageMaskNode",
+      "key": "scale_method"
+    }
+  ],
+  "toggles": [
+    {
+      "id": "drawbodyvidpose1",
+      "label": "Draw Body",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "defaultValue": true,
+      "nodePath": "675_672.inputs.draw_body"
+    },
+    {
+      "id": "drawhandsvidpose1",
+      "label": "Draw Hands",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "defaultValue": true,
+      "nodePath": "675_672.inputs.draw_hands"
+    },
+    {
+      "id": "drawfacevidpose1",
+      "label": "Draw Face",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      },
+      "defaultValue": true,
+      "nodePath": "675_672.inputs.draw_face"
+    },
+    {
+      "id": "drawfeetvidpose1",
+      "label": "Draw Feet",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      },
+      "defaultValue": true,
+      "nodePath": "675_672.inputs.draw_feet"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidpose1",
+      "label": "Save Video",
+      "nodeId": "680",
+      "type": "media"
+    }
+  ]
+}

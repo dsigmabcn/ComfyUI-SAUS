@@ -1,3 +1,4 @@
+import { parseMediaUrl, setMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 let previousMediaElement = null;
 
@@ -144,6 +145,23 @@ class HistoryManager {
         }
 
         thumbnailDiv.appendChild(mediaElement);
+
+        // A result can be dragged onto a "Load Image" / "Video" input - in this app or
+        // in another one, whose tab opens when the pointer rests on it. The payload
+        // comes from ComfyUI's own viewer URL, which is all a thumbnail has.
+        const payload = parseMediaUrl(imageUrl);
+        if (payload) {
+            thumbnailDiv.draggable = true;
+            thumbnailDiv.title = 'Drag onto a Load Image input';
+            thumbnailDiv.addEventListener('dragstart', (event) => {
+                setMediaDrag(payload, event.dataTransfer);
+                thumbnailDiv.classList.add('dragging');
+            });
+            thumbnailDiv.addEventListener('dragend', () => {
+                thumbnailDiv.classList.remove('dragging');
+                endMediaDrag();
+            });
+        }
 
         let clickTimeout = null;
         const CLICK_DELAY = 250; 

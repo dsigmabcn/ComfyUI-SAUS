@@ -16,7 +16,7 @@ This page is a quick tour. Each topic below has its own page with the full detai
 | [Running an App](RUNNING_APPS.md) | Controls and image/video generation. |
 | [The File Manager](FILE_MANAGER.md) | Browsing the results of your creations |
 | [ComfyUI](COMFYUI.md) | Opening ComfyUI. |
-| [Settings](SETTINGS.md) | Theme selection, info and restarting the server. |
+| [Settings](SETTINGS.md) | Theme selection, the deprecated-apps switch, info and restarting the server. |
 | [Runpod guide](RUNPOD.md) | How to run SAUS in rented GPUs |
 
 Not installed yet? Start with [Installation and Setup](INSTALLATION.md).
@@ -107,6 +107,7 @@ A simple File Manager to access and perform basic management of the files in you
 
 ### Settings
 - **Theme**: choose **Night** (neutral dark grey/white, the default), **Day** (light) or **Fire** (the original orange and ice look). 
+- **Show deprecated apps**: list the apps a newer model has superseded. They are hidden from the panel by default.
 - **Version**: the installed SAUS version.
 - **Social**: social media links.
 - **Restart Server**: Restart the ComfyUI server directly from the UI if needed.

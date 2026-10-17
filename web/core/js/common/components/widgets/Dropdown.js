@@ -114,12 +114,39 @@ export default class Dropdown {
 
     populateDropdown(
       this.config.id,
-      options,
+      this.allowedOptions(options),
       this.config.label,
       this.config.nodePath,
       this.workflow
     );
     return true;
+  }
+
+  /**
+   * The node's option list, narrowed by the app's own allow-list.
+   *
+   * An appConfig dropdown may carry `options: [...]` to offer only the files the app
+   * is built around (the ComfyUI list would otherwise include every model of that
+   * kind the user happens to have). The app's order is the curated one, and a name
+   * the node does not actually have is dropped - a stale entry must never add an
+   * option ComfyUI cannot load.
+   *
+   * When *none* of the listed files is installed the full list is shown instead:
+   * an empty dropdown would make the app unrunnable, while an installer can still
+   * see which files the app wants in its model card.
+   */
+  allowedOptions(options) {
+    const only = this.config.options;
+    if (!Array.isArray(only) || !only.length) return options;
+
+    const available = new Set(options);
+    const picked = only.filter((name) => available.has(name));
+    if (!picked.length) {
+      console.warn(`[SAUS] Dropdown "${this.config.id}": none of its ${only.length} `
+        + 'preferred models is installed, so the full list is shown.');
+      return options;
+    }
+    return picked;
   }
 
   displayMissingComponentMessage() {

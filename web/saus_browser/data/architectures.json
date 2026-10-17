@@ -222,107 +222,6 @@
       }
     }
   },
-  "LTX2_T2V_I2V": {
-    "title": "LTX-2 Text and image to video",
-    "description": "LTX-2 Models (checkpoint, text encoder, distilled lora and upscaler)",
-    "categories": [
-      "Video Models"
-    ],
-    "components": {
-      "compulsory": [
-        "LTX2_BASE",
-        "LTX2_DISTILLED_LORA",
-        "LTX2_VIDEO_UPSCALER",
-        "GEMMA_3_12B_ENCODER"
-      ],
-      "at_least_one": [],
-      "optional": []
-    },
-    "base_settings": {
-      "name": "BASE",
-      "steps": "20",
-      "cfg": "4.0",
-      "model": [
-        "LTX2_BASE"
-      ],
-      "lora": []
-    },
-    "models": [
-      {
-        "id": "CHECKPOINT",
-        "type": "CHECKPOINT",
-        "need": "all",
-        "node": {
-          "nodeType": "CheckpointLoaderSimple",
-          "input": "ckpt_name"
-        },
-        "files": [
-          {
-            "file": "ltx-2-19b-dev-fp8.safetensors",
-            "label": "LTX-2 19B DEV FP8"
-          }
-        ]
-      },
-      {
-        "id": "LORA",
-        "type": "LORA",
-        "need": "all",
-        "node": {
-          "nodeType": "LoraLoader",
-          "input": "lora_name"
-        },
-        "files": [
-          {
-            "file": "ltx-2-19b-distilled-lora-384.safetensors",
-            "label": "LTX-2 19B DISTILLED LORA"
-          }
-        ]
-      },
-      {
-        "id": "Latent_Upscaler",
-        "type": "Latent Upscaler",
-        "need": "all",
-        "node": {
-          "nodeType": "LatentUpscaleModelLoader",
-          "input": "model_name"
-        },
-        "files": [
-          {
-            "file": "ltx-2-spatial-upscaler-x2-1.0.safetensors",
-            "label": "LTX-2 Spatial Upscaler"
-          }
-        ]
-      },
-      {
-        "id": "TEXT_ENCODER",
-        "type": "TEXT ENCODER",
-        "need": "all",
-        "node": {
-          "nodeType": "CLIPLoader",
-          "input": "clip_name"
-        },
-        "files": [
-          {
-            "file": "gemma_3_12B_it_fp4_mixed.safetensors",
-            "label": "GEMMA 3 12B FP4 ENCODER"
-          }
-        ]
-      }
-    ],
-    "variants": {
-      "BASE": {
-        "label": "BASE",
-        "pick": {
-          "CHECKPOINT": "ltx-2-19b-dev-fp8.safetensors"
-        },
-        "settings": {
-          "steps": "20",
-          "cfg": "4.0"
-        },
-        "loras": []
-      }
-    }
-  },
   "FLUX_REDUX": {
     "title": "FLUX REDUX",
     "description": "Assets for image prompt guidance and style transfer.",
@@ -509,20 +408,6 @@
         },
         "loras": []
       }
-    }
-  },
-  "OTHER": {
-    "title": "Other",
-    "description": "Other",
-    "categories": [
-      ""
-    ],
-    "components": {
-      "compulsory": [],
-      "at_least_one": [],
-      "optional": [
-        ""
-      ]
     }
   },
   "QWEN IMAGE 2.1": {
@@ -1851,5 +1736,515 @@
         "loras": []
       }
     }
+  },
+  "FLUX 3 KLEIN": {
+    "title": "Flux 3 Image Klein family",
+    "description": "FLUX 3 Image Klein (5.6B) text-to-image. Klein Base is the undistilled checkpoint (50 steps, guidance 3.5) and the _sd_ file is the distilled one (16 steps, no guidance); both share the Qwen3-VL-4B encoder, the Qwen3.5-9B prompt upsampler and the FLUX 2 VAE.",
+    "categories": [
+      "text-to-image"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux3_image_klein_base_int8_convrot.safetensors",
+            "label": "FLUX 3 Klein Base int8"
+          },
+          {
+            "file": "flux3_image_klein_sd_int8_convrot.safetensors",
+            "label": "FLUX 3 Klein distilled int8"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_4b_int8_convrot.safetensors",
+            "label": "Qwen3-VL 4B (the image model's encoder)"
+          },
+          {
+            "file": "qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+            "label": "Qwen3.5 9B prompt upsampler"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "KLEIN3_BASE": {
+        "label": "Base",
+        "pick": {
+          "diffusion_model": "flux3_image_klein_base_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "50",
+          "cfg": "3.5"
+        },
+        "loras": []
+      },
+      "KLEIN3_SD": {
+        "label": "Distilled",
+        "pick": {
+          "diffusion_model": "flux3_image_klein_sd_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "16",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
+  },
+  "FLUX 3 KLEIN EDIT": {
+    "title": "Flux 3 Image Klein Edit family",
+    "description": "FLUX 3 Image Klein (5.6B) for single-image editing and multi-image (reference) composition. Klein Base is the undistilled checkpoint and the _sd_ file is the distilled one; both share the Qwen3-VL-4B encoder, the Qwen3.5-9B prompt upsampler and the FLUX 2 VAE. The templates run guidance 1 for editing.",
+    "categories": [
+      "image-to-image (editing)",
+      "image-to-image (reference)"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "flux3_image_klein_base_int8_convrot.safetensors",
+            "label": "FLUX 3 Klein Base int8"
+          },
+          {
+            "file": "flux3_image_klein_sd_int8_convrot.safetensors",
+            "label": "FLUX 3 Klein distilled int8"
+          }
+        ]
+      },
+      {
+        "id": "text_encoder",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3vl_4b_int8_convrot.safetensors",
+            "label": "Qwen3-VL 4B (the image model's encoder)"
+          },
+          {
+            "file": "qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+            "label": "Qwen3.5 9B prompt upsampler"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae.safetensors",
+            "label": "FLUX 2 VAE"
+          }
+        ]
+      }
+    ],
+    "variants": {
+      "KLEIN3_BASE": {
+        "label": "Base",
+        "pick": {
+          "diffusion_model": "flux3_image_klein_base_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "50",
+          "cfg": "1"
+        },
+        "loras": []
+      },
+      "KLEIN3_SD": {
+        "label": "Distilled",
+        "pick": {
+          "diffusion_model": "flux3_image_klein_sd_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "16",
+          "cfg": "1"
+        },
+        "loras": []
+      }
+    }
+  },
+  "SEEDVR2 UPSCALE": {
+    "title": "SeedVR2 image upscale",
+    "description": "SeedVR2 7B int8 transformer and its EMA VAE: a one-step generative upscaler.",
+    "categories": [
+      "Image tools"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "seedvr2_7b_int8_convrot.safetensors",
+            "label": "SeedVR2 7B int8"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "one",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "seedvr2_ema_vae_fp16.safetensors",
+            "label": "SeedVR2 EMA VAE"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "BIREFNET REMOVE BG": {
+    "title": "BiRefNet background removal",
+    "description": "BiRefNet removes the background: the app writes the cut-out with alpha.",
+    "categories": [
+      "Image tools"
+    ],
+    "models": [
+      {
+        "id": "background_removal_model",
+        "type": "Background removal",
+        "need": "one",
+        "node": {
+          "nodeType": "LoadBackgroundRemovalModel",
+          "input": "bg_removal_name"
+        },
+        "files": [
+          {
+            "file": "birefnet.safetensors",
+            "label": "BiRefNet"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "DEPTH ANYTHING 3": {
+    "title": "Depth Anything 3",
+    "description": "Depth Anything 3 mono large: estimates a depth map from one image.",
+    "categories": [
+      "Image tools",
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "depth_model",
+        "type": "Depth estimation",
+        "need": "one",
+        "node": {
+          "nodeType": "LoadDA3Model",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "depth_anything_3_mono_large.safetensors",
+            "label": "Depth Anything 3 mono large"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "SDPOSE": {
+    "title": "SDPose whole-body",
+    "description": "SDPose-OOD draws a pose map: body, hands, face and feet.",
+    "categories": [
+      "Image tools",
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "checkpoint",
+        "type": "CHECKPOINT",
+        "need": "one",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "sdpose_wholebody_fp16.safetensors",
+            "label": "SDPose wholebody fp16"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "UPSCALE MODELS": {
+    "title": "Upscale models",
+    "description": "The ESRGAN-family upscalers the Upscale with Model app offers. Install the one you want; they are alternatives, so any single file is enough.",
+    "categories": [
+      "Image tools",
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "upscale_model",
+        "type": "upscaler",
+        "need": "one",
+        "node": {
+          "nodeType": "UpscaleModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "RealESRGAN_x4plus.safetensors",
+            "label": "RealESRGAN x4"
+          },
+          {
+            "file": "RealESRGAN_x2.pth",
+            "label": "RealESRGAN x2"
+          },
+          {
+            "file": "4x-UltraSharp.pth",
+            "label": "4x UltraSharp"
+          },
+          {
+            "file": "4x-AnimeSharp.pth",
+            "label": "4x AnimeSharp"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "SEEDVR2 VIDEO UPSCALE": {
+    "title": "SeedVR2 video upscale (3B)",
+    "description": "SeedVR2 3B int8 transformer and its EMA VAE: the one-step generative video upscaler.",
+    "categories": [
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "diffusion_model",
+        "type": "Diffusion model",
+        "need": "one",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "seedvr2_3b_int8_convrot.safetensors",
+            "label": "SeedVR2 3B int8"
+          }
+        ]
+      },
+      {
+        "id": "vae",
+        "type": "VAE",
+        "need": "one",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "seedvr2_ema_vae_fp16.safetensors",
+            "label": "SeedVR2 EMA VAE"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "SAM3 SEGMENT": {
+    "title": "SAM3 video segmentation",
+    "description": "SAM3.1 multiplex segments the video from a text prompt; the app writes the masks as images.",
+    "categories": [
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "checkpoint",
+        "type": "CHECKPOINT",
+        "need": "one",
+        "node": {
+          "nodeType": "CheckpointLoaderSimple",
+          "input": "ckpt_name"
+        },
+        "files": [
+          {
+            "file": "sam3.1_multiplex_fp16.safetensors",
+            "label": "SAM3.1 multiplex fp16"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "FRAME INTERPOLATION": {
+    "title": "Frame interpolation models",
+    "description": "The film net and RIFE interpolation models ComfyUI can load. They are alternatives - any single file is enough.",
+    "categories": [
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "interpolation_model",
+        "type": "Frame interpolation",
+        "need": "one",
+        "node": {
+          "nodeType": "FrameInterpolationModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "film_net_fp16.safetensors",
+            "label": "FILM net fp16"
+          },
+          {
+            "file": "rife_v4.26.safetensors",
+            "label": "RIFE 4.26"
+          },
+          {
+            "file": "rife_v4.26_heavy.safetensors",
+            "label": "RIFE 4.26 heavy"
+          },
+          {
+            "file": "rife_v4.25.safetensors",
+            "label": "RIFE 4.25"
+          },
+          {
+            "file": "rife_v4.25_heavy.safetensors",
+            "label": "RIFE 4.25 heavy"
+          },
+          {
+            "file": "rife_v4.25_lite.safetensors",
+            "label": "RIFE 4.25 lite"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "VIDEO INTERPOLATE UPSCALE": {
+    "title": "Video interpolate + upscale",
+    "description": "Frame interpolation and an ESRGAN-family upscaler in one pass: needs one model of each kind.",
+    "categories": [
+      "Video tools"
+    ],
+    "models": [
+      {
+        "id": "interpolation_model",
+        "type": "Frame interpolation",
+        "need": "one",
+        "node": {
+          "nodeType": "FrameInterpolationModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "film_net_fp16.safetensors",
+            "label": "FILM net fp16"
+          },
+          {
+            "file": "rife_v4.26.safetensors",
+            "label": "RIFE 4.26"
+          },
+          {
+            "file": "rife_v4.26_heavy.safetensors",
+            "label": "RIFE 4.26 heavy"
+          },
+          {
+            "file": "rife_v4.25.safetensors",
+            "label": "RIFE 4.25"
+          },
+          {
+            "file": "rife_v4.25_heavy.safetensors",
+            "label": "RIFE 4.25 heavy"
+          },
+          {
+            "file": "rife_v4.25_lite.safetensors",
+            "label": "RIFE 4.25 lite"
+          }
+        ]
+      },
+      {
+        "id": "upscale_model",
+        "type": "upscaler",
+        "need": "one",
+        "node": {
+          "nodeType": "UpscaleModelLoader",
+          "input": "model_name"
+        },
+        "files": [
+          {
+            "file": "RealESRGAN_x4plus.safetensors",
+            "label": "RealESRGAN x4"
+          },
+          {
+            "file": "RealESRGAN_x2.pth",
+            "label": "RealESRGAN x2"
+          },
+          {
+            "file": "4x-UltraSharp.pth",
+            "label": "4x UltraSharp"
+          },
+          {
+            "file": "4x-AnimeSharp.pth",
+            "label": "4x AnimeSharp"
+          }
+        ]
+      }
+    ],
+    "variants": {}
   }
 }

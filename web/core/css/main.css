@@ -1,12 +1,20 @@
 /* Theme palette: Night (default) / Day / Fire. See /core/css/themes.css. */
 @import url('/core/css/themes.css');
+/* The completion notice: the shell renders it, and the shell does not load this file -
+   see the note in notices.css. */
+@import url('/core/css/notices.css');
 
 /* Reset and Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial, sans-serif;
+    /* A generic family has to come last: with `sans-serif` in second place the two
+       named families after it were unreachable, and the UI silently fell through to
+       the browser default. 'Roboto' stays first for the machines that have it; the
+       rest is the platform stack already used by the canvas plugins. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Palette comes from /core/css/themes.css (imported above). */
@@ -666,6 +674,14 @@ input[type="number"] {
     border: 1px solid var(--color-border);
     border-radius: 6px;
     cursor: pointer;
+    /* The three buttons are one box size, so centring the glyph is what keeps them on
+       one line: an "R" and a "-"/"+" do not share a baseline, and the letter used to sit
+       a couple of pixels high next to its neighbours. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
     transition: background-color 0.15s ease, color 0.15s ease,
         border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -1383,6 +1399,21 @@ button:hover {
 
 }
 
+/* A recent result can be dragged onto a "Load Image" / "Video" input - in this app
+   or another one (see core/js/common/scripts/appDrag.js). */
+.history-thumbnail[draggable="true"] {
+    cursor: grab;
+}
+
+.history-thumbnail.dragging {
+    opacity: 0.55;
+}
+
+/* While media is in hand every loader says so. */
+body.saus-dragging .image-loader {
+    border-color: var(--color-border-strong);
+}
+
 .content .mid-col #image-container img,
 .content .mid-col #image-container video {
     width: auto;
@@ -1406,36 +1437,92 @@ button:hover {
 
 }
 
+/* ------------------------------------------------------------------ *
+ * Media loader (the "Load Image" / "Video" input)
+ *
+ * One rounded card per input, matching the rest of SAUS: a muted caption
+ * header that is also the browse button, and a body that reads as a drop
+ * zone rather than a picture frame. The placeholder stays a *hint*, so it
+ * is drawn at ~60% of the panel instead of filling it edge to edge - only a
+ * real image or video takes the whole room. JS marks that state with
+ * `.placeholder` on the media element.
+ * ------------------------------------------------------------------ */
+
+#load-image-container {
+    /* Narrower than it was: the media area beside it is what needs the room. */
+    width: 15%;
+    padding: 10px;
+    border: none;
+}
+
 .image-loader-title {
     display: flex;
+    gap: 8px;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-background-secondary);
+    width: 100%;
+    padding: 7px 10px;
+    background-color: var(--color-surface-alt);
     color: var(--color-primary-text);
-    /* font-size: 1.2em; */
-    font-weight: bold;
-    border: 1px dashed var(--color-border);
+    font-weight: 600;
+    font-size: 0.92em;
+    border: 1px solid var(--color-border);
     border-bottom: none;
-    padding: 5px;
+    border-radius: 6px 6px 0 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
-#load-image-container {
-    width: 20%;
-    border: 1px dashed var(--color-border);
-    padding: 10px;
 
+.image-loader-title:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-accent-hover);
 }
 
 .image-loader {
     width: 100%;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
     margin-bottom: 10px;
-    padding-bottom: 10px;
+    padding: 10px 10px 26px;
+    background-color: var(--color-input-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 6px 6px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-/* Fix to load the video loading in the right size*/
+.image-loader:hover {
+    border-color: var(--color-border-hover);
+}
+
+/* The hint line, so an empty loader says what it accepts. */
+.image-loader::after {
+    content: 'Click or drop a file';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 7px;
+    text-align: center;
+    font-size: 0.72em;
+    color: var(--color-text-subtle);
+    pointer-events: none;
+}
+
+/* Dragging over it (a file from the desktop or from Recent). */
+.image-loader.highlight {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+}
+
+.image-loader.highlight::after {
+    content: 'Drop to load';
+    color: var(--color-accent-hover);
+}
+
+/* Keep the video preview in the right size (it is a real element now). */
 .image-loader img,
-.image-loader video 
-    {
+.image-loader video {
     display: block;
     width: 100% !important; /* Force same width */
     height: auto !important; /* Let height adjust automatically */
@@ -1444,9 +1531,80 @@ button:hover {
     left: auto !important;
     transform: none !important;
     object-fit: contain;
-    border: 1px dashed var(--color-border);
-
+    border: none;
 }
+
+/* The empty state is a hint: a muted glyph, not a picture that fills the card. */
+.image-loader .image-loader-placeholder {
+    font-size: 2.1em;
+    color: var(--color-text-subtle);
+    opacity: 0.55;
+}
+
+/* ------------------------------------------------------------------ *
+ * App toggles: the same switch the Settings pane uses.
+ *
+ * The old control was a checkbox with an OFF/ON slot and a curtain; the two
+ * sit inches apart in the same window, so they now share one look - grey off,
+ * green on, white knob. The checkbox stays the control (focus, keyboard, aria)
+ * and is only made invisible behind the track.
+ * ------------------------------------------------------------------ */
+
+.toggle-component {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.toggle-component .toggle {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.toggle-track {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: var(--color-neutral);
+    transition: background-color 0.15s ease;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--color-highlight);
+    transition: transform 0.15s ease;
+}
+
+.toggle-component .toggle:checked + .toggle-track {
+    background-color: var(--color-success);
+}
+
+.toggle-component .toggle:checked + .toggle-track::after {
+    transform: translateX(18px);
+}
+
+.toggle-component .toggle:focus-visible + .toggle-track {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ *
+ * The end-of-generation notice lives in /core/css/notices.css, imported at
+ * the top of this file: the shell renders it, and the shell never loads this
+ * stylesheet - so a copy here alone would leave the notice unstyled.
+ * ------------------------------------------------------------------ */
 
 /* #load-image-container img {
     max-width: 100%;
@@ -1865,10 +2023,22 @@ html:not(.css-loading) body {
     cursor: pointer;
     z-index: 1002; 
     user-select: none;
+    /* The X inherited the panel's text colour, so on light media it vanished.
+       The lightbox arrows use --color-button-primary - match them so the close
+       button reads as a control, and give it a real hit area rather than a
+       glyph-sized one. */
+    color: var(--color-button-primary);
+    line-height: 1;
+    padding: 0 8px 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
 }
 .lightbox-close:hover,
 .lightbox-close:focus {
-    color: var(--color-text-muted);
+    /* Red reads as "close / dismiss"; the old hover dimmed it to
+       --color-text-muted, which is the opposite of findable. */
+    color: var(--color-danger);
+    background-color: var(--color-background-secondary);
     text-decoration: none;
     cursor: pointer;
 }
@@ -2364,6 +2534,9 @@ html:not(.css-loading) body {
     align-items: center;
     /* margin: 0.5em;  */
     width: 100%;
+    /* The switch used to end flush against the panel edge; the rows beside it carry
+       their own inset, so this one needs the same breathing room. */
+    padding-right: 8px;
     background-color: var(--color-background-secondary);
     margin-bottom: 0.5em; 
     /* padding: 6px 0; */

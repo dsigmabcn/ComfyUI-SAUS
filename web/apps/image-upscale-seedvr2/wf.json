@@ -1,0 +1,189 @@
+{
+  "1": {
+    "inputs": {
+      "image": "indoor_portrait.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "9": {
+    "inputs": {
+      "images": [
+        "66_59",
+        0
+      ],
+      "filename_prefix": "SeedVR2-Upscale"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "66_48": {
+    "inputs": {
+      "pixels": [
+        "66_58",
+        0
+      ],
+      "vae": [
+        "66_51",
+        0
+      ],
+      "tile_size": 512,
+      "overlap": 128,
+      "temporal_size": 4096,
+      "temporal_overlap": 8
+    },
+    "class_type": "VAEEncodeTiled",
+    "_meta": {
+      "title": "VAEEncodeTiled"
+    }
+  },
+  "66_50": {
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ],
+      "alpha": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "JoinImageWithAlpha"
+    }
+  },
+  "66_51": {
+    "inputs": {
+      "vae_name": "seedvr2_ema_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "66_52": {
+    "inputs": {
+      "unet_name": "seedvr2_7b_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "66_54": {
+    "inputs": {
+      "model": [
+        "66_52",
+        0
+      ],
+      "positive": [
+        "66_61",
+        0
+      ],
+      "negative": [
+        "66_61",
+        1
+      ],
+      "latent_image": [
+        "66_48",
+        0
+      ],
+      "seed": 959948902156062,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "steps": 1,
+      "cfg": 1
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "66_55": {
+    "inputs": {
+      "samples": [
+        "66_54",
+        0
+      ],
+      "vae": [
+        "66_51",
+        0
+      ],
+      "tile_size": 512,
+      "overlap": 128,
+      "temporal_size": 4096,
+      "temporal_overlap": 8
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAEDecodeTiled"
+    }
+  },
+  "66_57": {
+    "inputs": {
+      "input": [
+        "66_50",
+        0
+      ],
+      "resize_type.multiplier": 4,
+      "resize_type": "scale by multiplier",
+      "scale_method": "lanczos"
+    },
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "ResizeImageMaskNode"
+    }
+  },
+  "66_58": {
+    "inputs": {
+      "resized_images": [
+        "66_57",
+        0
+      ]
+    },
+    "class_type": "SeedVR2Preprocess",
+    "_meta": {
+      "title": "SeedVR2Preprocess"
+    }
+  },
+  "66_59": {
+    "inputs": {
+      "images": [
+        "66_55",
+        0
+      ],
+      "original_resized_images": [
+        "66_57",
+        0
+      ],
+      "color_correction_method": "none"
+    },
+    "class_type": "SeedVR2PostProcessing",
+    "_meta": {
+      "title": "SeedVR2PostProcessing"
+    }
+  },
+  "66_61": {
+    "inputs": {
+      "model": [
+        "66_52",
+        0
+      ],
+      "vae_conditioning": [
+        "66_48",
+        0
+      ]
+    },
+    "class_type": "SeedVR2Conditioning",
+    "_meta": {
+      "title": "SeedVR2Conditioning"
+    }
+  }
+}

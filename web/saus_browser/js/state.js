@@ -37,6 +37,10 @@ const defaultPreferences = {
     hideTitles: false,
     sortValue: 'nameAsc',
     showHiddenOnly: false,
+    // Apps the API flags `deprecated` live in web/apps/deprecated/ and stay out of
+    // every list until the Settings switch "Show deprecated apps" turns this on
+    // (see ui.js -> filterCurrentApps).
+    showDeprecatedApps: false,
 };
 
 export const preferencesManager = new PreferencesManager(defaultPreferences);

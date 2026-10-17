@@ -29,6 +29,8 @@ In the bottom part, you can find:
 
 The side panel is divided in a header, where you can search and filter apps and quickly reach your favorite apps, and the tree, which displays the available SAUS apps per sub-category.
 
+The tree lists the apps that are *current*. When a newer model supersedes an older one, the older apps are parked in a `deprecated` folder and left out, so the panel only offers what is up to date — [Settings](SETTINGS.md) has a **Show deprecated apps** switch that brings them back.
+
 <img src="../web/core/media/git/app_browsing/sidebar full.png">
 
 ### The panel head
@@ -41,7 +43,7 @@ The side panel is divided in a header, where you can search and filter apps and 
 
 Below them **section name** (AI Image / AI Video / Other) the different subcategories, which unfold into the SAUS apps:
 
-1. **Subcategory** (text-to-image, image-to-image (editing), image-to-image (reference), text-to-video, image-to-video, video-to-video, tools...). The number next to it is how many apps it holds.
+1. **Subcategory** (text-to-image, image-to-image (editing), image-to-image (reference), text-to-video, image-to-video, video-to-video, Image tools, Video tools...). The number next to it is how many apps it holds.
 2. **Apps**: click a subcategory and its rows unfold right there.
 
 

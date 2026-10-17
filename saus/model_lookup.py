@@ -21,7 +21,12 @@ from pathlib import Path
 from typing import List, Optional
 
 from .constants import SAUSMSG, logger
-from .model_scan import candidate_folder_types, match_folder_names, MODEL_FOLDER_TYPES
+from .model_scan import (
+    candidate_folder_types,
+    match_folder_names,
+    normalise_folder_name,
+    MODEL_FOLDER_TYPES,
+)
 
 try:  # ComfyUI is always present at runtime; stay importable without it.
     import folder_paths
@@ -77,7 +82,15 @@ def model_folder_candidates(model_type: str = "", hint_dir: str = "") -> List[st
                 types = [map_legacy(t) for t in types]
             except Exception:
                 pass
-    return [t for t in types if t in MODEL_FOLDER_TYPES]
+
+    # The mapping can collide with a type that is already listed (``unet`` ->
+    # ``diffusion_models`` when that is the model's own folder type), and a
+    # duplicate would make destination_for() weigh the same folder twice.
+    allowed: List[str] = []
+    for name in types:
+        if name in MODEL_FOLDER_TYPES and name not in allowed:
+            allowed.append(name)
+    return allowed
 
 
 def model_folder_directories() -> List[Path]:
@@ -149,12 +162,27 @@ def destination_for(model_type: str = "", hint_dir: str = "") -> Optional[Path]:
 
     Prefers the ComfyUI directory for the model's type (so ``--models-directory``
     and ``extra_model_paths.yaml`` are respected); the caller falls back to
-    ``<ComfyUI>/models`` when nothing is registered.
+    ``<ComfyUI>/models`` when nothing is registered. The request's hint chooses
+    *which* registered directory, never the path.
+
+    A folder type can cover several directories -- ComfyUI registers
+    ``diffusion_models`` as ``models/unet`` *and* ``models/diffusion_models`` --
+    and always taking the first sent every diffusion model to ``models/unet``
+    however the registry named the folder, which is how a catalog saying
+    ``diffusion_models`` ended up with its files in ``unet/``. So a hint naming
+    one of those directories wins; without a usable hint the first directory is
+    still the answer.
     """
+    hint = normalise_folder_name(hint_dir)
     for folder_type in model_folder_candidates(model_type, hint_dir):
         directories = _directories(folder_type)
-        if directories:
-            return directories[0]
+        if not directories:
+            continue
+        if hint:
+            for directory in directories:
+                if directory.name.strip().lower() == hint:
+                    return directory
+        return directories[0]
     return None
 
 

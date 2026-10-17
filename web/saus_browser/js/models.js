@@ -22,7 +22,18 @@ function handleModelActionClick(event) {
     const action = btn.dataset.action;
     if (action === 'open-app') {
         event.stopPropagation();
-        window.open(`saus/${btn.dataset.url || ''}`, '_blank');
+        // Opening is routed through the document event main.js wires to tabs.js -
+        // the same route the explorer row takes - so "Open App" lands in a
+        // workspace tab. window.open() stranded the user in a bare app page: no
+        // rail, no tabs, no console. The catalog entry is resolved here so the
+        // tab's url is one the shell knows, never the button's data attribute.
+        const app = state.allApps.find((candidate) =>
+            candidate.url === btn.dataset.url || candidate.id === btn.dataset.url);
+        document.dispatchEvent(new CustomEvent('saus:open-app', {
+            detail: app
+                ? { id: app.id, url: app.url, name: app.name }
+                : { url: btn.dataset.url },
+        }));
         return;
     }
 

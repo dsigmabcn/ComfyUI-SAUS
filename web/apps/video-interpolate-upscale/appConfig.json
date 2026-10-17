@@ -1,0 +1,180 @@
+{
+  "id": "vidupinterp",
+  "name": "Video Interpolate + Upscale",
+  "url": "video-interpolate-upscale",
+  "description": "Upscale a video with a model and interpolate extra frames in one run.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "VIDEO INTERPOLATE UPSCALE",
+    "models": [
+      "film_net_fp16.safetensors",
+      "rife_v4.26.safetensors",
+      "rife_v4.26_heavy.safetensors",
+      "rife_v4.25.safetensors",
+      "rife_v4.25_heavy.safetensors",
+      "rife_v4.25_lite.safetensors",
+      "RealESRGAN_x4plus.safetensors",
+      "RealESRGAN_x2.pth",
+      "4x-UltraSharp.pth",
+      "4x-AnimeSharp.pth"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesvidupinterp",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "950.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidupinterp",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "950.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "multipliervidupinterp",
+      "label": "Multiplier",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "16_9.inputs.value",
+      "defValue": 2,
+      "minValue": 2,
+      "maxValue": 16,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    },
+    {
+      "id": "framebatchsizevidupinterp",
+      "label": "Frame Batch Size",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "960.inputs.batch_size",
+      "defValue": 8,
+      "minValue": 1,
+      "maxValue": 64,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidupinterp",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "12.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidupinterp",
+      "label": "Video",
+      "nodePath": "9.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "interpolationmodelvidupinterp",
+      "label": "Interpolation Model",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "16_1.inputs.model_name",
+      "url": "FrameInterpolationModelLoader",
+      "key": "model_name",
+      "options": [
+        "film_net_fp16.safetensors",
+        "rife_v4.26.safetensors",
+        "rife_v4.26_heavy.safetensors",
+        "rife_v4.25.safetensors",
+        "rife_v4.25_heavy.safetensors",
+        "rife_v4.25_lite.safetensors"
+      ]
+    },
+    {
+      "id": "upscalemodelvidupinterp",
+      "label": "Upscale Model",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "1.inputs.model_name",
+      "url": "UpscaleModelLoader",
+      "key": "model_name",
+      "options": [
+        "RealESRGAN_x4plus.safetensors",
+        "RealESRGAN_x2.pth",
+        "4x-UltraSharp.pth",
+        "4x-AnimeSharp.pth"
+      ]
+    }
+  ],
+  "toggles": [
+    {
+      "id": "enablefpsvidupinterp",
+      "label": "Enable FPS",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "defaultValue": true,
+      "nodePath": "16_13.inputs.value"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidupinterp",
+      "label": "Save Video",
+      "nodeId": "12",
+      "type": "media"
+    }
+  ]
+}

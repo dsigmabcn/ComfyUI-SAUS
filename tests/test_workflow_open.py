@@ -206,6 +206,17 @@ def test_workflow_export_harness():
     _run_harness(HARNESSES / 'workflow_export.harness.mjs')
 
 
+def test_workflow_path_harness():
+    """A dotted widget key must reach the graph, not a nested object.
+
+    ComfyUI stores a dynamic combo widget as one flat key ("resize_type.multiplier",
+    "output.normalization"), and `splitNodePath` keeps it whole - the Image Upscale
+    (SeedVR2) "Scale Multiplier", Depth Anything's normalization and the pose Resize
+    Target all bind through it.
+    """
+    _run_harness(HARNESSES / 'workflow_path.harness.mjs')
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

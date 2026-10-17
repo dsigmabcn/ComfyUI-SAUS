@@ -42,11 +42,7 @@ class ToggleComponent {
                         ${this.value ? 'checked' : ''}
                         aria-checked="${this.value}"
                     >
-                    <label for="${toggleId}" class="slot">
-                        <span class="slot__label">OFF</span>
-                        <span class="slot__label">ON</span>
-                    </label>
-                    <div class="curtain"></div>
+                    <span class="toggle-track" aria-hidden="true"></span>
                 </div>
                 ${this.config.labelPosition === 'right' ? this.getLabelHTML() : ''}
             </div>

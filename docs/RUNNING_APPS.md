@@ -126,5 +126,7 @@ The images or videos can be seen here and can also be downloaded by right-clicki
 
 On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
 
+**Dragging a result into an app.** Take an image (or video) from the Recent panel - or from the File Manager - and drop it on a **Load Image** / **Video** input to use it as that app's input. Hold it over a workspace tab and that app opens after a moment, so the file can go to an app in another tab. The file is copied into ComfyUI's `input/` folder, so the original result stays where it is.
+
 
 [Return to User Guide](USER_GUIDE.md#running-an-app)

@@ -26,6 +26,17 @@ class PreferencesManager {
         }
     }
 
+    /**
+     * Re-read localStorage over the current values.
+     *
+     * The Settings pane is a core component and writes the same key through its own
+     * manager, so the shell's in-memory copy goes stale the moment that switch is
+     * flipped. A `saus:preference-changed` listener calls this before re-rendering.
+     */
+    reload() {
+        this.loadPreferences();
+    }
+
     get(prefKey) {
         return this.preferences[prefKey];
     }

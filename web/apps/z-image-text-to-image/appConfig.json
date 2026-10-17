@@ -160,7 +160,7 @@
       "id": "compe34jy6",
       "label": "Save filename",
       "nodePath": "9.inputs.filename_prefix",
-      "defValue": "ZIT/Z-image-T2I",
+      "defValue": "Z-image-T2I",
       "layout": {
         "region": "basic",
         "order": 11

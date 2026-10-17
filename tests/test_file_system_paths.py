@@ -153,10 +153,22 @@ def test_move_refuses_a_root_source_or_target():
     assert _status(response) == 200 and body['moved'] == 0 and body['errors']
     assert (root / 'input').is_dir(), 'the input root must not have been moved'
 
-    # a root as the target
+    # a *folder* dropped on a root: refused, because that nests one root inside another
     response = asyncio.run(FS.move_copy_handler(
         _Request({'sourcePaths': ['output/sub'], 'targetDir': 'input'})))
-    assert _status(response) == 403, 'a root must not be a transfer target'
+    body = json.loads(response.text())
+    assert _status(response) == 200 and body['moved'] == 0 and body['errors'], \
+        'a folder must not be moved into a root'
+
+    # a *file* into a root is the normal way to feed a result back in (the File
+    # Manager's output -> input drag), so it has to be allowed
+    (out / 'shot.png').write_bytes(b'x')
+    response = asyncio.run(FS.move_copy_handler(
+        _Request({'sourcePaths': ['output/shot.png'], 'targetDir': 'input'})))
+    body = json.loads(response.text())
+    assert _status(response) == 200 and body['moved'] == 1 and not body['errors'], \
+        'a file must be movable into the input root'
+    assert (inp / 'shot.png').is_file(), 'and it lands in the root itself'
 
 
 def main():

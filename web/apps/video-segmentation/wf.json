@@ -1,0 +1,108 @@
+{
+  "114_100": {
+    "inputs": {
+      "clip": [
+        "114_102",
+        1
+      ],
+      "text": "unicorn"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIPTextEncode"
+    }
+  },
+  "114_101": {
+    "inputs": {
+      "model": [
+        "114_102",
+        0
+      ],
+      "image": [
+        "114_104",
+        0
+      ],
+      "conditioning": [
+        "114_100",
+        0
+      ],
+      "threshold": 0.5,
+      "refine_iterations": 2,
+      "individual_masks": false
+    },
+    "class_type": "SAM3_Detect",
+    "_meta": {
+      "title": "SAM3_Detect"
+    }
+  },
+  "114_102": {
+    "inputs": {
+      "ckpt_name": "sam3.1_multiplex_fp16.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "114_104": {
+    "inputs": {
+      "video": [
+        "950",
+        0
+      ]
+    },
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "GetVideoComponents"
+    }
+  },
+  "115": {
+    "inputs": {
+      "file": "drinking_unicorn.mp4"
+    },
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "LoadVideo"
+    }
+  },
+  "900": {
+    "inputs": {
+      "mask": [
+        "114_101",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "MaskToImage"
+    }
+  },
+  "901": {
+    "inputs": {
+      "images": [
+        "900",
+        0
+      ],
+      "filename_prefix": "Video-Masks"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "950": {
+    "class_type": "Video Slice",
+    "inputs": {
+      "video": [
+        "115",
+        0
+      ],
+      "start_time": 0,
+      "duration": 0,
+      "strict_duration": false
+    },
+    "_meta": {
+      "title": "Video Slice"
+    }
+  }
+}
