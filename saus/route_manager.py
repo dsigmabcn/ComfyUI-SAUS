@@ -4,9 +4,13 @@ from pathlib import Path
 class RouteManager:
 
     @staticmethod
-    def create_routes(base_path: str, app_dir: Path) -> web.RouteTableDef:
+    def create_routes(base_path: str, app_dir: Path,
+                      page_template: Path = None) -> web.RouteTableDef:
         routes = web.RouteTableDef()
+        # An app may ship its own index.html; the shipped apps all use the shared page.
         index_html = app_dir / 'index.html'
+        if not index_html.is_file() and page_template is not None:
+            index_html = page_template
         headers = {'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache'}
 
         # The page routes MUST be registered before the static mount.

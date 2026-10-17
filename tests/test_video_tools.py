@@ -84,7 +84,6 @@ def test_all_seven_are_filed_under_video_tools():
         cfg = config(url)
         assert cfg['metadata']['category'] == 'Video tools', url
         assert (APPS / url / 'wf.json').exists(), url
-        assert (APPS / url / 'index.html').exists(), url
         assert list((APPS / url).glob('thumbnail*')), f'{url} ships no thumbnail'
 
 

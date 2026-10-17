@@ -33,6 +33,8 @@ SAUS_BROWSER_PATH = WEBROOT / "saus_browser"
 SAUS_APPS_PATH = WEBROOT / "apps"
 
 FILE_MANAGER_PATH = WEBROOT / "file_manager"
+# The page every app is served with (an app may still ship its own index.html).
+APP_PAGE_TEMPLATE = CORE_PATH / "templates" / "index.html"
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
 COMFYUI_DIRECTORY = ROOT_DIR.parent.parent

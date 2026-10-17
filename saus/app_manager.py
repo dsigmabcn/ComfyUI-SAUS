@@ -5,7 +5,8 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH,
+    APP_PAGE_TEMPLATE
 )
 from .route_manager import RouteManager
 from .static_cache import install as install_revalidate_middleware
@@ -83,7 +84,7 @@ class AppManager:
                 )
                 continue
 
-            app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir))
+            app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir, APP_PAGE_TEMPLATE))
             APP_CONFIGS.append(conf)
 
     @staticmethod
