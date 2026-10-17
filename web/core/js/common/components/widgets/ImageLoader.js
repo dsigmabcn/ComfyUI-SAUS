@@ -1,6 +1,37 @@
 import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
 import { getMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
+/**
+ * Extensions this control never hands to ComfyUI's upload endpoint.
+ *
+ * Mirrors `BLOCKED_UPLOAD_EXTENSIONS` in `saus/constants.py`. Uploads land in
+ * user-data folders only, but nothing the server could import or execute should get
+ * there either - and the two upload routes are not the same route: the File Manager's
+ * upload is a SAUS handler that enforces this list server-side, while `/upload/image`
+ * is ComfyUI's own endpoint and enforces nothing. Everything this control uploads goes
+ * to the latter, so the check has to happen here.
+ * `tests/test_media_drag.py` fails if the two copies of the list drift apart.
+ */
+const BLOCKED_UPLOAD_EXTENSIONS = new Set([
+  'py', 'pyc', 'pyo', 'pyw', 'pyd', 'so', 'dll', 'dylib', 'exe', 'msi',
+  'bat', 'cmd', 'com', 'scr', 'sh', 'bash', 'zsh', 'ksh', 'csh', 'ps1',
+  'psm1', 'vbs', 'vbe', 'js', 'mjs', 'cjs', 'jar', 'class', 'php', 'pl',
+  'rb', 'lua', 'htaccess', 'service', 'desktop',
+]);
+
+/**
+ * True when a filename must not be uploaded.
+ *
+ * Same *extension* rule as the server's `allowed_file()`: the text after the last dot,
+ * lower-cased. No extension at all is fine, an empty name is left to ComfyUI.
+ */
+export function isBlockedUploadName(filename) {
+  const name = (filename || '').trim();
+  const dot = name.lastIndexOf('.');
+  if (dot < 0) return false;
+  return BLOCKED_UPLOAD_EXTENSIONS.has(name.slice(dot + 1).toLowerCase());
+}
+
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
     allowedFileType: 'video',
@@ -216,8 +247,15 @@ export default class ImageLoader {
    * root as a target ("moving a folder into one would nest user data"), and `input/` is
    * exactly such a root - which is the HTTP 403 the first version of this hit. A file
    * that is already in `input/` needs nothing at all.
+   *
+   * Scripts and native libraries are refused before anything is uploaded, because
+   * ComfyUI's endpoint does not screen them (see `BLOCKED_UPLOAD_EXTENSIONS`).
    */
   async ensureInputFile(payload) {
+    if (isBlockedUploadName(payload.filename)) {
+      throw new Error(`${payload.filename}: this file type cannot be uploaded`);
+    }
+
     if (payload.type === 'input') {
       return payload.subfolder ? `${payload.subfolder}/${payload.filename}` : payload.filename;
     }
@@ -256,6 +294,12 @@ export default class ImageLoader {
     //   this.showErrorMessage(`Unsupported file type. Please select a ${this.config.allowedFileType} file.`);
     //   return;
     // }
+
+    // Before `showSpinner()`: a refusal here must not leave the spinner running.
+    if (isBlockedUploadName(file.name)) {
+      this.showErrorMessage(`Unsupported file type: scripts and executables cannot be uploaded.`);
+      return;
+    }
 
     showSpinner();
 

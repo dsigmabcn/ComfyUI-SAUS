@@ -16,6 +16,10 @@ The pieces are spread over four files and each one has a reason to be the way it
 Runs under pytest or directly (``python tests/test_media_drag.py``).
 """
 
+import re
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +30,18 @@ RECENT_JS = CORE / 'components' / 'imagedisplay.js'
 TABS_JS = ROOT / 'web' / 'saus_browser' / 'js' / 'tabs.js'
 FM_JS = ROOT / 'web' / 'file_manager' / 'js' / 'main.js'
 MAIN_CSS = ROOT / 'web' / 'core' / 'css' / 'main.css'
+HARNESS = ROOT / 'tests' / 'js' / 'upload_guard.harness.mjs'
+
+
+class SkippedTest(Exception):
+    """Raised when the harness cannot run here (node is missing)."""
+
+
+def _skip(reason):
+    if 'pytest' in sys.modules:
+        import pytest
+        pytest.skip(reason)
+    raise SkippedTest(reason)
 
 
 def test_the_payload_survives_a_dragover():
@@ -94,13 +110,71 @@ def test_the_file_manager_publishes_its_drags_too():
     assert 'endMediaDrag()' in source, 'and a folder drag clears any previous payload'
 
 
+def test_the_guard_against_script_uploads_matches_the_server():
+    """`/upload/image` is ComfyUI's route and screens nothing, so the loader must.
+
+    A script dropped on the control would land in `input/`, which the server can read but
+    never imports - so this closes a policy hole, not a sandbox hole. The list is
+    duplicated on purpose (the server is Python, the control is a browser module), and
+    this test is what keeps the two copies equal.
+    """
+    loader = LOADER_JS.read_text(encoding='utf-8')
+    constants = (ROOT / 'saus' / 'constants.py').read_text(encoding='utf-8')
+
+    server_block = re.search(r'BLOCKED_UPLOAD_EXTENSIONS = \{(.*?)\}', constants, re.S)
+    assert server_block, 'the server list moved - update this test'
+    server_exts = set(re.findall(r"'([a-z0-9]+)'", server_block.group(1)))
+    assert 'py' in server_exts and 'so' in server_exts, 'sanity: the server list is real'
+
+    client_block = re.search(r'BLOCKED_UPLOAD_EXTENSIONS = new Set\(\[(.*?)\]\)', loader, re.S)
+    assert client_block, 'the loader no longer mirrors the server list'
+    client_exts = set(re.findall(r"'([a-z0-9]+)'", client_block.group(1)))
+
+    assert client_exts == server_exts, (
+        'the loader list must mirror saus/constants.py - '
+        f'server only: {sorted(server_exts - client_exts)}, '
+        f'loader only: {sorted(client_exts - server_exts)}'
+    )
+
+    # Both ways into /upload/image are guarded: the browse / OS-drop handler (which shows
+    # the error itself), and the copy-into-input path a dragged result takes (which
+    # throws, and the caller catches it into the same message).
+    assert 'isBlockedUploadName(file.name)' in loader, 'the drop handler is unguarded'
+    assert 'isBlockedUploadName(payload.filename)' in loader, 'the drag path is unguarded'
+    assert len(re.findall(r'isBlockedUploadName\(', loader)) == 3, \
+        'one definition plus exactly two call sites'
+    assert 'lastIndexOf' in loader and 'toLowerCase()' in loader, \
+        'same parse as the server: last dot, lower-cased (so .htaccess is caught)'
+
+
+def test_the_upload_guard_behaves_like_the_server():
+    """The guard's behaviour, not only its presence: run the node harness.
+
+    Skipped - never failed - when node is absent, because only the *environment* decides
+    that. `tools/check_all.py` puts node on PATH, so inside the gate this always runs.
+    """
+    node = shutil.which('node') or shutil.which('nodejs')
+    if node is None:
+        _skip(f'{HARNESS.name} needs node, which is not installed here')
+
+    result = subprocess.run([node, str(HARNESS)], cwd=str(ROOT), capture_output=True, text=True)
+    assert result.returncode == 0, f'{HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
+    assert 'upload guard: all scenarios passed' in result.stdout, result.stdout
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]
+    passed = 0
     for name, fn in tests:
-        fn()
+        try:
+            fn()
+        except SkippedTest as skipped:
+            print(f'  skip  {name}: {skipped}')
+            continue
+        passed += 1
         print(f'  ok  {name}')
-    print(f'{len(tests)}/{len(tests)} media-drag tests passed')
+    print(f'{passed}/{len(tests)} media-drag tests passed')
 
 
 if __name__ == '__main__':
