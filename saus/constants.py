@@ -32,8 +32,7 @@ CORE_PATH = WEBROOT / "core"
 SAUS_BROWSER_PATH = WEBROOT / "saus_browser"
 SAUS_APPS_PATH = WEBROOT / "apps"
 
-MODEL_MANAGER_PATH = WEBROOT / "model_manager"#Added to access the new model manager app - NOT ACTIVE, TO BE REPLACED BY LORA MANAGER IN FUTURE VERSIONS
-FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
+FILE_MANAGER_PATH = WEBROOT / "file_manager"
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
 COMFYUI_DIRECTORY = ROOT_DIR.parent.parent

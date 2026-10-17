@@ -5,7 +5,7 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
 )
 from .route_manager import RouteManager
 from .static_cache import install as install_revalidate_middleware
@@ -68,12 +68,6 @@ class AppManager:
 
     @staticmethod
     def _setup_apps_routes(app: web.Application) -> None:
-        for app_dir in filter(lambda d: d.is_dir(), SAUS_APPS_PATH.iterdir()):
-            conf_file = app_dir / APPS_CONFIG_FILE
-            if not conf_file.is_file():
-                # logger.warning(f"{SAUSMSG}: Config file not found in {app_dir}")
-                continue
-                
         for conf_file in SAUS_APPS_PATH.rglob(APPS_CONFIG_FILE):
             app_dir = conf_file.parent
             conf = AppManager._load_config(conf_file)
@@ -142,10 +136,8 @@ class AppManager:
             app.add_routes(RouteManager.create_routes('saus', SAUS_BROWSER_PATH))
         else:
             logger.error(f"{SAUSMSG}: SAUS Browser path not found at {SAUS_BROWSER_PATH}")
-        if MODEL_MANAGER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/model_manager', MODEL_MANAGER_PATH))
         if FILE_MANAGER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH)) #Added for FILE_MANAGER
+            app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH))
 
     @staticmethod
     def _load_config(conf_file: Path) -> Dict[str, Any]:

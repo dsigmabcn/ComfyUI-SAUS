@@ -10,7 +10,7 @@ except Exception:  # pragma: no cover
     web = None
 
 from .constants import (
-    SAUS_APPS_PATH, DATA_DIR, BLOCKED_UPLOAD_EXTENSIONS, ALLOWED_FILE_ROOTS,
+    DATA_DIR, BLOCKED_UPLOAD_EXTENSIONS, ALLOWED_FILE_ROOTS,
     COMFYUI_DIRECTORY, logger, SAUSMSG,
     PREVIEWS_REGISTRY_DIR, PREVIEWS_IMAGES_DIR, FILE_REGISTRY_DIR, FILE_IMAGES_DIR
 )
@@ -27,15 +27,6 @@ def ensure_data_folders():
 
 def pathToKey(model_path: str) -> str:
     return model_path.replace('\\', '/')
-
-def find_app_path(SAUS_url: str) -> Path:
-    p = SAUS_APPS_PATH / SAUS_url
-    if p.exists() and p.is_dir():
-        return p
-    for p in SAUS_APPS_PATH.rglob(SAUS_url):
-        if p.is_dir() and p.name == SAUS_url:
-            return p
-    return None
 
 def get_filename_only(model_path: str) -> str:
     fwd = pathToKey(model_path)
