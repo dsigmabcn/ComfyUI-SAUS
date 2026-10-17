@@ -76,7 +76,7 @@ export function playCompletionChime() {
  * The host is shared and long-lived, so several notices stack rather than overwriting
  * each other, and nothing here holds a pointer to a thing it removed.
  */
-export function showCompletionToast(message = 'Generation complete', milliseconds = 4000) {
+function showCompletionToast(message = 'Generation complete', milliseconds = 4000) {
     let host = document.getElementById('saus-notices');
     if (!host) {
         host = document.createElement('div');

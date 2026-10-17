@@ -306,7 +306,7 @@ function applyFocusState() {
     }
 }
 
-export function toggleFocus(id) {
+function toggleFocus(id) {
     focusedTabId = focusedTabId === id ? null : id;
     if (focusedTabId) activateTab(focusedTabId);
     applyFocusState();
@@ -326,7 +326,7 @@ export function exitFocus() {
  * Open / activate / close
  * ------------------------------------------------------------------ */
 
-export function activateTab(id) {
+function activateTab(id) {
     const tab = findTab(id);
     if (!tab) return;
 
@@ -356,7 +356,7 @@ export function activateTab(id) {
     }
 }
 
-export function openApp(app) {
+function openApp(app) {
     if (!app || !app.url) return;
     const id = String(app.id || app.url);
     if (!findTab(id)) {
@@ -396,7 +396,7 @@ export function openAppByUrl(url, name = '', id = null) {
     activateTab(tabKey);
 }
 
-export function closeTab(id) {
+function closeTab(id) {
     const index = state.openApps.findIndex(tab => tab.id === id);
     if (index === -1) return;
 
@@ -423,7 +423,7 @@ export function closeTab(id) {
 }
 
 /** No tab in front: the welcome pane. */
-export function showHome() {
+function showHome() {
     document.querySelectorAll('#paneContainer > .tab-pane').forEach(pane => pane.classList.add('hidden'));
     document.getElementById('homeContainer')?.classList.remove('hidden');
     state.activeAppId = null;

@@ -27,8 +27,6 @@ export const noshowAppIds = [
     'fltuts',
 ];
 
-export const priorityAppIds = [];
-
 const FAVORITES_KEY = 'AppFavorites';
 
 const defaultPreferences = {
@@ -97,7 +95,7 @@ export function loadExplorerState() {
     }
 }
 
-export function saveExplorerState() {
+function saveExplorerState() {
     try {
         localStorage.setItem(EXPLORER_KEY, JSON.stringify({
             openSection: explorerState.openSection,

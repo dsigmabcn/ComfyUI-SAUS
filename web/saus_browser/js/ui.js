@@ -30,7 +30,7 @@ export function requestRender() {
     if (renderHandler) renderHandler();
 }
 
-export function toggleFavorite(appId) {
+function toggleFavorite(appId) {
     if (state.favorites.has(appId)) {
         state.favorites.delete(appId);
     } else {
@@ -146,7 +146,7 @@ export function applyAppRowStatus(row, status) {
  * Filtering / sorting
  * ------------------------------------------------------------------ */
 
-export function sortApps(apps, sortValue) {
+function sortApps(apps, sortValue) {
     const sortedApps = [...apps];
 
     switch (sortValue) {

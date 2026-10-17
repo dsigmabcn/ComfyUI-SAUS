@@ -14,7 +14,7 @@ initTheme();
 
 const GUIDE_URL = 'https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md';
 
-export async function loadApps() {
+async function loadApps() {
     state.sessionTimestamp = Date.now();
     try {
         // Model registry (filename-keyed) + shared taxonomy + architectures.

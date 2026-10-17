@@ -30,15 +30,8 @@ const modelImagePreviews = {};
 const DEFAULT_PREVIEW_THUMBNAIL = '/core/media/ui/top-view_30trans.png';
 const TOGGLE_STATE_STORAGE_KEY = 'AppConfigDropdownExpandAllState';
 
+// No caller switches this on; smooth scrolling is effectively disabled.
 let scrollAnimationEnabled = false;
-
-export function enableScrollAnimation() {
-    scrollAnimationEnabled = true;
-}
-
-export function disableScrollAnimation() {
-    scrollAnimationEnabled = false;
-}
 
 function pathToKey(path) {
     return path.replace(/\\/g, '/');

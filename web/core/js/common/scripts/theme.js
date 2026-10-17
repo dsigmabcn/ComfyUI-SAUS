@@ -56,7 +56,7 @@ export function currentTheme() {
 }
 
 /** Show a theme on one document (this one by default). */
-export function applyToDocument(themeId, doc = document) {
+function applyToDocument(themeId, doc = document) {
     if (!isTheme(themeId) || !doc) return false;
     doc.documentElement.dataset.theme = themeId;
     return true;

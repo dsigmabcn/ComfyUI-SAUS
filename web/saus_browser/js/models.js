@@ -51,7 +51,7 @@ function handleModelActionClick(event) {
 }
 
 
-export async function checkModelStatus(fileId, modelPath, modelType = '') {
+async function checkModelStatus(fileId, modelPath, modelType = '') {
     if (!fileId) return 'missing';
     try {
         // model_path (the registry folder) is only a hint: the server looks for
@@ -79,7 +79,7 @@ export async function checkModelStatus(fileId, modelPath, modelType = '') {
  * Falls back to the legacy flat ``metadata.models`` (all required) when the
  * architecture has no grouped models yet.
  */
-export function modelsForApp(app) {
+function modelsForApp(app) {
     const arch = (app && app.architecture && state.ARCHITECTURES)
         ? state.ARCHITECTURES[app.architecture]
         : null;
@@ -116,7 +116,7 @@ export function modelsForApp(app) {
  * one never blocks the variant. Shared by the status dot and the information
  * modal, so the two can never disagree.
  */
-export function variantBlocks(app) {
+function variantBlocks(app) {
     const arch = (app && app.architecture && state.ARCHITECTURES)
         ? state.ARCHITECTURES[app.architecture]
         : null;

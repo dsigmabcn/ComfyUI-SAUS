@@ -762,7 +762,7 @@ export function displayImagesInDiv(imageUrls, addToHistory = true, isFinalImage 
     imageDisplayApp.displayImagesInDiv(imageUrls, addToHistory, isFinalImage);
 }
 
-export function addImageToHistory(imageUrl) {
+function addImageToHistory(imageUrl) {
     imageDisplayApp.addImageToHistory(imageUrl);
 }
 
