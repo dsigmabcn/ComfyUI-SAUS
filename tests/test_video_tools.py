@@ -1,21 +1,15 @@
 """The video tools: what every one of them must keep.
 
-Six of these seven apps are ComfyUI ``utility_*`` templates, and the templates are
-not quite usable as apps:
+Six of these seven apps are ComfyUI ``utility_*`` templates, which are not quite usable
+as they ship. Each needs **Start Time / Duration** as Basic options, so a live
+``Video Slice`` must sit right after ``LoadVideo`` (the depth template caps it at 5 s,
+the SeedVR2 one ships it bypassed behind a ``ComfySwitchNode``);
+``utility_video_segment_sam3`` has no save node at all and outputs a MASK, so
+``MaskToImage`` + ``SaveImage`` are added; and ``utility-gan_upscaler`` upscales every
+frame at once - what runs a long clip out of VRAM - so it is rebuilt as
+``RebatchImages`` -> upscale -> ``CreateVideo`` -> ``ConcatenateVideo``.
 
-* Each needs **Start Time / Duration** as Basic options, so every graph must have a
-  live ``Video Slice`` right after ``LoadVideo`` - the depth template ships a 5 s cap
-  (``duration: 0`` means *unlimited*, which is what an app should default to) and the
-  SeedVR2 video template ships its slice bypassed behind a ``ComfySwitchNode``.
-* ``utility_video_segment_sam3`` has **no save node at all** and its output is a MASK,
-  so ``MaskToImage`` + ``SaveImage`` have to be added before the graph converts.
-* ``utility-gan_upscaler`` upscales **every frame at once**, which is what runs a long
-  clip out of VRAM; it is rebuilt as ``RebatchImages`` -> upscale ->
-  ``CreateVideo`` -> ``ConcatenateVideo``.
-
-Those three are exactly what a later regeneration of the graphs would silently undo,
-so they are asserted here. Runs under pytest or directly
-(``python tests/test_video_tools.py``).
+A regeneration of these graphs would silently undo all three, so they are asserted here.
 """
 
 import json

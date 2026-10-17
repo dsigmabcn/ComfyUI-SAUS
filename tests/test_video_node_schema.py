@@ -1,22 +1,12 @@
 """The video graphs, checked against ComfyUI's own node definitions.
 
 The frame-batching chain (`RebatchImages` -> per-chunk `CreateVideo` ->
-`ConcatenateVideo`) is the one part of the video build that could not be *executed*
-while it was written - ComfyUI was down - so it is checked against the schemas that
-are on disk instead. Two things that a typo would silently break:
+`ConcatenateVideo`) could not be *executed* when it was written (ComfyUI was down), so
+it is checked against the schemas on disk: every input key a graph writes must exist on
+the node - autogrow groups and dotted dynamic-combo keys included - and the
+list-execution pair (`is_output_list` / `is_input_list`) is what makes batching work.
 
-* every input key a graph writes has to be one the node declares. Autogrow and dynamic
-  combo widgets make this less obvious than it sounds: `ConcatenateVideo` takes
-  `videos.video1` (an autogrow group) and `ResizeImageMaskNode` / `DA3Render` take
-  dotted *dynamic combo* keys like `resize_type.multiplier`, where only the first
-  segment is a declared input name.
-* the list-execution pair really is what makes batching work: `RebatchImages` declares
-  `is_output_list=True`, `ConcatenateVideo` declares `is_input_list=True`, and
-  `ImageUpscaleWithModel` declares **neither** - which is why a list handed to it runs
-  once per chunk and is collected back into a list.
-
-Skipped when ComfyUI is not on disk. Runs under pytest or directly
-(``python tests/test_video_node_schema.py``).
+Skipped when ComfyUI is not on disk.
 """
 
 import json

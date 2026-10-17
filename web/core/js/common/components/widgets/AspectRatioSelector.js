@@ -37,15 +37,10 @@ function shapeHtml(ratio, extraClass) {
 }
 
 /**
- * Visual aspect-ratio picker.
- *
- * Reads the combo options of a node input (e.g. ResolutionSelector.aspect_ratio)
- * and renders the ratios listed in `quickRatios` as proportional shape buttons;
- * every other option lives in a compact "Custom" dropdown. Each tile shows the
- * ratio on one line and the resolution the node will compute on the next.
- *
- * Only the selected aspect-ratio value is written to the workflow -- width and
- * height stay the node's job at execution time.
+ * Visual aspect-ratio picker: the combo options of a node input, with the ratios listed
+ * in `quickRatios` as proportional shape buttons (ratio on one line, the resolution the
+ * node will compute on the next) and every other option in a compact "Custom" dropdown.
+ * Only the selected aspect-ratio value is written to the workflow.
  */
 class AspectRatioSelector {
     constructor(config = {}, workflow) {

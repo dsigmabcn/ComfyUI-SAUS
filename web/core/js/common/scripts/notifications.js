@@ -1,16 +1,11 @@
 import { PreferencesManager } from './preferences.js';
 
 /**
- * The end-of-generation notice: a short "breadcrumb" on screen, plus - only when the
- * user asks for it - a chime.
- *
- * Two decisions worth keeping:
- *
- * * The sound is **synthesised** with the Web Audio API instead of shipped as a file.
- *   No asset to fetch, nothing to license, nothing to go missing, and it works offline.
- * * The preference is read here, from the same `localStorage` key the Settings pane
- *   writes (`SausMenuPref`), because a generation can finish in an app that the shell
- *   never told anything about. Off by default, so a fresh install stays quiet.
+ * The end-of-generation notice: a short "breadcrumb" on screen and, only when the user
+ * asks, a chime synthesised with the Web Audio API (nothing to ship, nothing to
+ * license). The preference is read here, from the same localStorage key the Settings
+ * pane writes, because a generation can finish in an app the shell never told anything
+ * about. Off by default.
  */
 
 let prefs = null;

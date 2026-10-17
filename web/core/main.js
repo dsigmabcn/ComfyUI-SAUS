@@ -118,8 +118,6 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     injectStylesheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'font-awesome');
     
 
-    //console.log("appConfig", appConfig);
-    //console.log("workflow", workflow);
 
 
     // ----------------------------------------------------------------------
@@ -838,14 +836,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         await canvasLoader.initPromise;
     
         if (canvasLoader.isInitialized) {
-            //console.log("Canvas initialized successfully.");
 
             const container = document.getElementById('pluginUIContainer');
             const quickControls = document.getElementById('quick-controls');
             container.append(quickControls);
 
         } else {
-            //console.log("Canvas was not initialized due to missing appConfig fields.");
         }
     };
     
@@ -876,7 +872,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     }
 
     async function queue() {   
-        //console.log("Queueing new job");
         messageHandler.updateNodeMap(workflow);
 
         if (canvasLoader && canvasLoader.isInitialized) {
@@ -885,16 +880,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             console.log("Canvas is not initialized. Skipping CanvasComponent.");
         }
 
-        //console.log("Queueing workflow:", workflow);        
 
         collectPromptValues(workflow);
 
         const jobId = StateManager.incrementJobId();
         const job = { id: jobId, workflow: { ...workflow } };
         StateManager.addJob(job);
-        //console.log(`Added job to queue. Job ID: ${jobId}`);
-        //console.log("Current queue:", StateManager.getJobQueue());
-        //console.log("queued workflow:", workflow);        
         store.dispatch({
             type: 'SET_QUEUE_RUNNING',
             payload: true
@@ -924,7 +915,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         StateManager.setProcessing(true);
 
         const job = StateManager.getNextJob();
-        //console.log(`Processing job ${job.id}`);
         try {
             await queue_prompt(job.workflow);
         } catch (error) {
@@ -958,7 +948,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             console.error('Error processing prompt:', error);
             throw error;
         } finally {
-            // hideSpinner();
         }
     }
 
@@ -979,19 +968,14 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     async function interrupt() {
         await queue_interrupt();
         if (StateManager.isProcessing()) {
-            //console.log("Interrupting current job");
         } else if (StateManager.getJobQueue().length > 0) {
             const removedJob = StateManager.getJobQueue().pop();
-            //console.log(`Removed job from queue. Job ID: ${removedJob.id}`);
-            //console.log("Remaining queue:", StateManager.getJobQueue());
             updateQueueDisplay(StateManager.getJobQueue());
         } else {
-            //console.log("No jobs in queue to interrupt.");
         }
     }
 
     async function queue_interrupt() {
-        //console.log("Interrupting last job");
         const data = { 'client_id': client_id };
         try {
             showSpinner();
@@ -1007,7 +991,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 throw new Error('Failed to interrupt the process.');
             }
             const result = await response.json();
-            //console.log('Interrupted:', result);
         } catch (error) {
             console.error('Error during interrupt:', error);
             hideSpinner();

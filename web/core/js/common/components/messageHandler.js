@@ -296,7 +296,6 @@ export class MessageHandler {
             const imageUrl = `/view?filename=${encodeURIComponent(filename)}`
                 + `&subfolder=${encodeURIComponent(image.subfolder || '')}`
                 + `&type=${encodeURIComponent(image.type || 'output')}`;
-            //console.log('processImages Image URL:', imageUrl);
             return imageUrl;
         }).filter(url => url !== null);
 

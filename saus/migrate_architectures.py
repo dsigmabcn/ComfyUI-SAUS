@@ -1,19 +1,9 @@
 """Give each architecture a ``models`` group list + ``variants``.
 
-An architecture is defined by the combination of models it needs. Each entry in
-``models`` is a group named by its *model type*, listing the files of that type::
-
-    "models": [
-      { "id", "type", "need": "all" | "one" | "none",
-        "node": {"nodeType","input"},          # derived from the type
-        "files": [ {"file", "label"} ] }
-    ],
-    "variants": {
-      "<ID>": { "label", "pick": {modelId: file}, "settings": {...}, "loras": [file] }
-    }
-
-The legacy keys (``components`` / ``base_settings`` / ``turbo_settings``) are
-kept untouched. The old flat ``models`` filename list is replaced by the groups.
+A ``models`` entry is a group per *model type* - ``{id, type, need: all|one|none,
+node, files: [{file, label}]}`` - and ``variants`` maps an id to ``{label, pick,
+settings, loras}``. The legacy keys (``components`` / ``base_settings`` /
+``turbo_settings``) stay untouched; the old flat filename list is replaced by groups.
 
 Usage (from the ComfyUI-SAUS folder)::
 

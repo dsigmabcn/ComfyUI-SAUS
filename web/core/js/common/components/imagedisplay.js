@@ -30,7 +30,6 @@ class ImageLoader {
                 const urlObj = new URL(mediaUrl, window.location.href);
                 const filename = urlObj.searchParams.get('filename');
                 if (filename) {
-                    //console.log(`[ImageLoader] Image failed. Attempting to find '${filename}' in subfolders...`);
                     mediaElement.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                     return;
                 }

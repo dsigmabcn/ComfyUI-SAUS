@@ -2,15 +2,11 @@ import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
 import { getMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 /**
- * Extensions this control never hands to ComfyUI's upload endpoint.
- *
- * Mirrors `BLOCKED_UPLOAD_EXTENSIONS` in `saus/constants.py`. Uploads land in
- * user-data folders only, but nothing the server could import or execute should get
- * there either - and the two upload routes are not the same route: the File Manager's
- * upload is a SAUS handler that enforces this list server-side, while `/upload/image`
- * is ComfyUI's own endpoint and enforces nothing. Everything this control uploads goes
- * to the latter, so the check has to happen here.
- * `tests/test_media_drag.py` fails if the two copies of the list drift apart.
+ * Extensions this control never uploads: they mirror `BLOCKED_UPLOAD_EXTENSIONS`
+ * in `saus/constants.py`, because everything here goes to ComfyUI's own
+ * `/upload/image`, which screens nothing (the File Manager's upload handler is a
+ * different route and enforces the list server-side).
+ * `tests/test_media_drag.py` fails if the two lists drift apart.
  */
 const BLOCKED_UPLOAD_EXTENSIONS = new Set([
   'py', 'pyc', 'pyo', 'pyw', 'pyd', 'so', 'dll', 'dylib', 'exe', 'msi',
@@ -202,16 +198,8 @@ export default class ImageLoader {
     }
   }
 
-  /**
-   * Point this loader at a file SAUS already has.
-   *
-   * `LoadImage` / `LoadVideo` read ComfyUI's `input/` folder while a Recent result
-   * lives in `output/`, so anything that is not already an input is copied there
-   * first - through the File Manager's own endpoint, which also refuses paths outside
-   * the allowed roots and never overwrites an existing file. The workflow is then
-   * written the same way an upload writes it (via `onImageLoaded`), so the control,
-   * the preview and the app config stay in step.
-   */
+  /** Points this loader at a file SAUS already has: anything not in `input/` is
+   *  copied there first, then the workflow is written like an upload writes it. */
   async useExistingMedia(payload) {
     if (!payload || !payload.filename) return;
 
@@ -237,19 +225,11 @@ export default class ImageLoader {
   }
 
   /**
-   * The name this file has inside ComfyUI's `input/` folder.
-   *
-   * `LoadImage` / `LoadVideo` only read `input/`, while a Recent result lives in
-   * `output/`, so the bytes are handed to ComfyUI's own upload endpoint - the same route
-   * the browse button and an OS drag & drop take.
-   *
-   * The File Manager's move/copy endpoint is deliberately **not** used: it refuses a
-   * root as a target ("moving a folder into one would nest user data"), and `input/` is
-   * exactly such a root - which is the HTTP 403 the first version of this hit. A file
-   * that is already in `input/` needs nothing at all.
-   *
-   * Scripts and native libraries are refused before anything is uploaded, because
-   * ComfyUI's endpoint does not screen them (see `BLOCKED_UPLOAD_EXTENSIONS`).
+   * The file's name inside ComfyUI's `input/`, which is all `LoadImage` /
+   * `LoadVideo` read: the bytes go to ComfyUI's `/upload/image` and not to the File
+   * Manager's move endpoint, which refuses `input/` as a root (the first version's
+   * HTTP 403). A file already in `input/` needs nothing. Blocked extensions are
+   * refused before anything is uploaded (see `BLOCKED_UPLOAD_EXTENSIONS`).
    */
   async ensureInputFile(payload) {
     if (isBlockedUploadName(payload.filename)) {
@@ -290,11 +270,6 @@ export default class ImageLoader {
   }
 
   async handleFile(file) {
-    // if (!this.isFileTypeAllowed(file)) {
-    //   this.showErrorMessage(`Unsupported file type. Please select a ${this.config.allowedFileType} file.`);
-    //   return;
-    // }
-
     // Before `showSpinner()`: a refusal here must not leave the spinner running.
     if (isBlockedUploadName(file.name)) {
       this.showErrorMessage(`Unsupported file type: scripts and executables cannot be uploaded.`);
@@ -314,10 +289,6 @@ export default class ImageLoader {
       hideSpinner();
     }
   }
-
-  // isFileTypeAllowed(file) {
-  //   return file.type.startsWith(`${this.config.allowedFileType}/`);
-  // }
 
   showErrorMessage(message) {
     console.error(message);

@@ -1,19 +1,11 @@
 """Workflow model scanner.
 
-Extracts the models a workflow needs, and -- for UI-format workflows -- the
-download information (URL + target folder) that workflow authors embed in
-``node.properties.models`` and in ``MarkdownNote`` text.
+Pulls the models a workflow needs out of either shape: API format (what SAUS
+stores as ``wf.json`` - concrete file names only) or UI format (``nodes`` with
+``properties.models`` / MarkdownNote text, which is where workflow authors embed
+download URLs and target folders, subgraphs included).
 
-Two workflow shapes are supported:
-
-* **API format** (what SAUS stores as ``wf.json``): ``{node_id: {class_type, inputs}}``.
-  It only carries the concrete filenames (no URLs / notes).
-* **UI format** (what ComfyUI saves / what ``app.graphToPrompt().workflow``
-  returns): ``{nodes: [...]}`` with node ``properties`` and MarkdownNote text.
-  Nodes may be nested inside ``definitions.subgraphs``.
-
-The module has no ComfyUI imports so it can be unit-tested and reused by the
-migration script.
+No ComfyUI imports, so it stays unit-testable and reusable by the migration.
 """
 
 from __future__ import annotations
@@ -145,15 +137,11 @@ MODEL_FOLDER_TYPES = frozenset({
 def normalise_folder_name(value) -> str:
     """A folder name however the registry happens to spell it.
 
-    The registry's ``directory`` values are not uniform: some are bare
-    (``unet``), some are wrapped in slashes (``/unet/``) and some are a
-    sub-path (``loras/sdxl``). Only the first segment names a ComfyUI folder
-    *type*, so ``/unet/`` has to mean ``unet``. Splitting on ``/`` first turned
-    ``/unet/`` into an empty string and the hint was dropped without a word --
-    the two spellings of one folder then behaved differently.
-
-    Returns ``""`` when nothing usable is left, so a caller can tell "no hint"
-    from "a hint".
+    ``/unet/``, ``unet`` and ``loras/sdxl`` all name a ComfyUI folder *type*, so only
+    the first segment counts and the slashes are stripped first (splitting without
+    stripping turned ``/unet/`` into an empty string, so the two spellings of one
+    folder behaved differently). Returns ``""`` when nothing usable is left, which is
+    how a caller tells "no hint" from "a hint".
     """
     text = str(value or "").strip().replace("\\", "/").strip("/")
     name = text.split("/")[0].strip().lower()
@@ -162,14 +150,9 @@ def normalise_folder_name(value) -> str:
 
 def candidate_folder_types(model_type: str = "", hint: str = "",
                            known: Iterable[str] = ()) -> List[str]:
-    """ComfyUI folder types to search for a model, most likely first.
-
-    ``model_type`` is the registry's ``type`` ("Diffusion model", "LORA", ...),
-    ``hint`` is the registry's ``directory`` (a folder name or sub-path, with or
-    without surrounding slashes) and ``known`` is whatever folder types ComfyUI
-    registered. Anything not covered by the map is searched too (last), so an
-    unknown/empty ``type`` -- or a folder registered by another custom node --
-    still resolves.
+    """ComfyUI folder types to search for a model, most likely first: the registry's
+    ``type``, then its ``directory`` hint, then anything ComfyUI registered - so an
+    unknown type, or a folder added by another custom node, still resolves.
     """
     ordered: List[str] = []
 

@@ -7,7 +7,6 @@ let destroyOnHide = false;
 
 export default function imageLoaderComp(appConfig, workflow) {
     if (!appConfig.imageLoaders || appConfig.imageLoaders.length === 0) {
-        // console.log('No uploaded images, skipping initialization of imageLoader.');
         return; 
     }
 
@@ -34,7 +33,6 @@ export default function imageLoaderComp(appConfig, workflow) {
     appConfig.imageLoaders.forEach((imageConfig, index) => {
         const containerId = loadImageContainer.id;
 
-        // console.log("image-loader-title",imageConfig.label);
         // this.imageDropAreaTitle.textContent = 'Drop an image or video here';
         const imageLoader = new ImageLoader(containerId, {
             allowedFileType: 'image',
@@ -92,7 +90,6 @@ function toggleLoadMedia() {
         }
     }
 }
-// loadMediaToggleBtn.addEventListener('click', toggleLoadMedia);
 
 function setDestroyOnHide(shouldDestroy) {
     destroyOnHide = shouldDestroy;

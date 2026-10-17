@@ -1,6 +1,5 @@
 class StepperComponent {
     constructor(config, workflow) {
-        // console.log("StepperComponent config:", config);
         this.container = document.getElementById(config.id);
         if (!this.container) {
             console.error("Container not found:", config.id);

@@ -33,7 +33,6 @@ async function processAndUpload(
             showSpinner();
 
             const imageDataURL = getImage();
-            // console.log(`${uploadDescription} Data URL for ${id}:`, imageDataURL);
             if (!imageDataURL) {
                 throw new Error(`${uploadDescription} data is unavailable.`);
             }
@@ -62,39 +61,23 @@ async function processAndUpload(
             let result;
             try {
                 result = await response.json();
-                // console.log(`Server Response for ${id}:`, result);
             } catch (e) {
                 throw new Error('Invalid JSON response from server.');
             }
 
-            // console.log(`${successMessagePrefix} ${id} uploaded successfully:`, result);
             if (result && result.name) {
                 updateWorkflow(workflow, nodePath, result.name);
                 switch (uploadDescription) {
                     case 'Original Image':
                         messageHandler.setOriginalImage(imageDataURL);
-                        // console.log('Original Image set in MessageHandler');
                         break;
                     case 'Cropped Mask Image':
                         messageHandler.setCroppedMaskImage(imageDataURL);
-                        // console.log('Cropped Mask Image set in MessageHandler');
                         break;                        
                     case 'Mask Alpha Image':
                         messageHandler.setAlphaMaskImage(imageDataURL);
-                        // console.log('Mask Alpha Image set in MessageHandler');
                         break;
-                    // case 'Mask Image':
-                    //     messageHandler.setMaskImage(imageDataURL);
-                    //     console.log('Mask Image set in MessageHandler');
-                    //     break;
-                    // case 'Selected Mask Alpha Image':
-                    //     messageHandler.setCanvasSelectedMaskOutputs(imageDataURL);
-                    //     // console.log('Selected Mask Alpha Image added to CanvasSelectedMaskOutputs in MessageHandler');
-                    //     messageHandler.setMaskImage(imageDataURL);
-                    //     // console.log('Mask Image set in MessageHandler');
-                    //     break;
                     default:
-                        // console.warn(`No setter defined for upload description: ${uploadDescription}`);
                 }
             } else {
                 throw new Error('Server response did not include imageUrl or imageName.');
@@ -104,7 +87,6 @@ async function processAndUpload(
             }
         } catch (error) {
             console.error(`Error uploading ${uploadDescription.toLowerCase()} ${id}:`, error);
-            // alert(`Error uploading ${label}: ${error.message}`);
         } finally {
             hideSpinner();
         }
@@ -214,29 +196,7 @@ export default async function CanvasComponent(appConfig, workflow, canvasLoader)
         );
     }
 
-    // ** ( Case 3 ) **
-    // if (
-    //     appConfig.canvasCroppedImageOutputs && Array.isArray(appConfig.canvasCroppedImageOutputs) &&
-    //     appConfig.canvasCroppedMaskOutputs && Array.isArray(appConfig.canvasCroppedMaskOutputs)
-    // ) {
-    //     await processAndUpload(
-    //         appConfig.canvasCroppedImageOutputs,
-    //         () => canvasLoader.getCroppedImage(),
-    //         'Cropped Image',
-    //         'Cropped image upload failed.',
-    //         'Cropped Image',
-    //         workflow
-    //     );
 
-    //     await processAndUpload(
-    //         appConfig.canvasCroppedMaskOutputs,
-    //         () => canvasLoader.getCroppedMask(),
-    //         'Cropped Mask Image',
-    //         'Cropped mask image upload failed.',
-    //         'Cropped Mask Image',
-    //         workflow
-    //     );
-    // }
 
     // ** ( Case 4 ) **
     if (

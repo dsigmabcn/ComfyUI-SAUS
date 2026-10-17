@@ -141,7 +141,6 @@ class Seeder {
         const newSeed = Math.floor(Math.random() * 1000000000000000);
         this.seedGenerator.setSeed(newSeed);
         this.inputElement.value = newSeed;
-        // console.log(`Generated new random seed: ${newSeed}`);
     }
 
     generateSeed() {

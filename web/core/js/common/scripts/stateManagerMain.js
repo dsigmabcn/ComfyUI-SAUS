@@ -1,6 +1,5 @@
 class StateManager {
     constructor(initialState = {}) {
-        // console.log('StateManager initializing with:', initialState);
         this.state = initialState;
         this.listeners = new Set();
         this.history = [];
@@ -18,12 +17,10 @@ class StateManager {
     }
 
     getState() {
-        // console.log('Getting current state:', this.state);
         return Object.freeze({ ...this.state });
     }
 
     subscribe(listener) {
-        // console.log('New subscriber added to StateManager');
         if (typeof listener !== 'function') {
             throw new TypeError('Listener must be a function');
         }
@@ -32,13 +29,11 @@ class StateManager {
         listener(this.getState());
 
         return () => {
-            // console.log('Subscriber removed from StateManager');
             this.listeners.delete(listener);
         };
     }
 
     dispatch(action) {
-        // console.log('Action dispatched:', action);
         if (!action || typeof action !== 'object' || !action.type) {
             throw new TypeError('Action must be an object with a type property');
         }
@@ -50,8 +45,6 @@ class StateManager {
                 throw new Error('Reducer must return a valid state object');
             }
 
-            // console.log('Previous state:', this.state);
-            // console.log('Next state:', nextState);
 
             this.state = nextState;
             
@@ -88,7 +81,6 @@ class StateManager {
     }
 
     notifyListeners() {
-        // console.log('Notifying', this.listeners.size, 'listeners');
         this.listeners.forEach(listener => {
             try {
                 listener(this.getState());
@@ -109,7 +101,6 @@ class StateManager {
         if (this.history.length > this.historyLimit) {
             this.history.shift();
         }
-        // console.log('History updated, current length:', this.history.length);
     }
 }
 

@@ -1,18 +1,9 @@
 /**
- * Dragging media inside SAUS: from an app's **Recent** panel (or the File Manager)
- * onto a "Load Image" / "Video" input, across workspace tabs.
- *
- * Two details make this more than a `dragstart` handler:
- *
- * * **The payload is unreadable while dragging.** Browsers only expose
- *   `dataTransfer.getData()` on `drop`; every `dragover` sees an empty string - and a
- *   tab that should open itself when the pointer hovers it has to ask *during* the
- *   drag. So the payload is also kept in module state for the duration of the drag,
- *   with `document.body` marked `.saus-dragging` (useful for CSS too).
- * * **The graph wants a file in ComfyUI's input folder.** Recent images live in
- *   `output/`, which `LoadImage` cannot read, so a drop copies the file into `input/`
- *   first (through the File Manager's own `move-file` endpoint) and only then writes
- *   the filename into the workflow.
+ * Dragging media inside SAUS: from an app's Recent panel (or the File Manager) onto a
+ * "Load Image" / "Video" input, across workspace tabs. Two traps: `getData()` is empty
+ * during `dragover`, so the payload is also held in module state for the drag (with
+ * `.saus-dragging` on the body); and the graph needs a file in `input/`, while a Recent
+ * result lives in `output/`.
  */
 
 /** The private MIME type a SAUS media drag carries. */
@@ -87,14 +78,9 @@ export function getMediaDrag(dataTransfer) {
 }
 
 /**
- * Is a SAUS media drag in flight? Askable during `dragover`, and from another document.
- *
- * Two traps make the obvious version fail. `getData()` returns nothing until the drop -
- * browsers hide the payload while dragging - and this module's `active` flag belongs to
- * the **source document**: an app runs in its own iframe, so the tab strip in the parent
- * has a different copy of this module, where `active` is always null. `dataTransfer.types`
- * is readable during a drag *and* crosses the frame boundary, which is exactly what the
- * tab strip needs to decide whether to open.
+ * Is a SAUS media drag in flight? Askable during `dragover` *and* from another
+ * document: `dataTransfer.types` crosses the iframe boundary, while this module's own
+ * flag belongs to the source document only - which is what the tab strip needs.
  */
 export function isMediaDrag(dataTransfer) {
     if (active) return true;

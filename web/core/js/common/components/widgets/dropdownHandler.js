@@ -633,7 +633,6 @@ export function populateDropdown(
             }
         }
 
-        //console.log('Initial value:', initialValue);
 
         if (loadFromWorkflow && !initialValue) {
             initialValue = getValueFromWorkflow(workflow, workflowPath);
@@ -641,7 +640,6 @@ export function populateDropdown(
             validateSelection(initialValue);
 
             if (initialValue && !items.includes(initialValue)) {
-                //console.log('Initial value not inside items:', initialValue);
             }
         }
 

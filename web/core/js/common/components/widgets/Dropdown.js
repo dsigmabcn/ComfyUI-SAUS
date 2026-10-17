@@ -123,17 +123,10 @@ export default class Dropdown {
   }
 
   /**
-   * The node's option list, narrowed by the app's own allow-list.
-   *
-   * An appConfig dropdown may carry `options: [...]` to offer only the files the app
-   * is built around (the ComfyUI list would otherwise include every model of that
-   * kind the user happens to have). The app's order is the curated one, and a name
-   * the node does not actually have is dropped - a stale entry must never add an
-   * option ComfyUI cannot load.
-   *
-   * When *none* of the listed files is installed the full list is shown instead:
-   * an empty dropdown would make the app unrunnable, while an installer can still
-   * see which files the app wants in its model card.
+   * The node's option list, narrowed by the app's own `options` allow-list: the app's
+   * order is the curated one, a name the node does not have is dropped (a stale entry
+   * must never offer a file ComfyUI cannot load), and when *none* of them is installed
+   * the full list is shown instead - an empty dropdown would make the app unrunnable.
    */
   allowedOptions(options) {
     const only = this.config.options;

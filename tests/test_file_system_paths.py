@@ -1,17 +1,13 @@
-"""The file API's path rules: UNC rejected as text, roots never renamed/deleted.
+"""The file API's path rules, from the registry review.
 
-Two items from the registry review:
+``download-file`` resolved the request path before checking it, so on Windows a UNC
+path (``\\\\host\\share``) connected to that host - it must be refused as a *string*
+first. And ``rename-file`` (like delete / move) accepted a root (``input``,
+``output``, ``models``) as the target, because ``resolve_within_roots`` treats a root
+as inside itself.
 
-* ``download-file`` resolved the request path before checking it, so on Windows a
-  UNC path (``\\\\host\\share``) connected to that host -- it must be refused as a
-  *string* first;
-* ``rename-file`` (and, for the same reason, delete-file / move-file) accepted a
-  root (``input`` / ``output`` / ``models``) as the target, because
-  ``resolve_within_roots`` treats a root as inside itself.
-
-``saus.file_system`` is driven for real with tiny aiohttp / request stubs and the
-allowed roots pointed at a temp tree. Runs under pytest or directly
-(``python tests/test_file_system_paths.py``).
+``saus.file_system`` is driven for real, with aiohttp/request stubs and the allowed
+roots pointed at a temp tree.
 """
 
 import asyncio

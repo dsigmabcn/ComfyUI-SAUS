@@ -1,19 +1,12 @@
 """Dragging a result onto a Load Image input, across tabs.
 
-The pieces are spread over four files and each one has a reason to be the way it is:
-
-* ``appDrag.js`` keeps the payload in **module state**, because a ``dragover`` may not
-  read ``dataTransfer.getData()`` - only a ``drop`` can - and the tab strip has to ask
-  "is this one of ours?" *during* the drag to decide whether to open a tab.
-* the Recent panel marks its thumbnails draggable and derives the payload from
-  ComfyUI's own ``/view?filename=...&type=...`` URL; ``temp/`` is refused because the
-  File Manager API may not copy from it, so a LoadImage could never use it.
-* the loader checks the payload **before** ``dataTransfer.files`` (an internal drag has
-  no files, and an OS drop has no payload), and copies anything outside ``input/`` into
-  ``input/`` first, because that is the folder ``LoadImage`` reads.
-* the tab strip only arms the hover for a media drag, never while reordering tabs.
-
-Runs under pytest or directly (``python tests/test_media_drag.py``).
+One reason per file involved: ``appDrag.js`` keeps the payload in module state, because
+only a ``drop`` may read ``dataTransfer.getData()`` while the tab strip has to ask
+*during* the drag; the Recent panel derives its payload from ComfyUI's own
+``/view?filename=...&type=...`` URL and refuses ``temp/`` (the File Manager API may not
+copy from there); the loader checks the payload **before** ``dataTransfer.files`` and
+copies anything outside ``input/`` in; the tab strip arms the hover for a media drag
+only, never while reordering tabs.
 """
 
 import re

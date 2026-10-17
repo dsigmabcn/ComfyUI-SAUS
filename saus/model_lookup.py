@@ -1,18 +1,13 @@
 """Find a model file in any of ComfyUI's model folders.
 
-ComfyUI registers each *folder type* (``diffusion_models``, ``loras``, ...) with
-one or more directories -- for example ``diffusion_models`` covers both
-``models/unet`` and ``models/diffusion_models`` -- and lists their contents
-(sub-folders included) through ``folder_paths.get_filename_list``.
+SAUS never hardcodes where a model lives: it asks ComfyUI for the directories of a
+folder *type* (``diffusion_models`` covers ``models/unet`` *and*
+``models/diffusion_models``) and reads the registry's ``directory`` as a hint for
+search order and download destination only, so a future Model Manager can rearrange
+the layout without the API changing.
 
-SAUS therefore never hardcodes where a model lives: it asks ComfyUI. The
-registry's ``directory`` field is only a *hint* (search priority and download
-destination). A future Model Manager can drive the layout without the API
-endpoints having to change.
-
-Only ComfyUI's *model* folder types are consulted (``MODEL_FOLDER_TYPES``):
-``custom_nodes`` and ``datasets`` are registered in the same table but hold
-code / data, so they are never searched, downloaded into or deleted from.
+Only weight folders are ever consulted (``MODEL_FOLDER_TYPES``): ``custom_nodes``
+and ``datasets`` sit in the same ComfyUI table but hold code and data.
 """
 
 from __future__ import annotations
@@ -64,14 +59,9 @@ def _directories(folder_type: str) -> List[Path]:
 
 
 def model_folder_candidates(model_type: str = "", hint_dir: str = "") -> List[str]:
-    """ComfyUI *model* folder types to search, most likely first.
-
-    Only folder types that hold weights are ever returned -- see
-    ``MODEL_FOLDER_TYPES``. ComfyUI registers ``custom_nodes`` and ``datasets`` in
-    the same ``folder_names_and_paths`` table, so without this filter a request's
-    ``model_path`` hint (or the unknown-type fallback) could name one of them:
-    a download there plus the restart route is code execution, and a delete there
-    is sabotage. Neither is model management.
+    """ComfyUI *model* folder types to search, most likely first. Weight folders only:
+    a ``custom_nodes`` destination plus the restart route is code execution and a
+    delete there is sabotage, so the filter is the whole point here.
     """
     types = candidate_folder_types(model_type, hint_dir, known_folder_types())
     if folder_paths is not None:
@@ -107,14 +97,11 @@ def model_folder_directories() -> List[Path]:
 
 
 def find_model(filename: str, model_type: str = "", hint_dir: str = "") -> Optional[dict]:
-    """Locate ``filename`` anywhere ComfyUI looks for models.
-
-    Both the folder *and* any sub-folder are ignored, so a diffusion model in
-    ``unet/`` is found just like one in ``diffusion_models/``, and a LoRA in
-    ``loras/my-style/`` like one in ``loras/``.
-
-    Returns ``{"folder_type", "relative_name", "path", "directories"}`` for the
-    first match, otherwise ``None``. Only model folder types are searched.
+    """Locate ``filename`` anywhere ComfyUI looks for models: the folder *and* any
+    sub-folder are ignored, so a diffusion model in ``unet/`` is found like one in
+    ``diffusion_models/`` and a LoRA in ``loras/my-style/`` like one in ``loras/``.
+    Returns ``{"folder_type", "relative_name", "path", "directories"}`` for the first
+    match, else ``None``.
     """
     wanted = str(filename or "").strip()
     if not wanted:
@@ -160,18 +147,12 @@ def find_model(filename: str, model_type: str = "", hint_dir: str = "") -> Optio
 def destination_for(model_type: str = "", hint_dir: str = "") -> Optional[Path]:
     """Directory a new download should go into, or ``None``.
 
-    Prefers the ComfyUI directory for the model's type (so ``--models-directory``
-    and ``extra_model_paths.yaml`` are respected); the caller falls back to
-    ``<ComfyUI>/models`` when nothing is registered. The request's hint chooses
-    *which* registered directory, never the path.
-
-    A folder type can cover several directories -- ComfyUI registers
-    ``diffusion_models`` as ``models/unet`` *and* ``models/diffusion_models`` --
-    and always taking the first sent every diffusion model to ``models/unet``
-    however the registry named the folder, which is how a catalog saying
-    ``diffusion_models`` ended up with its files in ``unet/``. So a hint naming
-    one of those directories wins; without a usable hint the first directory is
-    still the answer.
+    Prefers the ComfyUI directory registered for the model's type (so
+    ``--models-directory`` and ``extra_model_paths.yaml`` are respected), and the
+    caller falls back to ``<ComfyUI>/models``. A hint picks *which* registered
+    directory, never the path: ``diffusion_models`` covers both ``models/unet`` and
+    ``models/diffusion_models``, and always taking the first is how a catalog saying
+    ``diffusion_models`` used to end up in ``unet/``.
     """
     hint = normalise_folder_name(hint_dir)
     for folder_type in model_folder_candidates(model_type, hint_dir):

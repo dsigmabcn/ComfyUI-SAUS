@@ -1,23 +1,10 @@
 /**
- * Open a SAUS app's workflow in ComfyUI.
- *
- * The ⤴ button of the SAUS app browser (see
- * web/saus_browser/js/workflow_export.js) opens ComfyUI in a new window with
- * ?saus_workflow=<url of the workflow>. This file is loaded inside that
- * ComfyUI page (SAUS ships it through WEB_DIRECTORY, see saus/constants.py)
- * and turns the parameter into a real workflow:
- *
- *   1. it waits for ComfyUI to come up and to finish loading the workflow it
- *      had restored, so the app's graph is what is left on screen;
- *   2. it reads the JSON behind the parameter and tells the two formats apart:
- *      SAUS apps ship the API graph they run (wf.json), some ship a UI graph
- *      (ui_wf.json);
- *   3. it hands the graph to ComfyUI with a null target, which makes ComfyUI
- *      build a new - unsaved - workflow tab for it (app.loadApiJson converts
- *      the API format, app.loadGraphData takes the UI one).
- *
- * The parameter is dropped from the address bar before any of this, so a
- * reload never opens the same workflow twice.
+ * Open a SAUS app's workflow in ComfyUI: the app browser's ⤴ button opens ComfyUI with
+ * ?saus_workflow=<url>, and this file runs inside that ComfyUI page (SAUS ships it
+ * through WEB_DIRECTORY). It waits until ComfyUI has restored its own workflow, reads
+ * the JSON behind the parameter - API graph or UI graph - and hands it over with a null
+ * target, so it lands in a new unsaved tab. The parameter is dropped from the address
+ * bar first, so a reload cannot open it twice.
  */
 
 import { app } from "../../scripts/app.js";

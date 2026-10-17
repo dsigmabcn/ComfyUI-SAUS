@@ -1,19 +1,12 @@
 /**
  * Headless harness for the upload guard in
- * web/core/js/common/components/widgets/ImageLoader.js.
- *
- * The control does not upload through SAUS: it posts to ComfyUI's own `/upload/image`,
- * which screens nothing, so the deny-list SAUS applies server-side has to be applied
- * here as well - and a name has to be read the way `saus/helpers.allowed_file()` reads
- * it (the text after the last dot, lower-cased). This is the behavioural half of that
- * guard; the text checks in `tests/test_media_drag.py` keep the list itself equal to the
- * server's copy.
- *
- * `ImageLoader.js` reaches core through a route specifier (`/core/...`), so
- * `_root_paths_loader.mjs` maps those onto the checkout. Needs no browser: import time
- * only declares a Set, this function and a class.
- *
- * Run it with ``node tests/js/upload_guard.harness.mjs``.
+ * web/core/js/common/components/widgets/ImageLoader.js: the control posts to ComfyUI's
+ * own `/upload/image`, which screens nothing, so the deny-list is applied here as well,
+ * read the way `saus/helpers.allowed_file()` reads a name (the text after the last dot,
+ * lower-cased). The text checks in `tests/test_media_drag.py` keep the list itself equal
+ * to the server's copy, and `_root_paths_loader.mjs` maps the module's `/core/...`
+ * imports onto the checkout.
+ * Run: `node tests/js/upload_guard.harness.mjs`.
  */
 import { strict as assert } from 'node:assert';
 import { dirname, join } from 'node:path';

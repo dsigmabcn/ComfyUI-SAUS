@@ -1,17 +1,10 @@
 """What the SAUS pages must (not) do to the ComfyUI page and to the UI.
 
-Three small contracts that are easy to break by accident:
-
-* ``web/core/js/common/scripts`` is ComfyUI's ``WEB_DIRECTORY``, so every file
-  in it is imported by ComfyUI as an extension on *every* ComfyUI page. Nothing
-  there may therefore touch the page on import (a stray call once replaced
-  ComfyUI's own favicon with SAUS's).
-* the section rail only switches the explorer panel on a click; hovering an icon
-  merely highlights it.
-* an app page carries the workflow UI and nothing else - no SAUS chrome of its
-  own, now that the File Manager owns the only header it shows.
-
-Runs under pytest or directly (``python tests/test_page_behaviour.py``).
+``web/core/js/common/scripts`` is ComfyUI's ``WEB_DIRECTORY``, so every file in it is
+imported by ComfyUI as an extension on *every* ComfyUI page - nothing there may touch
+the page on import (a stray call once replaced ComfyUI's own favicon). Also: the
+section rail switches the explorer panel on a click only, and an app page carries the
+workflow UI and no SAUS chrome of its own.
 """
 
 import re

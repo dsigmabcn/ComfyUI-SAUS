@@ -1,17 +1,12 @@
-"""A combo has to survive a node type that /object_info cannot answer for.
+"""A combo has to survive a node type ``/object_info`` cannot answer for.
 
-An app config names the node a dropdown reads its option list from in `url`, and
-that value is not always a node type: the App Builder used to save ComfyUI's
-per-node uuid (`c291ceec-...`), which turned the widget into "Missing input ..."
-where the Advanced tab should show a dropdown. The widget therefore keeps the
-config's url as its first guess - several apps point a combo at another node on
-purpose, e.g. a `sampler_name` list served by KSampler for a KSamplerSelect -
-and falls back to the class the workflow itself names for the node, which is the
-fallback ``AspectRatioSelector`` already used.
+An app config names the node a dropdown reads its option list from in ``url``, and that
+value is not always a node type: the App Builder used to save ComfyUI's per-node uuid,
+which turned the widget into "Missing input ..." where the Advanced tab should show a
+dropdown. So the config's url is only the first guess - several apps point a combo at
+another node on purpose - and the class the workflow itself names is the fallback.
 
-The behaviour is covered by the browser-free harness next to this file
-(``tests/js/dropdown_lookup.harness.mjs``), run through node when it is
-installed. Runs under pytest or directly (``python tests/test_dropdown_lookup.py``).
+Behaviour: ``tests/js/dropdown_lookup.harness.mjs`` (run through node when installed).
 """
 
 import json

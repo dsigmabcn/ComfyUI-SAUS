@@ -21,12 +21,9 @@ export function escapeHtml(value) {
 
 /**
  * Elements under ``root`` whose ``data-model-path`` equals ``path`` -- or, when
- * ``descendantSelector`` is given, those descendants inside them.
- *
- * Model names come from ComfyUI's file listings, so they may contain quotes or
- * brackets that would be parsed as CSS syntax inside a
- * ``[data-model-path="…"]`` selector. Comparing the attribute value directly
- * avoids that entirely.
+ * ``descendantSelector`` is given, those descendants inside them. Model names may
+ * contain quotes or brackets that a ``[data-model-path="…"]`` selector would misparse,
+ * so the attribute value is compared directly instead.
  */
 export function modelPathElements(root, path, descendantSelector = null) {
     if (!root || path === null || path === undefined) return [];
