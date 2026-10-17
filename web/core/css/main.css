@@ -331,14 +331,6 @@ a {
     transform: rotate(180deg);
 }
 
-#expand-btn {
-    cursor: pointer;
-    padding: 0 10px;
-    transition: transform 0.3s;
-    user-select: none;
-
-}
-
 /* Rotates the arrow when expanded */
 .rotate {
     transform: rotate(180deg);
@@ -729,21 +721,6 @@ input[type="number"] {
     padding: 5px;
 }
 
-.dim-model-select {
-    margin-bottom: 8px;
-    width: 100%;
-}
-
-.dim-model-select select {
-    width: 100%;
-    padding: 6px;
-    background-color: var(--color-background-secondary);
-    color: var(--color-primary-text);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    outline: none;
-}
-
 .dim-icons-container {
     display: flex;
     justify-content: space-between;
@@ -793,12 +770,6 @@ input[type="number"] {
 .ratio-title {
     font-weight: bold;
     margin-bottom: 6px;
-}
-
-.ratio-icons-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
 }
 
 .ratio-icon-btn {
@@ -947,17 +918,6 @@ input[type="number"] {
 #aspect-ratio-selector {
     width: 100%;
     padding: 0;
-}
-
-.aspect-ratio-selector__select {
-    /* border-top: 1px solid var(--color-background-secondary); */
-    background-color: var(--color-background-secondary);
-    color: var(--color-primary-text);
-    /* padding: 5px; */
-    width: 100%;
-    outline: none;
-    border: none;
-    margin-top: 6px;
 } 
 
 .loader {
@@ -1013,28 +973,6 @@ select:focus {
 select option:hover {
     background-color: var(--color-primary-text);
     color: var(--color-background-secondary);
-}
-
-.input-component-wrapper {
-    display: flex;
-    align-items: center;
-    justify-items: space-evenly;
-    background-color: var(--color-background-secondary);
-    padding: 10px 14px; /* Reduced padding for a narrower component */
-    /* border: 1px solid var(--color-border); */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: var(--color-primary-text);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin:  0;
-    transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
-    width: 100%;
-    /* flex-grow: 1; */
-
-}
-
-.input-component-wrapper:hover {
-    /* box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15); */
-    /* border-color: var(--color-button-primary-hover); */
 }
 
 .input-container {
@@ -1855,49 +1793,10 @@ body.saus-dragging .image-loader {
   /* background-color: #e0f7fa; */
   /* color: #006064; */
 }
-.modal-main {
-  display: flex;
-  flex-direction: row;
-  gap: 24px;
-}
 .left-panel {
   flex: 2;
   display: flex;
   flex-direction: column;
-}
- .theme-form fieldset {
-  border: none;
-  margin-bottom: 16px;
-}
-.theme-form legend {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-}
-.form-group label {
-  margin-bottom: 4px;
-  font-size: 0.9rem;
-}
-.form-group input[type="text"],
-.form-group select {
-  padding: 8px;
-  font-size: 1rem;
-  border: none;
-  /* border-radius: 4px; */
-  color: var(--color-text-muted) !important;
-  background-color: var(--color-surface-alt);
-  border: none;
-  border-bottom: 1px solid var(--color-border-strong);
-  margin-bottom: 10px;
-} 
-.form-group input[type="text"]:focus,
-.form-group select:focus {
-    border: none;
-    border-bottom: 1px solid var(--color-border-hover);
 } 
 .form-actions {
   display: flex;
@@ -1925,10 +1824,6 @@ body.saus-dragging .image-loader {
 }
 .fade-out {
     animation: fadeOut 0.3s forwards;
-}
-
-.fade-in {
-    animation: fadeIn 0.3s forwards;
 }
 @keyframes fadeSlideDown {
     from {
@@ -2265,9 +2160,6 @@ html:not(.css-loading) body {
     .cbp-brush-ui-input-group input {
     flex: 1;
     }
-    .cbp-hidden-cursor {
-    cursor: none !important;
-    }
     
     .mbp-container * {
     box-sizing: border-box;
@@ -2289,15 +2181,6 @@ html:not(.css-loading) body {
         /* padding: 0.5rem; */
         /* border: solid 1px var(--color-button-primary-hover); */
         /* background-color: var(--color-background-secondary); */
-
-    }
-    
-    .mbp-config-item-buttons-group{ 
-        /* background: red; */
-        display: flex;
-        align-items: center;
-        flex-direction: row;
-        color: var(--color-button-secondary-text);
 
     }
     .mbp-config-item {
@@ -2583,22 +2466,22 @@ html:not(.css-loading) body {
     cursor: pointer;
     background-color: var(--color-background);
 }
-.toggle, .toggle:before, .slot__label, .curtain {
+.toggle, .toggle:before{
     transition-property: background-color, transform, visibility;
     transition-duration: 0.25s;
     transition-timing-function: ease-in, cubic-bezier(0.6,0.2,0.4,1.5), linear;
 
 }
-.toggle:before, .slot, .slot__label {
+.toggle:before, .slot{
     display: block;
 
 }
-.toggle:before, .curtain {
+.toggle:before{
     position: absolute;
     
 }
 
-.toggle:checked, .curtain {
+.toggle:checked{
     
 }
 
@@ -2653,45 +2536,6 @@ html:not(.css-loading) body {
     font-weight: bold;
     padding-right: 6px;
     color: var(--color-primary-text);
-}
-
-.slot__label {
-    transform-origin: 50% 0;
-    /* color: red; */
-    /* background: green; */
-    letter-spacing: 0.2em;
-    line-height: 0.8em;
-    overflow: hidden;
-    height: 1em;
-    text-indent: -0.8em;
-
-}
-
-.slot__label:nth-child(2) {
-    transform-origin: 50% 100%;
-}
-
-.toggle:checked ~ .slot .slot__label {
-    transform: translateY(-50%) scaleY(0);
-    color: var(--color-button-secondary-text);
-
-}
-
-.toggle:checked ~ .slot .slot__label:nth-child(2) {
-    transform: translateY(-100%) scaleY(1);
-} 
-.curtain {
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.toggle:checked ~ .curtain {
-    transform: scaleX(1);
 }
 
 @media (max-width: 600px) {

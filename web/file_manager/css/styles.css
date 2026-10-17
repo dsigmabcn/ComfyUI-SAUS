@@ -239,134 +239,9 @@ footer {
     margin-top: auto;
 }
 
-.app-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    justify-content: start;
-}
-
-.app-card {
-    background-color: var(--color-background-secondary);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 250px;
-    position: relative;
-    transition: transform 0.5s ease;
-
-}
-
-.app-card-content {
-    position: relative;
-    padding: 15px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.app-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: contain;
-    background-color: var(--color-scrollbar-track);
-    z-index: 1;
-}
-
-.app-card h3 {
-    margin-bottom: 10px;
-    color: var(--color-primary-text);
-    font-size: 1em;
-}
-
-.app-card p {
-    font-size: 0.8em;
-    color: var(--color-text-muted);
-    margin: 0;
-}
-
-.app-card:hover {
-    transform: translateY(-5px);
-
-    box-shadow: 0 5px 15px var(--shadow-hover);
-}
-
 .filter-menu {
     position: relative;
     display: inline-block;
-}
-
-.filter-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--color-background-secondary);
-    border: none;
-    color: var(--color-primary-text);
-    font-size: 1em;
-    padding: 10px 14px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.filter-button::after {
-    content: '\25BC';
-    font-size: 0.7em;
-    margin-left: 5px;
-    transition: transform 0.3s;
-}
-
-.filter-button.active::after {
-    transform: rotate(180deg);
-}
-
-.filter-content {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--color-background-secondary);
-    min-width: 600px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    max-height: 700px;
-    overflow-y: auto;
-    border: 1px dashed var(--color-border);
-    border-radius: var(--border-radius);
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.filter-content.show {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.filter-button i {
-    font-size: 1.2em;
-}
-
-.filter-button span {
-    font-size: 1em;
-}
-
-.filter-button:hover {
-    background-color: var(--color-background-pattern);
-}
-
-.filter-button:active {
-    transform: scale(0.98);
 }
 
 .controls {
@@ -384,8 +259,7 @@ footer {
 
 .controls input,
 .controls select,
-.filter-button,
-.toggle-button {
+.toggle-button{
     padding: 10px 14px;
     /* border: 1px dashed var(--color-border); */
     border: none;
@@ -429,37 +303,6 @@ footer {
     box-shadow: 0 1px 0 var(--color-accent);
 }
 
-.category-tag {
-    color: var(--color-primary-text);
-    padding: 6px 12px;
-    text-decoration: none;
-    cursor: pointer;
-    background-color: var(--color-background-pattern);
-    border-radius: 20px;
-    font-size: 0.9em;
-    transition: background-color 0.3s, color 0.3s;
-    text-align: center;
-}
-
-.category-tag:hover,
-.category-tag.selected {
-    background-color: var(--color-accent);
-    color: var(--color-text-on-accent);
-}
-
-.favorite-button {
-    position: absolute;
-    right: 1px;
-    background: transparent;
-    border: none;
-    color: var(--color-primary-text);
-    font-size: 1.2em;
-    pointer-events: auto;
-    transition: color 0.3s;
-    z-index: 2;
-    padding: 4px;
-}
-
 .hidden-button {
     border: none;
 
@@ -473,36 +316,6 @@ footer {
     transition: color 0.3s;
     z-index: 2;
     padding: 4px;
-}
-
-.favorite-button.favorited {
-    color: var(--color-accent);
-}
-
-.favorite-button:hover {
-    color: var(--color-accent);
-}
-
-.toggle-button#favoritesToggle {
-    border: none;
-    color: var(--color-primary-text);
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: color 0.3s;
-    margin-left: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toggle-button#favoritesToggle.active {
-    /* color: var(--color-accent); */
-    color: var(--color-button-primary-active);
-}
-
-.toggle-button#favoritesToggle:hover {
-    color: var(--color-button-primary-active);
-    /* color: var(--color-button-primary); */
 }
 
 .toggle-button {
@@ -556,15 +369,6 @@ footer {
     .controls {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .filter-content {
-        min-width: 100%;
-    }
-
-    .toggle-button#favoritesToggle {
-        font-size: 1em;
-        margin-left: 5px;
     }
 }
 
@@ -643,12 +447,6 @@ footer {
     cursor: pointer;
     z-index: 999;
     animation: floatIn 0.5s ease-out forwards, characterBob 3s ease-in-out infinite;
-}
-
-.floating-update-character .character-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
 }
 
 .floating-update-character img {
@@ -957,101 +755,12 @@ footer {
     }
 }
 
-/* Author Badge Styling */
-.author-badge {
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    /* background: var(--color-background); */
-}
-
-/* Avatar Container Styling */
-.avatar-container {
-    display: flex;
-    margin-right: 10px;
-    margin-left: 10px;
-    margin-bottom: 10px;
-
-
-
-}
-
-.avatar-container img {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-
-
-
-
-.author-name {
-    font-size: 1em;
-    margin: 0;
-    /* background: red; */
-    font-weight: bold;
-    margin-bottom: 10px;
-
-}
-
-
-/* this additional styling is for the explorer*/
-#file-explorer {
-    border: 1px solid var(--color-border);
-    padding: 10px;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    background-color: var(--color-background);
-}
-
-.file-item {
-    display: block;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--color-border);
-    font-family: sans-serif;
-    color: var(--color-button-primary-text);
-    background-color: var(--color-background);
-    transition: background-color 0.2s ease, color 0.2s ease;
-    cursor: pointer;
-    gap: 10px;
-}
-
-.file-icon {
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-}
-
-
-.file-item.up i {
-    font-weight: bold;
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-
-.file-item:hover {
-    background-color: var(--color-highlight);
-    color: var(--color-button-primary-text-hover);
-}
-
 .folder {
     font-weight: bold;
 }
 
 .file {
     margin-left: 20px;
-}
-
-.file-item.up {
-    font-weight: bold;
-    color: var(--color-button-primary-text);
-    cursor: pointer;
 }
 
 .modal {
@@ -1119,51 +828,6 @@ footer {
     color: var(--color-highlight);
 }
 
-.file-name {
-    /*flex-grow: 1;*/
-    cursor: pointer;
-}
-
-.file-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.file-actions button {
-    background: none;
-    border: none;
-    color: var(--color-button-primary-text);
-    cursor: pointer;
-    font-size: 14px;
-    transition: color 0.2s ease;
-}
-
-.file-actions button:hover {
-    color: var(--color-button-primary-text-hover);
-
-}
-
-.file-actions a {
-    /* Copy of button styles */
-    background: none;
-    border: none;
-    color: var(--color-button-primary-text); /* Matches the default icon color */
-    cursor: pointer;
-    font-size: 14px;
-    transition: color 0.2s ease;
-    
-    /* Ensure it behaves like a button for layout */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0; /* Remove default link padding */
-}
-
-/* Add hover style for the link as well */
-.file-actions a:hover {
-    color: var(--color-button-primary-text-hover);
-}
-
 /* Style the new preview column */
 .preview-col {
     /* flex: 1;  This will be set dynamically in JS when visible */
@@ -1184,13 +848,6 @@ footer {
 .preview-col.hidden {
     display: none;
     flex: 0;
-}
-
-#preview-content {
-    text-align: center;
-    /*padding-top: 20px;*/
-    text-align: center; /* Keep this for centering content like the filename */
-    width: 100%; /* Ensure content takes full width for horizontal centering */
 }
 
 

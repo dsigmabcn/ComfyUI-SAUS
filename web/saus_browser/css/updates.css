@@ -9,8 +9,6 @@
     animation: floatIn 0.5s ease-out forwards, characterBob 3s ease-in-out infinite;
 }
 
-.floating-update-character .character-wrapper { position: relative; width: 100%; height: 100%; }
-
 .floating-update-character img {
     width: 100%;
     height: 100%;

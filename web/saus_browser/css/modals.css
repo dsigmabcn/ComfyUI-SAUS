@@ -157,9 +157,6 @@
 .toast-error { border-left: 4px solid var(--color-danger); }
 .toast-error i { color: var(--color-danger); font-size: 1.2em; }
 
-.toast-info { border-left: 4px solid var(--color-info); }
-.toast-info i { color: var(--color-info); font-size: 1.2em; }
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

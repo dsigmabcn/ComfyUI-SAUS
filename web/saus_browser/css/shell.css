@@ -120,18 +120,6 @@
     box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
-.rail-btn .rail-sub {
-    font-size: 1em;
-    opacity: 0.6;
-    font-weight: normal;
-}
-
-.rail-sep {
-    width: 60%;
-    border-top: 1px dashed var(--color-border);
-    margin: 2px 0;
-}
-
 /* --- EXPLORER PANEL: floats while hovering, docks when pinned --- */
 .side-panel {
     width: 300px;
@@ -489,11 +477,6 @@ body.resizing-console .panes {
     border: none;
     background-color: var(--color-surface-alt);
     display: block;
-}
-
-/* The settings view takes over the panes area. */
-.panes.settings-open > .pane {
-    display: none;
 }
 
 .panes > .settings-container {
