@@ -1,13 +1,4 @@
-"""The video graphs, checked against ComfyUI's own node definitions.
-
-The frame-batching chain (`RebatchImages` -> per-chunk `CreateVideo` ->
-`ConcatenateVideo`) could not be *executed* when it was written (ComfyUI was down), so
-it is checked against the schemas on disk: every input key a graph writes must exist on
-the node - autogrow groups and dotted dynamic-combo keys included - and the
-list-execution pair (`is_output_list` / `is_input_list`) is what makes batching work.
-
-Skipped when ComfyUI is not on disk.
-"""
+"""The video graphs, checked against ComfyUI's own node definitions."""
 
 import json
 import re
@@ -28,19 +19,7 @@ class Skipped(Exception):
 
 
 def declared_inputs():
-    """({node_id: (file, {names})}, {file: {names}}) out of comfy_extras' schemas.
-
-    The names come from ``<Type>.Input("name")``, which covers ComfyUI's custom IO
-    types (``FrameInterpolationModel.Input("interp_model")``) as well as the plain
-    ``io.Image.Input(...)``. Two shapes need the extra fallback map:
-
-    * an input built by a **helper** (``SaveVideo``'s ``codec`` comes from
-      ``_save_video_codec_input``), and
-    * a schema whose window runs past the node.
-
-    So a key counts as declared when *the node* declares it or *the file defining the
-    node* does - which still catches a genuine typo while ignoring how it was written.
-    """
+    """({node_id: (file, {names})}, {file: {names}}) out of comfy_extras' schemas."""
     if not COMFY_EXTRAS.is_dir():
         raise Skipped('ComfyUI is not on disk')
     per_node, per_file = {}, {}

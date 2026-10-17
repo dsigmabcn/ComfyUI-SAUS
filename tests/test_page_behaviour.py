@@ -1,11 +1,4 @@
-"""What the SAUS pages must (not) do to the ComfyUI page and to the UI.
-
-``web/core/js/common/scripts`` is ComfyUI's ``WEB_DIRECTORY``, so every file in it is
-imported by ComfyUI as an extension on *every* ComfyUI page - nothing there may touch
-the page on import (a stray call once replaced ComfyUI's own favicon). Also: the
-section rail switches the explorer panel on a click only, and an app page carries the
-workflow UI and no SAUS chrome of its own.
-"""
+"""What the SAUS pages must (not) do to the ComfyUI page and to the UI."""
 
 import re
 import shutil
@@ -74,12 +67,7 @@ def test_the_rail_switches_sections_on_a_click():
 
 
 def test_the_app_page_ships_no_chrome_of_its_own():
-    """Opening ``/saus/<app>`` directly shows the workflow UI, nothing else.
-
-    The header (logo + the old navigation links) used to be injected into the
-    app page by core. The File Manager is the only page that wants that markup,
-    so it owns a copy next to its own stylesheet.
-    """
+    """Opening ``/saus/<app>`` directly shows the workflow UI, nothing else."""
     content = (ROOT / 'web' / 'core' / 'content.html').read_text(encoding='utf-8')
     assert '<header' not in content, 'the app page should not carry a header element'
 

@@ -1,13 +1,4 @@
-"""Themes: Night (default), Day, Fire.
-
-One palette file that every surface imports, a small controller that puts the
-choice on ``<html data-theme>``, and nothing else allowed to hardcode a colour.
-
-The behaviour itself is covered by the browser-free harness next to this file
-(``tests/js/theme.harness.mjs``), run through node when it is installed. The
-rules about *where* colours may come from are checked here, cheaply. Runs under
-pytest or directly (``python tests/test_themes.py``).
-"""
+"""Themes: Night (default), Day, Fire."""
 
 import re
 import shutil
@@ -212,14 +203,7 @@ def test_theme_harness():
 
 
 def test_a_generic_font_family_never_hides_the_named_ones():
-    """`sans-serif` in second place made the rest of the stack unreachable.
-
-    A generic family ends the search, so the old `'Roboto', sans-serif, 'Arial Narrow',
-    Arial` never consulted the last two - and because nothing ships or links 'Roboto'
-    (no `@font-face`, no font file, no <link>), the whole UI was quietly rendered in
-    whatever the browser defaults to. The platform families now come first and the
-    generic family last.
-    """
+    """`sans-serif` in second place made the rest of the stack unreachable."""
     generics = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'}
     checked = 0
 

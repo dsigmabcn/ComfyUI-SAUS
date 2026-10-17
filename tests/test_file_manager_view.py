@@ -1,15 +1,4 @@
-"""The File Manager's view mode: remembered per pane, and two modes that look different.
-
-Two small things the browser asked for, both easy to undo by accident:
-
-* the pane's view mode (list / medium / large) is restored on boot, so a refresh or a
-  restart does not silently drop the user back into the list;
-* ``medium`` and ``large`` are visually distinct - column width, thumbnail height and
-  caption size all move together. The old 150px vs 220px pair produced the same number of
-  columns on a wide pane, which is why they read as one mode.
-
-Runs under pytest or directly (``python tests/test_file_manager_view.py``).
-"""
+"""The File Manager's view mode: remembered per pane, and two modes that look different."""
 
 from pathlib import Path
 
@@ -48,12 +37,7 @@ FM_HTML = ROOT / 'web' / 'file_manager' / 'index.html'
 
 
 def test_the_view_buttons_do_not_look_alike():
-    """The mode is picked from the buttons, so *their* glyphs have to differ.
-
-    The pair is Font Awesome's own: `fa-table-cells` (a fine grid) next to
-    `fa-table-cells-large` (few big cells). The old `fa-border-all` was a third box-shaped
-    glyph and read as the same button as `fa-table-cells-large`.
-    """
+    """The mode is picked from the buttons, so *their* glyphs have to differ."""
     html = FM_HTML.read_text(encoding='utf-8')
 
     icons = {}

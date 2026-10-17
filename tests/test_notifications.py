@@ -1,15 +1,4 @@
-"""The end-of-generation notice: a breadcrumb always, a chime only on request.
-
-Two things this pins, because both are easy to get subtly wrong:
-
-* the hook is ComfyUI's ``execution_success`` - sent once per finished prompt - and not
-  the progress bar reaching its maximum, which a two-pass graph (base, then a refiner or
-  an upscale) hits twice;
-* the sound is **off by default** and read from the same ``SausMenuPref`` key the
-  Settings pane writes, so an app tab the shell never talked to still honours it.
-
-Runs under pytest or directly (``python tests/test_notifications.py``).
-"""
+"""The end-of-generation notice: a breadcrumb always, a chime only on request."""
 
 from pathlib import Path
 
@@ -54,13 +43,7 @@ def test_the_notice_hangs_off_the_end_of_the_prompt():
 
 
 def test_the_breadcrumb_is_styled_where_both_documents_load_it():
-    """The shell renders the notice, and the shell does **not** load main.css.
-
-    A copy of these rules in main.css alone left the shell appending an unstyled div to its
-    body: no notice where the user could see it, and the occasional stray scrollbar. The
-    rules live in their own file and both stylesheets import it - main.css for the app
-    pages, the shell's styles.css for the shell.
-    """
+    """The shell renders the notice, and the shell does **not** load main.css."""
     notices = NOTICES_CSS.read_text(encoding='utf-8')
     main = MAIN_CSS.read_text(encoding='utf-8')
     shell_styles = SHELL_CSS.read_text(encoding='utf-8')

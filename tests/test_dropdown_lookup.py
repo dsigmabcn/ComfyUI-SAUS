@@ -1,13 +1,4 @@
-"""A combo has to survive a node type ``/object_info`` cannot answer for.
-
-An app config names the node a dropdown reads its option list from in ``url``, and that
-value is not always a node type: the App Builder used to save ComfyUI's per-node uuid,
-which turned the widget into "Missing input ..." where the Advanced tab should show a
-dropdown. So the config's url is only the first guess - several apps point a combo at
-another node on purpose - and the class the workflow itself names is the fallback.
-
-Behaviour: ``tests/js/dropdown_lookup.harness.mjs`` (run through node when installed).
-"""
+"""A combo has to survive a node type ``/object_info`` cannot answer for."""
 
 import json
 import shutil
@@ -71,14 +62,7 @@ def test_an_unusable_type_is_retried_then_reported():
 
 
 def test_a_dropdown_can_be_narrowed_to_an_allow_list():
-    """An app may offer only the models it is built around.
-
-    The options come from /object_info, so without an allow-list a dropdown lists every
-    model of that kind the user happens to have. `options` in an appConfig narrows it -
-    in the app's order, dropping a listed name the node does not actually have (a stale
-    entry must never offer something ComfyUI cannot load), and keeping the full list when
-    *none* of them is installed, because an empty dropdown makes the app unrunnable.
-    """
+    """An app may offer only the models it is built around."""
     source = DROPDOWN_JS.read_text(encoding='utf-8')
 
     assert 'this.allowedOptions(options)' in source, \

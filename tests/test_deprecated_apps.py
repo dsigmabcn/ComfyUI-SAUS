@@ -1,14 +1,4 @@
-"""Deprecated apps: hidden from the explorer, still discovered and routable.
-
-An app parked in ``web/apps/deprecated/`` must stay in the API's app list (flagged),
-keep its ``/saus/<url>`` route and stay validated by the tools - only the explorer
-hides it, and only until "Show deprecated apps" is switched on. The flag is derived
-from the *folder*, so moving an app in or out of ``deprecated/`` is the whole story
-and there is no second place to keep in step.
-
-``saus.management`` needs a small aiohttp stub; nothing under test touches it. Runs
-under pytest or directly (``python tests/test_deprecated_apps.py``).
-"""
+"""Deprecated apps: hidden from the explorer, still discovered and routable."""
 
 import json
 import sys

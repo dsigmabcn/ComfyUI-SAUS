@@ -1,14 +1,4 @@
-"""The seed widget's R switch has to read as a switch.
-
-Randomising the seed on every run (the default) is filled with a halo and a solid
-border; keeping the seed in the field is hollow, dashed and dimmed. Two rules make
-that true: one in the stylesheet (two visibly different states, painted with
-palette variables that *every* theme overrides - see test_themes.py for the
-palette itself) and one in the component (class, aria-pressed and tooltip follow
-the state). The behaviour is covered by the browser-free harness next to this file
-(``tests/js/seeder.harness.mjs``), run through node when it is installed.
-Runs under pytest or directly (``python tests/test_seeder.py``).
-"""
+"""The seed widget's R switch has to read as a switch."""
 
 import re
 import shutil

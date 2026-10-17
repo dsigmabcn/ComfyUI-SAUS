@@ -1,9 +1,4 @@
-"""The static cache middleware: the shell's own files must revalidate.
-
-Only ``aiohttp``'s ``web.middleware`` decorator (the module's single import) is
-stubbed, so the real middleware is exercised without a running server. Runs
-under pytest or directly (``python tests/test_static_cache.py``).
-"""
+"""The static cache middleware: the shell's own files must revalidate."""
 
 import asyncio
 import sys

@@ -1,15 +1,4 @@
-"""The progress readout has to stay legible *on the bar*.
-
-The text is centred over the bar, and the bar is two colours at once: the filled
-part (``--color-progress-value``) and the empty track (``--color-progress-background``).
-No single colour can contrast with both a near-white and a near-black bar, so the
-rule paints the glyph in the page colour and its outline in the *fill* colour:
-wherever the text lands, either the glyph or its edge contrasts.
-
-The contrast is computed here from the palette itself, for all three themes, so
-a future palette edit cannot quietly make the readout unreadable. Runs under
-pytest or directly (``python tests/test_progress_bar.py``).
-"""
+"""The progress readout has to stay legible *on the bar*."""
 
 import re
 from pathlib import Path

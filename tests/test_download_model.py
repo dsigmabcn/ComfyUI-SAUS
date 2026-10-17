@@ -1,16 +1,4 @@
-"""The model-download route, driven without ComfyUI.
-
-Two invariants from the registry review:
-
-* the destination is always a *model* folder -- never ``custom_nodes``, where a
-  written ``.py`` would run after ``/saus/api/restart``;
-* a script / native-library name is refused before anything is fetched, exactly
-  as uploads refuse one.
-
-``saus.downloads`` needs tiny stubs for aiohttp and ComfyUI's ``server`` module;
-none of the code under test touches either. Runs under pytest or directly
-(``python tests/test_download_model.py``).
-"""
+"""The model-download route, driven without ComfyUI."""
 
 import asyncio
 import json
@@ -67,11 +55,7 @@ class _Request:
 
 
 class _WorkerCapture:
-    """Stands in for ``_download_worker`` and for ``asyncio.create_task``.
-
-    The handler schedules the download in the background; running it for real
-    would hit the network, so the worker is recorded and its coroutine closed.
-    """
+    """Stands in for ``_download_worker`` and for ``asyncio.create_task``."""
 
     def __init__(self):
         self.calls = []

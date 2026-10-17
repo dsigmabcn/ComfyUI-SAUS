@@ -1,17 +1,4 @@
-"""An upload's scratch folder must stay directly under the upload root.
-
-The File Manager sends a ``fileId`` that becomes a folder name under
-``/tmp/app_uploads``. The sanitiser only keeps ``[A-Za-z0-9_.-]``, so a literal
-``..`` used to survive it and turn the scratch folder into ``/tmp`` itself -
-``chunk_<n>.part`` was then written *outside* the folder it was meant to stay in.
-The folder is now derived by ``scratch_dir_for()``, which refuses ``.`` / ``..``
-and anything that does not resolve to a direct child of the root.
-
-The handler is driven for real, with ``saus.file_system`` imported from these
-sources; aiohttp is stubbed when there is no ComfyUI venv (the module imports it
-unguarded, and the parts this suite exercises never touch it). Runs under pytest
-or directly (``python tests/test_upload_scratch_dir.py``).
-"""
+"""An upload's scratch folder must stay directly under the upload root."""
 
 import asyncio
 import importlib.util

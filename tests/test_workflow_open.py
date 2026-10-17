@@ -1,16 +1,4 @@
-"""Opening a SAUS app's workflow in ComfyUI.
-
-The feature is cut in two: ``web/saus_browser/js/workflow_export.js`` (the ⤴
-button) saves the app's graph and opens ComfyUI with a ``?saus_workflow=``
-parameter, and ``web/core/js/common/scripts/saus_open_workflow.js`` (injected
-into the ComfyUI page) reads it and puts the graph in a new workflow tab.
-
-The contract between the two halves is checked here, cheaply. The behaviour
-itself needs a running ComfyUI and a browser, so it is covered by the two
-browser-free JS harnesses next to this file, which are run through node when it
-is installed. Runs under pytest or directly
-(``python tests/test_workflow_open.py``).
-"""
+"""Opening a SAUS app's workflow in ComfyUI."""
 
 import importlib.util
 import re
@@ -122,11 +110,7 @@ def test_the_copy_never_overwrites_a_user_workflow():
 
 
 def test_every_post_handler_has_a_csrf_guard():
-    """POST is a "simple" CORS method, so a cross-site page can send one without a
-    preflight and no custom header. Requiring a JSON body - or the SAUS header for
-    multipart uploads - forces the preflight this server never answers. (DELETE is
-    not a simple method, so the browser preflights those anyway.)
-    """
+    """POST is a "simple" CORS method, so a cross-site page can send one without a preflight and no custom header."""
     sources = {path.name: path.read_text(encoding='utf-8') for path in SAUS_DIR.glob('*.py')}
 
     routes = re.findall(r"\(f?'(/saus/api/[^']+)',\s*'(GET|POST|DELETE)',\s*(\w+)\)", sources['app_manager.py'])
@@ -147,11 +131,7 @@ def test_every_post_handler_has_a_csrf_guard():
 
 
 def test_every_handler_that_reads_a_json_body_requires_one():
-    """A handler that parses a JSON body must first demand a JSON content type:
-    that is what forces the CORS preflight a cross-site page cannot get answered.
-    Covers the handlers whose route is not a POST as well (a DELETE that reads a
-    body is not protected by the method alone).
-    """
+    """A handler that parses a JSON body must first demand a JSON content type: that is what forces the CORS preflight a cross-site page cannot get answered."""
     handlers = 0
     for path in sorted(SAUS_DIR.glob('*.py')):
         text = path.read_text(encoding='utf-8')
@@ -207,13 +187,7 @@ def test_workflow_export_harness():
 
 
 def test_workflow_path_harness():
-    """A dotted widget key must reach the graph, not a nested object.
-
-    ComfyUI stores a dynamic combo widget as one flat key ("resize_type.multiplier",
-    "output.normalization"), and `splitNodePath` keeps it whole - the Image Upscale
-    (SeedVR2) "Scale Multiplier", Depth Anything's normalization and the pose Resize
-    Target all bind through it.
-    """
+    """A dotted widget key must reach the graph, not a nested object."""
     _run_harness(HARNESSES / 'workflow_path.harness.mjs')
 
 

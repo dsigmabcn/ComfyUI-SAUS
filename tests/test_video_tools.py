@@ -1,16 +1,4 @@
-"""The video tools: what every one of them must keep.
-
-Six of these seven apps are ComfyUI ``utility_*`` templates, which are not quite usable
-as they ship. Each needs **Start Time / Duration** as Basic options, so a live
-``Video Slice`` must sit right after ``LoadVideo`` (the depth template caps it at 5 s,
-the SeedVR2 one ships it bypassed behind a ``ComfySwitchNode``);
-``utility_video_segment_sam3`` has no save node at all and outputs a MASK, so
-``MaskToImage`` + ``SaveImage`` are added; and ``utility-gan_upscaler`` upscales every
-frame at once - what runs a long clip out of VRAM - so it is rebuilt as
-``RebatchImages`` -> upscale -> ``CreateVideo`` -> ``ConcatenateVideo``.
-
-A regeneration of these graphs would silently undo all three, so they are asserted here.
-"""
+"""The video tools: what every one of them must keep."""
 
 import json
 from pathlib import Path

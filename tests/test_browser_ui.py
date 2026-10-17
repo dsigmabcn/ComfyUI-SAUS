@@ -1,15 +1,4 @@
-"""The browser / app UI contracts behind the last round of fixes.
-
-Half of these are static on purpose: the browser modules (``sidebar.js``,
-``tabs.js``) and the app runtime (``main.js``) import DOM-bound modules, so they
-cannot be loaded in a bare node. What is checked is therefore the shape of the
-code that implements each behaviour - the call, the event, the guard - plus the
-palette numbers where a colour was the bug. The console dock's resize maths,
-which is pure arithmetic over a stubbed DOM, is executed for real by
-``tests/js/console_dock.harness.mjs`` (run through node when it is installed).
-
-Runs under pytest or directly (``python tests/test_browser_ui.py``).
-"""
+"""The browser / app UI contracts behind the last round of fixes."""
 
 import json
 import re
@@ -235,13 +224,7 @@ def test_the_day_theme_is_softer_without_losing_its_white_surfaces():
 
 
 def test_the_panel_handles_are_visible_in_the_light_themes():
-    """The handle's glyph has to contrast with the handle, not with the page.
-
-    --color-primary-text was used here: near-white on Night's *light* handle and
-    near-black on Day's *dark* one, so the chevron vanished in both. The handle
-    is painted with --color-button-primary, so it needs that button's own label
-    colour. (Fire keeps the pairing it always had.)
-    """
+    """The handle's glyph has to contrast with the handle, not with the page. --color-primary-text was used here: near-white on Night's *light* handle and near-black on Day's *dark* one, so the chevron vanished in both."""
     handle = _rules(APP_CSS, '.toggle-button')
     assert handle['background-color'] == 'var(--color-button-primary)'
     assert handle['color'] == 'var(--color-button-primary-text)', \
@@ -308,11 +291,7 @@ def test_the_rail_entry_wears_a_solid_flame():
 
 
 def test_the_rail_entry_opens_the_app_instead_of_a_panel():
-    """ComfyUI's tab API has no action hook: a tab click toggles its side panel.
-
-    The click is therefore taken in the capture phase (before the tab's own
-    handler) and turned into opening the app page.
-    """
+    """ComfyUI's tab API has no action hook: a tab click toggles its side panel."""
     source = RAIL_JS.read_text(encoding='utf-8')
 
     assert 'bindRailEntry' in source, 'the click binding exists'
@@ -325,12 +304,7 @@ def test_the_rail_entry_opens_the_app_instead_of_a_panel():
 
 
 def test_a_confirmation_opened_from_the_information_modal_stays_in_front():
-    """Deleting a model asks "are you sure?" while the information modal is open.
-
-    The information overlay sits at 20000, so the generic modal overlay - the one
-    every confirmation uses - has to be above it. It used to be at 2000, which
-    hid the question behind the very panel it was asked about.
-    """
+    """Deleting a model asks "are you sure?" while the information modal is open."""
     details = _rule(DETAILS_CSS, '.app-details-overlay')
     modal = _rule(MODALS_CSS, '.modal-overlay')
 
@@ -341,13 +315,7 @@ def test_a_confirmation_opened_from_the_information_modal_stays_in_front():
 
 
 def test_a_toast_reports_in_front_of_the_information_modal():
-    """A toast says what a button inside the information modal just did.
-
-    The panel sits at 20000 and a confirmation opened from it at 21000, so every
-    surface that shows a toast has to clear both. ``#toast-container`` used to sit at
-    2100 and ``#saus-notices`` at 10000, so "deleted successfully" arrived *behind* the
-    panel it was about.
-    """
+    """A toast says what a button inside the information modal just did."""
     details = int(_rule(DETAILS_CSS, '.app-details-overlay')['z-index'])
     confirm = int(_rule(MODALS_CSS, '.modal-overlay')['z-index'])
 
@@ -360,12 +328,7 @@ def test_a_toast_reports_in_front_of_the_information_modal():
 
 
 def test_the_information_panel_closes_when_the_app_opens_in_a_tab():
-    """The panel is the way *to* an app, not a place to stay.
-
-    ``handleModelActionClick`` opens the app by dispatching ``saus:open-app`` - the same
-    route an explorer row takes - so the panel subscribes to that event and takes itself
-    down; otherwise the tab the user asked for stays hidden behind the panel.
-    """
+    """The panel is the way *to* an app, not a place to stay."""
     source = MODELS_JS.read_text(encoding='utf-8')
 
     assert "document.addEventListener('saus:open-app', close);" in source, \
@@ -375,13 +338,7 @@ def test_the_information_panel_closes_when_the_app_opens_in_a_tab():
 
 
 def test_the_app_toggle_takes_a_click_anywhere_on_it():
-    """A click on the visible switch has to reach its checkbox.
-
-    The checkbox is stretched invisibly behind the track, and the track painted over it
-    with no ``pointer-events: none`` - so it swallowed every click and the app toggles
-    (Prompt Enhance, every pose switch) answered only the keyboard. The row is a
-    ``<label>`` now too, like the Settings switch, so its text toggles it as well.
-    """
+    """A click on the visible switch has to reach its checkbox."""
     track = _rule(APP_CSS, '.toggle-track')
     assert track.get('pointer-events') == 'none', \
         'the track must not take the click away from the checkbox behind it'
@@ -394,12 +351,7 @@ def test_the_app_toggle_takes_a_click_anywhere_on_it():
 
 
 def test_the_dots_recover_after_a_delete():
-    """Dropping the status cache has to come with a re-check, or the dots stay grey.
-
-    ``invalidateStatusCache()`` fires the status-change handler with an empty
-    cache; repainting alone would leave every visible row on "checking" until the
-    panel was rebuilt. The handler therefore warms the visible rows as well.
-    """
+    """Dropping the status cache has to come with a re-check, or the dots stay grey."""
     source = (BROWSER / 'sidebar.js').read_text(encoding='utf-8')
     handler = re.search(r'setStatusChangeHandler\(\(\) => \{(.*?)\}\)', source, re.S)
 
@@ -413,11 +365,7 @@ def test_the_dots_recover_after_a_delete():
 
 
 def test_the_console_docks_over_the_workspace_instead_of_a_tab():
-    """The console floats over the bottom of the workspace, ComfyUI-style.
-
-    The panes keep their size (absolute, not a flex sibling), it is reachable
-    from the rail, and it is no longer a tab kind.
-    """
+    """The console floats over the bottom of the workspace, ComfyUI-style."""
     markup = BROWSER_HTML.read_text(encoding='utf-8')
 
     assert 'id="consoleDock"' in markup and 'id="consoleDockBody"' in markup, \
@@ -504,12 +452,7 @@ def test_console_dock_harness():
 
 
 def test_the_app_info_button_asks_the_browser_for_the_panel():
-    """The (i) in an app tab opens the shell's information panel.
-
-    The app runs in an iframe and cannot draw the model list with its install
-    buttons, so it asks the shell for it - keeping its own small dialog for the case
-    where the page is opened on its own (no shell around it).
-    """
+    """The (i) in an app tab opens the shell's information panel."""
     app = APP_MAIN_JS.read_text(encoding='utf-8')
     assert 'askParentForAppInfo' in app, 'the app needs a way to ask the shell'
     assert re.search(r"if \(!url \|\| window\.parent === window\) return false;", app), \
@@ -544,13 +487,7 @@ def test_the_model_picker_lists_names_only():
 
 
 def test_a_model_in_several_variants_updates_every_card():
-    """A download or a delete has to reach every card that lists the model.
-
-    The same file appears once per variant (plus the shared compulsory section), so
-    stopping at the first match left the other cards stale - one red where three
-    should be. The in-flight download is remembered too, so a panel that is closed
-    and reopened shows the card as it was.
-    """
+    """A download or a delete has to reach every card that lists the model."""
     source = MODELS_JS.read_text(encoding='utf-8')
 
     assert 'const activeDownloads = new Map();' in source, 'downloads in flight are remembered'
@@ -607,12 +544,7 @@ def test_model_status_cards_harness():
 
 
 def test_the_explorer_thumbnail_is_small_and_cacheable():
-    """The row paints a small copy, and the browser may keep it.
-
-    It used to ask for the ~23 KB master with a per-session cache-buster, while the
-    shell marked every /saus/ file no-cache - so opening the panel re-downloaded all
-    the thumbnails every time (29 apps, ~666 KB).
-    """
+    """The row paints a small copy, and the browser may keep it."""
     ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
     assert 'app.thumbnailRow' in ui, 'the row asks for the small copy'
     assert "thumb.loading = 'lazy'" in ui and "thumb.decoding = 'async'" in ui, \
@@ -637,12 +569,7 @@ def test_the_app_list_reports_both_thumbnail_sizes():
 
 
 def test_the_information_panels_open_app_button_opens_a_workspace_tab():
-    """The "Open App" button of the details modal must not leave the shell.
-
-    It opened a new browser window, which stranded the user in a bare app page -
-    no rail, no tabs, no console. The shell's own route is the ``saus:open-app``
-    document event, the same one the explorer row dispatches.
-    """
+    """The "Open App" button of the details modal must not leave the shell."""
     source = MODELS_JS.read_text(encoding='utf-8')
 
     assert "'saus:open-app'" in source, \
@@ -658,11 +585,7 @@ def test_the_information_panels_open_app_button_opens_a_workspace_tab():
 
 
 def test_open_app_reaches_the_tab_strip():
-    """The event the panel dispatches is the one tabs.js turns into a tab.
-
-    Read together: models.js emits ``saus:open-app``, main.js listens for it and
-    tabs.js implements the handler, so the chain the button relies on is whole.
-    """
+    """The event the panel dispatches is the one tabs.js turns into a tab."""
     shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
     assert "document.addEventListener('saus:open-app', handleOpenAppEvent)" in shell, \
         'main.js wires the event to the tab handler'
@@ -675,13 +598,7 @@ def test_open_app_reaches_the_tab_strip():
 
 
 def test_deprecated_apps_are_hidden_until_the_switch_is_on():
-    """Apps in web/apps/deprecated/ stay out of every explorer list by default.
-
-    The API keeps reporting them (`deprecated: true`) - that is what lets the switch
-    bring them back - so the filter belongs in `filterCurrentApps()`, the single
-    place the explorer asks for its list, and the switch must reach the shell through
-    a document event (core/ must not import the browser's modules).
-    """
+    """Apps in web/apps/deprecated/ stay out of every explorer list by default."""
     state = (BROWSER / 'state.js').read_text(encoding='utf-8')
     assert 'showDeprecatedApps: false' in state, \
         'deprecated apps are hidden unless the user opts in'
@@ -710,15 +627,7 @@ def test_deprecated_apps_are_hidden_until_the_switch_is_on():
 
 
 def test_the_settings_switch_actually_renders():
-    """The switch must survive the host's own `.settings-form label` rule.
-
-    `web/saus_browser/css/settings.css` sets `.settings-form label { display: block }`
-    (specificity 0,1,1), which beats a bare `.settings-switch` (0,1,0): the label stops
-    being a flex row, the track span stays `inline` so its width/height are ignored, and
-    the knob ends up floating over the label text - a switch that is not there. So the
-    component's rules must be scoped at least as specifically, and the text comes first
-    with the track after it (hence `~`, not `+`, for the checked state).
-    """
+    """The switch must survive the host's own `.settings-form label` rule."""
     settings = SETTINGS_JS.read_text(encoding='utf-8')
 
     for selector in ('.settings-form .settings-switch {',

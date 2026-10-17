@@ -1,13 +1,4 @@
-"""Dragging a result onto a Load Image input, across tabs.
-
-One reason per file involved: ``appDrag.js`` keeps the payload in module state, because
-only a ``drop`` may read ``dataTransfer.getData()`` while the tab strip has to ask
-*during* the drag; the Recent panel derives its payload from ComfyUI's own
-``/view?filename=...&type=...`` URL and refuses ``temp/`` (the File Manager API may not
-copy from there); the loader checks the payload **before** ``dataTransfer.files`` and
-copies anything outside ``input/`` in; the tab strip arms the hover for a media drag
-only, never while reordering tabs.
-"""
+"""Dragging a result onto a Load Image input, across tabs."""
 
 import re
 import shutil
@@ -104,13 +95,7 @@ def test_the_file_manager_publishes_its_drags_too():
 
 
 def test_the_guard_against_script_uploads_matches_the_server():
-    """`/upload/image` is ComfyUI's route and screens nothing, so the loader must.
-
-    A script dropped on the control would land in `input/`, which the server can read but
-    never imports - so this closes a policy hole, not a sandbox hole. The list is
-    duplicated on purpose (the server is Python, the control is a browser module), and
-    this test is what keeps the two copies equal.
-    """
+    """`/upload/image` is ComfyUI's route and screens nothing, so the loader must."""
     loader = LOADER_JS.read_text(encoding='utf-8')
     constants = (ROOT / 'saus' / 'constants.py').read_text(encoding='utf-8')
 
@@ -141,11 +126,7 @@ def test_the_guard_against_script_uploads_matches_the_server():
 
 
 def test_the_upload_guard_behaves_like_the_server():
-    """The guard's behaviour, not only its presence: run the node harness.
-
-    Skipped - never failed - when node is absent, because only the *environment* decides
-    that. `tools/check_all.py` puts node on PATH, so inside the gate this always runs.
-    """
+    """The guard's behaviour, not only its presence: run the node harness."""
     node = shutil.which('node') or shutil.which('nodejs')
     if node is None:
         _skip(f'{HARNESS.name} needs node, which is not installed here')

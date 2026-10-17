@@ -1,8 +1,4 @@
-"""Standalone tests for :mod:`saus.model_scan`.
-
-Run directly (``python tests/test_model_scan.py``) or via pytest. No ComfyUI
-imports are required.
-"""
+"""Standalone tests for :mod:`saus.model_scan`."""
 
 import os
 import sys

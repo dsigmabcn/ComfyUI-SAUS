@@ -1,11 +1,4 @@
-"""Where models live: SAUS finds a model by file name in *any* ComfyUI folder.
-
-ComfyUI maps a folder type to one or more directories (for example
-``diffusion_models`` covers both ``models/unet`` and ``models/diffusion_models``)
-and lists their contents -- sub-folders included -- via
-``folder_paths.get_filename_list``. These tests drive that with a fake
-``folder_paths`` so the rules can be checked without ComfyUI.
-"""
+"""Where models live: SAUS finds a model by file name in *any* ComfyUI folder."""
 
 import os
 import sys
@@ -195,12 +188,7 @@ def test_model_folder_directories_excludes_code_folders():
 
 
 def test_a_folder_name_is_parsed_the_same_however_it_is_written():
-    """The registry writes the same folder as 'unet', '/unet/' and 'unet/x'.
-
-    Splitting on '/' before trimming the outer ones turned '/unet/' into an empty
-    string, so the hint vanished and the two spellings of one folder gave
-    different answers.
-    """
+    """The registry writes the same folder as 'unet', '/unet/' and 'unet/x'."""
     for written, wanted in (('unet', 'unet'), ('/unet/', 'unet'), ('unet/', 'unet'),
                             ('/unet', 'unet'), ('/UNET/', 'unet'),
                             ('loras/sdxl', 'loras'), ('/loras/sdxl/', 'loras'),
@@ -213,11 +201,7 @@ def test_a_folder_name_is_parsed_the_same_however_it_is_written():
 
 
 def test_a_slash_wrapped_hint_keeps_its_priority():
-    """A hint written '/unet/' has to steer the search like 'unet' does.
-
-    The folder type adds nothing here (an unknown model type) and the known list
-    is the fallback, so the hint landing first is the whole assertion.
-    """
+    """A hint written '/unet/' has to steer the search like 'unet' does."""
     known = ['checkpoints', 'loras']
     for hint in ('/upscale_models/', 'upscale_models'):
         got = candidate_folder_types('', hint, known)
@@ -233,11 +217,7 @@ def test_a_hint_is_parsed_the_same_with_or_without_slashes():
 
 
 def test_the_alias_mapping_does_not_duplicate_a_folder_type():
-    """unet -> diffusion_models collides with the model's own folder type.
-
-    The alias is applied *after* the list is built, so without a second pass the
-    same folder type is searched twice.
-    """
+    """unet -> diffusion_models collides with the model's own folder type."""
     _install_fake(_tree())
     got = model_lookup.model_folder_candidates('Diffusion model', 'unet')
     assert got == list(dict.fromkeys(got)), f'a folder type is listed twice: {got}'
@@ -245,13 +225,7 @@ def test_the_alias_mapping_does_not_duplicate_a_folder_type():
 
 
 def test_the_hint_chooses_the_registered_directory_of_that_name():
-    """A folder type covers several directories, so the hint has to pick one.
-
-    ComfyUI registers ``diffusion_models`` as models/unet *and*
-    models/diffusion_models. Always taking the first sent every diffusion model
-    to ``unet/`` however the registry named the folder -- which is how a catalog
-    saying ``diffusion_models`` ended up with its files in ``unet/``.
-    """
+    """A folder type covers several directories, so the hint has to pick one."""
     root = _tree()
     _install_fake(root)
 
