@@ -1,0 +1,225 @@
+{
+  "id": "mosssft",
+  "name": "Moss SFT",
+  "url": "moss-text-to-image",
+  "description": "Text to image with MOSS-Image SFT (OpenMOSS, a 5B single-stream DiT), with an optional Qwen prompt upsampler.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "text-to-image",
+    "tags": {
+      "type": [
+        "base"
+      ],
+      "base_models": [
+        "MOSS"
+      ],
+      "other": []
+    },
+    "architecture": "MOSS",
+    "models": [
+      "moss_image_sft_int8_convrot.safetensors",
+      "qwen3.5_9b_w4a8_gptq.safetensors",
+      "flux2-vae_small.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promoss",
+      "label": "Prompt",
+      "nodePath": "18_17.inputs.value",
+      "default": "Cinematic night street photograph: a model in an exaggerated balloon-sleeve white wool coat walking toward camera under a huge illuminated theatre marquee, the marquee bulbs spelling \"MOSS\" in tall capital letters, wet asphalt with long reflections, warm tungsten glow against cold blue night, anamorphic flare, 35mm film grain, low angle",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      }
+    }
+  ],
+  "steppers": [
+    {
+      "id": "mpmoss",
+      "label": "Megapixels",
+      "nodePath": "19.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 8,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
+    },
+    {
+      "id": "stepmoss",
+      "label": "Steps",
+      "nodePath": "18_7.inputs.steps",
+      "minValue": 1,
+      "maxValue": 100,
+      "step": 1,
+      "defValue": 25,
+      "precision": 0,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    },
+    {
+      "id": "cfgmoss",
+      "label": "CFG",
+      "nodePath": "18_7.inputs.cfg",
+      "minValue": 0,
+      "maxValue": 20,
+      "step": 0.1,
+      "defValue": 2.5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "unetmoss",
+      "label": "Model",
+      "nodePath": "18_1.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "moss_image_sft_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      }
+    },
+    {
+      "id": "clipmoss",
+      "label": "CLIP",
+      "nodePath": "18_2.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "default": "qwen3.5_9b_w4a8_gptq.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      }
+    },
+    {
+      "id": "vaemoss",
+      "label": "VAE",
+      "nodePath": "18_3.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "default": "flux2-vae_small.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "sampmoss",
+      "label": "Sampler Name",
+      "nodePath": "18_7.inputs.sampler_name",
+      "url": "KSampler",
+      "key": "sampler_name",
+      "default": "er_sde",
+      "layout": {
+        "region": "advanced",
+        "order": 12
+      }
+    },
+    {
+      "id": "schedmoss",
+      "label": "Scheduler",
+      "nodePath": "18_7.inputs.scheduler",
+      "url": "KSampler",
+      "key": "scheduler",
+      "default": "simple",
+      "layout": {
+        "region": "advanced",
+        "order": 13
+      }
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedmoss",
+      "label": "Seed",
+      "nodePath": "18_7.inputs.seed",
+      "initialSeed": 333599710072681,
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
+    }
+  ],
+  "imageLoaders": [],
+  "toggles": [
+    {
+      "id": "togmosspe",
+      "label": "Prompt Enhance",
+      "nodePath": "18_16.inputs.switch",
+      "defaultValue": true,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    },
+    {
+      "id": "togmossslg",
+      "label": "Skip Layer Guidance",
+      "nodePath": "18_24.inputs.switch",
+      "defaultValue": false,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnmoss",
+      "label": "Filename Prefix",
+      "nodePath": "9.inputs.filename_prefix",
+      "defValue": "moss_image_t2i",
+      "layout": {
+        "region": "basic",
+        "order": 7
+      }
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [
+    {
+      "id": "armoss",
+      "label": "Aspect Ratio",
+      "nodePath": "19.inputs.aspect_ratio",
+      "url": "ResolutionSelector",
+      "key": "aspect_ratio",
+      "quickRatios": "1:1, 16:9, 9:16",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      }
+    }
+  ],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "output9",
+      "label": "Save Image",
+      "nodeId": "9",
+      "type": "media"
+    }
+  ]
+}

@@ -121,10 +121,6 @@ def test_the_browser_uses_the_thumbnail_it_is_given():
             f'{path.name} guesses a file name - that is a 404 for a webp master'
         assert 'saus_logo.png' in source, f'{path.name} needs the logo for apps without one'
 
-    # The explorer row asks for the small copy first; the details modal keeps the master.
-    assert 'app.thumbnailRow' in UI_JS.read_text(encoding='utf-8'), \
-        'the row should not download the master to draw a 40px square'
-
 
 def test_the_row_copy_is_resolved_separately():
     """The explorer row gets the 128px copy, the information panel keeps the master."""

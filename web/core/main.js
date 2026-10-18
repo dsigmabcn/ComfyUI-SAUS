@@ -93,7 +93,6 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             return fallback;
         });
     const architectures = await safeJson('/saus/api/architectures', {});
-    const modelsData = await safeJson('/saus/api/data-model-info', {});
     // Filename-keyed registry (used to apply the new architecture "models"/"variants").
     const modelsRegistry = await safeJson('/saus/api/models', {});
 
@@ -374,28 +373,6 @@ function setPromptComponents(config, options = { clearInputs: false }) {
             return files.every(fileInstalled);
         };
 
-        // Legacy check (identifier-based settings.model).
-        const checkModels = (settings) => {
-            if (!settings || !settings.model || settings.model.length === 0) {
-                return true; 
-            }
-            for (const modelId of settings.model) {
-                const modelInfo = modelsData[modelId];
-                if (!modelInfo) {
-                    console.warn(`Model identifier "${modelId}" not found in models_data.json`);
-                    return false;
-                }
-                let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
-                const fullModelPath = path ? `${path}/${modelInfo.id}` : modelInfo.id;
-                
-                if (!availableModels.includes(fullModelPath)) {
-                    console.warn(`Required model "${fullModelPath}" is not installed.`);
-                    return false;
-                }
-            }
-            return true;
-        };
-
         const setButton = (btn, label, enabled, title) => {
             if (!btn) return;
             if (label) btn.textContent = label;
@@ -461,21 +438,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 variantButtons.push(btn);
             });
         } else if (arch) {
-            // No named variants: the architecture's base settings *are* the
-            // default, so the app simply runs as HD. Turbo only exists as a
-            // choice when the architecture defines turbo_settings; otherwise its
-            // button goes away instead of sitting there greyed out.
-            setButton(staticButtons.hd, arch.base_settings ? arch.base_settings.name : 'HD',
-                !arch.base_settings || checkModels(arch.base_settings),
-                'Required models for this mode are not installed.');
-            if (arch.turbo_settings) {
-                setButton(staticButtons.turbo, arch.turbo_settings.name || 'Turbo',
-                    checkModels(arch.turbo_settings),
-                    'Required models for this mode are not installed.');
-            } else {
-                staticButtons.turbo?.remove();
-                staticButtons.turbo = null;
-            }
+            // No named variants: the app simply runs as HD (Custom stays, so the
+            // parameters are always reachable). A turbo mode would be a variant,
+            // so there is nothing to offer as an alternative here.
+            setButton(staticButtons.hd, 'HD', true);
+            staticButtons.turbo?.remove();
+            staticButtons.turbo = null;
         } else {
             // No architecture block at all: still a runnable app, and HD is what
             // it runs as. There is nothing to offer as an alternative (Custom
@@ -549,17 +517,12 @@ function setPromptComponents(config, options = { clearInputs: false }) {
 
                 if (architectureName && architectures[architectureName]) {
                     const arch = architectures[architectureName];
-                    // New schema: a mode ("hd"/"turbo") maps to the 1st/2nd variant.
-                    // Models are placed by group -> node; settings/LoRAs reuse the
-                    // legacy shape below (model:[] so the positional loop is skipped).
+                    // A variant names the model each group takes ("pick") plus its own
+                    // settings (steps/cfg); models are placed by group -> node.
                     let settings = null;
                     if (mode === 'variant' && arch.variants) {
                         const variant = arch.variants[clickedButton.dataset.variant];
                         if (variant) {
-                            const idByFile = {};
-                            Object.entries(modelsData || {}).forEach(([id, entry]) => {
-                                if (entry && entry.id) idByFile[entry.id] = id;
-                            });
                             // A variant can name its LoRAs either in the model group it
                             // picks from ("pick") or in its own list ("loras"): collect
                             // the file names from both.
@@ -594,46 +557,13 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                             });
                             settings = {
                                 name: variant.label,
-                                model: [],
-                                lora: (variant.loras || []).map(f => idByFile[f]).filter(Boolean),
                                 loraFiles: [...(variant.loras || []), ...pickedLoras],
                                 ...(variant.settings || {})
                             };
                         }
-                    } else if (mode === 'hd' && arch.base_settings) {
-                        settings = arch.base_settings;
-                    } else if (mode === 'turbo' && arch.turbo_settings) {
-                        settings = arch.turbo_settings;
                     }
 
                     if (settings) {
-                        // --- Models ---
-                        if (settings.model && Array.isArray(settings.model)) {
-                            const modelIdentifiers = settings.model;
-                            const modelWidgetConfigs = appConfig.dropdowns.filter(d => d.label.startsWith('Model') || d.label === 'Checkpoint');
-                            
-                            modelIdentifiers.forEach((modelIdentifier, index) => {
-                                if (modelWidgetConfigs[index] && modelsData[modelIdentifier]) {
-                                    const modelWidgetConfig = modelWidgetConfigs[index];
-                                    const modelInfo = modelsData[modelIdentifier];
-                                    let path = (modelInfo.model_path || '').replace('/diffusion_models/', '').replace('/checkpoints/', '').replace(/^\/|\/$/g, '');
-                                    const newModelValue = path ? `${path}/${modelInfo.id}` : modelInfo.id;
-                                    
-                                    updateWorkflow(workflow, modelWidgetConfig.nodePath, newModelValue);
-
-                                    const dropdownElement = document.getElementById(modelWidgetConfig.id);
-                                    if (dropdownElement) {
-                                        const input = dropdownElement.querySelector('input');
-                                        if (input) {
-                                            const getDisplayName = (fullPath) => fullPath.split(/[\\/]/).pop();
-                                            input.value = getDisplayName(newModelValue);
-                                            input.title = newModelValue;
-                                        }
-                                    }
-                                }
-                            });
-                        }
-
                         // --- LoRAs ---
                         // A LoRA is attached through the "+Lora" button, which adds (and
                         // chains) a LoraLoaderModelOnly node, so the file name has to be
@@ -646,17 +576,13 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                             }
                         });
 
-                        // Entries may be legacy keys ("QWEN_LIGHT_8steps"), registry ids or
-                        // plain file names -- resolve them all to a LoRA file name.
+                        // LoRAs are named by file name, which is what the registry is keyed by.
                         const loraFiles = [];
-                        const addLoraFile = (identifier) => {
-                            if (!identifier) return;
-                            const legacy = modelsData[identifier];
-                            const file = (legacy && legacy.id) ? legacy.id : String(identifier);
-                            if (file && !loraFiles.includes(file)) loraFiles.push(file);
+                        const addLoraFile = (file) => {
+                            if (!file || loraFiles.includes(file)) return;
+                            loraFiles.push(file);
                         };
                         (settings.loraFiles || []).forEach(addLoraFile);
-                        (settings.lora || []).forEach(addLoraFile);
 
                         const loraValueFor = (file) => {
                             const opts = loaderOptions['__lora__'] || [];
@@ -682,16 +608,23 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                             }
                         }
 
-                        // --- Other Steppers (CFG, Steps, etc.) ---
+                        // --- Other settings (CFG, Steps, toggles, ...) ---
+                        // A variant may set a stepper (numeric) or a toggle (on/off), matched
+                        // on its label. Without the toggle lookup a variant could not turn
+                        // "Enable manual sigmas" on for Turbo and off for HD.
                         for (const key in settings) {
                             if (Object.prototype.hasOwnProperty.call(settings, key) && key !== 'model' && key !== 'lora' && key !== 'name') {
-                                const widgetConfig = appConfig.steppers.find(s => s.label.toLowerCase() === key.toLowerCase());
+                                const wanted = key.toLowerCase();
+                                const stepper = appConfig.steppers.find(s => s.label.toLowerCase() === wanted);
+                                const widgetConfig = stepper
+                                    || (appConfig.toggles || []).find(t => t.label.toLowerCase() === wanted);
                                 if (widgetConfig) {
                                     const widgetInstance = widgetInstances[widgetConfig.id];
                                     if (widgetInstance) {
                                         const value = settings[key];
                                         if (value !== null && value !== undefined) {
-                                            widgetInstance.updateValue(Number(value));
+                                            // Toggles normalise their own value; a stepper needs a number.
+                                            widgetInstance.updateValue(stepper ? Number(value) : value);
                                         }
                                     }
                                 }

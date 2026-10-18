@@ -1,0 +1,45 @@
+# The gate that was missing: publish_action.yml only publishes on a pyproject
+# bump, so nothing ran the suites. The runner and the code checks live in the
+# companion builder repo, so it is checked out as a sibling and check_all.py is
+# given both paths explicitly (the sibling layout then does not matter).
+#
+# Nothing to install: the suites stub aiohttp / ComfyUI's `server` themselves and
+# otherwise use the stdlib. Node is only for tests/js/*.harness.mjs.
+name: Tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  suites:
+    name: Every suite + asset/security/skill checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ComfyUI-SAUS
+        uses: actions/checkout@v4
+        with:
+          path: ComfyUI-SAUS
+
+      - name: Check out ComfyUI-SAUS-builder
+        uses: actions/checkout@v4
+        with:
+          repository: dsigmabcn/ComfyUI-SAUS-builder
+          path: ComfyUI-SAUS-builder
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # >= 22 auto-detects module syntax, which the harnesses rely on.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run everything
+        run: |
+          python ComfyUI-SAUS-builder/tools/check_all.py \
+            --saus "$PWD/ComfyUI-SAUS" \
+            --builder "$PWD/ComfyUI-SAUS-builder"

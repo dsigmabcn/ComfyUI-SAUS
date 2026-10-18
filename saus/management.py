@@ -117,32 +117,6 @@ async def get_architectures_handler(request: web.Request) -> web.Response:
             status=500
         )
 
-MODEL_DATA_FILE = SAUS_BROWSER_PATH / "data" / "models_data.json"
-
-async def get_model_data_handler(request: web.Request) -> web.Response:
-    try:
-        if not MODEL_DATA_FILE.exists():
-            return web.json_response(
-                {"error": "Data Model file not found."},
-                status=404
-            )
-
-        with open(MODEL_DATA_FILE , 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        return web.json_response(data, status=200, headers={'Cache-Control': 'no-cache'})
-
-    except json.JSONDecodeError:
-        return web.json_response(
-            {"error": "Invalid JSON format in the Models Data file."},
-            status=500
-        )
-    except Exception as e:
-        return web.json_response(
-            {"error": f"An unexpected error occurred: {e}"},
-            status=500
-        )
-
 # --------------------------------------------------------------------------- #
 # New (metadata-era) read endpoints
 # --------------------------------------------------------------------------- #

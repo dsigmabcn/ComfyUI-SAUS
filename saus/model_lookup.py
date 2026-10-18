@@ -13,20 +13,111 @@ and ``datasets`` sit in the same ComfyUI table but hold code and data.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, Iterable, List, Optional
 
 from .constants import SAUSMSG, logger
-from .model_scan import (
-    candidate_folder_types,
-    match_folder_names,
-    normalise_folder_name,
-    MODEL_FOLDER_TYPES,
-)
 
 try:  # ComfyUI is always present at runtime; stay importable without it.
     import folder_paths
 except Exception:  # pragma: no cover - only outside ComfyUI
     folder_paths = None
+
+
+# --------------------------------------------------------------------------- #
+# Where a model lives
+# --------------------------------------------------------------------------- #
+# Registry model type -> the ComfyUI "folder type"(s) to look in, best first.
+# ComfyUI maps a folder type to one or more directories itself (for example
+# "diffusion_models" covers both models/unet and models/diffusion_models), so
+# nothing here hardcodes a directory. Custom folder types registered by other
+# nodes are still searched (see candidate_folder_types).
+TYPE_FOLDER_NAMES: Dict[str, List[str]] = {
+    "checkpoint": ["checkpoints"],
+    "diffusion model": ["diffusion_models"],
+    "text encoder": ["text_encoders"],
+    "vae": ["vae"],
+    "lora": ["lora"],
+    "controlnet": ["controlnet"],
+    "clipvision": ["clip_vision"],
+    "style": ["style_models"],
+    "upscaler": ["upscale_models"],
+    "latent upscaler": ["latent_upscale_models"],
+    "motion module": ["diffusion_models", "loras"],
+    "audio encoder": ["audio_encoders"],
+}
+
+# Registry types whose ComfyUI folder name differs from the type itself.
+_TYPE_FOLDER_OVERRIDES = {"lora": "loras"}
+
+# ComfyUI folder types that hold model weights. Only these may be searched for a
+# model, receive a download or have a model deleted from them. ``custom_nodes``
+# and ``datasets`` are deliberately absent -- ComfyUI registers them in the same
+# ``folder_names_and_paths`` table, but they hold code / data, so a download
+# there (plus ``/saus/api/restart``) would be remote code execution. Adding a
+# folder type here is a deliberate act, not an accident.
+MODEL_FOLDER_TYPES = frozenset({
+    "checkpoints", "loras", "vae", "text_encoders", "clip",
+    "diffusion_models", "unet", "clip_vision", "style_models", "embeddings",
+    "diffusers", "vae_approx", "controlnet", "t2i_adapter", "gligen",
+    "upscale_models", "latent_upscale_models", "hypernetworks", "photomaker",
+    "model_patches", "audio_encoders", "background_removal",
+    "frame_interpolation", "geometry_estimation", "optical_flow", "detection",
+})
+
+
+def normalise_folder_name(value) -> str:
+    """A folder name however the registry happens to spell it.
+
+    ``/unet/``, ``unet`` and ``loras/sdxl`` all name a ComfyUI folder *type*, so only
+    the first segment counts and the slashes are stripped first (splitting without
+    stripping turned ``/unet/`` into an empty string, so the two spellings of one
+    folder behaved differently). Returns ``""`` when nothing usable is left, which is
+    how a caller tells "no hint" from "a hint".
+    """
+    text = str(value or "").strip().replace("\\", "/").strip("/")
+    name = text.split("/")[0].strip().lower()
+    return _TYPE_FOLDER_OVERRIDES.get(name, name)
+
+
+def candidate_folder_types(model_type: str = "", hint: str = "",
+                           known: Iterable[str] = ()) -> List[str]:
+    """ComfyUI folder types to search for a model, most likely first: the registry's
+    ``type``, then its ``directory`` hint, then anything ComfyUI registered - so an
+    unknown type, or a folder added by another custom node, still resolves.
+    """
+    ordered: List[str] = []
+
+    def add(name) -> None:
+        text = normalise_folder_name(name)
+        if text and text not in ordered:
+            ordered.append(text)
+
+    for name in TYPE_FOLDER_NAMES.get(str(model_type or "").strip().lower(), []):
+        add(name)
+    add(hint)
+    for name in known:
+        add(name)
+    return ordered
+
+
+def match_folder_names(listing: Iterable[str], filename: str) -> str:
+    """The entry of a ComfyUI folder listing that refers to ``filename``.
+
+    ComfyUI lists files relative to the folder root (``sub/name.safetensors``),
+    so an exact match is preferred over a path that merely ends with the name.
+    Returns ``""`` when there is no match.
+    """
+    wanted = str(filename or "").strip().replace("\\", "/")
+    if not wanted:
+        return ""
+    suffix_match = ""
+    for name in listing or []:
+        normalized = str(name).replace("\\", "/")
+        if normalized == wanted:
+            return normalized
+        if not suffix_match and normalized.endswith("/" + wanted):
+            suffix_match = normalized
+    return suffix_match
 
 
 def known_folder_types() -> List[str]:

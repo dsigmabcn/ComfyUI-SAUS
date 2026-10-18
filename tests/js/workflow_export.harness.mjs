@@ -12,6 +12,7 @@
 import { strict as assert } from 'node:assert';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { install } from './_fake_clock.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORIGIN = 'http://localhost:8188';
@@ -89,6 +90,11 @@ const liveFrame = (workflow, variant = null, ready = () => true) => ({
         },
     },
 });
+
+/* The exporter polls for the app to report itself ready (150ms x a 3s grace), and
+ * scenario 8 waits that whole grace out; a virtual clock makes the same waits
+ * elapse in order, immediately (the >= 3s assertion still holds). */
+install({ auto: true });
 
 const { exportWorkflowToComfyUI } = await import(
     pathToFileURL(join(ROOT, 'web', 'saus_browser', 'js', 'workflow_export.js')).href

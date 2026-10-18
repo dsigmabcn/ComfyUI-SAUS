@@ -5,36 +5,6 @@
     "categories": [
       "Image Models"
     ],
-    "components": {
-      "compulsory": [
-        "AE_VAE",
-        "T5XXL_ENCODER",
-        "CLIP_L_ENCODER"
-      ],
-      "at_least_one": [
-        "FLUX_DEV_MODEL",
-        "FLUX_KREA"
-      ],
-      "optional": []
-    },
-    "base_settings": {
-      "name": "FLUX-DEV",
-      "steps": "30",
-      "cfg": "3.5",
-      "model": [
-        "FLUX_DEV_MODEL"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "FLUX-KREA",
-      "steps": "30",
-      "cfg": "3.5",
-      "model": [
-        "FLUX_KREA"
-      ],
-      "lora": []
-    },
     "models": [
       {
         "id": "VAE",
@@ -119,35 +89,6 @@
     "categories": [
       "Image Models"
     ],
-    "components": {
-      "compulsory": [
-        "QWEN_3_4B_VL_ENCODER",
-        "AE_VAE"
-      ],
-      "at_least_one": [
-        "Z_IMAGE_BASE",
-        "Z_IMAGE_TURBO"
-      ],
-      "optional": []
-    },
-    "base_settings": {
-      "name": "BASE",
-      "steps": "30",
-      "cfg": "4.0",
-      "model": [
-        "Z_IMAGE_BASE"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "TURBO",
-      "steps": "4",
-      "cfg": "1.0",
-      "model": [
-        "Z_IMAGE_TURBO"
-      ],
-      "lora": []
-    },
     "models": [
       {
         "id": "TEXT_ENCODER",
@@ -228,18 +169,6 @@
     "categories": [
       "Style, Edit, inpaint"
     ],
-    "components": {
-      "compulsory": [
-        "AE_VAE",
-        "T5XXL_ENCODER",
-        "CLIP_L_ENCODER",
-        "FLUX_DEV_MODEL",
-        "SIG CLIP VISION",
-        "FLUX REDUX"
-      ],
-      "at_least_one": [],
-      "optional": []
-    },
     "models": [
       {
         "id": "VAE",
@@ -412,13 +341,15 @@
   },
   "QWEN IMAGE 2.1": {
     "title": "QWEN IMAGE 2.1",
-    "description": "",
-    "categories": [],
+    "description": "Qwen-Image-2.1 text-to-image: diffusion (base or turbo), qwen3vl-8b encoder, the t2i prompt-enhancer encoder (qwen3.5 9B) and the 2.1 VAE.",
+    "categories": [
+      "text-to-image"
+    ],
     "models": [
       {
         "id": "Diffusion_model",
         "type": "Diffusion model",
-        "need": "all",
+        "need": "one",
         "node": {
           "nodeType": "UNETLoader",
           "input": "unet_name"
@@ -426,6 +357,9 @@
         "files": [
           {
             "file": "qwen_image_2.1_int8_convrot.safetensors"
+          },
+          {
+            "file": "qwen_image_2.1_turbo_int8_convrot.safetensors"
           }
         ]
       },
@@ -461,7 +395,32 @@
         ]
       }
     ],
-    "variants": {}
+    "variants": {
+      "BASE": {
+        "label": "HD",
+        "pick": {
+          "Diffusion_model": "qwen_image_2.1_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "25",
+          "cfg": "1",
+          "enable manual sigmas": false
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "Turbo",
+        "pick": {
+          "Diffusion_model": "qwen_image_2.1_turbo_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "8",
+          "cfg": "1",
+          "enable manual sigmas": true
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX 2 KLEIN FAMILY": {
     "title": "Flux 2 Klein family",
@@ -593,37 +552,6 @@
     "categories": [
       "Image Models"
     ],
-    "components": {
-      "compulsory": [
-        "WAN_VAE",
-        "QWEN_2.5VL_ENCODER",
-        "QWEN_IMAGE_MODEL"
-      ],
-      "at_least_one": [],
-      "optional": [
-        "QWEN_LIGHT_4steps"
-      ]
-    },
-    "base_settings": {
-      "name": "BASE",
-      "steps": "25",
-      "cfg": "7.5",
-      "model": [
-        "QWEN_IMAGE_MODEL"
-      ],
-      "lora": []
-    },
-    "turbo_settings": {
-      "name": "LIGHTNING",
-      "steps": "4",
-      "cfg": "1.0",
-      "model": [
-        "QWEN_IMAGE_MODEL"
-      ],
-      "lora": [
-        "QWEN_LIGHT_4steps"
-      ]
-    },
     "models": [
       {
         "id": "VAE",
@@ -1510,9 +1438,10 @@
   },
   "QWEN IMAGE 2.1 EDIT": {
     "title": "Qwen Image 2.1 Edit",
-    "description": "Qwen-Image-2.1 edit models: diffusion, qwen3vl-8b encoder, the i2i prompt-enhancer encoder (qwen3.5 9B) and the 2.1 VAE.",
+    "description": "Qwen-Image-2.1 edit models: diffusion (base or turbo), qwen3vl-8b encoder, the i2i prompt-enhancer encoder (qwen3.5 9B) and the 2.1 VAE.",
     "categories": [
-      "image-to-image (editing)"
+      "image-to-image (editing)",
+      "image-to-image (reference)"
     ],
     "models": [
       {
@@ -1549,7 +1478,7 @@
       {
         "id": "Diffusion_model",
         "type": "Diffusion model",
-        "need": "all",
+        "need": "one",
         "node": {
           "input": "unet_name",
           "nodeType": "UNETLoader"
@@ -1557,11 +1486,39 @@
         "files": [
           {
             "file": "qwen_image_2.1_int8_convrot.safetensors"
+          },
+          {
+            "file": "qwen_image_2.1_turbo_int8_convrot.safetensors"
           }
         ]
       }
     ],
-    "variants": {}
+    "variants": {
+      "BASE": {
+        "label": "HD",
+        "pick": {
+          "Diffusion_model": "qwen_image_2.1_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "25",
+          "cfg": "1",
+          "enable manual sigmas": false
+        },
+        "loras": []
+      },
+      "TURBO": {
+        "label": "Turbo",
+        "pick": {
+          "Diffusion_model": "qwen_image_2.1_turbo_int8_convrot.safetensors"
+        },
+        "settings": {
+          "steps": "8",
+          "cfg": "8",
+          "enable manual sigmas": true
+        },
+        "loras": []
+      }
+    }
   },
   "FLUX KONTEXT": {
     "title": "FLUX KONTEXT",
@@ -2241,6 +2198,58 @@
           {
             "file": "4x-AnimeSharp.pth",
             "label": "4x AnimeSharp"
+          }
+        ]
+      }
+    ],
+    "variants": {}
+  },
+  "MOSS": {
+    "title": "MOSS",
+    "description": "MOSS-Image (OpenMOSS): a ~5B single-stream DiT with the Qwen 3.5 text encoder and the FLUX.2 small VAE.",
+    "categories": [
+      "text-to-image"
+    ],
+    "models": [
+      {
+        "id": "Diffusion_model",
+        "type": "Diffusion model",
+        "need": "all",
+        "node": {
+          "nodeType": "UNETLoader",
+          "input": "unet_name"
+        },
+        "files": [
+          {
+            "file": "moss_image_sft_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "TEXT_ENCODER",
+        "type": "TEXT ENCODER",
+        "need": "all",
+        "node": {
+          "nodeType": "CLIPLoader",
+          "input": "clip_name"
+        },
+        "files": [
+          {
+            "file": "qwen3.5_9b_w4a8_gptq.safetensors"
+          }
+        ]
+      },
+      {
+        "id": "VAE",
+        "type": "VAE",
+        "need": "all",
+        "node": {
+          "nodeType": "VAELoader",
+          "input": "vae_name"
+        },
+        "files": [
+          {
+            "file": "flux2-vae_small.safetensors"
           }
         ]
       }

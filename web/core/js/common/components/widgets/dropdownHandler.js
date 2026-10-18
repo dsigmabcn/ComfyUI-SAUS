@@ -14,20 +14,9 @@ const ADVANCED_WORKFLOW_PATHS = [
     'face_restore_model',
 ];
 
-// Models whose previews are fetched, and whose dropdown *row* shows a thumbnail.
-// The lists themselves are names only for every dropdown: the cards used to carry
-// a 100x100 image, which pushed the names ("just the list") out of sight. LoRAs are
-// left out on purpose: their list was always a plain name list.
-const DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = [
-    'ckpt_name',
-    'unet_name',
-];
-
 const DISPLAY_MODEL_NAME_ONLY = true;
 const basePath = window.location.pathname.split('/saus/')[1];
 const DEFAULT_NESTING_TRIGGER_VALUE = 3;
-const modelImagePreviews = {};
-const DEFAULT_PREVIEW_THUMBNAIL = '/core/media/ui/top-view_30trans.png';
 const TOGGLE_STATE_STORAGE_KEY = 'AppConfigDropdownExpandAllState';
 
 // No caller switches this on; smooth scrolling is effectively disabled.
@@ -40,22 +29,6 @@ function getDisplayName(fullPath) {
     const modelName = fullPath.split(/[\\/]/).pop();
     return modelName;
 }
-function updateVisibleUI() {
-    document.querySelectorAll('.drop-down-element').forEach(element => {
-        const loaderId = element.getAttribute('data-loader-id');
-        if (loaderId && isPreviewWorkflowPath(loaderId)) {
-            const selectedValue = element.querySelector('input').value;
-            const imgElem = element.querySelector('.dropdownElementPreviewImage');
-            if (imgElem && selectedValue) {
-                const key = pathToKey(selectedValue);
-                if (modelImagePreviews[key]) { 
-                    imgElem.src = modelImagePreviews[key];
-                }
-            }
-        }
-    });
-}
-
 function getAppConfig() {
     const storedConfig = localStorage.getItem('AppConfig');
     return storedConfig ? JSON.parse(storedConfig) : {};
@@ -68,10 +41,6 @@ function setAppConfig(config) {
 function isAdvancedLayout(workflowPath) {
     if (!workflowPath) return false;
     return ADVANCED_WORKFLOW_PATHS.some(str => workflowPath.includes(str));
-}
-
-function isPreviewWorkflowPath(workflowPath) {
-    return DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS.some(str => workflowPath.includes(str));
 }
 
 function buildNestedStructure(items) {
@@ -88,61 +57,6 @@ function buildNestedStructure(items) {
         });
     });
     return root;
-}
-
-function gatherLeafPaths(nestedBranch, parentPath) {
-    const results = [];
-    for (const key of Object.keys(nestedBranch)) {
-        const val = nestedBranch[key];
-        const childPath = parentPath ? `${parentPath}\\${key}` : key;
-        if (val._isLeaf) {
-            results.push(childPath);
-        } else {
-            results.push(...gatherLeafPaths(val, childPath));
-        }
-    }
-    return results;
-}
-
-async function fetchThumbnailsForPaths(paths) {
-    if (!paths || paths.length === 0) return;
-
-    const needed = [];
-    for (const p of paths) {
-        const k = pathToKey(p);
-        if (!modelImagePreviews[k]) {
-            needed.push(p);
-        }
-    }
-    if (needed.length === 0) return;
-
-    const chunkSize = 50;
-    for (let i = 0; i < needed.length; i += chunkSize) {
-        const slice = needed.slice(i, i + chunkSize);
-        await doPostRequestForSlice(slice);
-        updateVisibleUI();
-    }
-}
-
-async function doPostRequestForSlice(pathsSlice) {
-    try {
-        const payload = { paths: pathsSlice.map(pathToKey) };
-        const resp = await fetch('/saus/api/model-previews', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-        if (!resp.ok) {
-            console.warn('Failed chunk post. Status:', resp.status);
-            return;
-        }
-        const data = await resp.json();
-        for (const [fwd, b64Url] of Object.entries(data)) {
-            modelImagePreviews[fwd] = b64Url;
-        }
-    } catch (err) {
-        console.error('Error in doPostRequestForSlice:', err);
-    }
 }
 
 /**
@@ -204,7 +118,7 @@ function buildPath(parent, key) {
     return pathToKey(key);
 }
 
-function createNestedList(nestedData, parentUl, parentPath, handleSelection, getImageUrl, selectedValue, autoExpand = false) {
+function createNestedList(nestedData, parentUl, parentPath, handleSelection, selectedValue, autoExpand = false) {
     const allKeys = Object.keys(nestedData);
     const folderKeys = allKeys.filter(k => !nestedData[k]._isLeaf);
     const leafKeys = allKeys.filter(k => nestedData[k]._isLeaf);
@@ -236,22 +150,16 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
 
         if (autoExpand) {
             subUl.style.display = 'block';
-            const childPaths = gatherLeafPaths(nestedData[key], currentPath);
-            fetchThumbnailsForPaths(childPaths);
         }
 
-        folderDiv.addEventListener('click', async e => {
+        folderDiv.addEventListener('click', e => {
             e.stopPropagation();
             e.preventDefault();
             const hidden = (subUl.style.display === 'none');
             subUl.style.display = hidden ? 'block' : 'none';
-            if (hidden) {
-                const childPaths = gatherLeafPaths(nestedData[key], currentPath);
-                await fetchThumbnailsForPaths(childPaths);
-            }
         });
 
-        createNestedList(nestedData[key], subUl, currentPath, handleSelection, getImageUrl, selectedValue, autoExpand);
+        createNestedList(nestedData[key], subUl, currentPath, handleSelection, selectedValue, autoExpand);
         
         if (autoExpand && Object.keys(nestedData[key]).length > 0) {
         } else if (selectedValue && selectedValue.startsWith(currentPath)) {
@@ -279,12 +187,10 @@ function createNestedList(nestedData, parentUl, parentPath, handleSelection, get
             li.style.backgroundColor = 'var(--color-background-pattern)';
         }
         li.addEventListener('click', () => handleSelection(currentPath));
-        addDragAndDropHandlers(li, currentPath);
-        addRightClickHandler(li, currentPath);
     });
 }
 
-function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTerm = '', selectedValue = null) {
+function createFlatList(items, parentUl, handleSelection, filterTerm = '', selectedValue = null) {
     parentUl.innerHTML = '';
     const visiblePaths = [];
 
@@ -306,14 +212,10 @@ function createFlatList(items, parentUl, handleSelection, getImageUrl, filterTer
                 li.style.backgroundColor = 'rgba(0,255,0,0.25)';
             }
             li.addEventListener('click', () => handleSelection(item));
-            addDragAndDropHandlers(li, item);
-            addRightClickHandler(li, item);
         }
     });
 
-    fetchThumbnailsForPaths(visiblePaths).then(() => {
-        scrollToSelectedItem(parentUl, selectedValue);
-    });
+    scrollToSelectedItem(parentUl, selectedValue);
 }
 
 function createLeanList(items, parentUl, handleSelection, filterTerm = '', selectedValue = null, dialogContainer, mousePosition) {
@@ -345,14 +247,10 @@ function createLeanList(items, parentUl, handleSelection, filterTerm = '', selec
                 li.classList.add('leanListItem-selected');
             }
             li.addEventListener('click', () => handleSelection(item));
-            addDragAndDropHandlers(li, item);
-            addRightClickHandler(li, item);
         }
     });
 
-    fetchThumbnailsForPaths(visiblePaths).then(() => {
-        scrollToSelectedItem(parentUl, selectedValue);
-    });
+    scrollToSelectedItem(parentUl, selectedValue);
 
     positionDialogNearPointer(dialogContainer, mousePosition);
 }
@@ -399,183 +297,6 @@ function positionDialogNearPointer(dialogContainer, mousePosition) {
     dialogContainer.style.transform = 'translate(0, 0)';
 }
 
-function addDragAndDropHandlers(element, originalPath) {
-    element.addEventListener('dragover', e => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-        element.classList.add('drag-over');
-    });
-    element.addEventListener('dragleave', () => {
-        element.classList.remove('drag-over');
-    });
-    element.addEventListener('drop', e => {
-        e.preventDefault();
-        element.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            const file = files[0];
-            if (file.type.startsWith('image/')) {
-                handleImageFile(file, originalPath);
-            } else {
-                alert('Please drop a valid image file.');
-            }
-        }
-    });
-}
-
-function addRightClickHandler(element, originalPath) {
-    element.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        closeAnyExistingContextMenu();
-        const menuHtml = `
-          <div id="modelPreviewContextMenu"
-            class="modelPreviewContextMenu"
-            style="
-                position:absolute;
-                left:${e.pageX}px;
-                top:${e.pageY}px;
-                background-color:var(--color-background-secondary);
-                color:var(--color-primary-text);
-                padding:10px;
-                border: 1px dashed var(--color-border);
-                z-index:9999;
-            ">
-            <div id="setImageOption" class="contextMenuOption">Set Preview Image</div>
-            <div id="clearImageOption" class="contextMenuOption">Clear Preview Image</div>
-          </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', menuHtml);
-
-        const menu = document.getElementById('modelPreviewContextMenu');
-        const setImageOption = document.getElementById('setImageOption');
-        const clearImageOption = document.getElementById('clearImageOption');
-
-        setImageOption.addEventListener('click', () => {
-            openImageSelector(originalPath);
-            closeContextMenu();
-        });
-        clearImageOption.addEventListener('click', () => {
-            clearImageSelector(originalPath);
-            closeContextMenu();
-        });
-
-        menu.addEventListener('mouseleave', closeContextMenu);
-
-        function closeContextMenu() {
-            const menuEl = document.getElementById('modelPreviewContextMenu');
-            if (menuEl) {
-                menuEl.remove();
-            }
-        }
-    });
-}
-
-function closeAnyExistingContextMenu() {
-    const existingMenu = document.getElementById('modelPreviewContextMenu');
-    if (existingMenu) {
-        existingMenu.remove();
-    }
-}
-
-function openImageSelector(originalPath) {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-
-    fileInput.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleImageFile(file, originalPath);
-        } else {
-            alert('Please select a valid image file.');
-        }
-    });
-
-    document.body.appendChild(fileInput);
-    fileInput.click();
-    document.body.removeChild(fileInput);
-}
-
-async function clearImageSelector(originalPath) {
-    try {
-        const resp = await fetch(`/saus/api/model-preview?modelPath=${encodeURIComponent(pathToKey(originalPath))}`, {
-            method: 'DELETE'
-        });
-        if (!resp.ok) {
-            const txt = await resp.text();
-            alert('Error clearing preview: ' + txt);
-            return;
-        }
-        delete modelImagePreviews[pathToKey(originalPath)];
-
-        const dropdownElements = document.querySelectorAll('.drop-down-element');
-        dropdownElements.forEach(element => {
-            const loaderId = element.getAttribute('data-loader-id');
-            if (loaderId && isPreviewWorkflowPath(loaderId)) {
-                const selectedValue = element.querySelector('input').value;
-                if (selectedValue === originalPath) {
-                    const imgElem = element.querySelector('.dropdownElementPreviewImage');
-                    if (imgElem) {
-                        imgElem.src = DEFAULT_PREVIEW_THUMBNAIL;
-                    }
-                }
-            }
-        });
-
-        updateVisibleUI();
-    } catch (err) {
-        console.error('Error clearing preview:', err);
-        alert('Error clearing preview: ' + err.message);
-    }
-}
-
-function handleImageFile(file, originalPath) {
-    const reader = new FileReader();
-    reader.onload = async function(event) {
-        const imageUrl = event.target.result;
-        try {
-            const payload = {
-                modelPath: pathToKey(originalPath),
-                base64Data: imageUrl
-            };
-            const resp = await fetch('/saus/api/model-preview', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!resp.ok) {
-                const txt = await resp.text();
-                throw new Error(txt);
-            }
-            setModelImagePreview(originalPath, imageUrl);
-            updateVisibleUI();
-        } catch (err) {
-            console.error('Error uploading preview:', err);
-            alert('Error uploading preview: ' + err.message);
-        }
-    };
-    reader.readAsDataURL(file);
-}
-
-function setModelImagePreview(originalPath, imageUrl) {
-    modelImagePreviews[pathToKey(originalPath)] = imageUrl;
-
-    const dropdownElements = document.querySelectorAll('.drop-down-element');
-    dropdownElements.forEach(element => {
-        const loaderId = element.getAttribute('data-loader-id');
-        if (loaderId && isPreviewWorkflowPath(loaderId)) {
-            const selectedValue = element.querySelector('input').value;
-            if (selectedValue === originalPath) {
-                const imgElem = element.querySelector('.dropdownElementPreviewImage');
-                if (imgElem) {
-                    imgElem.src = imageUrl;
-                }
-            }
-        }
-    });
-}
-
 export function populateDropdown(
     loaderId,
     items,
@@ -590,20 +311,16 @@ export function populateDropdown(
 
     container.innerHTML = '';
 
-    const shouldShowPreview = isPreviewWorkflowPath(workflowPath);
-
     const clickableHtml = `
         <div class="drop-down-element" data-loader-id="${escapeHtml(workflowPath)}">
             <label>${escapeHtml(customLabel)}</label>
             <input type="text" readonly ${DISPLAY_MODEL_NAME_ONLY ? 'title=""' : ''} />
-            ${shouldShowPreview ? `<img class="dropdownElementPreviewImage" src="/core/media/ui/plus_icon_n.png" alt="Preview" />` : ''}
         </div>
     `;
     container.insertAdjacentHTML('beforeend', clickableHtml);
 
     const clickableArea = container.querySelector('.drop-down-element');
     const selectedValueElem = clickableArea.querySelector('input');
-    const previewImageElem = clickableArea.querySelector('.dropdownElementPreviewImage');
 
     let selectedValue = null;
     const advanced = isAdvancedLayout(workflowPath);
@@ -645,18 +362,6 @@ export function populateDropdown(
 
         if (initialValue && initialValue !== '') {
             setSelection(initialValue);
-            if (shouldShowPreview && previewImageElem) {
-                // One batched request - the same path the lists use - instead of a
-                // GET per model, which 404'd for every model without a preview.
-                fetchThumbnailsForPaths([initialValue]).then(() => {
-                    previewImageElem.src = modelImagePreviews[pathToKey(initialValue)]
-                        || DEFAULT_PREVIEW_THUMBNAIL;
-                });
-            }
-        } else {
-            if (shouldShowPreview && previewImageElem) {
-                previewImageElem.src = DEFAULT_PREVIEW_THUMBNAIL;
-            }
         }
     }
 
@@ -694,15 +399,6 @@ export function populateDropdown(
                     value: value
                 }
             }));
-
-            if (shouldShowPreview && previewImageElem) {
-                const key = pathToKey(value);
-                previewImageElem.src = modelImagePreviews[key] || DEFAULT_PREVIEW_THUMBNAIL;
-            }
-        } else {
-            if (shouldShowPreview && previewImageElem) {
-                previewImageElem.src = DEFAULT_PREVIEW_THUMBNAIL;
-            }
         }
     }
 
@@ -805,7 +501,7 @@ export function populateDropdown(
 
 
                 if (!useNesting) {
-                    createFlatList(filteredItems, listContainer, handleSelection, getImageUrl, filter, selectedValue);
+                    createFlatList(filteredItems, listContainer, handleSelection, filter, selectedValue);
                     dialogContainer.classList.remove('leanListMode');
 
                     toggleButton.style.display = 'block';
@@ -815,15 +511,13 @@ export function populateDropdown(
                         filteredItems.some(i => i.includes('\\') || i.includes('/'));
 
                     if (!doWeNest) {
-                        createFlatList(filteredItems, listContainer, handleSelection, getImageUrl, filter, selectedValue);
+                        createFlatList(filteredItems, listContainer, handleSelection, filter, selectedValue);
                         dialogContainer.classList.remove('leanListMode');
 
                         toggleButton.style.display = 'block';
                     } else {
                         const nested = buildNestedStructure(filteredItems);
-                        createNestedList(nested, listContainer, '', handleSelection, getImageUrl, selectedValue, isAllExpanded);
-                        const leaves = gatherLeafPaths(nested, '');
-                        fetchThumbnailsForPaths(leaves);
+                        createNestedList(nested, listContainer, '', handleSelection, selectedValue, isAllExpanded);
                         dialogContainer.classList.remove('leanListMode');
                         toggleButton.style.display = 'block';
                     }
@@ -831,11 +525,6 @@ export function populateDropdown(
             }
 
             scrollToSelectedItem(listContainer, selectedValue);
-        }
-
-        function getImageUrl(path) {
-            const key = pathToKey(path);
-            return modelImagePreviews[key] || DEFAULT_PREVIEW_THUMBNAIL;
         }
 
         function handleSelection(pathSel) {

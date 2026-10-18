@@ -37,6 +37,21 @@
   ],
   "steppers": [
     {
+      "id": "compr08ltl",
+      "label": "Megapixels",
+      "nodePath": "72.inputs.megapixels",
+      "minValue": 0.1,
+      "maxValue": 16,
+      "step": 0.1,
+      "defValue": 1,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 2
+      }
+    },
+    {
       "id": "stepper6v9jqp",
       "label": "Steps",
       "nodePath": "69.inputs.steps",
@@ -48,7 +63,7 @@
       "scaleFactor": 1,
       "layout": {
         "region": "basic",
-        "order": 1
+        "order": 3
       }
     },
     {
@@ -63,22 +78,7 @@
       "scaleFactor": 1,
       "layout": {
         "region": "advanced",
-        "order": 2
-      }
-    },
-    {
-      "id": "compr08ltl",
-      "label": "Megapixels",
-      "nodePath": "72.inputs.megapixels",
-      "minValue": 0.1,
-      "maxValue": 16,
-      "step": 0.1,
-      "defValue": 1,
-      "precision": 1,
-      "scaleFactor": 1,
-      "layout": {
-        "region": "basic",
-        "order": 7
+        "order": 6
       }
     }
   ],
@@ -91,7 +91,7 @@
       "key": "clip_name",
       "layout": {
         "region": "advanced",
-        "order": 3
+        "order": 7
       }
     },
     {
@@ -102,7 +102,7 @@
       "key": "vae_name",
       "layout": {
         "region": "advanced",
-        "order": 4
+        "order": 8
       }
     },
     {
@@ -114,7 +114,7 @@
       "default": "simple",
       "layout": {
         "region": "advanced",
-        "order": 8
+        "order": 9
       }
     },
     {
@@ -126,7 +126,7 @@
       "default": "res_multistep",
       "layout": {
         "region": "advanced",
-        "order": 9
+        "order": 10
       }
     },
     {
@@ -138,7 +138,7 @@
       "default": "z_image_bf16.safetensors",
       "layout": {
         "region": "advanced",
-        "order": 10
+        "order": 11
       }
     }
   ],
@@ -149,7 +149,7 @@
       "nodePath": "69.inputs.seed",
       "layout": {
         "region": "basic",
-        "order": 5
+        "order": 4
       }
     }
   ],
@@ -163,7 +163,7 @@
       "defValue": "Z-image-T2I",
       "layout": {
         "region": "basic",
-        "order": 11
+        "order": 5
       }
     }
   ],
@@ -178,7 +178,7 @@
       "quickRatios": "1:1, 16:9, 9:16",
       "layout": {
         "region": "basic",
-        "order": 6
+        "order": 1
       }
     }
   ],

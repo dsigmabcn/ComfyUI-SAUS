@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from saus.model_scan import (  # noqa: E402
+from saus.model_lookup import (  # noqa: E402
     candidate_folder_types,
     match_folder_names,
     normalise_folder_name,
@@ -172,7 +172,7 @@ def test_a_hostile_hint_cannot_aim_the_destination():
 
 
 def test_the_allowlist_excludes_code_folders():
-    from saus.model_scan import MODEL_FOLDER_TYPES
+    from saus.model_lookup import MODEL_FOLDER_TYPES
     assert 'custom_nodes' not in MODEL_FOLDER_TYPES
     assert 'datasets' not in MODEL_FOLDER_TYPES
     for name in ('checkpoints', 'loras', 'diffusion_models', 'vae', 'text_encoders'):

@@ -20,12 +20,9 @@
     },
     "architecture": "FLUX 2 KLEIN EDIT",
     "models": [
-      "flux-2-klein-base-9b-fp8.safetensors",
-      "qwen_3_8b_fp8mixed.safetensors",
-      "full_encoder_small_decoder.safetensors",
-      "flux-2-klein-base-9b-fp8.safetensors",
-      "full_encoder_small_decoder.safetensors",
-      "qwen_3_8b_fp8mixed.safetensors"
+      "flux-2-klein-base-4b.safetensors",
+      "flux2-vae.safetensors",
+      "qwen_3_4b.safetensors"
     ]
   },
   "prompts": [
@@ -43,7 +40,7 @@
   "steppers": [
     {
       "id": "mpkleinedit2",
-      "label": "Image Megapixels",
+      "label": "Scale Megapixels",
       "nodePath": "139.inputs.megapixels",
       "minValue": 0.5,
       "maxValue": 8,

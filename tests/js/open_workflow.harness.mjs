@@ -18,6 +18,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
+import { install } from './_fake_clock.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const COMFY_ORIGIN = 'http://localhost:8188';
@@ -111,7 +112,11 @@ globalThis.fetch = async (url) => {
     };
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+/* The extension waits on real timeouts (a 400ms settle, a 20s boot cap) and posts
+ * a notice card on a 10s timer that kept node alive after the last scenario. Run
+ * them on a virtual clock: the waits elapse in order, immediately. */
+const clock = install();
+const sleep = (ms) => clock.advance(ms);
 
 let caseId = 0;
 

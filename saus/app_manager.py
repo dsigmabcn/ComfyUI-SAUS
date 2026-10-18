@@ -17,7 +17,7 @@ from .file_system import (
 )
 from .management import (
     apps_handler,
-    get_architectures_handler, get_model_data_handler,
+    get_architectures_handler,
     get_taxonomy_handler, get_models_registry_handler, get_app_models_handler
 )
 from .downloads import (
@@ -25,9 +25,7 @@ from .downloads import (
     check_model_status_batch_handler, delete_model_handler
 )
 from .system import (
-    saus_version_handler, set_model_preview_handler, clear_model_preview_handler,
-    list_model_previews_handler, get_model_preview_handler,
-    restart_server_handler
+    saus_version_handler, restart_server_handler
 )
 
 # aiohttp serves static files without a Cache-Control header, which leaves a
@@ -97,10 +95,6 @@ class AppManager:
         api_routes = [
             (f'/saus/api/apps', 'GET', apps_handler),
             (f'/saus/api/saus-version', 'GET', saus_version_handler),
-            (f'/saus/api/model-preview', 'POST', set_model_preview_handler),
-            (f'/saus/api/model-preview', 'DELETE', clear_model_preview_handler),
-            (f'/saus/api/model-previews', 'POST', list_model_previews_handler),
-            (f'/saus/api/model-preview', 'GET', get_model_preview_handler),
             (f"/saus/api/directory", "GET", directory_listing_handler),
             (f'/saus/api/thumbnail', 'GET', thumbnail_handler),
             (f'/saus/api/move-file', 'POST', move_copy_handler),
@@ -110,7 +104,6 @@ class AppManager:
             (f'/saus/api/download-file', 'GET', download_file_handler),
             (f'/saus/api/upload-chunk', 'POST', upload_chunk_handler),
             (f'/saus/api/architectures', 'GET', get_architectures_handler),
-            (f'/saus/api/data-model-info', 'GET', get_model_data_handler),
             (f'/saus/api/taxonomy', 'GET', get_taxonomy_handler),
             (f'/saus/api/models', 'GET', get_models_registry_handler),
             (f'/saus/api/app-models', 'GET', get_app_models_handler),

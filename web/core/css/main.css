@@ -263,10 +263,12 @@ a {
     z-index: 100;
 }
 
+/* The title is its own header line; the box and its unfold handle take the full
+   width below it, instead of sharing one row with the label. */
 .prompt-container {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     background-color: var(--color-background-secondary);
     border-bottom: 1px dashed var(--color-border);
     padding: 12px;
@@ -274,19 +276,19 @@ a {
     position: sticky;
     top: 0;
     z-index: 100;
-    gap: 10px;
+    gap: 6px;
 }
 
 .prompt-input-wrapper {
     display: flex;
     flex-direction: column;
-    flex: 3;
+    width: 100%;
 }
 
 .title-text {
-    flex: 1;
+    width: 100%;
     font-weight: bold;
-    margin-top: 6px;
+    margin-top: 0;
 }
 
 .prompt-textarea {
@@ -2779,31 +2781,6 @@ html:not(.css-loading) body {
     background-color: var(--color-background-pattern) !important;
 }
 
-.modelPreviewContextMenu {
-    border-radius: 4px;
-}
-
-.contextMenuOption {
-    cursor: pointer;
-    padding: 4px 0;
-}
-
-.contextMenuOption:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.drag-over {
-    border: 2px dashed var(--color-border);
-}
-
-.drop-down-element .dropdownElementPreviewImage {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    margin-left: 8px;
-    border-radius: 2px;
-    /* background-color: transparent; */
-}
 .selected-item-scroll {
     animation: highlight 0.1s ease-in-out;
 }

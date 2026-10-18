@@ -109,9 +109,10 @@ def test_turbo_disappears_when_the_architecture_has_none():
     source = APP_MAIN_JS.read_text(encoding='utf-8')
     branch = source.split('} else if (arch) {', 1)[1].split('const defaultButton', 1)[0]
 
-    assert 'arch.turbo_settings' in branch, 'Turbo is only offered when it exists'
+    assert 'base_settings' not in branch and 'turbo_settings' not in branch, \
+        'the retired per-architecture settings are gone from the mode branch'
     assert branch.count('staticButtons.turbo?.remove()') == 2, \
-        'and its button is removed when it does not (both fallbacks)'
+        'Turbo is removed in both fallbacks (no variants, and no architecture)'
     assert "setButton(staticButtons.hd, 'HD', true)" in branch, \
         'with no variants the app simply runs as HD'
 
@@ -244,6 +245,35 @@ def test_the_prompt_arrow_has_a_theme_colour():
     assert rule['color'] == 'var(--color-primary-text)', \
         'the ▼ prompt handle is plain text and needs its own theme colour'
     assert _rule(APP_CSS, '.expand-arrow-bottom:hover')['color'] == 'var(--color-accent)'
+
+
+def test_a_variant_can_drive_a_toggle_as_well_as_a_stepper():
+    """A mode may *be* a toggle ("Enable manual sigmas"), so settings must reach toggles."""
+    source = APP_MAIN_JS.read_text(encoding='utf-8')
+
+    assert 'appConfig.steppers.find(s => s.label.toLowerCase() === wanted)' in source, \
+        'a variant still sets a stepper by label'
+    assert '(appConfig.toggles || []).find(t => t.label.toLowerCase() === wanted)' in source, \
+        'and can set a toggle by label too - HD and Turbo differ by exactly one'
+    assert 'widgetInstance.updateValue(stepper ? Number(value) : value)' in source, \
+        'a stepper needs a number; a toggle normalises its own value'
+
+
+def test_the_prompt_title_sits_above_a_full_width_box():
+    """The label is its own line; the box and its unfold handle span the component."""
+    container = _rule(APP_CSS, '.prompt-container')
+    assert container['flex-direction'] == 'column', \
+        'the title is a header line, not a column beside the box'
+    title = _rule(APP_CSS, '.title-text')
+    assert title['width'] == '100%', 'the title spans the component'
+    assert title.get('flex') in (None, 'none'), \
+        'and it no longer shares a row with the box'
+    wrapper = _rule(APP_CSS, '.prompt-input-wrapper')
+    assert wrapper['width'] == '100%', 'the box takes the whole width'
+    assert wrapper.get('flex') in (None, 'none'), \
+        'not a fraction of a row that no longer exists'
+    assert _rule(APP_CSS, '.expand-arrow-bottom')['width'] == '100%', \
+        'the unfold handle spans the box below it'
 
 
 def test_saus_opens_from_comfyuis_left_toolbar():
@@ -470,20 +500,24 @@ def test_the_app_info_button_asks_the_browser_for_the_panel():
 
 
 def test_the_model_picker_lists_names_only():
-    """No pictures in the picker lists; nesting, search and the row thumbnail stay."""
+    """The picker is names only: no preview image, in the list or in the row."""
     handler = DROPDOWN_JS.read_text(encoding='utf-8')
 
     assert 'dropdownCardImage' not in handler, \
         'the list cards are the name (and its folder), not a 100x100 image'
     assert 'applyPreviewImagesToList' not in handler, 'and the code that filled them is gone'
-    assert 'dropdownElementPreviewImage' in handler, 'the row thumbnail is untouched'
-    assert re.search(r"DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = \[\s*\n\s*'ckpt_name',\s*\n\s*'unet_name',", handler), \
-        'the paths whose previews are fetched are unchanged'
+    assert 'dropdownElementPreviewImage' not in handler, \
+        'the row shows no model preview thumbnail'
+    assert 'model-preview' not in handler, 'nothing asks a preview API'
+    assert 'modelImagePreviews' not in handler and 'DEFAULT_PREVIEW_THUMBNAIL' not in handler, \
+        'nor caches or falls back to a preview image'
     assert 'createNestedList' in handler and 'createLeanList' in handler, \
         'both list shapes survive'
     assert 'leanListItem' in handler, 'so does the CLIP/VAE style plain list'
-    assert 'dropdownCardImage' not in APP_CSS.read_text(encoding='utf-8'), \
-        'and its dead rule left the stylesheet'
+    css = APP_CSS.read_text(encoding='utf-8')
+    assert 'dropdownCardImage' not in css, 'and its dead rule left the stylesheet'
+    assert 'dropdownElementPreviewImage' not in css and 'modelPreviewContextMenu' not in css, \
+        'as did the preview styles'
 
 
 def test_a_model_in_several_variants_updates_every_card():
@@ -558,14 +592,11 @@ def test_the_explorer_thumbnail_is_small_and_cacheable():
     assert "return 'no-cache'" in cache, 'while html / js / css keep revalidating'
 
 
-def test_the_app_list_reports_both_thumbnail_sizes():
+def test_the_row_thumbnail_falls_back_to_the_master():
+    """The resolver itself is test_media_formats' job; this is only the wiring."""
     source = (ROOT / 'saus' / 'management.py').read_text(encoding='utf-8')
-    assert "ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'" in source, 'the row name is declared'
-    assert "'thumbnail.row.webp'," in source, 'and is one of the known names'
-    assert 'exclude=(ROW_THUMBNAIL_NAME,)' in source, \
-        'the master never resolves to the small copy'
     assert "config['thumbnailRow']" in source and "or config['thumbnail']" in source, \
-        'and the row falls back to the master when an app ships only one'
+        'the row falls back to the master when an app ships only one'
 
 
 def test_the_information_panels_open_app_button_opens_a_workspace_tab():
