@@ -1,0 +1,302 @@
+/* ------------------------------------------------------------------ *
+ * The manager panes (App Manager, Model Manager).
+ *
+ * They are built-in shell views, not app iframes, so their layout lives here.
+ * Palette variables only - a colour is defined once, in /core/css/themes.css.
+ * ------------------------------------------------------------------ */
+
+.manager-host {
+    height: 100%;
+    overflow: hidden;
+}
+
+.manager-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    padding: 18px 22px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.manager-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.manager-title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-primary-text);
+}
+
+.manager-count,
+.manager-hint {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.manager-hint {
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Section buttons, then the categories of the selected section. */
+.manager-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.manager-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: transparent;
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.manager-chip:hover {
+    color: var(--color-accent);
+    border-color: var(--color-border-hover);
+}
+
+.manager-chip.active {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.manager-chip-count {
+    color: var(--color-text-subtle);
+    font-size: 0.8em;
+}
+
+.manager-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.manager-empty {
+    padding: 18px 4px;
+    color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------ App Manager groups
+   Section -> subcategory, three rows of apps across: the panel's own filing,
+   with enough on screen to actually use the space. */
+
+.manager-section-title {
+    margin: 16px 0 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary-text);
+}
+
+/* One box per subcategory: a border, not just a heading, so where one group ends
+   and the next begins is obvious at a glance. */
+.manager-subgroup {
+    margin-bottom: 12px;
+    padding: 10px 14px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-background);
+}
+
+.manager-group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--color-border);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.manager-group-title { font-weight: 600; }
+
+.manager-group-count { color: var(--color-text-subtle); }
+
+.manager-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px 12px;
+}
+
+/* Fewer columns when the window cannot hold three legibly. */
+@media (max-width: 1500px) {
+    .manager-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1050px) {
+    .manager-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------ Model Manager cards
+   Three across, like the App Manager. Each card: the model and its install state
+   on top, then the apps that need it, each as a thumbnail and its name. */
+
+.manager-model-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.manager-model-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: start;
+}
+
+.manager-model-main { min-width: 0; }
+
+/* The Install / Uninstall button (or the progress bar) sits top right. */
+.manager-model-row .component-actions {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.manager-model-uses {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.manager-uses-label {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.manager-uses-empty {
+    color: var(--color-text-subtle);
+    font-size: 0.78rem;
+}
+
+.manager-apps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+}
+
+.manager-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--color-primary-text);
+}
+
+.manager-app-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: cover;
+    background-color: var(--color-scrollbar-track);
+}
+
+.manager-app-more { color: var(--color-text-muted); }
+
+@media (max-width: 1500px) {
+    .manager-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1050px) {
+    .manager-model-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Model Manager rows are .component-item (details.css) with two extra lines. */
+.manager-list .component-item {
+    align-items: flex-start;
+}
+
+.manager-meta,
+.manager-uses {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.manager-meta { color: var(--color-text-muted); }
+
+.manager-uses {
+    color: var(--color-text-subtle);
+    margin-top: 2px;
+}
+
+/* The rows keep the panel's look (.app-row and friends, explorer.css): a hidden app
+   keeps its row - that is how it comes back - but reads as switched off. */
+.app-row.manager-hidden .app-row-thumb,
+.app-row.manager-hidden .app-row-name {
+    opacity: 0.5;
+}
+
+/* The display switch. The panel row keeps the star; here the one slot that can be
+   acted on is "does the panel show this app". */
+.manager-switch {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.manager-switch input {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.manager-switch-track {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: var(--color-neutral);            /* off = grey */
+    transition: background-color 0.15s ease;
+}
+
+.manager-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--color-text-on-accent);
+    transition: transform 0.15s ease;
+}
+
+.manager-switch input:checked ~ .manager-switch-track {
+    background-color: var(--color-success);            /* shown = green */
+}
+
+.manager-switch input:checked ~ .manager-switch-track::after {
+    transform: translateX(18px);
+}
+
+.manager-switch input:focus-visible ~ .manager-switch-track {
+    box-shadow: 0 0 0 2px var(--color-accent-soft);
+}

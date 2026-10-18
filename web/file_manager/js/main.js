@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createUploadModal();
     createDeleteModal();
     createRenameModal();
+    createNewFolderModal();
 
     const hiddenUpload = document.getElementById('hidden-upload');
     if (hiddenUpload) hiddenUpload.addEventListener('change', handleFileUpload);
@@ -433,6 +434,7 @@ function onPaneClick(root, e) {
     if (action) {
         switch (action.dataset.act) {
             case 'upload': triggerFileUpload(); return;
+            case 'newfolder': doNewFolder(root); return;
             case 'rename': doRename(root); return;
             case 'download': doDownload(root); return;
             case 'delete': doDelete(root); return;
@@ -497,6 +499,12 @@ function selectItem(root, node, e) {
 /* ------------------------------------------------------------------ *
  * Header actions
  * ------------------------------------------------------------------ */
+
+function doNewFolder(root) {
+    // Acts on the folder the pane is *showing*, so unlike rename / delete it
+    // needs no selection and is never disabled.
+    showNewFolderModal(panes[root].path, root);
+}
 
 function doRename(root) {
     const pane = panes[root];
@@ -1092,8 +1100,8 @@ function createDeleteModal() {
             <h3 style="margin-top: 0; margin-bottom: 15px;">Delete</h3>
             <p id="delete-modal-message">Are you sure you want to delete this?</p>
             <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-                <button id="delete-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
-                <button id="delete-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: #d32f2f; color: white; border: none; border-radius: 4px;">Delete</button>
+                <button id="delete-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="delete-confirm-btn" class="btn-modal-primary delete">Delete</button>
             </div>
         </div>
     </div>`;
@@ -1160,8 +1168,8 @@ function createRenameModal() {
             <h3 style="margin-top: 0; margin-bottom: 15px;">Rename</h3>
             <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
             <div style="display: flex; justify-content: center; gap: 10px;">
-                <button id="rename-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
-                <button id="rename-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: var(--color-accent, #007bff); color: white; border: none; border-radius: 4px;">Rename</button>
+                <button id="rename-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="rename-confirm-btn" class="btn-modal-primary">Rename</button>
             </div>
         </div>
     </div>`;
@@ -1205,6 +1213,82 @@ async function renameFile(path, newName, root) {
     } catch (error) {
         console.error('Rename error:', error);
         showToast('Failed to rename file.', 'error');
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * New folder
+ * ------------------------------------------------------------------ */
+
+function createNewFolderModal() {
+    if (document.getElementById('newfolder-modal')) return;
+    const modalHTML = `
+    <div id="newfolder-modal" class="modal hidden">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">New folder</h3>
+            <input type="text" id="newfolder-input" placeholder="Folder name" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="newfolder-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="newfolder-confirm-btn" class="btn-modal-primary">Create</button>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const cancelBtn = document.getElementById('newfolder-cancel-btn');
+    if (cancelBtn) cancelBtn.onclick = closeNewFolderModal;
+    const input = document.getElementById('newfolder-input');
+    // A name dialog is expected to take Enter (the rename one has nothing to add:
+    // it opens pre-filled).
+    if (input) {
+        input.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            const confirmBtn = document.getElementById('newfolder-confirm-btn');
+            if (confirmBtn) confirmBtn.click();
+        });
+    }
+}
+
+function showNewFolderModal(path, root) {
+    const modal = document.getElementById('newfolder-modal');
+    const input = document.getElementById('newfolder-input');
+    const confirmBtn = document.getElementById('newfolder-confirm-btn');
+    if (!modal || !input || !confirmBtn) return;
+
+    input.value = '';
+    confirmBtn.onclick = async () => {
+        const folderName = input.value.trim();
+        closeNewFolderModal();
+        if (folderName) await createFolder(path, folderName, root);
+    };
+    modal.classList.remove('hidden');
+    input.focus();
+}
+
+function closeNewFolderModal() {
+    const modal = document.getElementById('newfolder-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function createFolder(path, folderName, root) {
+    try {
+        const response = await fetch('/saus/api/create-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentPath: path, folderName })
+        });
+        if (!response.ok) {
+            // The server knows why (name taken, not allowed): say that instead of
+            // a generic failure.
+            let reason = '';
+            try { reason = (await response.json()).error || ''; } catch (error) { /* not JSON */ }
+            throw new Error(reason || response.statusText);
+        }
+        showToast('Folder created.', 'success');
+        await reloadPane(root, folderName);
+    } catch (error) {
+        console.error('Create folder error:', error);
+        showToast(`Failed to create folder: ${error.message}`, 'error');
     }
 }
 

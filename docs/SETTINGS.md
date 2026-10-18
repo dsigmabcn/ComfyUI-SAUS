@@ -21,6 +21,19 @@ follow it.
 `deprecated` folder inside `web/apps` and left out of the side panel, so the panel only offers what
 is current. Switch this on to list them again: they open and run exactly as before, which is what you
 want for an older workflow or a project already built on them. The setting is remembered per browser.
+It also decides whether deprecated apps appear in the **App Manager** below — while it is off they
+are not listed there either, so this switch is what you turn on to manage them.
+
+## Managers
+
+Two buttons, each opening a view in its own workspace tab (like the settings themselves):
+
+- **App Manager** — every app the panel may offer, grouped by section and category, with a switch per
+  app that hides or shows it. See [App Browsing](APP_BROWSING.md#hiding-apps).
+- **Model Manager** — every model the apps need, with what is installed and which apps use it.
+
+Hiding an app is an install-wide setting (it is stored on the server, not in your browser), so every
+device that opens this ComfyUI sees the same panel.
 
 ## Version
 

@@ -815,6 +815,45 @@ footer {
     background-color: var(--color-button-primary-hover);
 }
 
+/* Dialog buttons. The File Manager loads only this stylesheet, so the two
+   classes the browser pages get from /saus_browser/css/modals.css are defined
+   here as well: without them both buttons fell back to the plain rule above -
+   the same light grey - and the confirm button did not read as the one that
+   does the work. Cancel is the outline, the confirm is the filled button. */
+.modal-content .btn-modal-secondary {
+    background: transparent;
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+}
+
+.modal-content .btn-modal-secondary:hover {
+    background: var(--color-background-pattern);
+    border-color: var(--color-border-hover);
+}
+
+.modal-content .btn-modal-primary {
+    background-color: var(--color-button-primary);
+    /* The text token the page's own buttons pair with it (see above): dark on
+       Night's light button, white on Day's and Fire's. */
+    color: var(--color-button-primary-text-hover);
+    font-weight: bold;
+}
+
+.modal-content .btn-modal-primary:hover {
+    background-color: var(--color-button-primary-hover);
+    border-color: var(--color-button-primary-hover);
+}
+
+/* Destructive confirms keep their own colour, themed instead of hardcoded. */
+.modal-content .btn-modal-primary.delete {
+    background-color: var(--color-danger);
+    color: var(--color-text-on-accent);
+}
+
+.modal-content .btn-modal-primary.delete:hover {
+    background-color: var(--color-danger-strong);
+}
+
 .close-button {
     float: right;
     font-size: 20px;

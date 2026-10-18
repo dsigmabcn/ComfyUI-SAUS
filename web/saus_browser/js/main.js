@@ -1,5 +1,5 @@
 import { PromptServerClient } from './websocket.js';
-import { state, loadFavorites, preferencesManager } from './state.js';
+import { state, loadFavorites, loadAppVisibility, preferencesManager } from './state.js';
 import { checkForUpdate } from './updates.js';
 import { updateComponentStatus, showAppDetails } from './models.js';
 import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
@@ -23,6 +23,10 @@ async function loadApps() {
             fetch('/saus/api/taxonomy'),
             fetch('/saus/api/architectures')
         ]);
+
+        // The App Manager's hidden list (install-wide). Read alongside the catalogs
+        // so the first paint already knows which apps to leave out; it never rejects.
+        await loadAppVisibility();
 
         if (modelsResponse.ok) state.MODELS_DATA = await modelsResponse.json();
         if (taxonomyResponse.ok) state.TAXONOMY = await taxonomyResponse.json();
@@ -142,6 +146,13 @@ export function initializeUI() {
         if (key !== 'showDeprecatedApps') return;
         preferencesManager.reload();
         renderExplorer();
+    });
+
+    // The App Manager hides/shows apps: the panel and its filter chips have to
+    // follow at once (the App Manager repaints itself).
+    document.addEventListener('saus:app-visibility-changed', () => {
+        renderExplorer();
+        renderTagsFilter();
     });
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') exitFocus();

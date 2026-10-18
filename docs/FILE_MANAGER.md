@@ -25,7 +25,7 @@ The manager is split into **two side-by-side panels**:
 - **Del** deletes the selected files — it asks first, exactly like the panel's **Delete** button.
 - **Drag and drop** a selection onto another folder, onto the other pane, or onto the pane's background to **move** it; hold **Ctrl / ⌘** while dropping to **copy** instead.
 
-The **Rename / Download / Delete** buttons sit at the right of each panel's title and act on the **selected** file(s).
+The **New folder / Rename / Download / Delete** buttons sit at the right of each panel's title. **New folder** creates a folder in the panel's *current* folder — it needs no selection — while the other three act on the **selected** file(s).
 
 ## Views and sorting
 

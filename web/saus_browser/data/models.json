@@ -289,14 +289,6 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "full_encoder_small_decoder.safetensors": {
-      "name": "full_encoder_small_decoder.safetensors",
-      "type": "VAE",
-      "url": "https://huggingface.co/black-forest-labs/FLUX.2-small-decoder/resolve/main/full_encoder_small_decoder.safetensors",
-      "directory": "/vae/",
-      "thumbnail": "",
-      "source": "manual"
-    },
     "qwen_image_fp8_e4m3fn.safetensors": {
       "name": "qwen_image_fp8_e4m3fn.safetensors",
       "type": "Diffusion model",

@@ -57,6 +57,62 @@ def test_the_view_buttons_do_not_look_alike():
         'all three buttons have to be distinguishable at a glance'
 
 
+def test_the_dialog_buttons_do_not_look_alike():
+    """Cancel is an outline and the confirm is filled - or they read as one button.
+
+    The page loads only its own stylesheet, so `btn-modal-primary` /
+    `-secondary` mean nothing here until they are defined in it: with just the
+    plain `.modal-content button` rule both buttons came out the same grey and
+    "Create" was not visibly the action that does the work.
+    """
+    css = FM_CSS.read_text(encoding='utf-8')
+    js = FM_JS.read_text(encoding='utf-8')
+
+    secondary = css.split('.modal-content .btn-modal-secondary {', 1)[1].split('}', 1)[0]
+    primary = css.split('.modal-content .btn-modal-primary {', 1)[1].split('}', 1)[0]
+
+    assert 'background: transparent' in secondary, 'Cancel stays an outline'
+    assert 'border: 1px solid var(--color-border)' in secondary
+    assert 'var(--color-button-primary)' in primary, 'the confirm is the filled one'
+    assert 'transparent' not in primary, 'so the two cannot render the same'
+    assert 'font-weight: bold' in primary, 'and it reads as the primary action'
+    assert '.modal-content .btn-modal-primary.delete' in css, \
+        'Delete keeps its own colour through a modifier class'
+
+    assert js.count('class="btn-modal-primary"') == 2, 'New folder + Rename confirms'
+    assert 'class="btn-modal-primary delete"' in js, 'and Delete uses the variant'
+    assert js.count('class="btn-modal-secondary"') == 3
+    assert 'style="padding: 8px 16px; cursor: pointer;"' not in js, \
+        'the classes carry the padding, so no dialog needs an inline style'
+
+
+def test_both_panes_can_create_a_folder_left_of_rename():
+    """New folder is a toolbar button in each pane, immediately left of Rename."""
+    html = FM_HTML.read_text(encoding='utf-8')
+    js = FM_JS.read_text(encoding='utf-8')
+
+    acts = {}
+    for chunk in html.split('<section class="fm-pane"')[1:]:
+        pane = chunk.split('data-pane="', 1)[1].split('"', 1)[0]
+        toolbar = chunk.split('</section>', 1)[0]
+        acts[pane] = [part.split('"', 1)[0] for part in toolbar.split('data-act="')[1:]]
+
+    assert set(acts) == {'input', 'output'}, f'both panes have a toolbar: {acts}'
+    for pane, order in acts.items():
+        assert 'newfolder' in order, f'the {pane} pane needs a New folder button'
+        assert order.index('newfolder') == order.index('rename') - 1, \
+            f'the {pane} button has to sit immediately left of Rename: {order}'
+        assert 'disabled' not in html.split('data-act="newfolder"', 1)[1].split('>', 1)[0], \
+            'it acts on the open folder, so it is never disabled'
+
+    assert "case 'newfolder':" in js, 'the toolbar click has to be wired up'
+    assert "'/saus/api/create-folder'" in js, 'and it has to reach the server route'
+    assert 'id="newfolder-modal"' in js and 'createNewFolderModal();' in js, \
+        'the dialog is built at boot, like the upload / delete / rename ones'
+    assert 'await reloadPane(root, folderName)' in js, \
+        'the new folder is shown selected, the way a rename keeps its file selected'
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

@@ -1,18 +1,22 @@
 import { state, loadOpenApps, saveOpenApps } from './state.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
 import { exportWorkflowToComfyUI } from './workflow_export.js';
+import { mountAppManager, refreshAppManager } from './app_manager.js';
+import { mountModelManager, refreshModelManager } from './model_manager.js';
 import { currentTheme } from '/core/js/common/scripts/theme.js';
 import { isMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 /* ------------------------------------------------------------------ *
  * Workspace tabs. A tab is an app (iframe of /saus/<url>) or one of the
- * built-in panes: Settings, File Manager. The iframe is created when the
- * tab is first activated, so a restored tab costs nothing. The console is
+ * built-in panes: Settings, App Manager, File Manager. The iframe is created when
+ * the tab is first activated, so a restored tab costs nothing. The console is
  * not a tab: it docks over the bottom of the workspace (see console.js).
  * ------------------------------------------------------------------ */
 
 const BUILT_INS = {
     settings: { name: 'Settings', icon: 'fas fa-cog' },
+    appmanager: { name: 'App Manager', icon: 'fas fa-list-check' },
+    modelmanager: { name: 'Model Manager', icon: 'fas fa-database' },
     filemanager: { name: 'File Manager', icon: 'fas fa-folder', url: 'file_manager' },
 };
 
@@ -66,6 +70,13 @@ function armMediaHover(tabId_, btn) {
 
 // Any drag ending anywhere clears the pending switch.
 document.addEventListener('dragend', cancelMediaHover);
+
+// The Settings pane opens a manager through an event, so that core component needs
+// no import of this one - the route "Open App" already takes (see models.js).
+document.addEventListener('saus:open-manager', (event) => {
+    const kind = event && event.detail && event.detail.kind;
+    if (kind && BUILT_INS[kind]) openBuiltIn(kind);
+});
 
 function findTab(id) {
     return state.openApps.find(tab => tab.id === id);
@@ -258,7 +269,29 @@ function ensurePane(id) {
         pane.appendChild(host);
         container.appendChild(pane);
         // The settings form (theme, version, social links, restart).
-        new SettingsComponent('#settingsPane', { showDeprecatedSwitch: true }).show();
+        new SettingsComponent('#settingsPane', { showDeprecatedSwitch: true, showManagers: true }).show();
+        return pane;
+    }
+
+    if (tab.kind === 'appmanager') {
+        // A pane that lives in the shell rather than an iframe: it needs the live app
+        // list, the taxonomy and the model-status cache, which the shell already has.
+        const host = document.createElement('div');
+        host.id = 'appManagerPane';
+        host.className = 'manager-host';
+        pane.appendChild(host);
+        container.appendChild(pane);
+        mountAppManager(host);
+        return pane;
+    }
+
+    if (tab.kind === 'modelmanager') {
+        const host = document.createElement('div');
+        host.id = 'modelManagerPane';
+        host.className = 'manager-host';
+        pane.appendChild(host);
+        container.appendChild(pane);
+        mountModelManager(host);
         return pane;
     }
 
@@ -341,6 +374,11 @@ function activateTab(id) {
 
     const pane = ensurePane(id);
     if (pane) pane.classList.remove('hidden');
+
+    // A manager view can go stale while it is not on screen: the hidden list is
+    // install-wide, and a download anywhere changes the status dots.
+    if (tab.kind === 'appmanager') refreshAppManager();
+    if (tab.kind === 'modelmanager') refreshModelManager();
 
     state.activeAppId = id;
     renderTabStrip();

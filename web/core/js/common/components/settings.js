@@ -30,9 +30,10 @@ const SOCIAL_LINKS = `
 
 export class SettingsComponent {
     /**
-     * ``options.showDeprecatedSwitch`` adds the "Apps" section. Only the SAUS app
-     * browser passes it - the File Manager mounts this same pane, where "deprecated
-     * apps" would mean nothing.
+     * ``options.showDeprecatedSwitch`` adds the "Apps" section and
+     * ``options.showManagers`` the "Managers" one. Only the SAUS app browser passes
+     * them: the File Manager mounts this same pane, where "deprecated apps" would
+     * mean nothing and a manager (which opens in a workspace tab) has nowhere to go.
      */
     constructor(containerSelector, options = {}) {
         this.containerSelector = containerSelector;
@@ -277,6 +278,19 @@ export class SettingsComponent {
                             <span class="settings-switch-track" aria-hidden="true"></span>
                         </label>
                     </section>
+                    ${this.options.showManagers ? `
+                    <section class="settings-section">
+                        <h2>Managers</h2>
+                        <p class="settings-hint">Each opens in its own workspace tab, like the settings themselves.</p>
+                        <div class="settings-managers">
+                            <button type="button" id="open-app-manager" class="btn-action">
+                                <i class="fas fa-list-check"></i> App Manager
+                            </button>
+                            <button type="button" id="open-model-manager" class="btn-action">
+                                <i class="fas fa-database"></i> Model Manager
+                            </button>
+                        </div>
+                    </section>` : ''}
                     <section class="settings-section">
                         <h2>Version</h2>
                         <p class="settings-version">Installed version:
@@ -322,7 +336,27 @@ export class SettingsComponent {
         const restartBtn = view.querySelector('#restart-server-btn');
         restartBtn.addEventListener('click', () => this.restartServer(restartBtn));
 
+        const appManagerBtn = view.querySelector('#open-app-manager');
+        if (appManagerBtn) {
+            appManagerBtn.addEventListener('click', () => this.openManager('appmanager'));
+        }
+        const modelManagerBtn = view.querySelector('#open-model-manager');
+        if (modelManagerBtn) {
+            modelManagerBtn.addEventListener('click', () => this.openManager('modelmanager'));
+        }
+
         this.loadVersion(view);
+    }
+
+    /**
+     * Ask the shell to open one of the manager tabs.
+     *
+     * Through a document event, not an import: this component is shared by the app
+     * browser and the File Manager, and only the browser has tabs to open - tabs.js
+     * is what listens for ``saus:open-manager``.
+     */
+    openManager(kind) {
+        document.dispatchEvent(new CustomEvent('saus:open-manager', { detail: { kind } }));
     }
 
     /**
@@ -414,6 +448,11 @@ export class SettingsComponent {
         style.id = 'saus-settings-styles';
         style.innerHTML = `
             .settings-section { margin-bottom: 22px; }
+            .settings-managers {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
             .settings-hint {
                 margin: 4px 0 12px;
                 color: var(--color-text-muted);

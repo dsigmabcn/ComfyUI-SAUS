@@ -68,6 +68,22 @@ In every case, click **(i)** to see the details and [install](MODELS.md) the mis
 **☆** marks the app as a favorite; favorites then appear in the panel head.
 
 
+## Hiding apps
+
+**Settings → Managers → App Manager** opens the manager in its own tab: the same rows as the panel
+(thumbnail, name, status dot, **(i)**), filed **by section and then by subcategory** — each subcategory
+in its own bordered box, with its apps laid out **three across** — so a screenful shows most of the
+catalogue and the groups never blur into one list. Every app has a switch: switch it off and it
+disappears from the panel, from Favorites and from search; switch it back on and it returns. Nothing is
+uninstalled — a hidden app keeps working if it is already open in a tab.
+
+- The choice is stored on the server, so **every browser** that opens this ComfyUI sees the same panel.
+- Deprecated apps are listed here only while **Show deprecated apps** is on in Settings: that switch is
+  the gate, and the manager tells you when it is keeping apps out.
+- Clicking a row still opens the app; the switch is the display control, the **☆** stays the favorite
+  and lives in the panel.
+
+
 ## Opening apps: tabs
 
 <img src="../web/core/media/git/app_browsing/tabs.png">

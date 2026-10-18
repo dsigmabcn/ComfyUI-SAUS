@@ -15,7 +15,13 @@ export function escapeHtml(value) {
  * app-details modal. Nothing is inlined into the markup, so data (file names,
  * model names, URLs) can never be interpreted as code.
  */
-function handleModelActionClick(event) {
+/**
+ * Install / uninstall / open, from a click anywhere in a `.component-item`.
+ *
+ * Delegated on the list that holds the rows, so the app details modal and the Model
+ * Manager share one dispatcher and one implementation of each action.
+ */
+export function handleModelActionClick(event) {
     const btn = event.target.closest('button[data-action]');
     if (!btn) return;
 
@@ -171,14 +177,36 @@ function variantBlocks(app) {
 const STATUS_TTL_MS = 60 * 1000;
 const STATUS_BATCH_LIMIT = 500;
 
-let statusChangeHandler = null;
+// Everything that paints model status registers here - the explorer rows, the App
+// Manager, the model manager: a download or a delete changes what is installed, so
+// each of those views repaints itself. A set, not a single slot, because more than
+// one view is alive at a time.
+const statusChangeHandlers = new Set();
 
 /** main.js wires this so the explorer can repaint after a download. */
 export function setStatusChangeHandler(fn) {
-    statusChangeHandler = typeof fn === 'function' ? fn : null;
+    return subscribeStatusChanges(fn);
 }
 
-function statusEntry(fileId) {
+/** Add one more listener; the returned function removes it again. */
+export function subscribeStatusChanges(fn) {
+    if (typeof fn !== 'function') return () => {};
+    statusChangeHandlers.add(fn);
+    return () => statusChangeHandlers.delete(fn);
+}
+
+function notifyStatusChanged() {
+    statusChangeHandlers.forEach((handler) => {
+        try {
+            handler();
+        } catch (error) {
+            console.error('[SAUS] A model status listener failed:', error);
+        }
+    });
+}
+
+/** The `{file_id, model_path, type, label}` triple the status routes take. */
+export function statusEntry(fileId) {
     const model = state.MODELS_DATA[fileId] || {};
     return {
         file_id: fileId,
@@ -202,7 +230,7 @@ function filesForApp(app) {
  * Ask the server about many files at once. Falls back to the per-file
  * endpoint when the batch route is missing (an older server).
  */
-async function fetchModelStatuses(entries) {
+export async function fetchModelStatuses(entries) {
     const chunk = entries.slice(0, STATUS_BATCH_LIMIT);
     if (!chunk.length) return new Map();
 
@@ -355,7 +383,7 @@ export async function warmAppStatuses(apps) {
 export function invalidateStatusCache(appId = null) {
     if (appId) state.statusCache.delete(appId);
     else state.statusCache.clear();
-    if (statusChangeHandler) statusChangeHandler();
+    notifyStatusChanged();
 }
 
 export async function showAppDetails(app) {
@@ -479,7 +507,7 @@ const TYPE_LABELS = {
     'Style': 'Style model'
 };
 
-function prettyType(type) {
+export function prettyType(type) {
     if (!type) return '';
     return TYPE_LABELS[type] || type;
 }
@@ -505,7 +533,7 @@ function rememberDownload(fileId, status, progress = 0) {
 }
 
 /** Progress of the download in flight for a file, or null when there is none. */
-function downloadProgressOf(fileId) {
+export function downloadProgressOf(fileId) {
     return activeDownloads.has(fileId) ? activeDownloads.get(fileId) : null;
 }
 
@@ -706,13 +734,11 @@ export function updateComponentStatus(fileId, status, progress = 0) {
         invalidateStatusCache();
     }
 
-    // Every variant that needs this model lists it, so *all* the matching cards are
-    // updated - stopping at the first one left the other variants showing stale
-    // buttons. Lookup by property: a crafted name can never be parsed as a selector.
-    const scope = document.getElementById('app-details-content');
-    const items = scope
-        ? [...scope.querySelectorAll('.component-item')].filter((el) => el.dataset.fileId === fileId)
-        : [];
+    // Every card that lists this model updates - the app details modal and the Model
+    // Manager both render .component-item rows, and a download may be started from
+    // either view. Lookup by property: a crafted name can never be parsed as a selector.
+    const items = [...document.querySelectorAll('.component-item')]
+        .filter((el) => el.dataset.fileId === fileId);
     if (!items.length) return;
     items.forEach((item) => applyStatusToItem(item, status, progress));
 
@@ -722,7 +748,7 @@ export function updateComponentStatus(fileId, status, progress = 0) {
 
 
 /** Paint one card for a status: its classes, its badge and its section header. */
-function applyStatusToItem(item, status, progress) {
+export function applyStatusToItem(item, status, progress) {
     const actions = item.querySelector('.component-actions');
     if (!actions) return;
 

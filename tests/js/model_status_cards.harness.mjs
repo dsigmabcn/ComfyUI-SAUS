@@ -84,7 +84,9 @@ const scope = {
 
 globalThis.document = {
     getElementById: (id) => (id === 'app-details-content' ? scope : null),
-    querySelectorAll: () => [],
+    // models.js looks cards up document-wide now: the details modal and the Model
+    // Manager render the same .component-item rows, so the harness answers for both.
+    querySelectorAll: (selector) => (selector === '.component-item' ? cards : []),
 };
 
 // state.js builds a PreferencesManager while it is imported, and that reads the

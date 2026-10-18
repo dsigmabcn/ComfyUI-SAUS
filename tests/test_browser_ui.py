@@ -525,10 +525,14 @@ def test_a_model_in_several_variants_updates_every_card():
     source = MODELS_JS.read_text(encoding='utf-8')
 
     assert 'const activeDownloads = new Map();' in source, 'downloads in flight are remembered'
-    assert re.search(r"rememberDownload\(fileId, status, progress\);[\s\S]*?const items = scope", source), \
+    assert re.search(r"rememberDownload\(fileId, status, progress\);[\s\S]*?const items = \[\.\.\.document", source), \
         'and remembered before any card is looked up, so a closed panel keeps it'
-    assert re.search(r"const items = scope\s*\n\s*\? \[\.\.\.scope\.querySelectorAll\('\.component-item'\)\]\.filter", source), \
-        'every matching card is collected'
+    assert re.search(r"document\.querySelectorAll\('\.component-item'\)\]\s*\n\s*\.filter", source), \
+        'every matching card in the document is collected - the app details modal and '
+    assert 'export function updateComponentStatus' in source, \
+        'the shell calls it for every download event'
+    assert "getElementById('app-details-content')" not in source.split('export function updateComponentStatus', 1)[1], \
+        'so the lookup may not be scoped to the details modal any more'
     assert 'items.forEach((item) => applyStatusToItem(item, status, progress));' in source, \
         'and each of them is painted'
     assert 'function applyStatusToItem(item, status, progress)' in source, \
@@ -637,8 +641,13 @@ def test_deprecated_apps_are_hidden_until_the_switch_is_on():
     ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
     assert "preferencesManager.get('showDeprecatedApps')" in ui, \
         'the explorer consults the preference'
-    assert 'filteredApps.filter(app => !app.deprecated)' in ui, \
+    # The rule lives in the shared predicate now, because the App Manager has to
+    # list exactly what the panel may offer (and never a parked app while it is off).
+    listed = ui.split('export function isAppListed(app) {', 1)[1].split('}', 1)[0]
+    assert 'showDeprecatedApps' in listed and 'deprecated' in listed, \
         'and drops the apps the API flagged deprecated'
+    assert 'state.allApps.filter(isAppShown)' in ui, \
+        'the panel asks for its list through that predicate'
 
     settings = SETTINGS_JS.read_text(encoding='utf-8')
     assert 'show-deprecated-apps' in settings, 'the Settings pane owns the switch'
@@ -653,7 +662,7 @@ def test_deprecated_apps_are_hidden_until_the_switch_is_on():
     assert 'renderExplorer();' in shell, 'and repaints the side panel'
 
     tabs = (BROWSER / 'tabs.js').read_text(encoding='utf-8')
-    assert '{ showDeprecatedSwitch: true }' in tabs, \
+    assert 'showDeprecatedSwitch: true' in tabs, \
         'the app browser is the host that opts in'
 
 

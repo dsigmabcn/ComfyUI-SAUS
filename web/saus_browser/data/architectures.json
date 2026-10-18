@@ -486,7 +486,7 @@
             "label": "FLUX 2 VAE"
           },
           {
-            "file": "full_encoder_small_decoder.safetensors"
+            "file": "flux2-vae_small.safetensors"
           }
         ]
       }
@@ -523,7 +523,7 @@
         "pick": {
           "diffusion_model": "flux-2-klein-base-9b.safetensors",
           "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
-          "vae": "full_encoder_small_decoder.safetensors"
+          "vae": "flux2-vae_small.safetensors"
         },
         "settings": {
           "steps": "20",
@@ -536,7 +536,7 @@
         "pick": {
           "diffusion_model": "flux-2-klein-9b.safetensors",
           "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
-          "vae": "full_encoder_small_decoder.safetensors"
+          "vae": "flux2-vae_small.safetensors"
         },
         "settings": {
           "steps": "4",
@@ -1314,7 +1314,7 @@
   },
   "FLUX 2 KLEIN EDIT": {
     "title": "Flux 2 Klein Edit family",
-    "description": "Klein edit models (4B and 9B, base and distilled) used by the Edit and 2-images Reference apps. 4B uses flux2-vae, 9B uses full_encoder_small_decoder. No Fast LoRAs: the distilled models are separate checkpoints.",
+    "description": "Klein edit models (4B and 9B, base and distilled) used by the Edit and 2-images Reference apps. 4B uses flux2-vae, 9B uses the small-decoder VAE, shipped once as flux2-vae_small.safetensors. No Fast LoRAs: the distilled models are separate checkpoints.",
     "categories": [
       "image-to-image (editing)",
       "image-to-image (reference)"
@@ -1376,7 +1376,7 @@
             "label": "FLUX 2 VAE"
           },
           {
-            "file": "full_encoder_small_decoder.safetensors"
+            "file": "flux2-vae_small.safetensors"
           }
         ]
       }
@@ -1413,7 +1413,7 @@
         "pick": {
           "diffusion_model": "flux-2-klein-base-9b.safetensors",
           "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
-          "vae": "full_encoder_small_decoder.safetensors"
+          "vae": "flux2-vae_small.safetensors"
         },
         "settings": {
           "steps": "20",
@@ -1426,7 +1426,7 @@
         "pick": {
           "diffusion_model": "flux-2-klein-9b.safetensors",
           "text_encoder": "qwen_3_8b_fp8mixed.safetensors",
-          "vae": "full_encoder_small_decoder.safetensors"
+          "vae": "flux2-vae_small.safetensors"
         },
         "settings": {
           "steps": "4",

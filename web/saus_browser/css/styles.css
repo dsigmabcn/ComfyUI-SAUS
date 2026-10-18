@@ -7,6 +7,7 @@
 @import 'details.css';
 @import 'updates.css';
 @import 'settings.css';
+@import 'managers.css';
 @import 'modals.css';
 /* The end-of-generation notice, shared with the app pages (/core/css/main.css imports it
    as well) - the shell is what shows it, so it has to be styled here too. */

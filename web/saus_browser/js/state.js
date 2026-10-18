@@ -7,6 +7,10 @@ export const state = {
     selectedTags: new Set(),
     allTags: new Set(),
     favorites: new Set(),
+    // Apps the App Manager hides. Server-side (saus/data/settings.json), so this
+    // is an install-wide choice rather than a per-browser one; filled by
+    // loadAppVisibility() while the shell boots.
+    hiddenAppIds: new Set(),
     sidebarFilter: null,
     searchTerm: '',
     ARCHITECTURES: {},
@@ -62,6 +66,80 @@ export function saveFavorites() {
 
 export function isFavorited(appId) {
     return state.favorites.has(appId);
+}
+
+/* ------------------------------------------------------------------ *
+ * App visibility (the App Manager's hidden list)
+ *
+ * Server-side on purpose: hiding an app is a property of the *install*, not of
+ * one browser, so every device that opens this ComfyUI agrees. The endpoint only
+ * ever stores ids of apps that are installed, which is what keeps this a display
+ * filter: no app file is read or written by it.
+ * ------------------------------------------------------------------ */
+
+const VISIBILITY_URL = '/saus/api/app-visibility';
+
+/** True when the App Manager hides this app. */
+export function isAppHidden(appId) {
+    return state.hiddenAppIds.has(appId);
+}
+
+export function hiddenAppCount() {
+    return state.hiddenAppIds.size;
+}
+
+/** Read the hidden list (boot, and whenever the App Manager opens). */
+export async function loadAppVisibility() {
+    try {
+        const response = await fetch(VISIBILITY_URL);
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        state.hiddenAppIds = new Set(Array.isArray(data.hiddenAppIds) ? data.hiddenAppIds : []);
+    } catch (error) {
+        // A hiccup, or a server that predates the route, must not empty the panel:
+        // with no list nothing is hidden, which is also the first-run state.
+        console.warn('[SAUS] Could not read the app visibility setting:', error);
+        state.hiddenAppIds = new Set();
+    }
+    return state.hiddenAppIds;
+}
+
+/**
+ * Hide or show one app and store the whole list.
+ *
+ * Optimistic: the panel repaints at once, and the server's answer is taken as
+ * final (it prunes ids of apps that no longer exist). A failed write puts the
+ * previous list back, so the UI never claims something the server did not save.
+ */
+export async function setAppHidden(appId, hidden) {
+    if (!appId) return false;
+
+    const previous = new Set(state.hiddenAppIds);
+    if (hidden) state.hiddenAppIds.add(appId);
+    else state.hiddenAppIds.delete(appId);
+    notifyVisibilityChanged();
+
+    try {
+        const response = await fetch(VISIBILITY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hiddenAppIds: Array.from(state.hiddenAppIds) }),
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        state.hiddenAppIds = new Set(Array.isArray(data.hiddenAppIds) ? data.hiddenAppIds : []);
+        return true;
+    } catch (error) {
+        console.error('[SAUS] Could not save the app visibility setting:', error);
+        state.hiddenAppIds = previous;
+        notifyVisibilityChanged();
+        return false;
+    }
+}
+
+/** Tell the shell that what the explorer should list has changed. */
+export function notifyVisibilityChanged() {
+    document.dispatchEvent(new CustomEvent('saus:app-visibility-changed'));
 }
 
 /* ------------------------------------------------------------------ *
