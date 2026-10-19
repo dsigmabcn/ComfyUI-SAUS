@@ -1,16 +1,12 @@
-# The gate that was missing: publish_action.yml only publishes on a pyproject
-# bump, so nothing ran the suites. The runner and the code checks live in the
-# companion builder repo, so it is checked out as a sibling and check_all.py is
-# given both paths explicitly (the sibling layout then does not matter).
+# The SAUS suites - run here, with nothing but this repo's default token.
 #
-# The builder is a *private* repo, so the default token (scoped to this repo
-# alone) cannot read it - every run stopped at that checkout, before a single
-# suite ran. SAUS_BUILDER_TOKEN is a PAT with read access to it; the fallback is
-# GITHUB_TOKEN, which is enough the moment the builder is public.
-#
-# Nothing to install: the suites stub aiohttp / ComfyUI's `server` themselves and
-# otherwise use the stdlib. Node is only for tests/js/*.harness.mjs.
-name: Tests
+# A workflow in a *public* repo cannot read the private ComfyUI-SAUS-builder with
+# the default token (`GITHUB_TOKEN` is scoped to the repo that started the run),
+# so the *full* gate - both repos' suites plus check_js / check_security /
+# check_apps / skill_lint - lives in the builder's own workflow instead, where a
+# private repo reads the public SAUS for free. This file covers only what SAUS
+# itself owns, so a push here still gets a signal, and no secret is ever needed.
+name: SAUS suites
 
 on:
   push:
@@ -20,51 +16,26 @@ on:
 
 jobs:
   suites:
-    name: Every suite + asset/security/skill checks
+    name: The SAUS suites
     runs-on: ubuntu-latest
     steps:
-      - name: Check out ComfyUI-SAUS
-        uses: actions/checkout@v5
-        with:
-          path: ComfyUI-SAUS
-
-      # actions/checkout reports a repo its token cannot see as a bare
-      # "Not Found", which says nothing about the fix: ask GitHub here, and name
-      # the repo and the two ways to make it readable.
-      - name: Verify the builder checkout is allowed
-        env:
-          BUILDER_TOKEN: ${{ secrets.SAUS_BUILDER_TOKEN }}
-          FALLBACK_TOKEN: ${{ github.token }}
-        run: |
-          code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            -H "Authorization: Bearer ${BUILDER_TOKEN:-$FALLBACK_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/dsigmabcn/ComfyUI-SAUS-builder)
-          if [ "$code" != "200" ]; then
-            echo "::error::dsigmabcn/ComfyUI-SAUS-builder is not readable with this token (HTTP $code). Set the SAUS_BUILDER_TOKEN secret (fine-grained PAT, Repository access = ComfyUI-SAUS-builder, Permissions > Contents = Read) or make the builder public."
-            exit 1
-          fi
-
-      - name: Check out ComfyUI-SAUS-builder
-        uses: actions/checkout@v5
-        with:
-          repository: dsigmabcn/ComfyUI-SAUS-builder
-          path: ComfyUI-SAUS-builder
-          # Private repo: a PAT with read access to it, or the default token once
-          # the builder is public (the step above is what proves which applies).
-          token: ${{ secrets.SAUS_BUILDER_TOKEN || github.token }}
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # >= 22 auto-detects module syntax, which the harnesses rely on.
+      # >= 22 auto-detects module syntax, which tests/js/*.harness.mjs relies on.
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Run everything
+      # Standalone scripts, exactly as the builder's check_all.py runs them: a
+      # failing assert propagates out of main(), and `bash -e` stops the job.
+      - name: Run every tests/test_*.py
         run: |
-          python ComfyUI-SAUS-builder/tools/check_all.py \
-            --saus "$PWD/ComfyUI-SAUS" \
-            --builder "$PWD/ComfyUI-SAUS-builder"
+          for suite in tests/test_*.py; do
+            echo "::group::$suite"
+            python "$suite"
+            echo "::endgroup::"
+          done
