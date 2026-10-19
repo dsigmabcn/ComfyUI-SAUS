@@ -30,12 +30,21 @@ jobs:
         with:
           node-version: '22'
 
-      # Standalone scripts, exactly as the builder's check_all.py runs them: a
-      # failing assert propagates out of main(), and `bash -e` stops the job.
+      # Standalone scripts, exactly as the builder's check_all.py runs them, but
+      # every suite runs even after a failure and a failure is *annotated* with
+      # its file and last line: the job log needs a login, the annotation does not.
       - name: Run every tests/test_*.py
         run: |
+          fail=0
           for suite in tests/test_*.py; do
             echo "::group::$suite"
-            python "$suite"
+            rc=0
+            out=$(python "$suite" 2>&1) || rc=$?
+            printf '%s\n' "$out"
             echo "::endgroup::"
+            if [ "$rc" != 0 ]; then
+              echo "::error file=$suite::$(basename "$suite") failed: $(printf '%s' "$out" | tail -n 1)"
+              fail=1
+            fi
           done
+          exit $fail
