@@ -497,14 +497,6 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "flux-2-klein-base-9b-fp8.safetensors": {
-      "name": "flux-2-klein-base-9b-fp8.safetensors",
-      "type": "Diffusion model",
-      "url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9b-fp8",
-      "directory": "diffusion_models",
-      "thumbnail": "",
-      "source": "builder"
-    },
     "flux3_image_klein_base_int8_convrot.safetensors": {
       "name": "flux3_image_klein_base_int8_convrot.safetensors",
       "type": "Diffusion model",

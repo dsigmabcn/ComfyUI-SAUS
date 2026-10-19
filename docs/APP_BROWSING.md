@@ -78,10 +78,14 @@ disappears from the panel, from Favorites and from search; switch it back on and
 uninstalled — a hidden app keeps working if it is already open in a tab.
 
 - The choice is stored on the server, so **every browser** that opens this ComfyUI sees the same panel.
-- Deprecated apps are listed here only while **Show deprecated apps** is on in Settings: that switch is
-  the gate, and the manager tells you when it is keeping apps out.
-- Clicking a row still opens the app; the switch is the display control, the **☆** stays the favorite
-  and lives in the panel.
+- **Show all**, under the filters, turns every app back on in one go. It sits *off* the moment one app
+  is hidden, and greys out while everything is already shown (there is nothing to restore). Apps are
+  never hidden in bulk.
+- Deprecated apps are listed here only while **Show deprecated apps** is on in Settings — that switch is
+  the gate, and the head of the manager counts how many apps it is keeping out.
+- The manager does not launch anything: a click on a row does nothing (hovering an app shows its
+  category under the cursor). Use **(i)** for the information panel and the app list, or the panel on
+  the left to open an app — the **☆** favorite stays there too.
 
 
 ## Opening apps: tabs

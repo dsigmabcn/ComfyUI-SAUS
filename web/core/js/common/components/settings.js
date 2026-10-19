@@ -281,13 +281,20 @@ export class SettingsComponent {
                     ${this.options.showManagers ? `
                     <section class="settings-section">
                         <h2>Managers</h2>
-                        <p class="settings-hint">Each opens in its own workspace tab, like the settings themselves.</p>
-                        <div class="settings-managers">
-                            <button type="button" id="open-app-manager" class="btn-action">
-                                <i class="fas fa-list-check"></i> App Manager
+                        <div class="theme-options">
+                            <button type="button" id="open-app-manager" class="theme-option"
+                                    title="Choose which apps the side panel offers">
+                                <span class="theme-manager-icon"><i class="fas fa-list-check"></i></span>
+                                <span class="theme-option-text">
+                                    <span class="theme-option-name">App Manager</span>
+                                </span>
                             </button>
-                            <button type="button" id="open-model-manager" class="btn-action">
-                                <i class="fas fa-database"></i> Model Manager
+                            <button type="button" id="open-model-manager" class="theme-option"
+                                    title="Install and uninstall the models the apps need">
+                                <span class="theme-manager-icon"><i class="fas fa-database"></i></span>
+                                <span class="theme-option-text">
+                                    <span class="theme-option-name">Model Manager</span>
+                                </span>
                             </button>
                         </div>
                     </section>` : ''}
@@ -448,10 +455,19 @@ export class SettingsComponent {
         style.id = 'saus-settings-styles';
         style.innerHTML = `
             .settings-section { margin-bottom: 22px; }
-            .settings-managers {
+            /* The manager buttons wear the theme picker's own look - same box, same
+               name + hint - with an icon tile where a theme swatch sits. */
+            .theme-manager-icon {
+                flex: 0 0 auto;
                 display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+                align-items: center;
+                justify-content: center;
+                width: 26px;
+                height: 26px;
+                border-radius: 6px;
+                background-color: var(--color-accent-soft);
+                color: var(--color-accent);
+                font-size: 0.85rem;
             }
             .settings-hint {
                 margin: 4px 0 12px;

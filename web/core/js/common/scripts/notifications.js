@@ -65,13 +65,17 @@ export function playCompletionChime() {
 }
 
 /**
- * The breadcrumb itself: the same card, icon and reveal the Settings pane's toasts use,
- * in the same top-right corner (see `core/css/notices.css`).
+ * A breadcrumb: the same card, icon and reveal the Settings pane's toasts use, in the
+ * same top-right corner (see `core/css/notices.css`).
  *
  * The host is shared and long-lived, so several notices stack rather than overwriting
  * each other, and nothing here holds a pointer to a thing it removed.
+ *
+ * Exported for anything in the shell that has to say something short: "Generation
+ * complete" from here, and the App Manager's "hide apps one at a time" hint.
  */
-function showCompletionToast(message = 'Generation complete', milliseconds = 4000) {
+export function showNotice(message, { icon = 'fas fa-check-circle', variant = 'toast-success',
+                                      milliseconds = 4000 } = {}) {
     let host = document.getElementById('saus-notices');
     if (!host) {
         host = document.createElement('div');
@@ -80,13 +84,13 @@ function showCompletionToast(message = 'Generation complete', milliseconds = 400
     }
 
     const toast = document.createElement('div');
-    toast.className = 'saus-toast toast-success';
+    toast.className = `saus-toast ${variant}`;
     toast.setAttribute('role', 'status');
-    const icon = document.createElement('i');
-    icon.className = 'fas fa-check-circle';
+    const mark = document.createElement('i');
+    mark.className = `fas ${icon}`;
     const text = document.createElement('span');
     text.textContent = message;
-    toast.append(icon, text);
+    toast.append(mark, text);
     host.appendChild(toast);
 
     requestAnimationFrame(() => toast.classList.add('show'));
@@ -106,7 +110,7 @@ function showCompletionToast(message = 'Generation complete', milliseconds = 400
 
 /** "Generation finished": the notice always, the chime only when enabled. */
 export function notifyGenerationComplete(message = 'Generation complete') {
-    showCompletionToast(message);
+    showNotice(message);
     if (completionSoundEnabled()) playCompletionChime();
 }
 

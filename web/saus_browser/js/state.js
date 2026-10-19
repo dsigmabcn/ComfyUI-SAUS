@@ -118,7 +118,21 @@ export async function setAppHidden(appId, hidden) {
     if (hidden) state.hiddenAppIds.add(appId);
     else state.hiddenAppIds.delete(appId);
     notifyVisibilityChanged();
+    return persistHidden(previous);
+}
 
+/** Show every app again - the App Manager's "Show all". One write, not one per app. */
+export async function showAllApps() {
+    if (!state.hiddenAppIds.size) return true;
+
+    const previous = new Set(state.hiddenAppIds);
+    state.hiddenAppIds = new Set();
+    notifyVisibilityChanged();
+    return persistHidden(previous);
+}
+
+/** Write the current list, and put `previous` back when the write fails. */
+async function persistHidden(previous) {
     try {
         const response = await fetch(VISIBILITY_URL, {
             method: 'POST',

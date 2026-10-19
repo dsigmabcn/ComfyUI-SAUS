@@ -5,6 +5,8 @@ shell wiring - and about the App Manager staying what its description says: a
 view that hides and shows apps, never one that deletes or changes them.
 """
 
+import shutil
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +37,12 @@ def test_settings_offers_the_managers_only_where_tabs_exist():
     assert 'id="open-model-manager"' in settings, 'the second button is there too'
     assert "this.openManager('modelmanager')" in settings
     assert "new CustomEvent('saus:open-manager'" in settings
+
+    # The buttons carry their name only - the subtitle line was noise.
+    managers_section = settings.split('showManagers ? `', 1)[1].split("` : ''", 1)[0]
+    assert 'theme-option-name' in managers_section, 'the name is there'
+    assert 'theme-option-hint' not in managers_section, 'and no subtitle under it'
+    assert 'settings-hint' not in managers_section, 'nor a line explaining the obvious'
 
     # Only the browser has workspace tabs, so only it passes the option.
     assert 'showManagers: true' in tabs, 'the shell shows the Managers section'
@@ -106,8 +114,6 @@ def test_the_panel_and_the_manager_share_one_predicate():
         'a hidden app contributes no tag chip'
 
     assert 'isAppListed' in manager, 'the manager lists exactly the apps the panel may offer'
-    assert 'turn on "Show deprecated apps" in Settings' in manager, \
-        'and it says where a parked app is managed from'
 
 
 def test_the_manager_only_hides_and_shows():
@@ -151,10 +157,43 @@ def test_the_switch_carries_the_theme():
 
 
 MODEL_MANAGER_JS = BROWSER / 'js' / 'model_manager.js'
+NOTIF_JS = CORE / 'js' / 'common' / 'scripts' / 'notifications.js'
+
+
+def test_toggling_never_rebuilds_the_list_and_show_all_is_one_way():
+    """A switch two thirds down must not scroll the list; Show all only ever shows."""
+    manager = _text(MANAGER_JS)
+    state = _text(STATE_JS)
+
+    # A toggle repaints the rows in place, and any rebuild keeps the scroll position.
+    assert "document.addEventListener('saus:app-visibility-changed', applyRowVisibility);" in manager
+    assert 'function applyRowVisibility()' in manager and 'row.classList.toggle' in manager, \
+        'the switch is updated where it is, never by re-rendering the pane'
+    assert 'const scrollTop = previousList ? previousList.scrollTop : 0;' in manager
+    assert 'list.scrollTop = scrollTop;' in manager
+    assert 'list.scrollTop = scrollTop;' in _text(MODEL_MANAGER_JS), \
+        'the model manager rebuilds on a status change too, so it keeps it as well'
+
+    # "Show all": greyed out while nothing is hidden; clicking it on shows everything
+    # in one write; the off direction stays refused in code as a safety net.
+    assert "createElement('span', 'manager-showall-text', 'Show all')" in manager
+    assert 'await showAllApps();' in manager and 'export async function showAllApps()' in state
+    assert 'input.disabled = nothingHidden;' in manager, 'a no-op switch is greyed out'
+    assert "showAllWrap.classList.toggle('manager-showall-disabled', nothingHidden);" in manager
+    assert 'showAll.disabled = nothingHidden;' in manager, 'kept in step in place'
+    assert '.manager-showall-disabled' in _text(MANAGERS_CSS)
+    assert 'input.checked = true;' in manager, 'the off direction springs back on'
+    assert "showNotice('Apps are hidden one at a time" in manager
+    assert 'export function showNotice(' in _text(NOTIF_JS), \
+        'the shell breadcrumb is shared, not copied'
+
+    # The hint lines are gone from both managers.
+    assert 'manager-hint' not in manager
+    assert 'manager-hint' not in _text(MODEL_MANAGER_JS)
 
 
 def test_the_app_manager_groups_by_section_and_subcategory():
-    """The panel's filing, three apps across, so the space is actually used."""
+    """The panel's filing, in columns as wide as the explorer panel."""
     manager = _text(MANAGER_JS)
     css = _text(MANAGERS_CSS)
 
@@ -163,34 +202,80 @@ def test_the_app_manager_groups_by_section_and_subcategory():
     assert 'manager-section-title' in manager and 'manager-group-title' in manager, \
         'a heading per section and per subcategory'
     assert "'manager-grid'" in manager and 'manager-group-head' in manager
-    assert 'grid-template-columns: repeat(3, minmax(0, 1fr));' in css, 'three columns across'
+    assert 'grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));' in css, \
+        'flexible columns, each as wide as the side panel (300px)'
     assert '.manager-subgroup' in css and 'border: 1px solid var(--color-border)' in css, \
         'each subcategory is boxed, so its apps cannot be read as the next group'
-    assert 'manager-section-title' in css and 'manager-group-count' in css, \
-        'the group headings are styled, with their counts'
-    # A category the taxonomy has not caught up with must not hide the app.
-    assert 'Uncategorised' in manager
+    assert 'manager-section-title' in css and 'manager-group-count' in css
+    assert 'Uncategorised' in manager, 'a category the taxonomy lacks must not hide the app'
+    assert 'turn on "Show deprecated apps" in Settings to manage them' not in manager, \
+        'the deprecated notice in the hint is gone (the head still counts them)'
 
 
-def test_the_model_manager_is_three_across_with_app_chips():
-    """Like the App Manager: three cards per row, each naming the apps that need it."""
+def test_the_app_manager_row_click_opens_nothing():
+    """The click is executed, not just asserted: see tests/js/app_manager.harness.mjs."""
+    manager = _text(MANAGER_JS)
+    assert "new CustomEvent('saus:open-app'" not in manager, \
+        'the manager never dispatches the open-app event'
+
+    node = (shutil.which('node') or shutil.which('nodejs')
+            or next((candidate for candidate in ('/workspace/code-server/lib/node',
+                                                 '/usr/local/bin/node', '/usr/bin/node')
+                     if Path(candidate).is_file()), None))
+    if node is None:
+        print('  skip  app_manager.harness.mjs needs node, which is not installed here')
+        return
+
+    harness = ROOT / 'tests' / 'js' / 'app_manager.harness.mjs'
+    result = subprocess.run([node, str(harness)], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.returncode == 0, \
+        f'{harness.name} failed:\n{result.stdout}\n{result.stderr}'
+    assert '4/4 OK' in result.stdout, 'the four cases have to run'
+
+
+def test_the_model_manager_cards_are_flexible_with_app_chips():
+    """Like the App Manager: flexible columns, each card naming the apps that need it."""
     manager = _text(MODEL_MANAGER_JS)
+    models = _text(BROWSER / 'js' / 'models.js')
     css = _text(MANAGERS_CSS)
 
-    assert "item.className = 'component-item manager-model-row';" in manager
-    assert "'manager-model-grid'" in manager and 'manager-model-main' in manager
-    assert 'grid-template-columns: repeat(3, minmax(0, 1fr));' in css, 'three cards across'
-    assert '.manager-model-grid' in css and '.manager-app-thumb' in css
+    # A card is the model band on top and the apps below it.
+    assert "createElement('div', 'manager-model-card')" in manager
+    assert "item.className = 'component-item manager-model-row';" in manager, \
+        'the top band is the .component-item, so the red/green only covers it'
+    assert "createElement('div', 'manager-model-uses')" in manager
+    assert 'grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));' in css
+    assert '.manager-model-card' in css and '.manager-app-thumb' in css
+    assert 'manager-uses-label' not in manager and "'Used by'" not in manager, \
+        'the label is gone - the chips speak for themselves'
 
-    # The apps are the thumbnails + names; the architectures are only counted.
-    assert "createElement('span', 'manager-app'" in manager
-    assert 'appThumbSrc(app)' in manager and 'APP_THUMB_FALLBACK' in manager
+    # The apps are thumbnails + names, filed by category; the category is only in the tooltip.
+    assert 'function appChip(app, categoryLabelText = ' in manager
+    assert 'appThumbSrc(app)' in manager and 'thumb.title = tooltip' in manager
+    assert 'manager-app-list' in manager
+    assert 'manager-app-category' not in manager, 'no category label written on the card'
+    assert 'function orderedCategoryIds(byCategory)' in manager, 'filed in taxonomy order'
     assert 'const APP_CHIPS_SHOWN' in manager and 'manager-app-more' in manager, \
         'a long list is counted, with every name in the tooltip'
-    assert 'Architecture:' not in manager and 'usesTooltip' not in manager, \
-        'the cards name apps only'
-    assert 'architectures.push(value)' in manager, \
-        'architectures are still counted, or the Unused chip would be wrong'
+
+    # The list itself is grouped by model kind, in boxed sections like the App Manager.
+    assert 'function appendTypeGroups(container, files, usage)' in manager
+    assert 'function orderedTypes(byType)' in manager, 'a stable order per kind'
+    assert "createElement('section', 'manager-subgroup')" in manager, 'each kind is boxed'
+    assert 'manager-group-title' in manager and 'prettyType(type)' in manager
+
+    # Architectures are counted (for the Unused chip) but never named.
+    assert 'Architecture:' not in manager and 'usesTooltip' not in manager
+    assert 'architectures.push(value)' in manager
+
+    # A variant's LoRA belongs to the app whose architecture names it.
+    assert 'variantBlocks' in manager and 'export function variantBlocks(app)' in models, \
+        'the variant files (picks and LoRAs) are what makes "used by" truthful'
+
+    # The kind is the section heading and the folder is a lookup hint only.
+    assert 'function folderOf(model)' not in manager, 'the folder is not shown on a card'
+    assert "'no download URL'" in manager, 'only a real problem gets a line'
 
     assert 'let typeFilter' in manager and 'function typeBar(files)' in manager
     assert 'matchesType' in manager and 'prettyType(type)' in manager

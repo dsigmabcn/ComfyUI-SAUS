@@ -127,6 +127,33 @@ def test_the_prompt_box_drives_both_prompt_branches():
             f'{url}: the prompt enhancer must read the box, not a baked-in demo prompt'
 
 
+def test_no_registry_entry_is_unreachable():
+    """A registered file that nothing needs is a download nobody can use.
+
+    "Needed" is the rule the Model Manager's Unused chip applies: an app's
+    `metadata.models`, its architecture's model groups, or a variant's pick / LoRA.
+    """
+    architectures, registry = _load()
+
+    used = set()
+    for app_file in APPS.rglob('appConfig.json'):
+        metadata = json.loads(app_file.read_text(encoding='utf-8')).get('metadata') or {}
+        used.update(metadata.get('models') or [])
+        arch = architectures.get(metadata.get('architecture')) or {}
+        for group in arch.get('models') or []:
+            for entry in group.get('files') or []:
+                used.add(_file_names(entry))
+        for variant in (arch.get('variants') or {}).values():
+            used.update((variant.get('pick') or {}).values())
+            used.update(variant.get('loras') or [])
+
+    orphans = sorted(set(registry) - used)
+    assert not orphans, (
+        'registry entries no app and no architecture needs - drop them with '
+        "tools/registry.py remove-model: " + ', '.join(orphans)
+    )
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

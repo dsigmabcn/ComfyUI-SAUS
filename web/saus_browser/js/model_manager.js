@@ -11,7 +11,7 @@ import { state } from './state.js';
 import { appThumbSrc, APP_THUMB_FALLBACK } from './ui.js';
 import {
     handleModelActionClick, statusEntry, fetchModelStatuses, applyStatusToItem,
-    downloadProgressOf, prettyType, escapeHtml, subscribeStatusChanges,
+    downloadProgressOf, prettyType, escapeHtml, subscribeStatusChanges, variantBlocks,
 } from './models.js';
 
 const FILTERS = [
@@ -69,7 +69,14 @@ function usageIndex() {
     };
 
     state.allApps.forEach((app) => {
-        (((app.metadata || {}).models) || []).forEach(file => note(file, app, 'app'));
+        // Everything the app can need: what it declares, plus every file its variants
+        // pick and every LoRA they add - the turbo / lightning LoRA of a variant is
+        // named by the *architecture*, so `metadata.models` alone misses it.
+        const files = new Set((((app.metadata || {}).models) || []));
+        variantBlocks(app).forEach((block) => {
+            block.entries.forEach((entry) => { if (entry.file) files.add(entry.file); });
+        });
+        files.forEach(file => note(file, app, 'app'));
     });
 
     Object.entries(state.ARCHITECTURES || {}).forEach(([name, arch]) => {
@@ -85,7 +92,10 @@ function usageIndex() {
     return used;
 }
 
-/** The apps that need a file: a thumbnail and the name, then a count for the rest. */
+/**
+ * The apps that need a file: a thumbnail and the name, **filed by their category**
+ * (the same filing the App Manager uses), then a count for the rest.
+ */
 function appChips(usage) {
     const wrap = createElement('div', 'manager-apps');
     const apps = (usage && usage.apps) || [];
@@ -94,43 +104,91 @@ function appChips(usage) {
         return wrap;
     }
 
-    apps.slice(0, APP_CHIPS_SHOWN).forEach((app) => {
-        const chip = createElement('span', 'manager-app');
-        chip.title = app.name || app.url;
-
-        const thumb = document.createElement('img');
-        thumb.className = 'manager-app-thumb';
-        thumb.alt = '';
-        thumb.loading = 'lazy';
-        thumb.decoding = 'async';
-        const onThumbError = () => {
-            thumb.removeEventListener('error', onThumbError);
-            thumb.src = APP_THUMB_FALLBACK;
-        };
-        thumb.addEventListener('error', onThumbError);
-        thumb.src = appThumbSrc(app);
-
-        chip.appendChild(thumb);
-        chip.appendChild(document.createTextNode(app.name || app.url));
-        wrap.appendChild(chip);
+    const byCategory = new Map();
+    apps.forEach((app) => {
+        const id = ((app.metadata || {}).category) || '';
+        if (!byCategory.has(id)) byCategory.set(id, []);
+        byCategory.get(id).push(app);
     });
 
-    const rest = apps.length - APP_CHIPS_SHOWN;
-    if (rest > 0) {
-        const more = createElement('span', 'manager-app manager-app-more', `+${rest}`);
-        more.title = apps.map(app => app.name || app.url).join(', ');
-        wrap.appendChild(more);
-    }
+    // Filed by category, in taxonomy order - but the category is only in the tooltip:
+    // the cards are already grouped by model kind, and a label per line was noise.
+    orderedCategoryIds(byCategory).forEach((categoryId) => {
+        const group = createElement('div', 'manager-app-list');
+        const groupApps = byCategory.get(categoryId);
+        const label = categoryId ? categoryLabel(categoryId) : '';
+
+        groupApps.slice(0, APP_CHIPS_SHOWN).forEach((app) => group.appendChild(appChip(app, label)));
+
+        const rest = groupApps.length - APP_CHIPS_SHOWN;
+        if (rest > 0) {
+            const more = createElement('span', 'manager-app manager-app-more', `+${rest}`);
+            more.title = groupApps.map(app => app.name || app.url).join(', ');
+            group.appendChild(more);
+        }
+        wrap.appendChild(group);
+    });
+
     return wrap;
+}
+
+/** Taxonomy order first, then anything the vocabulary does not list yet. */
+function orderedCategoryIds(byCategory) {
+    const taxonomy = state.TAXONOMY || {};
+    const order = new Map();
+    (taxonomy.categories || []).forEach((category) => order.set(category.id, category.order ?? 0));
+    return Array.from(byCategory.keys()).sort((a, b) => {
+        const known = order.has(a) ? 0 : 1;
+        const knownOther = order.has(b) ? 0 : 1;
+        if (known !== knownOther) return known - knownOther;
+        return (order.get(a) ?? 0) - (order.get(b) ?? 0) || a.localeCompare(b);
+    });
+}
+
+function categoryLabel(categoryId) {
+    const categories = ((state.TAXONOMY || {}).categories) || [];
+    const found = categories.find(category => category.id === categoryId);
+    return (found && found.label) || categoryId;
+}
+
+/** One app: its thumbnail, then its name. The category lives in the tooltip. */
+function appChip(app, categoryLabelText = '') {
+    const chip = createElement('span', 'manager-app');
+    const name = app.name || app.url;
+    const tooltip = categoryLabelText ? `${name} — ${categoryLabelText}` : name;
+    chip.title = tooltip;
+
+    const thumb = document.createElement('img');
+    thumb.className = 'manager-app-thumb';
+    thumb.alt = '';
+    thumb.loading = 'lazy';
+    thumb.decoding = 'async';
+    thumb.title = tooltip;
+    const onThumbError = () => {
+        thumb.removeEventListener('error', onThumbError);
+        thumb.src = APP_THUMB_FALLBACK;
+    };
+    thumb.addEventListener('error', onThumbError);
+    thumb.src = appThumbSrc(app);
+
+    chip.appendChild(thumb);
+    chip.appendChild(document.createTextNode(name));
+    return chip;
 }
 
 /* ------------------------------------------------------------------ *
  * Rows
  * ------------------------------------------------------------------ */
 
-/** One registry file as a `.component-item`, so the shared painting applies to it. */
+/**
+ * One registry file. The `.component-item` *is* the card's top band, so the red /
+ * green marking only ever covers the model and its buttons - the apps below sit on
+ * the page's own background, whatever the theme.
+ */
 function modelRow(file, usage) {
     const model = state.MODELS_DATA[file] || {};
+
+    const card = createElement('div', 'manager-model-card');
 
     const item = document.createElement('div');
     item.className = 'component-item manager-model-row';
@@ -139,26 +197,23 @@ function modelRow(file, usage) {
     // that cannot be missing, which is what every registry entry is here.
     item.dataset.listType = 'compulsory';
 
-    // The model and its install state (the actions models.js paints) ...
     const main = createElement('div', 'manager-model-main');
     main.appendChild(createElement('span', 'component-name', model.name || file));
-    main.appendChild(createElement('span', 'manager-meta', [
-        prettyType(typeOf(file)),
-        model.directory ? `${model.directory}/` : '',
-        model.url ? '' : 'no download URL',
-    ].filter(Boolean).join(' · ')));
+    // The kind is the section heading and the folder is only a lookup hint, so the
+    // card carries one extra line only when there is something to say about it.
+    if (!model.url) main.appendChild(createElement('span', 'manager-meta', 'no download URL'));
     item.appendChild(main);
 
-    // ... its Install / Uninstall button (or progress bar), top right ...
+    // Its Install / Uninstall button (or the progress bar), top right.
     item.appendChild(createElement('div', 'component-actions'));
+    card.appendChild(item);
 
-    // ... and the apps that need it, each as a thumbnail and its name.
+    // Below the band: the apps that need it, filed by their category.
     const uses = createElement('div', 'manager-model-uses');
-    uses.appendChild(createElement('span', 'manager-uses-label', 'Used by'));
     uses.appendChild(appChips(usage));
-    item.appendChild(uses);
+    card.appendChild(uses);
 
-    return item;
+    return card;
 }
 
 /* ------------------------------------------------------------------ *
@@ -188,6 +243,39 @@ function matchesType(file) {
     return typeFilter === 'all' || typeOf(file) === typeFilter;
 }
 
+/**
+ * The models as one boxed group per kind - the way the App Manager files its
+ * subcategories - so the registry reads as a handful of sections instead of one run.
+ */
+function appendTypeGroups(container, files, usage) {
+    const byType = new Map();
+    files.forEach((file) => {
+        const type = typeOf(file);
+        if (!byType.has(type)) byType.set(type, []);
+        byType.get(type).push(file);
+    });
+
+    orderedTypes(byType).forEach((type) => {
+        const block = createElement('section', 'manager-subgroup');
+
+        const head = createElement('div', 'manager-group-head');
+        head.appendChild(createElement('span', 'manager-group-title', prettyType(type)));
+        head.appendChild(createElement('span', 'manager-group-count',
+            String(byType.get(type).length)));
+        block.appendChild(head);
+
+        const grid = createElement('div', 'manager-model-grid');
+        byType.get(type).forEach(file => grid.appendChild(modelRow(file, usage.get(file))));
+        block.appendChild(grid);
+        container.appendChild(block);
+    });
+}
+
+/** The kinds, alphabetically by the label they are shown with. */
+function orderedTypes(byType) {
+    return Array.from(byType.keys()).sort((a, b) => prettyType(a).localeCompare(prettyType(b)));
+}
+
 function render() {
     if (!host) return;
 
@@ -201,6 +289,10 @@ function render() {
     const missing = typeScoped.filter(file => statusOf(file) !== 'ready').length;
     const unused = typeScoped.filter(file => !usage.has(file)).length;
 
+    // Rebuilding the list must not send the reader back to the top of it.
+    const previousList = host.querySelector('.manager-list');
+    const scrollTop = previousList ? previousList.scrollTop : 0;
+
     host.innerHTML = '';
 
     const head = createElement('div', 'manager-head');
@@ -211,9 +303,6 @@ function render() {
         known && unused ? `${unused} unused` : '',
     ].filter(Boolean).join(' · ')));
     host.appendChild(head);
-
-    host.appendChild(createElement('p', 'manager-hint',
-        "Install and uninstall here or from an app's (i) panel - both use the same model folders."));
 
     const counts = {
         all: typeScoped.length,
@@ -239,11 +328,10 @@ function render() {
     if (!shown.length) {
         list.appendChild(createElement('p', 'manager-empty', 'No model matches this filter.'));
     } else {
-        const grid = createElement('div', 'manager-model-grid');
-        shown.forEach(file => grid.appendChild(modelRow(file, usage.get(file))));
-        list.appendChild(grid);
+        appendTypeGroups(list, shown, usage);
     }
     host.appendChild(list);
+    list.scrollTop = scrollTop;
 
     paint();
 }

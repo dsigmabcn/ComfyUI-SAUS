@@ -122,7 +122,7 @@ function modelsForApp(app) {
  * one never blocks the variant. Shared by the status dot and the information
  * modal, so the two can never disagree.
  */
-function variantBlocks(app) {
+export function variantBlocks(app) {
     const arch = (app && app.architecture && state.ARCHITECTURES)
         ? state.ARCHITECTURES[app.architecture]
         : null;

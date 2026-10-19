@@ -10,10 +10,11 @@
  * on from here while it is off.
  */
 import {
-    state, isAppHidden, setAppHidden, loadAppVisibility, hiddenAppCount,
+    state, isAppHidden, setAppHidden, loadAppVisibility, hiddenAppCount, showAllApps,
 } from './state.js';
 import { appThumbSrc, applyAppRowStatus, isAppListed, APP_THUMB_FALLBACK } from './ui.js';
 import { warmAppStatuses, subscribeStatusChanges, showAppDetails } from './models.js';
+import { showNotice } from '/core/js/common/scripts/notifications.js';
 
 const THUMB_FALLBACK = APP_THUMB_FALLBACK;
 
@@ -136,21 +137,14 @@ function appRow(app) {
         showAppDetails(app);
     });
 
+    // No row click here on purpose: the manager is for managing, not for launching.
+    // The (i) opens the same information panel as a panel row, and the switch is the
+    // display control - opening an app stays the explorer's job.
     row.appendChild(thumb);
     row.appendChild(name);
     row.appendChild(dot);
     row.appendChild(toggle);
     row.appendChild(infoBtn);
-
-    // Clicking the row opens the app - the same route the panel takes, so the
-    // manager needs no tabs.js import (see the note in ui.js).
-    row.addEventListener('click', (event) => {
-        if (event.target.closest('button, .manager-switch')) return;
-        event.preventDefault();
-        document.dispatchEvent(new CustomEvent('saus:open-app', {
-            detail: { id: app.id, url: app.url, name: app.name },
-        }));
-    });
 
     return row;
 }
@@ -302,27 +296,20 @@ function render() {
     }
 
     const shown = filteredApps();
-    const hidden = hiddenAppCount();
-    const parkedOut = state.allApps.filter(app => app.deprecated && !isAppListed(app)).length;
+    // Rebuilding the list must not send the reader back to the top of it.
+    const previousList = host.querySelector('.manager-list');
+    const scrollTop = previousList ? previousList.scrollTop : 0;
 
     host.innerHTML = '';
 
     const head = createElement('div', 'manager-head');
     head.appendChild(createElement('h2', 'manager-title', 'App Manager'));
-    head.appendChild(createElement('span', 'manager-count', [
-        `${apps.length} app${apps.length === 1 ? '' : 's'}`,
-        hidden ? `${hidden} hidden` : '',
-        parkedOut ? `${parkedOut} deprecated not listed` : '',
-    ].filter(Boolean).join(' · ')));
+    head.appendChild(createElement('span', 'manager-count', countText()));
     host.appendChild(head);
-
-    host.appendChild(createElement('p', 'manager-hint', parkedOut
-        ? `${parkedOut} deprecated app${parkedOut === 1 ? ' is' : 's are'} not listed - `
-          + 'turn on "Show deprecated apps" in Settings to manage them.'
-        : 'Hiding an app only takes it out of the side panel: it stays installed and keeps working.'));
 
     host.appendChild(sectionBar(sections, apps.length));
     host.appendChild(categoryBar(sections));
+    host.appendChild(showAllSwitch());
 
     const list = createElement('div', 'manager-list');
     if (!shown.length) {
@@ -331,8 +318,106 @@ function render() {
         appendGroups(list, shown, sections);
     }
     host.appendChild(list);
+    list.scrollTop = scrollTop;
 
     paintStatuses();
+}
+
+/** The head's summary line: what the manager offers, and what it holds back. */
+function countText() {
+    const apps = listedApps();
+    const hidden = hiddenAppCount();
+    const parkedOut = state.allApps.filter(app => app.deprecated && !isAppListed(app)).length;
+    return [
+        `${apps.length} app${apps.length === 1 ? '' : 's'}`,
+        hidden ? `${hidden} hidden` : '',
+        parkedOut ? `${parkedOut} deprecated not listed` : '',
+    ].filter(Boolean).join(' · ');
+}
+
+function updateCounts() {
+    const count = host && host.querySelector('.manager-count');
+    if (count) count.textContent = countText();
+}
+
+/**
+ * Repaint the switches in place.
+ *
+ * Toggling one app must never rebuild the list: doing that threw the reader back to the
+ * top of it, which is exactly what a switch two thirds of the way down should not do.
+ */
+function applyRowVisibility() {
+    if (!host) return;
+
+    host.querySelectorAll('.app-row').forEach((row) => {
+        const hidden = state.hiddenAppIds.has(row.dataset.appId);
+        row.classList.toggle('manager-hidden', hidden);
+
+        const toggle = row.querySelector('.manager-switch');
+        if (toggle) toggle.title = hidden ? 'Hidden: show it in the panel' : 'Shown in the panel: hide it';
+        const input = row.querySelector('.manager-switch input');
+        if (input) input.checked = !hidden;
+    });
+
+    const showAllWrap = host.querySelector('.manager-showall');
+    if (showAllWrap) {
+        const nothingHidden = hiddenAppCount() === 0;
+        showAllWrap.classList.toggle('manager-showall-disabled', nothingHidden);
+        showAllWrap.title = nothingHidden
+            ? 'Every app is already shown'
+            : 'Show every hidden app again';
+        const showAll = showAllWrap.querySelector('input');
+        if (showAll) {
+            showAll.checked = nothingHidden;
+            showAll.disabled = nothingHidden;
+        }
+    }
+
+    updateCounts();
+}
+
+/**
+ * "Show all": on while nothing is hidden, off the moment one app is.
+ *
+ * Turning it back on shows everything. Turning it *off* would mean hiding every app at
+ * once - not something a switch that reads "Show all" should ever do - so that direction
+ * is refused, with a breadcrumb saying so.
+ */
+function showAllSwitch() {
+    const wrap = createElement('div', 'manager-showall');
+    const nothingHidden = hiddenAppCount() === 0;
+
+    const label = createElement('label', 'manager-switch manager-showall-switch');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = nothingHidden;
+    // Nothing to restore: grey it out rather than offer a no-op.
+    input.disabled = nothingHidden;
+    input.setAttribute('aria-label', 'Show all apps');
+    input.addEventListener('change', async () => {
+        if (input.checked) {
+            await showAllApps();   // one write; the event repaints the rows
+            return;
+        }
+        // Unreachable while the switch is disabled - kept as a safety net: this switch
+        // must never hide every app.
+        input.checked = true;
+        showNotice('Apps are hidden one at a time: use the switch on the app itself.',
+            { icon: 'fa-circle-info' });
+    });
+
+    const track = createElement('span', 'manager-switch-track');
+    track.setAttribute('aria-hidden', 'true');
+
+    label.appendChild(input);
+    label.appendChild(track);
+    label.appendChild(createElement('span', 'manager-showall-text', 'Show all'));
+    wrap.appendChild(label);
+    wrap.classList.toggle('manager-showall-disabled', nothingHidden);
+    wrap.title = nothingHidden
+        ? 'Every app is already shown'
+        : 'Show every hidden app again';
+    return wrap;
 }
 
 /** Dots come from the same cache the explorer uses, and repaint on any change. */
@@ -360,7 +445,8 @@ export function mountAppManager(container) {
 
     if (!listenersBound) {
         listenersBound = true;
-        document.addEventListener('saus:app-visibility-changed', render);
+        // In place, never a re-render: see applyRowVisibility().
+        document.addEventListener('saus:app-visibility-changed', applyRowVisibility);
         // The deprecated switch changes which apps are listed here at all.
         document.addEventListener('saus:preference-changed', render);
         subscribeStatusChanges(paintStatuses);
