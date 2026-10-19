@@ -95,7 +95,7 @@ A simple File Manager to access and perform basic management of the files in you
 - **Folders**: Shortcut access to the 'Input' and 'Output' folders inside ComfyUI.
 - **Upload File**: Upload files to your local machine/ComfyUI installation.
 - **Folder Navigation**: Click on folders to navigate into them, and use 'Go Up' to move one level up in the directory structure.
-- **Image Visualization**: Click on an image or video file to open a preview panel and view it.
+- **Image Visualization**: Click on an image or video file to open a preview panel and view it. Use the **arrow keys** to walk the files (with the panel open they flip straight through the images), and deleting the shown image moves the panel on to the next one.
 - **File Management**: Use the icons on each file to rename, download, or delete it.
 
 **Full guide:** [The File Manager](FILE_MANAGER.md)

@@ -663,15 +663,35 @@ async function transferItems(sourceRoot, names, targetDir, copy) {
 }
 
 /* ------------------------------------------------------------------ *
- * Keyboard: F2 renames the selected file
+ * Keyboard: arrows move the selection, F2 renames, Del deletes
  * ------------------------------------------------------------------ */
 
+// The step each arrow makes in the focused pane: dx a column, dy a row. With a
+// preview open ← / ↑ and → / ↓ collapse to the previous/next image (see below).
+const ARROW_STEPS = {
+    ArrowLeft: { dx: -1, dy: 0 },
+    ArrowRight: { dx: 1, dy: 0 },
+    ArrowUp: { dx: 0, dy: -1 },
+    ArrowDown: { dx: 0, dy: 1 },
+};
+
 function onGlobalKeyDown(e) {
-    if (e.key !== 'F2' && e.key !== 'Delete') return;
+    const step = ARROW_STEPS[e.key];
+    if (e.key !== 'F2' && e.key !== 'Delete' && !step) return;
     const tag = (document.activeElement && document.activeElement.tagName) || '';
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
     const pane = panes[focusedPane];
     if (!pane) return;
+
+    if (step) {
+        e.preventDefault();
+        // A preview on this pane turns the arrows into its ‹ › : they step straight
+        // to the previous/next image, folders and other files skipped, and the
+        // panel shows it. With no preview they just walk the selection.
+        if (preview.pane === focusedPane) stepPreview(step.dx + step.dy);
+        else moveSelection(focusedPane, step.dx, step.dy);
+        return;
+    }
 
     // Del asks before it removes anything (showDeleteModal), so the key is as
     // safe as the toolbar button it mirrors.
@@ -687,6 +707,51 @@ function onGlobalKeyDown(e) {
         e.preventDefault();
         doRename(focusedPane);
     }
+}
+
+/** 1 in list view; in a grid, the number of columns the CSS actually lays out. */
+function paneColumns(root) {
+    const pane = panes[root];
+    const listEl = paneRole(root, 'list');
+    if (!listEl || pane.viewMode === 'list') return 1;
+    const tracks = getComputedStyle(listEl).gridTemplateColumns.split(/\s+/).filter(Boolean);
+    return tracks.length > 0 ? tracks.length : 1;
+}
+
+/**
+ * Move the pane's selection by one step: dx a column, dy a row.
+ *
+ * With nothing selected the first item is the anchor going forwards and the last
+ * one going backwards, so a single arrow always lands on something.
+ */
+function moveSelection(root, dx, dy) {
+    const pane = panes[root];
+    if (!pane.view.length) return;
+
+    const last = pane.view.length - 1;
+    const selected = pane.view.findIndex(i => pane.selected.has(i.name));
+    let idx;
+    if (selected < 0) idx = (dx + dy) < 0 ? last : 0;
+    else idx = Math.max(0, Math.min(last, selected + dx + dy * paneColumns(root)));
+
+    const item = pane.view[idx];
+    pane.selected.clear();
+    pane.selected.add(item.name);
+    pane.anchor = item.name;
+    applySelection(root);
+    updateTools(root);
+    revealSelected(root);
+}
+
+/** Keep the highlighted row/tile in view, or a keyboard move sends it off-screen. */
+function revealSelected(root) {
+    const listEl = paneRole(root, 'list');
+    const pane = panes[root];
+    if (!listEl) return;
+    const idx = pane.view.findIndex(i => pane.selected.has(i.name));
+    if (idx < 0) return;
+    const node = listEl.querySelector(`[data-idx="${idx}"]`);
+    if (node && node.scrollIntoView) node.scrollIntoView({ block: 'nearest' });
 }
 
 /* ------------------------------------------------------------------ *
@@ -733,6 +798,7 @@ function stepPreview(delta) {
     pane.anchor = item.name;
     applySelection(preview.pane);
     updateTools(preview.pane);
+    revealSelected(preview.pane);
     renderPreview();
 }
 
@@ -804,6 +870,31 @@ function syncPreviewAfterReload(root, keepName) {
     if (idx < 0) { hidePreview(); return; }
     preview.index = idx;
     renderPreview();
+}
+
+/**
+ * The file the preview should show once `items` are gone.
+ *
+ * The image on screen when it is not among them; otherwise the first survivor
+ * below it, or above it when it was the last. Null when nothing is left, which
+ * is what makes reloadPane hide the panel.
+ */
+function previewNameAfterDelete(items, root) {
+    if (preview.pane !== root) return null;
+    const media = mediaItems(panes[root]);
+    const current = media[preview.index];
+    if (!current) return null;
+
+    const deleted = new Set(items.map(i => i.name));
+    if (!deleted.has(current.name)) return current.name;
+
+    for (let i = preview.index + 1; i < media.length; i += 1) {
+        if (!deleted.has(media[i].name)) return media[i].name;
+    }
+    for (let i = preview.index - 1; i >= 0; i -= 1) {
+        if (!deleted.has(media[i].name)) return media[i].name;
+    }
+    return null;
 }
 
 
@@ -1133,6 +1224,11 @@ function closeDeleteModal() {
 }
 
 async function deleteItems(items, root) {
+    // Work out what the preview should show afterwards *before* the files go:
+    // the image on screen when it survives, else the next one still there (the
+    // previous at the end), so deleting it moves on instead of closing the panel.
+    const keepName = previewNameAfterDelete(items, root);
+
     let failed = 0;
     for (const item of items) {
         try {
@@ -1151,8 +1247,7 @@ async function deleteItems(items, root) {
     if (failed) showToast(`Deleted ${ok}/${items.length} item(s).`, 'error');
     else showToast(items.length === 1 ? 'Item deleted.' : `${items.length} items deleted.`, 'success');
 
-    // reloadPane hides the preview when the file it was showing is gone.
-    await reloadPane(root);
+    await reloadPane(root, keepName);
 }
 
 

@@ -1,10 +1,19 @@
-"""The File Manager's view mode: remembered per pane, and two modes that look different."""
+"""The File Manager: its view modes, its keyboard navigation and its preview panel."""
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FM_JS = ROOT / 'web' / 'file_manager' / 'js' / 'main.js'
 FM_CSS = ROOT / 'web' / 'file_manager' / 'css' / 'styles.css'
+
+
+def _function(path, signature):
+    """The body of one function, from its signature to the closing brace."""
+    source = path.read_text(encoding='utf-8')
+    start = source.index(f'{signature}(')
+    body = source[start:].split('\n}', 1)[0]
+    assert body, f'{signature}() is missing from {path.name}'
+    return body
 
 
 def test_the_view_mode_is_remembered_per_pane():
@@ -111,6 +120,65 @@ def test_both_panes_can_create_a_folder_left_of_rename():
         'the dialog is built at boot, like the upload / delete / rename ones'
     assert 'await reloadPane(root, folderName)' in js, \
         'the new folder is shown selected, the way a rename keeps its file selected'
+
+
+def test_the_arrow_keys_navigate_the_focused_pane():
+    """Left/Right step one file, Up/Down a whole visual row, typing stays safe."""
+    source = FM_JS.read_text(encoding='utf-8')
+    steps = source.split('const ARROW_STEPS = {', 1)[1].split('};', 1)[0]
+    for key in ('ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'):
+        assert f'{key}: {{' in steps, f'{key} has to be mapped to a step'
+
+    body = _function(FM_JS, 'function onGlobalKeyDown')
+
+    assert 'ARROW_STEPS[e.key]' in body, 'the arrows are read from that map'
+    assert 'moveSelection(focusedPane, step.dx, step.dy)' in body, \
+        'the arrows move the selection in the pane the user last clicked'
+    assert "['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)" in body, \
+        'and they must never fire while the user is typing'
+
+    move = _function(FM_JS, 'function moveSelection')
+    assert 'paneColumns(root)' in move, \
+        'Up/Down have to move a whole grid row, not the next file'
+    assert 'Math.max(0, Math.min(last,' in move, 'the ends of the list are clamped'
+
+    columns = _function(FM_JS, 'function paneColumns')
+    assert "pane.viewMode === 'list'" in columns and 'return 1;' in columns, \
+        'the list view is a single column'
+    assert 'getComputedStyle(listEl).gridTemplateColumns' in columns, \
+        'the icon views read the real column count, not a guessed one'
+
+
+def test_an_open_preview_turns_the_arrows_into_its_previous_next():
+    """With the panel open the arrows flip the images it shows, folders skipped."""
+    body = _function(FM_JS, 'function onGlobalKeyDown')
+
+    assert 'preview.pane === focusedPane' in body and 'stepPreview(' in body, \
+        'the panel on this pane takes the arrows over as its chevrons'
+
+    step = _function(FM_JS, 'function stepPreview')
+    assert 'revealSelected(preview.pane)' in step, \
+        'stepping the preview keeps the highlighted row in view'
+
+
+def test_deleting_the_previewed_image_shows_the_next_one():
+    """Del on the shown image moves the panel on, rather than closing it."""
+    body = _function(FM_JS, 'function deleteItems')
+
+    assert 'previewNameAfterDelete(items, root)' in body, \
+        'the preview has to be told what to show after the delete'
+    assert 'reloadPane(root, keepName)' in body, \
+        'and the pane picks that file (and the preview) back up'
+
+    helper = _function(FM_JS, 'function previewNameAfterDelete')
+    assert 'preview.pane !== root' in helper, \
+        'a preview on the other pane is none of this delete\'s business'
+    assert 'return current.name;' in helper, \
+        'deleting a different file must not move or close the panel'
+    assert 'preview.index + 1' in helper and 'preview.index - 1' in helper, \
+        'the next image comes first; the previous one only at the end of the list'
+    assert 'return null;' in helper, \
+        'with no image left the panel closes, the way reloadPane expects'
 
 
 def main():

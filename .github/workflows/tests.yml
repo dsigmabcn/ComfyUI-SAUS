@@ -3,6 +3,11 @@
 # companion builder repo, so it is checked out as a sibling and check_all.py is
 # given both paths explicitly (the sibling layout then does not matter).
 #
+# The builder is a *private* repo, so the default token (scoped to this repo
+# alone) cannot read it - every run stopped at that checkout, before a single
+# suite ran. SAUS_BUILDER_TOKEN is a PAT with read access to it; the fallback is
+# GITHUB_TOKEN, which is enough the moment the builder is public.
+#
 # Nothing to install: the suites stub aiohttp / ComfyUI's `server` themselves and
 # otherwise use the stdlib. Node is only for tests/js/*.harness.mjs.
 name: Tests
@@ -28,6 +33,10 @@ jobs:
         with:
           repository: dsigmabcn/ComfyUI-SAUS-builder
           path: ComfyUI-SAUS-builder
+          # Private repo: a PAT with read access to it, or the default token once
+          # the builder is public. Without the secret this falls back to
+          # GITHUB_TOKEN, which is what failed on every run so far.
+          token: ${{ secrets.SAUS_BUILDER_TOKEN || github.token }}
 
       - uses: actions/setup-python@v5
         with:

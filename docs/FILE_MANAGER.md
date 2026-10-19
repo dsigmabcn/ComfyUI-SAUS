@@ -21,6 +21,7 @@ The manager is split into **two side-by-side panels**:
 - **Ctrl / ⌘ + click** adds or removes a file from the selection.
 - **Shift + click** selects a whole range.
 - **Double-click** a folder to open it, or a file to preview it.
+- **Arrow keys** move the selection in the pane you last clicked: **↑ / ↓** a whole row at a time in the icon views (one file in the list), **← / →** one file. With the preview panel open on that pane they step from image to image instead — see below.
 - **F2** renames the selected file.
 - **Del** deletes the selected files — it asks first, exactly like the panel's **Delete** button.
 - **Drag and drop** a selection onto another folder, onto the other pane, or onto the pane's background to **move** it; hold **Ctrl / ⌘** while dropping to **copy** instead.
@@ -34,7 +35,9 @@ The **New folder / Rename / Download / Delete** buttons sit at the right of each
 
 ## The preview panel
 
-Double-click an image or video and it opens in the panel on the right. Use **‹ ›** to move to the previous/next file and the **✕** to close it.
+Double-click an image or video and it opens in the panel on the right. Use **‹ ›** to move to the previous/next file and the **✕** to close it. While the panel is open on the pane you are browsing, the **arrow keys** do the same thing: they step straight from image to image, skipping folders and other files, so you can flip through a folder without touching the mouse.
+
+If you **delete** the image the panel is showing, it moves on to the **next** image (the previous one if it was the last) instead of closing. Deleting a *different* file leaves the panel on the image it was showing.
 
 <img src="../web/core/media/git/file_manager/file manager with preview.png">
 
