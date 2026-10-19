@@ -24,18 +24,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out ComfyUI-SAUS
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: ComfyUI-SAUS
 
+      # actions/checkout reports a repo its token cannot see as a bare
+      # "Not Found", which says nothing about the fix: ask GitHub here, and name
+      # the repo and the two ways to make it readable.
+      - name: Verify the builder checkout is allowed
+        env:
+          BUILDER_TOKEN: ${{ secrets.SAUS_BUILDER_TOKEN }}
+          FALLBACK_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${BUILDER_TOKEN:-$FALLBACK_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/dsigmabcn/ComfyUI-SAUS-builder)
+          if [ "$code" != "200" ]; then
+            echo "::error::dsigmabcn/ComfyUI-SAUS-builder is not readable with this token (HTTP $code). Set the SAUS_BUILDER_TOKEN secret (fine-grained PAT, Repository access = ComfyUI-SAUS-builder, Permissions > Contents = Read) or make the builder public."
+            exit 1
+          fi
+
       - name: Check out ComfyUI-SAUS-builder
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: dsigmabcn/ComfyUI-SAUS-builder
           path: ComfyUI-SAUS-builder
           # Private repo: a PAT with read access to it, or the default token once
-          # the builder is public. Without the secret this falls back to
-          # GITHUB_TOKEN, which is what failed on every run so far.
+          # the builder is public (the step above is what proves which applies).
           token: ${{ secrets.SAUS_BUILDER_TOKEN || github.token }}
 
       - uses: actions/setup-python@v5
