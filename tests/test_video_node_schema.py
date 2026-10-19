@@ -6,7 +6,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 APPS = ROOT / 'web' / 'apps'
-COMFY_EXTRAS = Path('/workspace/ComfyUI/comfy_extras')
+# The node is installed as <ComfyUI>/custom_nodes/ComfyUI-SAUS, so ComfyUI is two
+# levels up. A checkout on its own (CI) has no ComfyUI beside it, and the tests
+# below skip there - the old absolute /workspace/ComfyUI path made them fail
+# everywhere but the machine it was written on.
+COMFY_EXTRAS = ROOT.parents[1] / 'comfy_extras'
 
 # Every video app graph, plus the image tools (same nodes, same rules).
 APP_GLOBS = ('video-*', 'image-*')
@@ -18,12 +22,17 @@ class Skipped(Exception):
     """ComfyUI is not on disk here, so there is nothing to check against."""
 
 
-def declared_inputs():
-    """({node_id: (file, {names})}, {file: {names}}) out of comfy_extras' schemas."""
+def comfy_extras():
+    """ComfyUI's `comfy_extras/`, or a skip when this checkout has no ComfyUI."""
     if not COMFY_EXTRAS.is_dir():
         raise Skipped('ComfyUI is not on disk')
+    return COMFY_EXTRAS
+
+
+def declared_inputs():
+    """({node_id: (file, {names})}, {file: {names}}) out of comfy_extras' schemas."""
     per_node, per_file = {}, {}
-    for path in COMFY_EXTRAS.glob('*.py'):
+    for path in comfy_extras().glob('*.py'):
         source = path.read_text(encoding='utf-8', errors='replace')
         per_file[path.name] = {m.group(1) for m in INPUT_RE.finditer(source)}
         for match in re.finditer(r'node_id="([A-Za-z0-9_]+)"', source):
@@ -76,17 +85,18 @@ def test_every_bound_input_exists_on_the_node():
 
 
 def test_batching_relies_on_the_list_execution_pair():
-    source = (COMFY_EXTRAS / 'nodes_rebatch.py').read_text(encoding='utf-8')
+    extras = comfy_extras()
+    source = (extras / 'nodes_rebatch.py').read_text(encoding='utf-8')
     images = source.split('node_id="RebatchImages"', 1)[1].split('class ', 1)[0]
     assert 'is_input_list=True' in images
     assert 'is_output_list=True' in images, 'the chunks are handed out as a list'
 
-    video = (COMFY_EXTRAS / 'nodes_video.py').read_text(encoding='utf-8')
+    video = (extras / 'nodes_video.py').read_text(encoding='utf-8')
     concat = video.split('node_id="ConcatenateVideo"', 1)[1].split('class ', 1)[0]
     assert 'is_input_list=True' in concat, 'the chunk videos arrive as one list'
     assert 'complete_audio' in concat, 'the soundtrack is restored once, at the end'
 
-    upscale = (COMFY_EXTRAS / 'nodes_upscale_model.py').read_text(encoding='utf-8')
+    upscale = (extras / 'nodes_upscale_model.py').read_text(encoding='utf-8')
     node = upscale.split('node_id="ImageUpscaleWithModel"', 1)[1].split('class ', 1)[0]
     assert 'is_input_list' not in node, \
         'no flag is exactly why a list handed to it runs once per chunk'
