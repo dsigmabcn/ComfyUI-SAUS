@@ -8,6 +8,12 @@ This quick guide is based on the official information provided by ComfyUI in
 
 This guide is a brief summary focusing on Windows portable and Debian-based Linux. However, the links and commands to install may change, so please always check the official documentation.
 
+## Windows and Mac Desktop
+Download and install the [desktop app](https://comfy.org/download)
+
+**[Link to Download](https://comfy.org/download)**
+
+
 ## Windows Portable
 Follow the instructions to install [ComfyUI Windows Portable](https://github.com/Comfy-Org/ComfyUI?tab=readme-ov-file#windows-portable) and in [ComfyUI-Manager Method 2](https://github.com/Comfy-Org/ComfyUI-Manager?tab=readme-ov-file#installationmethod2-installation-for-portable-comfyui-version-comfyui-manager-only)
 
@@ -31,6 +37,6 @@ chmod +x install-comfyui-venv-linux.sh
 ```
 
 
-When you have ComfyUI and ComfyUI-Manager installed, you can follow the instructions to install ComfyUI-SAUS.
+After ComfyUI and ComfyUI-Manager are installed, follow the [instructions to install ComfyUI-SAUS.](INSTALLATION.md)
 
 [Return to User Guide](USER_GUIDE.md#detailed-guide)
