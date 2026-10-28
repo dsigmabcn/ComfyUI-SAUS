@@ -4,6 +4,13 @@ import { updateWorkflow } from './workflowManager.js';
 /** Just the file name of a ComfyUI model path ("QWEN/a.safetensors" -> "a.safetensors"). */
 const fileName = (fullPath) => String(fullPath).split(/[\\/]/).pop();
 
+// The API graph is a flat map whose keys are strings: a plain node id ("20") or a
+// subgraph-expanded one ("18_1" - the builder names an inner node `<outer>_<inner>`,
+// see `ui_to_api.py`). Every lookup therefore keys on the raw id; only the "next id"
+// high-water mark may be numeric, and there it under-counts ("18_1" -> 18), which can
+// only land below the real maximum, never on a key that exists.
+const numericId = (id) => parseInt(id, 10) || 0;
+
 class LoraWorkflowManager {
 
     constructor(workflow, appConfig) {
@@ -11,7 +18,7 @@ class LoraWorkflowManager {
             throw new TypeError('Workflow must be a non-null object');
         }
         this.workflow = JSON.parse(JSON.stringify(workflow));
-        this.existingIds = new Set(Object.keys(this.workflow).map(id => parseInt(id, 10)));
+        this.existingIds = new Set(Object.keys(this.workflow).map(numericId));
         this.highestId = this._getHighestNodeId();
 
         this.appConfig = appConfig;
@@ -243,10 +250,10 @@ class LoraWorkflowManager {
     _findLoraNodes(modelLoaderId) {
         return Object.entries(this.workflow)
             .filter(([_, node]) => node.class_type === "LoraLoaderModelOnly")
-            .map(([id, node]) => ({ id: parseInt(id, 10), ...node }))
+            .map(([id, node]) => ({ id, ...node }))
             .filter(lora => {
                 const modelInput = lora.inputs.model;
-                return Array.isArray(modelInput) && parseInt(modelInput[0], 10) === modelLoaderId;
+                return Array.isArray(modelInput) && String(modelInput[0]) === String(modelLoaderId);
             });
     }
 
@@ -256,7 +263,7 @@ class LoraWorkflowManager {
                 const hasModelInput = node.inputs && node.inputs.model !== undefined;
                 return !hasModelInput && this._isModelLoader(node.class_type);
             })
-            .map(([id, node]) => ({ id: parseInt(id, 10), ...node }));
+            .map(([id, node]) => ({ id, ...node }));
     }
 
     _isModelLoader(classType) {
@@ -269,14 +276,17 @@ class LoraWorkflowManager {
             .filter(([_, node]) => {
                 if (!node.inputs || !node.inputs.model) return false;
                 const modelInput = node.inputs.model;
-                return Array.isArray(modelInput) && parseInt(modelInput[0], 10) === nodeId;
+                return Array.isArray(modelInput) && String(modelInput[0]) === String(nodeId);
             })
-            .map(([id, node]) => ({ id: parseInt(id, 10), ...node }));
+            .map(([id, node]) => ({ id, ...node }));
     }
 
+    /** The most recently added LoRA: the highest id, expanded keys compared by number. */
     _getLastLoraNode(loraNodes) {
         return loraNodes.reduce((prev, current) => {
-            return (prev.id > current.id) ? prev : current;
+            const byNumber = numericId(current.id) - numericId(prev.id);
+            if (byNumber !== 0) return byNumber > 0 ? current : prev;
+            return String(current.id) > String(prev.id) ? current : prev;
         }, loraNodes[0]);
     }
 
@@ -285,7 +295,10 @@ class LoraWorkflowManager {
     }
 
     _getHighestNodeId() {
-        return this.existingIds.size > 0 ? Math.max(...this.existingIds) : 0;
+        // Only the numeric part is comparable; expanded keys sit below their outer
+        // node's number, and a fresh id is always one plain number.
+        const ids = [...this.existingIds].map(numericId).filter(Number.isFinite);
+        return ids.length > 0 ? Math.max(...ids) : 0;
     }
 
     // --- WorkflowNodeEraser Methods ---
@@ -302,7 +315,7 @@ class LoraWorkflowManager {
              console.warn(`Node ${loraNodeId} does not have a model input. Deleting without reconnecting.`);
              delete this.workflow[nodeIdStr];
              if (this.existingIds) {
-                 this.existingIds.delete(parseInt(loraNodeId, 10));
+                 this.existingIds.delete(numericId(loraNodeId));
              }
              return;
         }
@@ -324,7 +337,7 @@ class LoraWorkflowManager {
 
         delete this.workflow[nodeIdStr];
         if (this.existingIds) {
-            this.existingIds.delete(parseInt(loraNodeId, 10));
+            this.existingIds.delete(numericId(loraNodeId));
         }
     }
 
