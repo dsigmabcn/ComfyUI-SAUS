@@ -8,6 +8,11 @@
 # itself owns, so a push here still gets a signal, and no secret is ever needed.
 name: SAUS suites
 
+# The suites only read this checkout, so the token carries nothing else: CodeQL's
+# `actions/missing-workflow-permissions` asks for this block by name.
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, dev]
