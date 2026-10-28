@@ -53,6 +53,23 @@ def test_a_graph_key_is_never_read_as_a_number():
         'the message the "+Lora" alert showed'
 
 
+def test_the_lora_reaches_every_branch_that_reads_the_loader():
+    """A model input is not always called `model`.
+
+    MOSS gates Skip Layer Guidance behind a `ComfySwitchNode` whose branches are
+    `on_true` / `on_false`, and its *default* is the branch that reads the loader
+    directly - a LoRA written only to `inputs.model` would reach the sampler on
+    neither path.
+    """
+    source = MANAGER_JS.read_text(encoding='utf-8')
+
+    assert '_modelInputKeys(node, wanted)' in source, 'the readers are found by scanning inputs'
+    assert 'Object.entries(node.inputs)' in source, 'every input of a consumer, not just `model`'
+    assert 'Number(value[1]) === 0' in source, 'slot 0 is the MODEL output of every loader type'
+    assert source.count('this._relinkTo(firstConnectedNodes, newLoraId);') == 2, \
+        'both the first LoRA and a chained one relink the readers'
+
+
 def test_the_next_free_id_ignores_the_expanded_part():
     """An added node is a plain id, so it may only be compared by number."""
     source = MANAGER_JS.read_text(encoding='utf-8')

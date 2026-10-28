@@ -207,9 +207,7 @@ class LoraWorkflowManager {
                 throw new Error(`No nodes are directly connected to model loader ID ${modelLoaderId}.`);
             }
 
-            firstConnectedNodes.forEach(node => {
-                node.inputs.model = [newLoraId.toString(), 0];
-            });
+            this._relinkTo(firstConnectedNodes, newLoraId);
 
             loraNode.inputs.model = [modelLoaderId.toString(), 0];
         } else {
@@ -219,9 +217,7 @@ class LoraWorkflowManager {
                 throw new Error(`No nodes are directly connected to the last LoRA node ID ${lastLora.id}.`);
             }
 
-            firstConnectedNodes.forEach(node => {
-                node.inputs.model = [newLoraId.toString(), 0];
-            });
+            this._relinkTo(firstConnectedNodes, newLoraId);
 
             loraNode.inputs.model = [lastLora.id.toString(), 0];
         }
@@ -271,14 +267,39 @@ class LoraWorkflowManager {
         return modelLoaderTypes.includes(classType);
     }
 
+    /**
+     * Every input that reads this node's model output, so both ends of the chain move
+     * to the new LoRA. The input is not always called `model`: a graph exported from a
+     * template gates a stage behind a `ComfySwitchNode`, whose branches are `on_true`
+     * and `on_false` - MOSS sends its loader's model *around* the Skip Layer Guidance
+     * node on the branch that skips it (`switch: false` is that app's default), so a
+     * LoRA written only to `inputs.model` would reach the sampler on neither path.
+     * Slot 0 is the MODEL output of every loader this manager accepts, so an input
+     * list that starts with this id and slot 0 is a model reader and nothing else.
+     */
     _findConnectedNodes(nodeId) {
+        const wanted = String(nodeId);
         return Object.entries(this.workflow)
-            .filter(([_, node]) => {
-                if (!node.inputs || !node.inputs.model) return false;
-                const modelInput = node.inputs.model;
-                return Array.isArray(modelInput) && String(modelInput[0]) === String(nodeId);
-            })
-            .map(([id, node]) => ({ id, ...node }));
+            .filter(([_, node]) => this._modelInputKeys(node, wanted).length > 0)
+            .map(([id, node]) => ({ id, keys: this._modelInputKeys(node, wanted), ...node }));
+    }
+
+    /** The input names of `node` that read model output 0 of `nodeId`. */
+    _modelInputKeys(node, nodeId) {
+        if (!node.inputs) return [];
+        return Object.entries(node.inputs)
+            .filter(([_, value]) => Array.isArray(value) && value.length >= 2
+                && String(value[0]) === String(nodeId) && Number(value[1]) === 0)
+            .map(([key]) => key);
+    }
+
+    /** Point every model input of these nodes at `newNodeId`'s output 0. */
+    _relinkTo(nodes, newNodeId) {
+        nodes.forEach(node => {
+            node.keys.forEach(key => {
+                node.inputs[key] = [newNodeId.toString(), 0];
+            });
+        });
     }
 
     /** The most recently added LoRA: the highest id, expanded keys compared by number. */

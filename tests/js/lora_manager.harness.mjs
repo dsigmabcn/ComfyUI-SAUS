@@ -101,6 +101,12 @@ const sortedKeys = (workflow) => Object.keys(workflow).sort();
 const loraKeys = (workflow) =>
     Object.keys(workflow).filter((key) => workflow[key].class_type === 'LoraLoaderModelOnly');
 
+/** The nodes whose model input (output 0) reads `id` - "who is still wired to it". */
+const readersOf = (workflow, id) => Object.keys(workflow)
+    .filter((key) => Object.values(workflow[key].inputs || {}).some((value) =>
+        Array.isArray(value) && String(value[0]) === id && Number(value[1]) === 0))
+    .sort();
+
 const { default: LoraWorkflowManager } = await import(
     pathToFileURL(join(ROOT, 'web', 'core', 'js', 'common', 'components', 'LoraWorkflowManager.js')).href);
 
@@ -115,12 +121,14 @@ function build(workflow, appConfig = {}) {
 
 /* 1. A subgraph-exported graph: the ids the builder writes ("<outer>_<inner>") */
 // Mirrors the shape of web/apps/moss-text-to-image/wf.json: a UNETLoader whose model
-// reaches the sampler through another node, plus one plain-id node (the SaveImage).
+// reaches the sampler through a switch (one branch through Skip Layer Guidance, one
+// straight from the loader - and that one is the reported app's default).
 const expanded = {
     '9': { inputs: { images: ['18_8', 0] }, class_type: 'SaveImage' },
     '18_1': { inputs: { unet_name: 'moss.safetensors', weight_dtype: 'default' }, class_type: 'UNETLoader' },
     '18_15': { inputs: { model: ['18_1', 0], end_percent: 0.5 }, class_type: 'SkipLayerGuidanceDiTSimple' },
-    '18_7': { inputs: { model: ['18_15', 0], seed: 1 }, class_type: 'KSampler' },
+    '18_24': { inputs: { switch: false, on_false: ['18_1', 0], on_true: ['18_15', 0] }, class_type: 'ComfySwitchNode' },
+    '18_7': { inputs: { model: ['18_24', 0], seed: 1 }, class_type: 'KSampler' },
 };
 
 const first = build(expanded);
@@ -135,8 +143,12 @@ const afterFirst = first.manager.getWorkflow();
 // The highest numeric part in that graph is 18 ("18_1"), so the free id is 19.
 assert.deepEqual(loraKeys(afterFirst), ['19'], 'the new node goes to the next free id');
 assert.deepEqual(afterFirst['18_15'].inputs.model, ['19', 0], 'the consumer now reads the LoRA');
+assert.deepEqual(afterFirst['18_24'].inputs.on_false, ['19', 0],
+    'and so does the switch, whose branch skipped the stage the LoRA sits behind');
 assert.deepEqual(afterFirst['19'].inputs.model, ['18_1', 0], 'which reads the loader it was attached to');
 assert.equal(afterFirst['18_15'].inputs.end_percent, 0.5, 'and nothing else on that node moved');
+assert.deepEqual(readersOf(afterFirst, '18_1'), ['19'], 'only the LoRA reads the loader now');
+assert.deepEqual(readersOf(afterFirst, '19'), ['18_15', '18_24'], 'and both consumers read the LoRA');
 console.log('1. a subgraph graph ("18_1") takes a LoRA: OK');
 
 /* 2. A second click chains onto the first LoRA instead of the loader */
@@ -144,6 +156,7 @@ first.button.click();
 assert.deepEqual(alerts, [], 'a second LoRA must not fail either');
 const afterSecond = first.manager.getWorkflow();
 assert.deepEqual(afterSecond['18_15'].inputs.model, ['20', 0], 'the consumer reads the newest LoRA');
+assert.deepEqual(afterSecond['18_24'].inputs.on_false, ['20', 0], 'both branches moved together');
 assert.deepEqual(afterSecond['20'].inputs.model, ['19', 0], 'which reads the first one');
 assert.deepEqual(afterSecond['19'].inputs.model, ['18_1', 0], 'which still reads the loader');
 console.log('2. a second LoRA chains onto the first: OK');
@@ -153,7 +166,8 @@ first.manager.handleRemoveLora('20', null);
 const afterRemove = first.manager.getWorkflow();
 assert.equal(afterRemove['20'], undefined, 'the node is gone');
 assert.deepEqual(afterRemove['18_15'].inputs.model, ['19', 0], 'and its consumer reads the LoRA below it');
-assert.deepEqual(sortedKeys(afterRemove), ['18_1', '18_15', '18_7', '19', '9'],
+assert.deepEqual(afterRemove['18_24'].inputs.on_false, ['19', 0], 'both of them');
+assert.deepEqual(sortedKeys(afterRemove), ['18_1', '18_15', '18_24', '18_7', '19', '9'],
     'nothing else was added or lost');
 console.log('3. removing a LoRA reconnects the chain: OK');
 
@@ -189,6 +203,15 @@ assert.deepEqual(mossAfter[mossLora].inputs.model, [mossLoaderKey, 0],
 assert.ok(Object.values(mossAfter).some((node) => node.inputs && node.inputs.model
         && String(node.inputs.model[0]) === mossLora),
     'and at least one node downstream reads the LoRA');
+// The app gates Skip Layer Guidance behind a switch whose *off* branch (its default,
+// switch: false) reads the loader directly - that branch has to carry the LoRA too, or
+// the sampler would never see it.
+const mossSwitch = Object.keys(moss).find((key) => moss[key].class_type === 'ComfySwitchNode'
+    && Array.isArray(moss[key].inputs.on_false) && String(moss[key].inputs.on_false[0]) === mossLoaderKey);
+assert.ok(mossSwitch, 'moss reads its loader straight on the SLG-off branch');
+assert.deepEqual(mossAfter[mossSwitch].inputs.on_false, [mossLora, 0],
+    'which the LoRA now covers');
+assert.deepEqual(readersOf(mossAfter, mossLoaderKey), [mossLora], 'the loader feeds the LoRA only');
 console.log('5. moss-text-to-image (the reported app) takes a LoRA: OK');
 
 console.log('lora-manager harness: 5/5 OK');
