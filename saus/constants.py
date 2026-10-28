@@ -2,8 +2,6 @@ import logging
 import mimetypes
 from pathlib import Path
 
-APP_NAME = "SAUS"
-
 CURRENT_DIR = Path(__file__).parent
 ROOT_DIR = CURRENT_DIR.parent
 
@@ -32,8 +30,9 @@ CORE_PATH = WEBROOT / "core"
 SAUS_BROWSER_PATH = WEBROOT / "saus_browser"
 SAUS_APPS_PATH = WEBROOT / "apps"
 
-MODEL_MANAGER_PATH = WEBROOT / "model_manager"#Added to access the new model manager app - NOT ACTIVE, TO BE REPLACED BY LORA MANAGER IN FUTURE VERSIONS
-FILE_MANAGER_PATH = WEBROOT / "file_manager" #Added for file_manager application
+FILE_MANAGER_PATH = WEBROOT / "file_manager"
+# The page every app is served with (an app may still ship its own index.html).
+APP_PAGE_TEMPLATE = CORE_PATH / "templates" / "index.html"
 WEB_DIRECTORY = "web/core/js/common/scripts"
 
 COMFYUI_DIRECTORY = ROOT_DIR.parent.parent
@@ -47,13 +46,7 @@ COMFUI_LOGS_PATH = COMFYUI_DIRECTORY / "user" / "comfyui.log"
 # validated with realpath + commonpath against these roots.
 ALLOWED_FILE_ROOTS = (INPUT_FILES_DIRECTORY, OUTPUT_FILES_DIRECTORY, MODELS_DIRECTORY)
 
-#Previously in api_handlers
 DATA_DIR = Path(__file__).parent / "data"
-PREVIEWS_REGISTRY_DIR = DATA_DIR / "model_previews_registry"
-PREVIEWS_IMAGES_DIR = DATA_DIR / "model_previews"
-# Paths for the file manager
-FILE_REGISTRY_DIR = DATA_DIR / "file_registry"
-FILE_IMAGES_DIR = DATA_DIR / "file_previews"
 
 
 # Uploads land in user-data folders only, but we still refuse anything that
@@ -68,6 +61,3 @@ mimetypes.add_type('application/javascript', '.js')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 APPS_CONFIG_FILE = 'appConfig.json'
-
-NODE_CLASS_MAPPINGS = {}
-NODE_DISPLAY_NAME_MAPPINGS = {}

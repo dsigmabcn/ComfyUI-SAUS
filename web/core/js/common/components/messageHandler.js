@@ -2,6 +2,7 @@ import { WebSocketHandler } from './webSocketHandler.js';
 import './progressbar.js'; 
 import { hideSpinner, detectMimeType } from './utils.js';
 import { store } from '../scripts/stateManagerMain.js';
+import { announceGenerationComplete } from '../scripts/notifications.js';
 
 import { PreviewManager } from './previewManager.js';
 
@@ -46,6 +47,7 @@ class JSONMessageProcessor extends IMessageProcessor {
                     this.messageHandler.handleExecutionCached(data.data);
                     break;
                 case 'execution_success':
+                    this.messageHandler.handleExecutionSuccess();
                     break;
                 case 'execution_error':
                     this.messageHandler.handleExecutionError(data.data);
@@ -181,6 +183,19 @@ export class MessageHandler {
     handleStatus() {
         // Optional additional handling
     }
+
+    /**
+     * The whole prompt finished - ComfyUI sends `execution_success` once, after the last
+     * output node has run.
+     *
+     * It is deliberately *not* hooked to the progress bar reaching its maximum: a
+     * two-pass graph (base pass, then a refiner or an upscale) gets there twice, so a
+     * notice hung off that would fire in the middle of a single generation.
+     */
+    handleExecutionSuccess() {
+        this.progressUpdater.updateStatus('');
+        announceGenerationComplete();
+    }
     handleMonitor(data) {
         console.log('Monitor data received:', data);
     }
@@ -281,7 +296,6 @@ export class MessageHandler {
             const imageUrl = `/view?filename=${encodeURIComponent(filename)}`
                 + `&subfolder=${encodeURIComponent(image.subfolder || '')}`
                 + `&type=${encodeURIComponent(image.type || 'output')}`;
-            //console.log('processImages Image URL:', imageUrl);
             return imageUrl;
         }).filter(url => url !== null);
 

@@ -1,0 +1,55 @@
+# The SAUS suites - run here, with nothing but this repo's default token.
+#
+# A workflow in a *public* repo cannot read the private ComfyUI-SAUS-builder with
+# the default token (`GITHUB_TOKEN` is scoped to the repo that started the run),
+# so the *full* gate - both repos' suites plus check_js / check_security /
+# check_apps / skill_lint - lives in the builder's own workflow instead, where a
+# private repo reads the public SAUS for free. This file covers only what SAUS
+# itself owns, so a push here still gets a signal, and no secret is ever needed.
+name: SAUS suites
+
+# The suites only read this checkout, so the token carries nothing else: CodeQL's
+# `actions/missing-workflow-permissions` asks for this block by name.
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  suites:
+    name: The SAUS suites
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      # >= 22 auto-detects module syntax, which tests/js/*.harness.mjs relies on.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # Standalone scripts, exactly as the builder's check_all.py runs them, but
+      # every suite runs even after a failure and a failure is *annotated* with
+      # its file and last line: the job log needs a login, the annotation does not.
+      - name: Run every tests/test_*.py
+        run: |
+          fail=0
+          for suite in tests/test_*.py; do
+            echo "::group::$suite"
+            rc=0
+            out=$(python "$suite" 2>&1) || rc=$?
+            printf '%s\n' "$out"
+            echo "::endgroup::"
+            if [ "$rc" != 0 ]; then
+              echo "::error file=$suite::$(basename "$suite") failed: $(printf '%s' "$out" | tail -n 1)"
+              fail=1
+            fi
+          done
+          exit $fail

@@ -1,13 +1,4 @@
-"""Themes: Night (default), Day, Fire.
-
-One palette file that every surface imports, a small controller that puts the
-choice on ``<html data-theme>``, and nothing else allowed to hardcode a colour.
-
-The behaviour itself is covered by the browser-free harness next to this file
-(``tests/js/theme.harness.mjs``), run through node when it is installed. The
-rules about *where* colours may come from are checked here, cheaply. Runs under
-pytest or directly (``python tests/test_themes.py``).
-"""
+"""Themes: Night (default), Day, Fire."""
 
 import re
 import shutil
@@ -209,6 +200,28 @@ def test_theme_harness():
 
     result = subprocess.run([node, str(HARNESS)], cwd=str(ROOT), capture_output=True, text=True)
     assert result.returncode == 0, f'{HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
+
+
+def test_a_generic_font_family_never_hides_the_named_ones():
+    """`sans-serif` in second place made the rest of the stack unreachable."""
+    generics = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'}
+    checked = 0
+
+    for path in sorted((ROOT / 'web').rglob('*.css')):
+        for declaration in path.read_text(encoding='utf-8').split('font-family:')[1:]:
+            value = declaration.split(';')[0].split('}')[0]
+            names = [n.strip().strip('"\'') for n in value.split(',') if n.strip()]
+            if not names:
+                continue
+            checked += 1
+            first = next((i for i, n in enumerate(names) if n.lower() in generics), None)
+            assert first in (None, len(names) - 1), (
+                '%s: %s - a generic family is not last, so everything after it is '
+                'unreachable' % (path.relative_to(ROOT), names))
+
+    assert checked >= 5, f'the scan only found {checked} font stacks - it is broken'
+    assert 'Roboto' in APP_CSS.read_text(encoding='utf-8'), \
+        'the family the stack always meant to prefer has to stay listed'
 
 
 def main():

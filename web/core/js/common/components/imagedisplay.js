@@ -1,3 +1,4 @@
+import { parseMediaUrl, setMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 let previousMediaElement = null;
 
@@ -29,7 +30,6 @@ class ImageLoader {
                 const urlObj = new URL(mediaUrl, window.location.href);
                 const filename = urlObj.searchParams.get('filename');
                 if (filename) {
-                    //console.log(`[ImageLoader] Image failed. Attempting to find '${filename}' in subfolders...`);
                     mediaElement.src = `/saus/api/download-file?filePath=${encodeURIComponent(filename)}&force_find=true`;
                     return;
                 }
@@ -144,6 +144,23 @@ class HistoryManager {
         }
 
         thumbnailDiv.appendChild(mediaElement);
+
+        // A result can be dragged onto a "Load Image" / "Video" input - in this app or
+        // in another one, whose tab opens when the pointer rests on it. The payload
+        // comes from ComfyUI's own viewer URL, which is all a thumbnail has.
+        const payload = parseMediaUrl(imageUrl);
+        if (payload) {
+            thumbnailDiv.draggable = true;
+            thumbnailDiv.title = 'Drag onto a Load Image input';
+            thumbnailDiv.addEventListener('dragstart', (event) => {
+                setMediaDrag(payload, event.dataTransfer);
+                thumbnailDiv.classList.add('dragging');
+            });
+            thumbnailDiv.addEventListener('dragend', () => {
+                thumbnailDiv.classList.remove('dragging');
+                endMediaDrag();
+            });
+        }
 
         let clickTimeout = null;
         const CLICK_DELAY = 250; 
@@ -744,7 +761,7 @@ export function displayImagesInDiv(imageUrls, addToHistory = true, isFinalImage 
     imageDisplayApp.displayImagesInDiv(imageUrls, addToHistory, isFinalImage);
 }
 
-export function addImageToHistory(imageUrl) {
+function addImageToHistory(imageUrl) {
     imageDisplayApp.addImageToHistory(imageUrl);
 }
 

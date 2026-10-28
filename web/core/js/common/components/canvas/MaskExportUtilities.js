@@ -239,8 +239,6 @@ export class MaskExportUtilities {
             
             config.padding = (croppedMaskCanvas.width * 0.2);
             const growMaskForFinalComposite = (croppedMaskCanvas.width * 0.1);
-            // console.log('config.padding', config.padding);
-            // console.log('(growMaskForFinalComposite',growMaskForFinalComposite);
 
             let processedMaskCanvas = croppedMaskCanvas;
             if (config.padding > 0) {

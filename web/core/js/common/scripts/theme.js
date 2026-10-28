@@ -1,19 +1,8 @@
 /**
- * Theme controller: Night (default), Day, Fire.
- *
- * The palette itself lives in /core/css/themes.css; this module only decides
- * which of the three a document shows:
- *
- *     <html>                 -> :root, i.e. Night
- *     <html data-theme="day"> -> the Day block
- *     <html data-theme="fire">-> the Fire block
- *
- * The choice is a device preference rather than a per-app one, so the app
- * browser, every app and the File Manager always agree. They are all served
- * from the ComfyUI origin, which is also why a change can be pushed into the
- * iframes the browser owns without reloading them.
- *
- * Kept dependency-free on purpose: the app pages load it before anything else.
+ * Theme controller: Night (default), Day, Fire - by setting `data-theme` on <html>,
+ * which picks a block in /core/css/themes.css. One device-wide choice, so the shell,
+ * every app and the File Manager agree (they share an origin, so a change can also be
+ * pushed into the iframes). Dependency-free on purpose: app pages load it first.
  */
 
 /* A plain string, so the tiny inline script in the pages' <head> can read it
@@ -56,7 +45,7 @@ export function currentTheme() {
 }
 
 /** Show a theme on one document (this one by default). */
-export function applyToDocument(themeId, doc = document) {
+function applyToDocument(themeId, doc = document) {
     if (!isTheme(themeId) || !doc) return false;
     doc.documentElement.dataset.theme = themeId;
     return true;

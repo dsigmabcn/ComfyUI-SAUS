@@ -193,11 +193,6 @@ async def move_copy_handler(request: web.Request) -> web.Response:
         logger.warning(f"{SAUSMSG}: transfer denied (target): {e}")
         return web.json_response({'error': 'Access denied'}, status=403)
 
-    # A root is not a valid transfer target: input -> output would nest a whole
-    # user-data folder inside another.
-    if is_root_path(target_dir):
-        return web.json_response({'error': 'Access denied'}, status=403)
-
     if not target_dir.exists() or not target_dir.is_dir():
         return web.json_response({'error': 'Target folder not found'}, status=404)
 
@@ -212,6 +207,13 @@ async def move_copy_handler(request: web.Request) -> web.Response:
 
         if is_root_path(src):
             errors.append(f'{src.name}: cannot move a root folder')
+            continue
+
+        if src.is_dir() and is_root_path(target_dir):
+            # A root may hold loose files - dragging a generated image from the output
+            # root into the input root is the normal way to feed it back in - but a
+            # *folder* dropped on a root would nest one user-data folder inside another.
+            errors.append(f'{src.name}: a folder cannot be moved into a root')
             continue
 
         if not src.exists():
@@ -292,6 +294,59 @@ async def rename_file_handler(request: web.Request) -> web.Response:
         current_path.rename(new_path)
 
         return web.json_response({"message": "Rename successful", "newPath": str(new_path)})
+
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def create_folder_handler(request: web.Request) -> web.Response:
+    """Create one folder inside the user-data roots: the File Manager's New folder.
+
+    The name is a single path segment, so separators, the ``.`` / ``..`` entries
+    and control characters are refused before anything touches the filesystem.
+    ``allowed_file`` deliberately does not apply - a folder has no extension to
+    vet - which is why the name rules are spelled out here like rename's.
+    """
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
+    try:
+        data = await request.json()
+        folder_name = data.get("folderName")
+
+        if not folder_name or not isinstance(folder_name, str):
+            return web.json_response({"error": "Missing folderName"}, status=400)
+
+        folder_name = folder_name.strip()
+        if (not folder_name
+                or os.path.sep in folder_name
+                or (os.path.altsep and os.path.altsep in folder_name)
+                or '/' in folder_name or '\\' in folder_name
+                or folder_name in ('.', '..')
+                or any(ord(char) < 32 for char in folder_name)):
+            return web.json_response({"error": "Invalid folderName"}, status=400)
+
+        # Confined to input / output / models (realpath + commonpath). A root is a
+        # valid parent here: "input" + "renders" is the normal way to fill one.
+        try:
+            parent_path = resolve_within_roots(data.get("parentPath"))
+        except ValueError as e:
+            logger.warning(f"{SAUSMSG}: create folder denied: {e}")
+            return web.json_response({"error": "Access denied"}, status=403)
+
+        if not parent_path.exists() or not parent_path.is_dir():
+            return web.json_response({"error": "Folder not found"}, status=404)
+
+        new_path = parent_path / folder_name
+
+        try:
+            new_path.mkdir()
+        except FileExistsError:
+            # mkdir is the check: asking first would race with another create.
+            return web.json_response({"error": "An item with that name already exists"}, status=400)
+
+        return web.json_response({"message": "Folder created", "path": str(new_path)})
 
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)

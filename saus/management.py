@@ -1,11 +1,13 @@
 import json
+import os
 from pathlib import Path
 from aiohttp import web
 
 from .constants import (
-    APP_CONFIGS, SAUSMSG, logger,
+    APP_CONFIGS, DATA_DIR, SAUSMSG, logger,
     SAUS_BROWSER_PATH, SAUS_APPS_PATH, APPS_CONFIG_FILE
 )
+from .helpers import require_json
 
 SAUS_BROWSER_DATA_PATH = SAUS_BROWSER_PATH / "data"
 
@@ -26,6 +28,27 @@ APP_THUMBNAIL_NAMES = (
 # The small copy the explorer row paints (tools/thumbnail.py writes it, 128px): the
 # row must not download the ~23 KB master to draw a 40px square.
 ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'
+
+# Apps may be parked in a ``web/apps/deprecated/`` folder when a newer model
+# supersedes them. They are still discovered and still get their route - the
+# explorer just hides them until "Show deprecated apps" is switched on.
+DEPRECATED_DIR_NAME = 'deprecated'
+
+
+def _is_deprecated(app_folder: Path) -> bool:
+    """True when the app sits inside a ``deprecated/`` folder under ``web/apps``.
+
+    Derived from the folder rather than an appConfig flag, so moving an app in or
+    out of ``deprecated/`` is the only action needed and there is nothing to drift
+    out of step. The *nearest* ancestors below the apps root decide, so a nested
+    ``deprecated`` anywhere in the chain counts, while an app that merely happens
+    to be named ``deprecated`` is not one itself (its own name is excluded).
+    """
+    try:
+        relative = app_folder.relative_to(SAUS_APPS_PATH)
+    except ValueError:
+        return False
+    return DEPRECATED_DIR_NAME in relative.parts[:-1]
 
 
 def _find_app_thumbnail(app_folder: Path, names=APP_THUMBNAIL_NAMES, exclude=()) -> str:
@@ -56,6 +79,10 @@ def _load_app_configs():
         config['thumbnail'] = _find_app_thumbnail(conf_file.parent, exclude=(ROW_THUMBNAIL_NAME,))
         config['thumbnailRow'] = (_find_app_thumbnail(conf_file.parent, names=(ROW_THUMBNAIL_NAME,))
                                   or config['thumbnail'])
+        # An app in the deprecated/ folder is still listed and still routable; the
+        # explorer filters it out unless the user has switched on "Show deprecated
+        # apps" (see web/saus_browser/js/ui.js -> filterCurrentApps).
+        config['deprecated'] = _is_deprecated(conf_file.parent)
         configs.append(config)
     return configs
 
@@ -65,6 +92,101 @@ async def apps_handler(request: web.Request) -> web.Response:
     # metadata) appear without a ComfyUI restart.
     configs = _load_app_configs() or APP_CONFIGS
     return web.json_response(configs, headers={'Cache-Control': 'no-cache'})
+
+
+# The App Manager's hidden-app list. It is server-side, so every browser that
+# opens this ComfyUI sees the same panel, and it lives in the node's own data dir
+# (never user files); ``.gitignore`` already ignores ``**/data/settings.json``.
+# The list is a *deny* list of app ids: an app that leaves the disk simply stops
+# matching, so there is nothing to migrate and no stale state to clean up.
+SETTINGS_FILE = DATA_DIR / "settings.json"
+SETTINGS_SCHEMA_VERSION = 1
+# Longer than the app set is nonsense, so it is refused before anything is written.
+MAX_HIDDEN_APP_IDS = 500
+
+
+def _known_app_ids() -> set:
+    """The ids of the apps actually installed under ``web/apps``."""
+    return {str(config['id']) for config in _load_app_configs() if config.get('id')}
+
+
+def _stored_hidden_app_ids() -> list:
+    """The deny list on disk, pruned to apps that still exist.
+
+    Pruning on *read* as well as write means the answer to "what is hidden" never
+    depends on an app having been deleted since the list was saved.
+    """
+    stored = _read_json_file(SETTINGS_FILE, {})
+    stored = stored.get('hiddenAppIds') if isinstance(stored, dict) else None
+    if not isinstance(stored, list):
+        return []
+
+    known = _known_app_ids()
+    hidden = []
+    for value in stored:
+        if isinstance(value, str) and value in known and value not in hidden:
+            hidden.append(value)
+    return hidden
+
+
+def _write_settings(hidden_app_ids: list) -> None:
+    """Write the deny list atomically (tmp + replace), so a crash keeps the old one."""
+    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    payload = {'schemaVersion': SETTINGS_SCHEMA_VERSION, 'hiddenAppIds': hidden_app_ids}
+    temporary = SETTINGS_FILE.with_name(SETTINGS_FILE.name + '.tmp')
+    temporary.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+    os.replace(temporary, SETTINGS_FILE)
+
+
+async def get_app_visibility_handler(request: web.Request) -> web.Response:
+    """Which apps the App Manager hides (install-wide, not per browser)."""
+    return web.json_response({'hiddenAppIds': _stored_hidden_app_ids()},
+                             headers={'Cache-Control': 'no-cache'})
+
+
+async def set_app_visibility_handler(request: web.Request) -> web.Response:
+    """Replace the hidden-app list. Display only: no app file is ever touched.
+
+    Every entry has to be an *installed* app's id, so the file can only ever hold
+    apps that exist - it is a display filter, not somewhere to park a path or a
+    name of our own choosing. An id that no longer matches an app is dropped (and
+    the reply carries the list that was actually stored), while a malformed
+    payload is refused outright.
+    """
+    guard = require_json(request)
+    if guard is not None:
+        return guard
+
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({'error': 'Body must be JSON'}, status=400)
+
+    if not isinstance(data, dict):
+        return web.json_response({'error': 'Body must be a JSON object'}, status=400)
+
+    hidden_app_ids = data.get('hiddenAppIds')
+    if not isinstance(hidden_app_ids, list):
+        return web.json_response({'error': 'hiddenAppIds must be a list'}, status=400)
+    if len(hidden_app_ids) > MAX_HIDDEN_APP_IDS:
+        return web.json_response({'error': 'hiddenAppIds is too long'}, status=400)
+    if any(not isinstance(value, str) for value in hidden_app_ids):
+        return web.json_response({'error': 'hiddenAppIds entries must be app ids'}, status=400)
+
+    known = _known_app_ids()
+    stored = []
+    for value in hidden_app_ids:
+        if value in known and value not in stored:
+            stored.append(value)
+
+    try:
+        _write_settings(stored)
+    except Exception as e:
+        logger.error(f"{SAUSMSG}: could not write the app visibility setting: {e}")
+        return web.json_response({'error': 'Could not save the setting'}, status=500)
+
+    return web.json_response({'hiddenAppIds': stored})
+
 
 ARCHITECTURES_FILE = SAUS_BROWSER_PATH / "data" / "architectures.json"
 
@@ -84,32 +206,6 @@ async def get_architectures_handler(request: web.Request) -> web.Response:
     except json.JSONDecodeError:
         return web.json_response(
             {"error": "Invalid JSON format in the architectures file."},
-            status=500
-        )
-    except Exception as e:
-        return web.json_response(
-            {"error": f"An unexpected error occurred: {e}"},
-            status=500
-        )
-
-MODEL_DATA_FILE = SAUS_BROWSER_PATH / "data" / "models_data.json"
-
-async def get_model_data_handler(request: web.Request) -> web.Response:
-    try:
-        if not MODEL_DATA_FILE.exists():
-            return web.json_response(
-                {"error": "Data Model file not found."},
-                status=404
-            )
-
-        with open(MODEL_DATA_FILE , 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        return web.json_response(data, status=200, headers={'Cache-Control': 'no-cache'})
-
-    except json.JSONDecodeError:
-        return web.json_response(
-            {"error": "Invalid JSON format in the Models Data file."},
             status=500
         )
     except Exception as e:

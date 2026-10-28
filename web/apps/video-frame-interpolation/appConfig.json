@@ -1,0 +1,144 @@
+{
+  "id": "vidinterp",
+  "name": "Video Frame Interpolation",
+  "url": "video-frame-interpolation",
+  "description": "Interpolate extra frames into a video with FILM net or RIFE. Enable FPS keeps the clip the same length by raising its frame rate; off plays it in slow motion.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "FRAME INTERPOLATION",
+    "models": [
+      "film_net_fp16.safetensors",
+      "rife_v4.26.safetensors",
+      "rife_v4.26_heavy.safetensors",
+      "rife_v4.25.safetensors",
+      "rife_v4.25_heavy.safetensors",
+      "rife_v4.25_lite.safetensors"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesvidinterp",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "950.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidinterp",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "950.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "multipliervidinterp",
+      "label": "Multiplier",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "16_9.inputs.value",
+      "defValue": 2,
+      "minValue": 2,
+      "maxValue": 16,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidinterp",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "7.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidinterp",
+      "label": "Video",
+      "nodePath": "4.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "interpolationmodelvidinterp",
+      "label": "Interpolation Model",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "16_1.inputs.model_name",
+      "url": "FrameInterpolationModelLoader",
+      "key": "model_name",
+      "options": [
+        "film_net_fp16.safetensors",
+        "rife_v4.26.safetensors",
+        "rife_v4.26_heavy.safetensors",
+        "rife_v4.25.safetensors",
+        "rife_v4.25_heavy.safetensors",
+        "rife_v4.25_lite.safetensors"
+      ]
+    }
+  ],
+  "toggles": [
+    {
+      "id": "enablefpsvidinterp",
+      "label": "Enable FPS",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "defaultValue": true,
+      "nodePath": "16_13.inputs.value"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidinterp",
+      "label": "Save Video",
+      "nodeId": "7",
+      "type": "media"
+    }
+  ]
+}

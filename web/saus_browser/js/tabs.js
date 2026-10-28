@@ -1,17 +1,22 @@
 import { state, loadOpenApps, saveOpenApps } from './state.js';
 import { SettingsComponent } from '../../core/js/common/components/settings.js';
 import { exportWorkflowToComfyUI } from './workflow_export.js';
+import { mountAppManager, refreshAppManager } from './app_manager.js';
+import { mountModelManager, refreshModelManager } from './model_manager.js';
 import { currentTheme } from '/core/js/common/scripts/theme.js';
+import { isMediaDrag } from '/core/js/common/scripts/appDrag.js';
 
 /* ------------------------------------------------------------------ *
  * Workspace tabs. A tab is an app (iframe of /saus/<url>) or one of the
- * built-in panes: Settings, File Manager. The iframe is created when the
- * tab is first activated, so a restored tab costs nothing. The console is
+ * built-in panes: Settings, App Manager, File Manager. The iframe is created when
+ * the tab is first activated, so a restored tab costs nothing. The console is
  * not a tab: it docks over the bottom of the workspace (see console.js).
  * ------------------------------------------------------------------ */
 
 const BUILT_INS = {
     settings: { name: 'Settings', icon: 'fas fa-cog' },
+    appmanager: { name: 'App Manager', icon: 'fas fa-list-check' },
+    modelmanager: { name: 'Model Manager', icon: 'fas fa-database' },
     filemanager: { name: 'File Manager', icon: 'fas fa-folder', url: 'file_manager' },
 };
 
@@ -23,6 +28,55 @@ let focusedTabId = null;
 
 // The tab being dragged along the strip (drag & drop reordering). Transient.
 let draggedTabId = null;
+
+/* ------------------------------------------------------------------ *
+ * Hovering a tab with media in hand opens that app.
+ *
+ * A file dragged out of Recent belongs to the *previous* app, so the tab the
+ * pointer rests on has to come forward before the drop - the loader of the app
+ * behind it is not even on screen. A short dwell avoids swapping the workspace
+ * while the pointer is merely passing over the strip.
+ * ------------------------------------------------------------------ */
+
+const MEDIA_HOVER_MS = 550;
+let mediaHoverTimer = null;
+let mediaHoverTabId = null;
+
+function clearMediaHoverMark() {
+    document.querySelectorAll('.tab.media-hover')
+        .forEach((el) => el.classList.remove('media-hover'));
+}
+
+function cancelMediaHover() {
+    if (mediaHoverTimer) clearTimeout(mediaHoverTimer);
+    mediaHoverTimer = null;
+    mediaHoverTabId = null;
+    clearMediaHoverMark();
+}
+
+function armMediaHover(tabId_, btn) {
+    if (mediaHoverTabId === tabId_) return;   // already armed for this tab
+    cancelMediaHover();
+    mediaHoverTabId = tabId_;
+    btn.classList.add('media-hover');
+    mediaHoverTimer = setTimeout(() => {
+        mediaHoverTimer = null;
+        // The arming above proved a media drag is in flight, and the source document's
+        // flag is not readable from here - so only re-check that the pointer is still
+        // on this tab.
+        if (mediaHoverTabId === tabId_) activateTab(tabId_);
+    }, MEDIA_HOVER_MS);
+}
+
+// Any drag ending anywhere clears the pending switch.
+document.addEventListener('dragend', cancelMediaHover);
+
+// The Settings pane opens a manager through an event, so that core component needs
+// no import of this one - the route "Open App" already takes (see models.js).
+document.addEventListener('saus:open-manager', (event) => {
+    const kind = event && event.detail && event.detail.kind;
+    if (kind && BUILT_INS[kind]) openBuiltIn(kind);
+});
 
 function findTab(id) {
     return state.openApps.find(tab => tab.id === id);
@@ -104,17 +158,35 @@ function renderTabStrip() {
             btn.classList.remove('dragging');
         });
         btn.addEventListener('dragover', (event) => {
-            if (!draggedTabId || draggedTabId === tab.id) return;
+            if (draggedTabId) {
+                if (draggedTabId === tab.id) return;
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+                btn.classList.add('drop-target');
+                return;
+            }
+            // A *media* drag (an image from the Recent panel or the File Manager) can
+            // be dropped on whichever app's load input is in front, so hovering a tab
+            // opens it. This runs in the parent document while the drag comes from an
+            // app's iframe, so it asks dataTransfer.types - the module flag lives in
+            // the source document and is not visible here.
+            if (!isMediaDrag(event.dataTransfer)) return;
             event.preventDefault();
-            event.dataTransfer.dropEffect = 'move';
-            btn.classList.add('drop-target');
+            event.dataTransfer.dropEffect = 'copy';
+            armMediaHover(tab.id, btn);
         });
-        btn.addEventListener('dragleave', () => btn.classList.remove('drop-target'));
+        btn.addEventListener('dragleave', () => {
+            btn.classList.remove('drop-target');
+            cancelMediaHover();
+        });
         btn.addEventListener('drop', (event) => {
             btn.classList.remove('drop-target');
-            if (!draggedTabId || draggedTabId === tab.id) return;
-            event.preventDefault();
-            moveTab(draggedTabId, tab.id);
+            cancelMediaHover();
+            if (draggedTabId) {
+                if (draggedTabId === tab.id) return;
+                event.preventDefault();
+                moveTab(draggedTabId, tab.id);
+            }
         });
 
         const icon = document.createElement('i');
@@ -197,7 +269,29 @@ function ensurePane(id) {
         pane.appendChild(host);
         container.appendChild(pane);
         // The settings form (theme, version, social links, restart).
-        new SettingsComponent('#settingsPane').show();
+        new SettingsComponent('#settingsPane', { showDeprecatedSwitch: true, showManagers: true }).show();
+        return pane;
+    }
+
+    if (tab.kind === 'appmanager') {
+        // A pane that lives in the shell rather than an iframe: it needs the live app
+        // list, the taxonomy and the model-status cache, which the shell already has.
+        const host = document.createElement('div');
+        host.id = 'appManagerPane';
+        host.className = 'manager-host';
+        pane.appendChild(host);
+        container.appendChild(pane);
+        mountAppManager(host);
+        return pane;
+    }
+
+    if (tab.kind === 'modelmanager') {
+        const host = document.createElement('div');
+        host.id = 'modelManagerPane';
+        host.className = 'manager-host';
+        pane.appendChild(host);
+        container.appendChild(pane);
+        mountModelManager(host);
         return pane;
     }
 
@@ -245,7 +339,7 @@ function applyFocusState() {
     }
 }
 
-export function toggleFocus(id) {
+function toggleFocus(id) {
     focusedTabId = focusedTabId === id ? null : id;
     if (focusedTabId) activateTab(focusedTabId);
     applyFocusState();
@@ -265,7 +359,7 @@ export function exitFocus() {
  * Open / activate / close
  * ------------------------------------------------------------------ */
 
-export function activateTab(id) {
+function activateTab(id) {
     const tab = findTab(id);
     if (!tab) return;
 
@@ -281,6 +375,11 @@ export function activateTab(id) {
     const pane = ensurePane(id);
     if (pane) pane.classList.remove('hidden');
 
+    // A manager view can go stale while it is not on screen: the hidden list is
+    // install-wide, and a download anywhere changes the status dots.
+    if (tab.kind === 'appmanager') refreshAppManager();
+    if (tab.kind === 'modelmanager') refreshModelManager();
+
     state.activeAppId = id;
     renderTabStrip();
     markActiveRow(id);
@@ -295,7 +394,7 @@ export function activateTab(id) {
     }
 }
 
-export function openApp(app) {
+function openApp(app) {
     if (!app || !app.url) return;
     const id = String(app.id || app.url);
     if (!findTab(id)) {
@@ -335,7 +434,7 @@ export function openAppByUrl(url, name = '', id = null) {
     activateTab(tabKey);
 }
 
-export function closeTab(id) {
+function closeTab(id) {
     const index = state.openApps.findIndex(tab => tab.id === id);
     if (index === -1) return;
 
@@ -362,7 +461,7 @@ export function closeTab(id) {
 }
 
 /** No tab in front: the welcome pane. */
-export function showHome() {
+function showHome() {
     document.querySelectorAll('#paneContainer > .tab-pane').forEach(pane => pane.classList.add('hidden'));
     document.getElementById('homeContainer')?.classList.remove('hidden');
     state.activeAppId = null;

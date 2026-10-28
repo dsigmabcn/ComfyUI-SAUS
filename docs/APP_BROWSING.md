@@ -29,6 +29,8 @@ In the bottom part, you can find:
 
 The side panel is divided in a header, where you can search and filter apps and quickly reach your favorite apps, and the tree, which displays the available SAUS apps per sub-category.
 
+The tree lists the apps that are *current*. When a newer model supersedes an older one, the older apps are parked in a `deprecated` folder and left out, so the panel only offers what is up to date — [Settings](SETTINGS.md) has a **Show deprecated apps** switch that brings them back.
+
 <img src="../web/core/media/git/app_browsing/sidebar full.png">
 
 ### The panel head
@@ -41,7 +43,7 @@ The side panel is divided in a header, where you can search and filter apps and 
 
 Below them **section name** (AI Image / AI Video / Other) the different subcategories, which unfold into the SAUS apps:
 
-1. **Subcategory** (text-to-image, image-to-image (editing), image-to-image (reference), text-to-video, image-to-video, video-to-video, tools...). The number next to it is how many apps it holds.
+1. **Subcategory** (text-to-image, image-to-image (editing), image-to-image (reference), text-to-video, image-to-video, video-to-video, Image tools, Video tools...). The number next to it is how many apps it holds.
 2. **Apps**: click a subcategory and its rows unfold right there.
 
 
@@ -64,6 +66,26 @@ In addition to the **status dot**, a tooltip when hovering the app will indicate
 In every case, click **(i)** to see the details and [install](MODELS.md) the missing models.
 
 **☆** marks the app as a favorite; favorites then appear in the panel head.
+
+
+## Hiding apps
+
+**Settings → Managers → App Manager** opens the manager in its own tab: the same rows as the panel
+(thumbnail, name, status dot, **(i)**), filed **by section and then by subcategory** — each subcategory
+in its own bordered box, with its apps laid out **three across** — so a screenful shows most of the
+catalogue and the groups never blur into one list. Every app has a switch: switch it off and it
+disappears from the panel, from Favorites and from search; switch it back on and it returns. Nothing is
+uninstalled — a hidden app keeps working if it is already open in a tab.
+
+- The choice is stored on the server, so **every browser** that opens this ComfyUI sees the same panel.
+- **Show all**, under the filters, turns every app back on in one go. It sits *off* the moment one app
+  is hidden, and greys out while everything is already shown (there is nothing to restore). Apps are
+  never hidden in bulk.
+- Deprecated apps are listed here only while **Show deprecated apps** is on in Settings — that switch is
+  the gate, and the head of the manager counts how many apps it is keeping out.
+- The manager does not launch anything: a click on a row does nothing (hovering an app shows its
+  category under the cursor). Use **(i)** for the information panel and the app list, or the panel on
+  the left to open an app — the **☆** favorite stays there too.
 
 
 ## Opening apps: tabs

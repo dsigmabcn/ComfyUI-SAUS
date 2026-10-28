@@ -1,19 +1,8 @@
 /**
- * "Open the workflow in ComfyUI".
- *
- * The graph that goes over is the one the app is running right now, read from
- * the app itself (window.SAUS in web/core/main.js): its settings and the variant
- * the user selected, which is an overlay applied to the template graph at run
- * time and therefore cannot be read from a file. An app that cannot be reached
- * - not loaded yet, or an older copy without the accessor - falls back to the
- * base wf.json it ships.
- *
- * Either way the JSON is copied into ComfyUI's own user workflow folder through
- * ComfyUI's /userdata API, so it also shows up in the ComfyUI workflow list.
- * ComfyUI is then opened in a new window, carrying a ?saus_workflow= parameter
- * that points at that copy; the extension SAUS injects into the ComfyUI page
- * (web/core/js/common/scripts/saus_open_workflow.js) reads the parameter and
- * loads the graph in a new workflow tab of that window.
+ * "Open the workflow in ComfyUI": the graph that goes over is the one the app is
+ * running (its overlay cannot be read from a file), copied into ComfyUI's own
+ * workflow folder, with the new window's ?saus_workflow= telling the injected
+ * extension which copy to load.
  */
 
 function safeFileName(name) {
@@ -84,16 +73,9 @@ const MAX_EXPORT_NODES = 2000;
 const MAX_SAVE_ATTEMPTS = 20;
 
 /**
- * The graph the app is running right now, read straight from the app page.
- *
- * ``frame`` is the app's iframe. It is built on demand by the app browser and
- * may still be booting (or missing for an app tab that was restored but never
- * shown), so we wait - briefly - for the app to report itself ready.
- *
- * @returns {Promise<?{workflow: object, variant: ?{mode: string, variant: ?string, label: string}}>}
- *          null when the app cannot be read (older copy without the accessor,
- *          still loading, or not same-origin): the caller then falls back to
- *          the base wf.json.
+ * The graph the app is running, read from its iframe - which may still be booting,
+ * so this waits briefly. Null when the app cannot be read (older copy, not
+ * same-origin); the caller then falls back to the shipped wf.json.
  */
 async function readLiveWorkflow(frame) {
     if (!frame) return null;
@@ -147,15 +129,8 @@ async function readCopy(target) {
 }
 
 /**
- * Put the workflow in ComfyUI's own workflow folder, never over a file that is
- * already there: ComfyUI refuses to overwrite with ``overwrite=false`` (409), and
- * the copy is then numbered the way ComfyUI numbers its own ("name (2).json").
- *
- * Exporting the same app again is the common case, so a copy that is already
- * byte-for-byte the same is simply reused.
- *
- * @returns {Promise<{target: string, fileName: string}>} where the copy ended up,
- *          and the name it ended up with (numbered when it had to be)
+ * Copies the workflow into ComfyUI's workflow folder, never over an existing file
+ * (ComfyUI numbers its own copies), reusing an identical copy when there is one.
  */
 async function saveWorkflowCopy(fileName, workflowText) {
     for (let attempt = 0; attempt < MAX_SAVE_ATTEMPTS; attempt += 1) {

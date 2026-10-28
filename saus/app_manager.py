@@ -5,18 +5,21 @@ from pathlib import Path
 from aiohttp import web
 from typing import Dict, Any
 from .constants import (
-    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, MODEL_MANAGER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH
+    SAUS_APPS_PATH, CORE_PATH, SAUS_BROWSER_PATH, APP_CONFIGS, SAUSMSG, APPS_CONFIG_FILE, logger, FILE_MANAGER_PATH,
+    APP_PAGE_TEMPLATE
 )
 from .route_manager import RouteManager
 from .static_cache import install as install_revalidate_middleware
 from .file_system import (
+    create_folder_handler,
     directory_listing_handler, rename_file_handler, delete_file_handler,
     download_file_handler, upload_chunk_handler, list_input_files_handler,
     get_logs_handler, thumbnail_handler, move_copy_handler
 )
 from .management import (
     apps_handler,
-    get_architectures_handler, get_model_data_handler,
+    get_app_visibility_handler, set_app_visibility_handler,
+    get_architectures_handler,
     get_taxonomy_handler, get_models_registry_handler, get_app_models_handler
 )
 from .downloads import (
@@ -24,9 +27,7 @@ from .downloads import (
     check_model_status_batch_handler, delete_model_handler
 )
 from .system import (
-    saus_version_handler, set_model_preview_handler, clear_model_preview_handler,
-    list_model_previews_handler, get_model_preview_handler,
-    restart_server_handler
+    saus_version_handler, restart_server_handler
 )
 
 # aiohttp serves static files without a Cache-Control header, which leaves a
@@ -68,12 +69,6 @@ class AppManager:
 
     @staticmethod
     def _setup_apps_routes(app: web.Application) -> None:
-        for app_dir in filter(lambda d: d.is_dir(), SAUS_APPS_PATH.iterdir()):
-            conf_file = app_dir / APPS_CONFIG_FILE
-            if not conf_file.is_file():
-                # logger.warning(f"{SAUSMSG}: Config file not found in {app_dir}")
-                continue
-                
         for conf_file in SAUS_APPS_PATH.rglob(APPS_CONFIG_FILE):
             app_dir = conf_file.parent
             conf = AppManager._load_config(conf_file)
@@ -89,7 +84,7 @@ class AppManager:
                 )
                 continue
 
-            app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir))
+            app.add_routes(RouteManager.create_routes(f"saus/{SAUS_url}", app_dir, APP_PAGE_TEMPLATE))
             APP_CONFIGS.append(conf)
 
     @staticmethod
@@ -101,21 +96,19 @@ class AppManager:
     def _setup_api_routes(app: web.Application) -> None:
         api_routes = [
             (f'/saus/api/apps', 'GET', apps_handler),
+            (f'/saus/api/app-visibility', 'GET', get_app_visibility_handler),
+            (f'/saus/api/app-visibility', 'POST', set_app_visibility_handler),
             (f'/saus/api/saus-version', 'GET', saus_version_handler),
-            (f'/saus/api/model-preview', 'POST', set_model_preview_handler),
-            (f'/saus/api/model-preview', 'DELETE', clear_model_preview_handler),
-            (f'/saus/api/model-previews', 'POST', list_model_previews_handler),
-            (f'/saus/api/model-preview', 'GET', get_model_preview_handler),
             (f"/saus/api/directory", "GET", directory_listing_handler),
             (f'/saus/api/thumbnail', 'GET', thumbnail_handler),
             (f'/saus/api/move-file', 'POST', move_copy_handler),
             (f'/saus/api/download', 'POST', download_generic_handler),
             (f'/saus/api/rename-file', 'POST', rename_file_handler),
+            (f'/saus/api/create-folder', 'POST', create_folder_handler),
             (f'/saus/api/delete-file', 'POST', delete_file_handler),
             (f'/saus/api/download-file', 'GET', download_file_handler),
             (f'/saus/api/upload-chunk', 'POST', upload_chunk_handler),
             (f'/saus/api/architectures', 'GET', get_architectures_handler),
-            (f'/saus/api/data-model-info', 'GET', get_model_data_handler),
             (f'/saus/api/taxonomy', 'GET', get_taxonomy_handler),
             (f'/saus/api/models', 'GET', get_models_registry_handler),
             (f'/saus/api/app-models', 'GET', get_app_models_handler),
@@ -142,10 +135,8 @@ class AppManager:
             app.add_routes(RouteManager.create_routes('saus', SAUS_BROWSER_PATH))
         else:
             logger.error(f"{SAUSMSG}: SAUS Browser path not found at {SAUS_BROWSER_PATH}")
-        if MODEL_MANAGER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/model_manager', MODEL_MANAGER_PATH))
         if FILE_MANAGER_PATH.is_dir():
-            app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH)) #Added for FILE_MANAGER
+            app.add_routes(RouteManager.create_routes('saus/file_manager', FILE_MANAGER_PATH))
 
     @staticmethod
     def _load_config(conf_file: Path) -> Dict[str, Any]:

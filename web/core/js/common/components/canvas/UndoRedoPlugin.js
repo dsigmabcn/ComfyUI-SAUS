@@ -70,7 +70,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
 
         const obj = e.target;
         if (this.isBrushStroke(obj)) {
-            // console.log('UndoRedoPlugin: Brush stroke added', obj);
 
             if (!obj.brushStrokeId) {
                 obj.brushStrokeId = `stroke_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -90,7 +89,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
 
         const obj = e.target;
         if (this.isBrushStroke(obj)) {
-            // console.log('UndoRedoPlugin: Brush stroke removed', obj);
             this.redoStack.push(obj.toObject(['type', 'path', 'stroke', 'strokeWidth', 'opacity', 'brushStrokeId']));
             if (this.redoStack.length > this.maxHistory) {
                 this.redoStack.shift();
@@ -101,12 +99,10 @@ export class UndoRedoPlugin extends CanvasPlugin {
 
     isBrushStroke(obj) {
         const isPath = obj && obj.type === 'path';
-        // console.log(`UndoRedoPlugin: isBrushStroke check for object type '${obj.type}': ${isPath}`);
         return isPath;
     }
 
     handleMaskStrokeAdded(strokeData) {
-        // console.log('UndoRedoPlugin: Mask stroke added', strokeData);
         this.undoStack.push({
             type: 'mask_add',
             maskName: strokeData.maskName,
@@ -120,7 +116,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
     }
 
     handleMaskStrokeRemoved(strokeData) {
-        // console.log('UndoRedoPlugin: Mask stroke removed', strokeData);
         this.redoStack.push({
             type: 'mask_remove',
             maskName: strokeData.maskName,
@@ -224,15 +219,12 @@ export class UndoRedoPlugin extends CanvasPlugin {
     }
 
     onUndo() {
-        // console.log('UndoRedoPlugin: Undo.');
 
         if (this.undoStack.length === 0) {
-            //console.log('UndoRedoPlugin: Undo stack is empty.');
             return;
         }
 
         const lastAction = this.undoStack.pop();
-        // console.log('UndoRedoPlugin: Performing Undo', lastAction);
 
         this.isPerformingUndoRedo = true;
 
@@ -248,7 +240,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
             if (targetObj) {
                 this.canvas.remove(targetObj);
                 this.redoStack.push(lastAction);
-                // console.log('UndoRedoPlugin: Brush stroke removed for Undo');
             } else {
                 console.warn('UndoRedoPlugin: Could not find the brush stroke object to undo.');
             }
@@ -260,15 +251,12 @@ export class UndoRedoPlugin extends CanvasPlugin {
     }
 
     onRedo() {
-        // console.log('UndoRedoPlugin: Redo.');
 
         if (this.redoStack.length === 0) {
-            // console.log('UndoRedoPlugin: Redo stack is empty.');
             return;
         }
 
         const lastUndone = this.redoStack.pop();
-        // console.log('UndoRedoPlugin: Performing Redo', lastUndone);
 
         this.isPerformingUndoRedo = true;
 
@@ -294,7 +282,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
             });
             this.canvas.add(path);
             this.undoStack.push(lastUndone);
-            // console.log('UndoRedoPlugin: Brush stroke re-added for Redo');
         }
 
         this.isPerformingUndoRedo = false;
@@ -305,7 +292,6 @@ export class UndoRedoPlugin extends CanvasPlugin {
     updateButtons() {
         this.undoBtn.disabled = this.undoStack.length === 0;
         this.redoBtn.disabled = this.redoStack.length === 0;
-        // console.log(`UndoRedoPlugin: Update Buttons - Undo: ${!this.undoBtn.disabled}, Redo: ${!this.redoBtn.disabled}`);
     }
 
     onKeyDown(e) {
@@ -323,17 +309,14 @@ export class UndoRedoPlugin extends CanvasPlugin {
 
     onFocus() {
         this.isFocused = true;
-        // console.log('UndoRedoPlugin: Canvas focused.');
     }
 
     onBlur() {
         this.isFocused = false;
-        // console.log('UndoRedoPlugin: Canvas lost focus.');
     }
 
     onMouseEnter() {
         this.focusableElement.focus();
-        // console.log('UndoRedoPlugin: Canvas focused via mouse enter.');
     }
 
     destroy() {

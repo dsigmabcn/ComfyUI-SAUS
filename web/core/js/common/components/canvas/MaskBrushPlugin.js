@@ -106,7 +106,6 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
     onToggleEraser() {
         if(this.drawingMode){
             this.isEraserActive = !this.isEraserActive;
-            //console.log('Eraser Active:', this.isEraserActive);
             if (this.isEraserActive) {
                 this.eraserBtn.classList.add('active');
                 this.cursorFill = '#FF0000';
@@ -357,13 +356,6 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
         });
         this.canvas.renderAll();
     }
-    // onToggleDrawingMode() {
-    //     if (!this.drawingMode) {
-    //         this.enableDrawingMode();
-    //     } else {
-    //         this.disableDrawingMode();
-    //     }
-    // }
     hideMask(){
         this.currentMask.visible = false;
         this.currentMask.fabricImage.visible = this.currentMask.visible;
@@ -845,7 +837,6 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
             this.onToggleEraser();
         }
         if (e.key === 'q' || e.key === 'Q') {
-            //console.log('q pressed', e.key);
             this.onToggleHideMaskKey();
         }        
     }
@@ -1009,12 +1000,6 @@ export class MaskBrushPlugin extends CustomBrushPlugin {
         this.uiContainer.querySelector('#maskConfigResizeDimensions').addEventListener('input', (e) => {
             updateConfigValue('resizeDimensions', parseInt(e.target.value, 10));
         });
-        // this.uiContainer.querySelector('#maskConfigResizeWidth').addEventListener('input', (e) => {
-        //     updateConfigValue('resizeWidth', parseInt(e.target.value, 10));
-        // });
-        // this.uiContainer.querySelector('#maskConfigResizeHeight').addEventListener('input', (e) => {
-        //     updateConfigValue('resizeHeight', parseInt(e.target.value, 10));
-        // });
         this.uiContainer.querySelector('#maskConfigResizeKeepProportion').addEventListener('change', (e) => {
             updateConfigValue('resizeKeepProportion', e.target.checked);
         });

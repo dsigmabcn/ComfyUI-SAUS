@@ -1,0 +1,68 @@
+{
+  "14_7": {
+    "inputs": {
+      "da3_geometry": [
+        "14_5",
+        0
+      ],
+      "output": "depth",
+      "output.normalization": "v2_style",
+      "output.apply_sky_clip": false
+    },
+    "class_type": "DA3Render",
+    "_meta": {
+      "title": "DA3Render"
+    }
+  },
+  "14_5": {
+    "inputs": {
+      "da3_model": [
+        "14_82",
+        0
+      ],
+      "image": [
+        "85",
+        0
+      ],
+      "resolution": 504,
+      "resize_method": "upper_bound_resize",
+      "mode": "mono"
+    },
+    "class_type": "DA3Inference",
+    "_meta": {
+      "title": "DA3Inference"
+    }
+  },
+  "14_82": {
+    "inputs": {
+      "model_name": "depth_anything_3_mono_large.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "LoadDA3Model",
+    "_meta": {
+      "title": "LoadDA3Model"
+    }
+  },
+  "85": {
+    "inputs": {
+      "image": "retro_futuristic_home.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "900": {
+    "inputs": {
+      "images": [
+        "14_7",
+        0
+      ],
+      "filename_prefix": "Depth"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  }
+}

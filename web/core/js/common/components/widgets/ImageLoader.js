@@ -1,4 +1,32 @@
 import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
+import { getMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
+
+/**
+ * Extensions this control never uploads: they mirror `BLOCKED_UPLOAD_EXTENSIONS`
+ * in `saus/constants.py`, because everything here goes to ComfyUI's own
+ * `/upload/image`, which screens nothing (the File Manager's upload handler is a
+ * different route and enforces the list server-side).
+ * `tests/test_media_drag.py` fails if the two lists drift apart.
+ */
+const BLOCKED_UPLOAD_EXTENSIONS = new Set([
+  'py', 'pyc', 'pyo', 'pyw', 'pyd', 'so', 'dll', 'dylib', 'exe', 'msi',
+  'bat', 'cmd', 'com', 'scr', 'sh', 'bash', 'zsh', 'ksh', 'csh', 'ps1',
+  'psm1', 'vbs', 'vbe', 'js', 'mjs', 'cjs', 'jar', 'class', 'php', 'pl',
+  'rb', 'lua', 'htaccess', 'service', 'desktop',
+]);
+
+/**
+ * True when a filename must not be uploaded.
+ *
+ * Same *extension* rule as the server's `allowed_file()`: the text after the last dot,
+ * lower-cased. No extension at all is fine, an empty name is left to ComfyUI.
+ */
+export function isBlockedUploadName(filename) {
+  const name = (filename || '').trim();
+  const dot = name.lastIndexOf('.');
+  if (dot < 0) return false;
+  return BLOCKED_UPLOAD_EXTENSIONS.has(name.slice(dot + 1).toLowerCase());
+}
 
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
@@ -31,7 +59,10 @@ export default class ImageLoader {
 
     // The button now acts as the title and browse trigger.
     this.browseButton = document.createElement('button');
-    this.browseButton.innerHTML = `📂 ${escapeHtml(this.config.label || 'Browse')}`;
+    // The File Manager's folder glyph rather than an emoji: the two sit in the same
+    // window, inches apart.
+    this.browseButton.innerHTML =
+      `<i class="fas fa-folder"></i> ${escapeHtml(this.config.label || 'Browse')}`;
     this.browseButton.classList.add('image-loader-title');
     this.browseButton.style.width = '100%';
     this.browseButton.style.cursor = 'pointer';
@@ -43,9 +74,12 @@ export default class ImageLoader {
     });
     this.container.appendChild(this.browseButton);
 
-    this.imgElement = document.createElement('img');
-    this.imgElement.src = this.config.defaultImageSrc;
-    this.setElementStyles(this.imgElement);
+    // The empty state is a Font Awesome glyph, like the File Manager's - the old
+    // dashed PNG drew its own frame *inside* the card and fought the panel styling.
+    // The first real load replaces this element with an <img> or <video>.
+    this.imgElement = document.createElement('i');
+    this.imgElement.className = (this.config.placeholderIcon || 'fas fa-image')
+      + ' image-loader-placeholder';
 
     this.imageDropArea.appendChild(this.imgElement);
     this.container.appendChild(this.imageDropArea);
@@ -149,10 +183,78 @@ export default class ImageLoader {
 
   onDrop(e) {
     this.imageDropArea.classList.remove('highlight');
+
+    // A file dragged in from SAUS itself (the Recent panel, the File Manager) is
+    // already on the server, so it is *referenced* rather than uploaded again.
+    const dragged = getMediaDrag(e.dataTransfer);
+    if (dragged) {
+      this.useExistingMedia(dragged);
+      return;
+    }
+
     const file = e.dataTransfer.files[0];
     if (file) {
       this.handleFile(file);
     }
+  }
+
+  /** Points this loader at a file SAUS already has: anything not in `input/` is
+   *  copied there first, then the workflow is written like an upload writes it. */
+  async useExistingMedia(payload) {
+    if (!payload || !payload.filename) return;
+
+    let name;
+    try {
+      name = await this.ensureInputFile(payload);
+    } catch (error) {
+      this.showErrorMessage(`Could not use that file: ${error.message}`);
+      return;
+    }
+
+    const src = `/view?filename=${encodeURIComponent(name.split('/').pop())}`
+        + (name.includes('/') ? `&subfolder=${encodeURIComponent(name.split('/').slice(0, -1).join('/'))}` : '')
+        + '&type=input';
+
+    // The media is displayed *and* handed on: the component's callback writes the
+    // filename into the graph (`updateWorkflow(... nodePath, name)`).
+    this.displayMedia({ type: this.guessMimeType(name) }, src);
+    if (typeof this.onImageLoaded === 'function') {
+      this.onImageLoaded(src, { name });
+    }
+    endMediaDrag();
+  }
+
+  /**
+   * The file's name inside ComfyUI's `input/`, which is all `LoadImage` /
+   * `LoadVideo` read: the bytes go to ComfyUI's `/upload/image` and not to the File
+   * Manager's move endpoint, which refuses `input/` as a root (the first version's
+   * HTTP 403). A file already in `input/` needs nothing. Blocked extensions are
+   * refused before anything is uploaded (see `BLOCKED_UPLOAD_EXTENSIONS`).
+   */
+  async ensureInputFile(payload) {
+    if (isBlockedUploadName(payload.filename)) {
+      throw new Error(`${payload.filename}: this file type cannot be uploaded`);
+    }
+
+    if (payload.type === 'input') {
+      return payload.subfolder ? `${payload.subfolder}/${payload.filename}` : payload.filename;
+    }
+
+    const source = `/view?filename=${encodeURIComponent(payload.filename)}`
+      + (payload.subfolder ? `&subfolder=${encodeURIComponent(payload.subfolder)}` : '')
+      + `&type=${encodeURIComponent(payload.type)}`;
+
+    const media = await fetch(source);
+    if (!media.ok) throw new Error(`HTTP ${media.status}`);
+    const blob = await media.blob();
+
+    const form = new FormData();
+    form.append('image', blob, payload.filename);
+    // No `overwrite`: a name clash makes ComfyUI save a copy, never clobber an input.
+    const response = await fetch('/upload/image', { method: 'POST', body: form });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const saved = await response.json();
+    return saved.subfolder ? `${saved.subfolder}/${saved.name}` : saved.name;
   }
 
   onDoubleClick(e) {
@@ -168,10 +270,11 @@ export default class ImageLoader {
   }
 
   async handleFile(file) {
-    // if (!this.isFileTypeAllowed(file)) {
-    //   this.showErrorMessage(`Unsupported file type. Please select a ${this.config.allowedFileType} file.`);
-    //   return;
-    // }
+    // Before `showSpinner()`: a refusal here must not leave the spinner running.
+    if (isBlockedUploadName(file.name)) {
+      this.showErrorMessage(`Unsupported file type: scripts and executables cannot be uploaded.`);
+      return;
+    }
 
     showSpinner();
 
@@ -186,10 +289,6 @@ export default class ImageLoader {
       hideSpinner();
     }
   }
-
-  // isFileTypeAllowed(file) {
-  //   return file.type.startsWith(`${this.config.allowedFileType}/`);
-  // }
 
   showErrorMessage(message) {
     console.error(message);

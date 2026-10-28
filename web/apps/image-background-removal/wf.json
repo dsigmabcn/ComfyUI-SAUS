@@ -1,0 +1,77 @@
+{
+  "17": {
+    "inputs": {
+      "image": "the_lily_veil.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "19_13": {
+    "inputs": {
+      "bg_removal_model": [
+        "19_14",
+        0
+      ],
+      "image": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "RemoveBackground",
+    "_meta": {
+      "title": "RemoveBackground"
+    }
+  },
+  "19_14": {
+    "inputs": {
+      "bg_removal_name": "birefnet.safetensors"
+    },
+    "class_type": "LoadBackgroundRemovalModel",
+    "_meta": {
+      "title": "LoadBackgroundRemovalModel"
+    }
+  },
+  "19_15": {
+    "inputs": {
+      "mask": [
+        "19_13",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "19_16": {
+    "inputs": {
+      "image": [
+        "17",
+        0
+      ],
+      "alpha": [
+        "19_15",
+        0
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "JoinImageWithAlpha"
+    }
+  },
+  "900": {
+    "inputs": {
+      "images": [
+        "19_16",
+        0
+      ],
+      "filename_prefix": "Background-Removed"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  }
+}

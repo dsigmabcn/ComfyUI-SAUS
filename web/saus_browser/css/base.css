@@ -2,7 +2,9 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial;
+    /* Generic last - see the note in /core/css/main.css. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
 }
 
 html,

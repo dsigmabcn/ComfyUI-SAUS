@@ -1,5 +1,5 @@
 import { PromptServerClient } from './websocket.js';
-import { state, loadFavorites } from './state.js';
+import { state, loadFavorites, loadAppVisibility, preferencesManager } from './state.js';
 import { checkForUpdate } from './updates.js';
 import { updateComponentStatus, showAppDetails } from './models.js';
 import { initExplorer, renderRail, renderExplorer } from './sidebar.js';
@@ -7,13 +7,14 @@ import { setRenderHandler, renderTagsFilter } from './ui.js';
 import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.js';
 import { toggleConsoleDock } from './console.js';
 import { initTheme } from '/core/js/common/scripts/theme.js';
+import { listenForGenerationComplete } from '/core/js/common/scripts/notifications.js';
 
 // Night / Day / Fire, before the shell renders (palette: /core/css/themes.css).
 initTheme();
 
 const GUIDE_URL = 'https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md';
 
-export async function loadApps() {
+async function loadApps() {
     state.sessionTimestamp = Date.now();
     try {
         // Model registry (filename-keyed) + shared taxonomy + architectures.
@@ -22,6 +23,10 @@ export async function loadApps() {
             fetch('/saus/api/taxonomy'),
             fetch('/saus/api/architectures')
         ]);
+
+        // The App Manager's hidden list (install-wide). Read alongside the catalogs
+        // so the first paint already knows which apps to leave out; it never rejects.
+        await loadAppVisibility();
 
         if (modelsResponse.ok) state.MODELS_DATA = await modelsResponse.json();
         if (taxonomyResponse.ok) state.TAXONOMY = await taxonomyResponse.json();
@@ -132,9 +137,30 @@ export function initializeUI() {
 
     document.addEventListener('saus:open-app', handleOpenAppEvent);
     document.addEventListener('saus:app-info', handleAppInfoEvent);
+    // The Settings pane (a core component) writes the shared preferences through
+    // its own manager, so our copy is stale the moment its switch is flipped:
+    // re-read it, then repaint the explorer so deprecated apps appear/disappear
+    // without a reload.
+    document.addEventListener('saus:preference-changed', (event) => {
+        const key = event && event.detail && event.detail.key;
+        if (key !== 'showDeprecatedApps') return;
+        preferencesManager.reload();
+        renderExplorer();
+    });
+
+    // The App Manager hides/shows apps: the panel and its filter chips have to
+    // follow at once (the App Manager repaints itself).
+    document.addEventListener('saus:app-visibility-changed', () => {
+        renderExplorer();
+        renderTagsFilter();
+    });
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') exitFocus();
     });
+
+    // App tabs report a finished generation from inside their iframe; the notice and the
+    // bell belong here, where switching tabs cannot take them away.
+    listenForGenerationComplete();
 
     initializeWebSocket();
     loadApps();

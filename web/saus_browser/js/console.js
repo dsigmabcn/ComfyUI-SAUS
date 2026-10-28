@@ -238,7 +238,7 @@ export function toggleConsoleDock() {
 }
 
 /** Dock the console over the workspace: the panes keep their size. */
-export function showConsoleDock() {
+function showConsoleDock() {
     const dock = document.getElementById('consoleDock');
     const body = document.getElementById('consoleDockBody');
     if (!dock || !body) return;
@@ -262,11 +262,6 @@ export function hideConsoleDock() {
     teardownConsole();
 }
 
-export function refreshConsole() {
-    fetchLogs();
-}
-
-/** Called when the console is closed. */
 export function teardownConsole() {
     if (timer) clearInterval(timer);
     timer = null;

@@ -51,4 +51,26 @@ If a model is missing, click over the 'download' icon and the model will start d
 ## Uninstalling Models
 If you want to free up space because you no longer use an app, you can delete its models by clicking over the 'trash bin' icon to **Uninstall**.
 
+## The Model Manager
+
+**Settings → Managers → Model Manager** opens the other half in its own tab: every model the registry
+knows, not just the ones one app needs.
+
+- The list is **grouped by model kind** — one boxed section per kind, the way the App Manager files its
+  subcategories — and inside each, cards in **flexible columns** as wide as the side panel. Each card is
+  the model — its name, with its **Install / Uninstall** state top right — and under a divider, **the
+  apps that need it**: each app as its own thumbnail plus name, with the rest counted (`+3`). Hovering an
+  app shows its category. Only the top band carries the red / green state; the app list sits on the page
+  background. (The folder a model belongs in is not shown: SAUS finds it by file name anywhere.)
+- Two chip rows filter the list: **All / Installed / Not installed / Unused**, and a chip per **model
+  kind** (Diffusion model, VAE, TEXT ENCODER, LORA, …) with its count. **Unused** finds files no app
+  *and* no architecture references any more — architectures are counted for that answer, but the cards
+  themselves only name apps.
+- **Install** and **Uninstall** work exactly as they do in the app's **(i)** panel, and share the same
+  progress: starting a download in one view shows up in the other, and both write to the same ComfyUI
+  model folders.
+
+Uninstalling still only ever touches model weight folders (`custom_nodes` and `datasets` are never
+touched), and it asks before deleting.
+
 [Return to User Guide](USER_GUIDE.md#installing-and-uninstalling-models)

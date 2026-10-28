@@ -19,7 +19,6 @@ class ToggleComponent {
             ? (this.config.defaultValue ? 1 : 0) 
             : (this.config.defaultValue === "true" ? 1 : 0);
 
-        //console.log("ToggleComponent", this.value, this.config.id, this.config.defaultValue);
 
         this.buildUI();
         this.initializeUI();
@@ -28,8 +27,11 @@ class ToggleComponent {
     buildUI() {
         const toggleId = `${this.config.id}Toggle`;
 
+        // A <label>, not a <div>: a click anywhere on the row toggles the switch, the
+        // same as the Settings switch. (The track is pointer-events:none, so the
+        // invisible checkbox under it still takes the click.)
         const html = `
-            <div class="toggle-component-wrapper">
+            <label class="toggle-component-wrapper">
                 ${this.config.labelPosition === 'left' ? this.getLabelHTML() : ''}
                 <div class="toggle-component">
                     <input 
@@ -42,14 +44,10 @@ class ToggleComponent {
                         ${this.value ? 'checked' : ''}
                         aria-checked="${this.value}"
                     >
-                    <label for="${toggleId}" class="slot">
-                        <span class="slot__label">OFF</span>
-                        <span class="slot__label">ON</span>
-                    </label>
-                    <div class="curtain"></div>
+                    <span class="toggle-track" aria-hidden="true"></span>
                 </div>
                 ${this.config.labelPosition === 'right' ? this.getLabelHTML() : ''}
-            </div>
+            </label>
         `;
         this.container.innerHTML = html;
 

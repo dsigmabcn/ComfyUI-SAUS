@@ -82,7 +82,6 @@
     const runsInc = document.getElementById('runsInc');
     if (runsDec) runsDec.addEventListener('click', () => clampRuns(-1));
     if (runsInc) runsInc.addEventListener('click', () => clampRuns(1));
-    // console.log('Progress bar content inserted');
   }
 
   if (document.readyState === 'loading') {

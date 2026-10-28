@@ -1,4 +1,5 @@
 import { THEMES, applyTheme, currentTheme } from '../scripts/theme.js';
+import { PreferencesManager } from '../scripts/preferences.js';
 
 /* The project links of the Settings pane. The icons are inline SVG that inherit
  * their colour (currentColor), so they follow the theme like everything else. */
@@ -28,11 +29,19 @@ const SOCIAL_LINKS = `
 `;
 
 export class SettingsComponent {
-    constructor(containerSelector) {
+    /**
+     * ``options.showDeprecatedSwitch`` adds the "Apps" section and
+     * ``options.showManagers`` the "Managers" one. Only the SAUS app browser passes
+     * them: the File Manager mounts this same pane, where "deprecated apps" would
+     * mean nothing and a manager (which opens in a workspace tab) has nowhere to go.
+     */
+    constructor(containerSelector, options = {}) {
         this.containerSelector = containerSelector;
         this.container = document.querySelector(containerSelector);
+        this.options = options;
         this.settings = {};
         this.version = null;        // read once from /saus/api/saus-version
+        this._prefs = null;         // shared shell preferences, made on first use
     }
 
     async show() {
@@ -86,7 +95,11 @@ export class SettingsComponent {
         // Animate out and remove
         setTimeout(() => {
             toast.classList.remove('show');
-            toast.addEventListener('transitionend', () => toast.remove());
+            toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            // Backstop: if no transition runs, `transitionend` never fires and the toast
+            // would stay on screen for good - which is what "the sound on/off breadcrumb
+            // does not disappear" was.
+            setTimeout(() => toast.remove(), 500);
         }, duration);
     }
 
@@ -246,6 +259,45 @@ export class SettingsComponent {
                                 </button>`).join('')}
                         </div>
                     </section>
+                    ${this.options.showDeprecatedSwitch ? `
+                    <section class="settings-section">
+                        <h2>Apps</h2>
+                        <label class="settings-switch">
+                            <input type="checkbox" id="show-deprecated-apps"
+                                   ${this.preferences().get('showDeprecatedApps') ? 'checked' : ''}>
+                            <span class="settings-switch-text">Show deprecated apps</span>
+                            <span class="settings-switch-track" aria-hidden="true"></span>
+                        </label>
+                    </section>` : ''}
+                    <section class="settings-section">
+                        <h2>Notifications</h2>
+                        <label class="settings-switch">
+                            <input type="checkbox" id="play-sound-on-complete"
+                                   ${this.preferences().get('playSoundOnComplete') ? 'checked' : ''}>
+                            <span class="settings-switch-text">Play sound when generation is finished</span>
+                            <span class="settings-switch-track" aria-hidden="true"></span>
+                        </label>
+                    </section>
+                    ${this.options.showManagers ? `
+                    <section class="settings-section">
+                        <h2>Managers</h2>
+                        <div class="theme-options">
+                            <button type="button" id="open-app-manager" class="theme-option"
+                                    title="Choose which apps the side panel offers">
+                                <span class="theme-manager-icon"><i class="fas fa-list-check"></i></span>
+                                <span class="theme-option-text">
+                                    <span class="theme-option-name">App Manager</span>
+                                </span>
+                            </button>
+                            <button type="button" id="open-model-manager" class="theme-option"
+                                    title="Install and uninstall the models the apps need">
+                                <span class="theme-manager-icon"><i class="fas fa-database"></i></span>
+                                <span class="theme-option-text">
+                                    <span class="theme-option-name">Model Manager</span>
+                                </span>
+                            </button>
+                        </div>
+                    </section>` : ''}
                     <section class="settings-section">
                         <h2>Version</h2>
                         <p class="settings-version">Installed version:
@@ -276,10 +328,96 @@ export class SettingsComponent {
             });
         });
 
+        const deprecatedSwitch = view.querySelector('#show-deprecated-apps');
+        if (deprecatedSwitch) {
+            deprecatedSwitch.addEventListener('change', () =>
+                this.setShowDeprecatedApps(deprecatedSwitch.checked));
+        }
+
+        const soundSwitch = view.querySelector('#play-sound-on-complete');
+        if (soundSwitch) {
+            soundSwitch.addEventListener('change', () =>
+                this.setPlaySoundOnComplete(soundSwitch.checked));
+        }
+
         const restartBtn = view.querySelector('#restart-server-btn');
         restartBtn.addEventListener('click', () => this.restartServer(restartBtn));
 
+        const appManagerBtn = view.querySelector('#open-app-manager');
+        if (appManagerBtn) {
+            appManagerBtn.addEventListener('click', () => this.openManager('appmanager'));
+        }
+        const modelManagerBtn = view.querySelector('#open-model-manager');
+        if (modelManagerBtn) {
+            modelManagerBtn.addEventListener('click', () => this.openManager('modelmanager'));
+        }
+
         this.loadVersion(view);
+    }
+
+    /**
+     * Ask the shell to open one of the manager tabs.
+     *
+     * Through a document event, not an import: this component is shared by the app
+     * browser and the File Manager, and only the browser has tabs to open - tabs.js
+     * is what listens for ``saus:open-manager``.
+     */
+    openManager(kind) {
+        document.dispatchEvent(new CustomEvent('saus:open-manager', { detail: { kind } }));
+    }
+
+    /**
+     * The shared shell preferences - the same localStorage key the browser's
+     * `state.js` manager uses.
+     *
+     * `PreferencesManager`'s constructor merges the *stored* object over these
+     * defaults, so writing from here carries every other preference along and
+     * cannot drop the shell's settings.
+     */
+    preferences() {
+        if (!this._prefs) {
+            // Both off by default: a fresh install shows no parked apps and stays quiet.
+            this._prefs = new PreferencesManager({
+                showDeprecatedApps: false,
+                playSoundOnComplete: false,
+            });
+        }
+        return this._prefs;
+    }
+
+    /**
+     * Persist the switch, then tell the shell.
+     *
+     * The browser listens for `saus:preference-changed`, re-reads its now-stale copy
+     * and repaints the explorer. A document event rather than an import, because this
+     * component lives in `core/` and must not depend on the browser's modules -
+     * exactly why `ui.js` dispatches `saus:open-app` for the tab strip.
+     */
+    setShowDeprecatedApps(value) {
+        const on = value === true;
+        this.preferences().set('showDeprecatedApps', on);
+        document.dispatchEvent(new CustomEvent('saus:preference-changed', {
+            detail: { key: 'showDeprecatedApps', value: on },
+        }));
+        this.showToast(on ? 'Deprecated apps: shown' : 'Deprecated apps: hidden',
+            'success', 1500);
+    }
+
+    /**
+     * Persist the completion-sound switch.
+     *
+     * The app page reads this preference itself when a generation finishes (its own
+     * `PreferencesManager` over the same `SausMenuPref` key), so nothing has to be sent
+     * anywhere - the event below is for the shell's in-memory copy.
+     */
+    setPlaySoundOnComplete(value) {
+        const on = value === true;
+        this.preferences().set('playSoundOnComplete', on);
+        document.dispatchEvent(new CustomEvent('saus:preference-changed', {
+            detail: { key: 'playSoundOnComplete', value: on },
+        }));
+        this.showToast(on ? 'Completion sound: on' : 'Completion sound: off',
+            'success', 1500);
     }
 
     /** The installed version, read once and then cached: the pane re-renders. */
@@ -317,10 +455,79 @@ export class SettingsComponent {
         style.id = 'saus-settings-styles';
         style.innerHTML = `
             .settings-section { margin-bottom: 22px; }
+            /* The manager buttons wear the theme picker's own look - same box, same
+               name + hint - with an icon tile where a theme swatch sits. */
+            .theme-manager-icon {
+                flex: 0 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 26px;
+                height: 26px;
+                border-radius: 6px;
+                background-color: var(--color-accent-soft);
+                color: var(--color-accent);
+                font-size: 0.85rem;
+            }
             .settings-hint {
                 margin: 4px 0 12px;
                 color: var(--color-text-muted);
                 font-size: 0.85em;
+            }
+            /* Scoped with .settings-form on purpose: the host's settings.css sets
+               .settings-form label { display: block }, which wins over a bare
+               .settings-switch (specificity 0,1,1 beats 0,1,0). The label then
+               stops being a flex row, the track span stays inline, its width/height
+               are ignored and the knob floats over the label text. Never put a
+               backtick in here - this block lives inside a JS template literal. */
+            .settings-form .settings-switch {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin: 0;
+                font-weight: normal;
+                cursor: pointer;
+                user-select: none;
+            }
+            .settings-form .settings-switch input {
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                opacity: 0;
+                pointer-events: none;
+            }
+            .settings-form .settings-switch-text { color: var(--color-primary-text); }
+            .settings-form .settings-switch-track {
+                position: relative;
+                flex: 0 0 auto;
+                width: 44px;
+                height: 24px;
+                border-radius: 12px;
+                background-color: var(--color-neutral);        /* off = grey */
+                transition: background-color 0.15s ease;
+            }
+            .settings-form .settings-switch-track::after {
+                content: '';
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background-color: var(--color-text-on-accent);
+                transition: transform 0.15s ease;
+            }
+            /* The general sibling combinator (~), not (+): the text sits between the
+               input and the track. */
+            .settings-form .settings-switch input:checked ~ .settings-switch-track {
+                background-color: var(--color-success);        /* on = green */
+            }
+            .settings-form .settings-switch input:checked ~ .settings-switch-track::after {
+                transform: translateX(20px);
+            }
+            .settings-form .settings-switch input:focus-visible ~ .settings-switch-track {
+                outline: 2px solid var(--color-focus);
+                outline-offset: 2px;
             }
             .theme-options { display: flex; flex-wrap: wrap; gap: 10px; }
             .theme-option {

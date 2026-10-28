@@ -1,12 +1,20 @@
 /* Theme palette: Night (default) / Day / Fire. See /core/css/themes.css. */
 @import url('/core/css/themes.css');
+/* The completion notice: the shell renders it, and the shell does not load this file -
+   see the note in notices.css. */
+@import url('/core/css/notices.css');
 
 /* Reset and Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif, 'Arial Narrow', Arial, sans-serif;
+    /* A generic family has to come last: with `sans-serif` in second place the two
+       named families after it were unreachable, and the UI silently fell through to
+       the browser default. 'Roboto' stays first for the machines that have it; the
+       rest is the platform stack already used by the canvas plugins. */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Palette comes from /core/css/themes.css (imported above). */
@@ -255,10 +263,12 @@ a {
     z-index: 100;
 }
 
+/* The title is its own header line; the box and its unfold handle take the full
+   width below it, instead of sharing one row with the label. */
 .prompt-container {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     background-color: var(--color-background-secondary);
     border-bottom: 1px dashed var(--color-border);
     padding: 12px;
@@ -266,19 +276,19 @@ a {
     position: sticky;
     top: 0;
     z-index: 100;
-    gap: 10px;
+    gap: 6px;
 }
 
 .prompt-input-wrapper {
     display: flex;
     flex-direction: column;
-    flex: 3;
+    width: 100%;
 }
 
 .title-text {
-    flex: 1;
+    width: 100%;
     font-weight: bold;
-    margin-top: 6px;
+    margin-top: 0;
 }
 
 .prompt-textarea {
@@ -321,14 +331,6 @@ a {
 
 .expand-arrow-bottom.rotated {
     transform: rotate(180deg);
-}
-
-#expand-btn {
-    cursor: pointer;
-    padding: 0 10px;
-    transition: transform 0.3s;
-    user-select: none;
-
 }
 
 /* Rotates the arrow when expanded */
@@ -666,6 +668,14 @@ input[type="number"] {
     border: 1px solid var(--color-border);
     border-radius: 6px;
     cursor: pointer;
+    /* The three buttons are one box size, so centring the glyph is what keeps them on
+       one line: an "R" and a "-"/"+" do not share a baseline, and the letter used to sit
+       a couple of pixels high next to its neighbours. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
     transition: background-color 0.15s ease, color 0.15s ease,
         border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -711,21 +721,6 @@ input[type="number"] {
     width: 100%;
     margin-bottom: 4px;
     padding: 5px;
-}
-
-.dim-model-select {
-    margin-bottom: 8px;
-    width: 100%;
-}
-
-.dim-model-select select {
-    width: 100%;
-    padding: 6px;
-    background-color: var(--color-background-secondary);
-    color: var(--color-primary-text);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    outline: none;
 }
 
 .dim-icons-container {
@@ -777,12 +772,6 @@ input[type="number"] {
 .ratio-title {
     font-weight: bold;
     margin-bottom: 6px;
-}
-
-.ratio-icons-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
 }
 
 .ratio-icon-btn {
@@ -931,17 +920,6 @@ input[type="number"] {
 #aspect-ratio-selector {
     width: 100%;
     padding: 0;
-}
-
-.aspect-ratio-selector__select {
-    /* border-top: 1px solid var(--color-background-secondary); */
-    background-color: var(--color-background-secondary);
-    color: var(--color-primary-text);
-    /* padding: 5px; */
-    width: 100%;
-    outline: none;
-    border: none;
-    margin-top: 6px;
 } 
 
 .loader {
@@ -997,28 +975,6 @@ select:focus {
 select option:hover {
     background-color: var(--color-primary-text);
     color: var(--color-background-secondary);
-}
-
-.input-component-wrapper {
-    display: flex;
-    align-items: center;
-    justify-items: space-evenly;
-    background-color: var(--color-background-secondary);
-    padding: 10px 14px; /* Reduced padding for a narrower component */
-    /* border: 1px solid var(--color-border); */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: var(--color-primary-text);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin:  0;
-    transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
-    width: 100%;
-    /* flex-grow: 1; */
-
-}
-
-.input-component-wrapper:hover {
-    /* box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15); */
-    /* border-color: var(--color-button-primary-hover); */
 }
 
 .input-container {
@@ -1383,6 +1339,21 @@ button:hover {
 
 }
 
+/* A recent result can be dragged onto a "Load Image" / "Video" input - in this app
+   or another one (see core/js/common/scripts/appDrag.js). */
+.history-thumbnail[draggable="true"] {
+    cursor: grab;
+}
+
+.history-thumbnail.dragging {
+    opacity: 0.55;
+}
+
+/* While media is in hand every loader says so. */
+body.saus-dragging .image-loader {
+    border-color: var(--color-border-strong);
+}
+
 .content .mid-col #image-container img,
 .content .mid-col #image-container video {
     width: auto;
@@ -1406,36 +1377,92 @@ button:hover {
 
 }
 
+/* ------------------------------------------------------------------ *
+ * Media loader (the "Load Image" / "Video" input)
+ *
+ * One rounded card per input, matching the rest of SAUS: a muted caption
+ * header that is also the browse button, and a body that reads as a drop
+ * zone rather than a picture frame. The placeholder stays a *hint*, so it
+ * is drawn at ~60% of the panel instead of filling it edge to edge - only a
+ * real image or video takes the whole room. JS marks that state with
+ * `.placeholder` on the media element.
+ * ------------------------------------------------------------------ */
+
+#load-image-container {
+    /* Narrower than it was: the media area beside it is what needs the room. */
+    width: 15%;
+    padding: 10px;
+    border: none;
+}
+
 .image-loader-title {
     display: flex;
+    gap: 8px;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-background-secondary);
+    width: 100%;
+    padding: 7px 10px;
+    background-color: var(--color-surface-alt);
     color: var(--color-primary-text);
-    /* font-size: 1.2em; */
-    font-weight: bold;
-    border: 1px dashed var(--color-border);
+    font-weight: 600;
+    font-size: 0.92em;
+    border: 1px solid var(--color-border);
     border-bottom: none;
-    padding: 5px;
+    border-radius: 6px 6px 0 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
-#load-image-container {
-    width: 20%;
-    border: 1px dashed var(--color-border);
-    padding: 10px;
 
+.image-loader-title:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-accent-hover);
 }
 
 .image-loader {
     width: 100%;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
     margin-bottom: 10px;
-    padding-bottom: 10px;
+    padding: 10px 10px 26px;
+    background-color: var(--color-input-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 6px 6px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-/* Fix to load the video loading in the right size*/
+.image-loader:hover {
+    border-color: var(--color-border-hover);
+}
+
+/* The hint line, so an empty loader says what it accepts. */
+.image-loader::after {
+    content: 'Click or drop a file';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 7px;
+    text-align: center;
+    font-size: 0.72em;
+    color: var(--color-text-subtle);
+    pointer-events: none;
+}
+
+/* Dragging over it (a file from the desktop or from Recent). */
+.image-loader.highlight {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+}
+
+.image-loader.highlight::after {
+    content: 'Drop to load';
+    color: var(--color-accent-hover);
+}
+
+/* Keep the video preview in the right size (it is a real element now). */
 .image-loader img,
-.image-loader video 
-    {
+.image-loader video {
     display: block;
     width: 100% !important; /* Force same width */
     height: auto !important; /* Let height adjust automatically */
@@ -1444,9 +1471,83 @@ button:hover {
     left: auto !important;
     transform: none !important;
     object-fit: contain;
-    border: 1px dashed var(--color-border);
-
+    border: none;
 }
+
+/* The empty state is a hint: a muted glyph, not a picture that fills the card. */
+.image-loader .image-loader-placeholder {
+    font-size: 2.1em;
+    color: var(--color-text-subtle);
+    opacity: 0.55;
+}
+
+/* ------------------------------------------------------------------ *
+ * App toggles: the same switch the Settings pane uses.
+ *
+ * The old control was a checkbox with an OFF/ON slot and a curtain; the two
+ * sit inches apart in the same window, so they now share one look - grey off,
+ * green on, white knob. The checkbox stays the control (focus, keyboard, aria)
+ * and is only made invisible behind the track.
+ * ------------------------------------------------------------------ */
+
+.toggle-component {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.toggle-component .toggle {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.toggle-track {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: var(--color-neutral);
+    transition: background-color 0.15s ease;
+    /* The invisible checkbox behind this is the control; the track must not swallow
+       the click, or the switch only responds to the keyboard. */
+    pointer-events: none;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--color-highlight);
+    transition: transform 0.15s ease;
+}
+
+.toggle-component .toggle:checked + .toggle-track {
+    background-color: var(--color-success);
+}
+
+.toggle-component .toggle:checked + .toggle-track::after {
+    transform: translateX(18px);
+}
+
+.toggle-component .toggle:focus-visible + .toggle-track {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ *
+ * The end-of-generation notice lives in /core/css/notices.css, imported at
+ * the top of this file: the shell renders it, and the shell never loads this
+ * stylesheet - so a copy here alone would leave the notice unstyled.
+ * ------------------------------------------------------------------ */
 
 /* #load-image-container img {
     max-width: 100%;
@@ -1697,49 +1798,10 @@ button:hover {
   /* background-color: #e0f7fa; */
   /* color: #006064; */
 }
-.modal-main {
-  display: flex;
-  flex-direction: row;
-  gap: 24px;
-}
 .left-panel {
   flex: 2;
   display: flex;
   flex-direction: column;
-}
- .theme-form fieldset {
-  border: none;
-  margin-bottom: 16px;
-}
-.theme-form legend {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-}
-.form-group label {
-  margin-bottom: 4px;
-  font-size: 0.9rem;
-}
-.form-group input[type="text"],
-.form-group select {
-  padding: 8px;
-  font-size: 1rem;
-  border: none;
-  /* border-radius: 4px; */
-  color: var(--color-text-muted) !important;
-  background-color: var(--color-surface-alt);
-  border: none;
-  border-bottom: 1px solid var(--color-border-strong);
-  margin-bottom: 10px;
-} 
-.form-group input[type="text"]:focus,
-.form-group select:focus {
-    border: none;
-    border-bottom: 1px solid var(--color-border-hover);
 } 
 .form-actions {
   display: flex;
@@ -1767,10 +1829,6 @@ button:hover {
 }
 .fade-out {
     animation: fadeOut 0.3s forwards;
-}
-
-.fade-in {
-    animation: fadeIn 0.3s forwards;
 }
 @keyframes fadeSlideDown {
     from {
@@ -1865,10 +1923,22 @@ html:not(.css-loading) body {
     cursor: pointer;
     z-index: 1002; 
     user-select: none;
+    /* The X inherited the panel's text colour, so on light media it vanished.
+       The lightbox arrows use --color-button-primary - match them so the close
+       button reads as a control, and give it a real hit area rather than a
+       glyph-sized one. */
+    color: var(--color-button-primary);
+    line-height: 1;
+    padding: 0 8px 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
 }
 .lightbox-close:hover,
 .lightbox-close:focus {
-    color: var(--color-text-muted);
+    /* Red reads as "close / dismiss"; the old hover dimmed it to
+       --color-text-muted, which is the opposite of findable. */
+    color: var(--color-danger);
+    background-color: var(--color-background-secondary);
     text-decoration: none;
     cursor: pointer;
 }
@@ -2095,9 +2165,6 @@ html:not(.css-loading) body {
     .cbp-brush-ui-input-group input {
     flex: 1;
     }
-    .cbp-hidden-cursor {
-    cursor: none !important;
-    }
     
     .mbp-container * {
     box-sizing: border-box;
@@ -2119,15 +2186,6 @@ html:not(.css-loading) body {
         /* padding: 0.5rem; */
         /* border: solid 1px var(--color-button-primary-hover); */
         /* background-color: var(--color-background-secondary); */
-
-    }
-    
-    .mbp-config-item-buttons-group{ 
-        /* background: red; */
-        display: flex;
-        align-items: center;
-        flex-direction: row;
-        color: var(--color-button-secondary-text);
 
     }
     .mbp-config-item {
@@ -2364,6 +2422,9 @@ html:not(.css-loading) body {
     align-items: center;
     /* margin: 0.5em;  */
     width: 100%;
+    /* The switch used to end flush against the panel edge; the rows beside it carry
+       their own inset, so this one needs the same breathing room. */
+    padding-right: 8px;
     background-color: var(--color-background-secondary);
     margin-bottom: 0.5em; 
     /* padding: 6px 0; */
@@ -2410,22 +2471,22 @@ html:not(.css-loading) body {
     cursor: pointer;
     background-color: var(--color-background);
 }
-.toggle, .toggle:before, .slot__label, .curtain {
+.toggle, .toggle:before{
     transition-property: background-color, transform, visibility;
     transition-duration: 0.25s;
     transition-timing-function: ease-in, cubic-bezier(0.6,0.2,0.4,1.5), linear;
 
 }
-.toggle:before, .slot, .slot__label {
+.toggle:before, .slot{
     display: block;
 
 }
-.toggle:before, .curtain {
+.toggle:before{
     position: absolute;
     
 }
 
-.toggle:checked, .curtain {
+.toggle:checked{
     
 }
 
@@ -2480,45 +2541,6 @@ html:not(.css-loading) body {
     font-weight: bold;
     padding-right: 6px;
     color: var(--color-primary-text);
-}
-
-.slot__label {
-    transform-origin: 50% 0;
-    /* color: red; */
-    /* background: green; */
-    letter-spacing: 0.2em;
-    line-height: 0.8em;
-    overflow: hidden;
-    height: 1em;
-    text-indent: -0.8em;
-
-}
-
-.slot__label:nth-child(2) {
-    transform-origin: 50% 100%;
-}
-
-.toggle:checked ~ .slot .slot__label {
-    transform: translateY(-50%) scaleY(0);
-    color: var(--color-button-secondary-text);
-
-}
-
-.toggle:checked ~ .slot .slot__label:nth-child(2) {
-    transform: translateY(-100%) scaleY(1);
-} 
-.curtain {
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.toggle:checked ~ .curtain {
-    transform: scaleX(1);
 }
 
 @media (max-width: 600px) {
@@ -2759,31 +2781,6 @@ html:not(.css-loading) body {
     background-color: var(--color-background-pattern) !important;
 }
 
-.modelPreviewContextMenu {
-    border-radius: 4px;
-}
-
-.contextMenuOption {
-    cursor: pointer;
-    padding: 4px 0;
-}
-
-.contextMenuOption:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.drag-over {
-    border: 2px dashed var(--color-border);
-}
-
-.drop-down-element .dropdownElementPreviewImage {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    margin-left: 8px;
-    border-radius: 2px;
-    /* background-color: transparent; */
-}
 .selected-item-scroll {
     animation: highlight 0.1s ease-in-out;
 }

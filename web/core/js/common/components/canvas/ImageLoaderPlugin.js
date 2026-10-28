@@ -521,7 +521,6 @@ export class ImageLoaderPlugin extends CanvasPlugin {
     }
 
     getOriginalImage(id) {
-        // console.log("getOriginalImage", this.loadedImages, this.originalImages);
         if (this.loadedImages.length === 0) {
             console.error('No images loaded.');
             return null;
@@ -532,7 +531,6 @@ export class ImageLoaderPlugin extends CanvasPlugin {
             dataURL = this.originalImages[id];
         } else {
             const latestImage = this.loadedImages[this.loadedImages.length - 1];
-            // console.log("getOriginalImage latestImage", latestImage, this.originalImages);
             dataURL = this.originalImages[latestImage.id];
         }
 

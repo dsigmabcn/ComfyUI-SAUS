@@ -1,19 +1,6 @@
-"""A combo has to survive a node type that /object_info cannot answer for.
+"""A combo has to survive a node type ``/object_info`` cannot answer for."""
 
-An app config names the node a dropdown reads its option list from in `url`, and
-that value is not always a node type: the App Builder used to save ComfyUI's
-per-node uuid (`c291ceec-...`), which turned the widget into "Missing input ..."
-where the Advanced tab should show a dropdown. The widget therefore keeps the
-config's url as its first guess - several apps point a combo at another node on
-purpose, e.g. a `sampler_name` list served by KSampler for a KSamplerSelect -
-and falls back to the class the workflow itself names for the node, which is the
-fallback ``AspectRatioSelector`` already used.
-
-The behaviour is covered by the browser-free harness next to this file
-(``tests/js/dropdown_lookup.harness.mjs``), run through node when it is
-installed. Runs under pytest or directly (``python tests/test_dropdown_lookup.py``).
-"""
-
+import json
 import shutil
 import subprocess
 import sys
@@ -72,6 +59,28 @@ def test_an_unusable_type_is_retried_then_reported():
     message = source.split('displayMissingComponentMessage()', 1)[1]
     assert 'Missing input' in message, 'the wording the UI always had'
     assert 'looked.join' in message, 'and it names every type it asked for'
+
+
+def test_a_dropdown_can_be_narrowed_to_an_allow_list():
+    """An app may offer only the models it is built around."""
+    source = DROPDOWN_JS.read_text(encoding='utf-8')
+
+    assert 'this.allowedOptions(options)' in source, \
+        'populate() must narrow the combo before it reaches the widget'
+    assert 'const only = this.config.options;' in source, 'reading the app allow-list'
+    assert 'Array.isArray(only)' in source, 'which is only honoured as a real list'
+    assert 'only.filter((name) => available.has(name))' in source, \
+        'a name the node does not offer is dropped'
+    assert 'return options;' in source, 'and the full list is the fallback'
+
+    # The app that needs it pins exactly the four ESRGAN-family models it is built for.
+    config = json.loads((ROOT / 'web' / 'apps' / 'image-upscale-with-model'
+                         / 'appConfig.json').read_text(encoding='utf-8'))
+    model_dropdown = next(d for d in config['dropdowns'] if d.get('options'))
+    assert model_dropdown['options'] == [
+        'RealESRGAN_x4plus.safetensors', 'RealESRGAN_x2.pth',
+        '4x-UltraSharp.pth', '4x-AnimeSharp.pth',
+    ], 'Upscale with Model offers exactly its four models'
 
 
 def test_dropdown_harness():

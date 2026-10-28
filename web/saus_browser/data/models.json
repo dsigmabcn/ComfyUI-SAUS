@@ -145,30 +145,6 @@
       "thumbnail": "",
       "source": "migrated"
     },
-    "ltx-2-19b-dev-fp8.safetensors": {
-      "name": "LTX-2 19B DEV FP8",
-      "type": "CHECKPOINT",
-      "url": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors",
-      "directory": "/checkpoints/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "ltx-2-19b-distilled-lora-384.safetensors": {
-      "name": "LTX-2 19B DISTILLED LORA",
-      "type": "LORA",
-      "url": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-lora-384.safetensors",
-      "directory": "/loras/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
-    "ltx-2-spatial-upscaler-x2-1.0.safetensors": {
-      "name": "LTX-2 Spatial Upscaler",
-      "type": "Latent Upscaler",
-      "url": "https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors",
-      "directory": "/latent_upscale_models/",
-      "thumbnail": "",
-      "source": "migrated"
-    },
     "wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors": {
       "name": "WAN 2.2 T2V HIGH (fp8)",
       "type": "Diffusion model",
@@ -312,14 +288,6 @@
       "directory": "text_encoders",
       "thumbnail": "",
       "source": "builder"
-    },
-    "full_encoder_small_decoder.safetensors": {
-      "name": "full_encoder_small_decoder.safetensors",
-      "type": "VAE",
-      "url": "https://huggingface.co/black-forest-labs/FLUX.2-small-decoder/resolve/main/full_encoder_small_decoder.safetensors",
-      "directory": "/vae/",
-      "thumbnail": "",
-      "source": "manual"
     },
     "qwen_image_fp8_e4m3fn.safetensors": {
       "name": "qwen_image_fp8_e4m3fn.safetensors",
@@ -529,19 +497,203 @@
       "thumbnail": "",
       "source": "builder"
     },
-    "gemma_3_12B_it_fp4_mixed.safetensors": {
-      "name": "gemma_3_12B_it_fp4_mixed.safetensors",
+    "flux3_image_klein_base_int8_convrot.safetensors": {
+      "name": "flux3_image_klein_base_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/KoalaNation/FLUX-3-KLEIN-MODELS/resolve/main/diffusion_models/flux3_image_klein_base_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "flux3_image_klein_sd_int8_convrot.safetensors": {
+      "name": "flux3_image_klein_sd_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/KoalaNation/FLUX-3-KLEIN-MODELS/resolve/main/diffusion_models/flux3_image_klein_sd_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen3vl_4b_int8_convrot.safetensors": {
+      "name": "qwen3vl_4b_int8_convrot.safetensors",
       "type": "TEXT ENCODER",
-      "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+      "url": "https://huggingface.co/KoalaNation/FLUX-3-KLEIN-MODELS/resolve/main/text_encoders/qwen3vl_4b_int8_convrot.safetensors",
       "directory": "/text_encoders/",
       "thumbnail": "",
-      "source": "migrated"
+      "source": "builder"
     },
-    "flux-2-klein-base-9b-fp8.safetensors": {
-      "name": "flux-2-klein-base-9b-fp8.safetensors",
+    "qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors": {
+      "name": "qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/KoalaNation/FLUX-3-KLEIN-MODELS/resolve/main/text_encoders/qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+      "directory": "/text_encoders/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "seedvr2_7b_int8_convrot.safetensors": {
+      "name": "seedvr2_7b_int8_convrot.safetensors",
       "type": "Diffusion model",
-      "url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9b-fp8",
-      "directory": "diffusion_models",
+      "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/diffusion_models/seedvr2_7b_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "seedvr2_ema_vae_fp16.safetensors": {
+      "name": "seedvr2_ema_vae_fp16.safetensors",
+      "type": "VAE",
+      "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/vae/seedvr2_ema_vae_fp16.safetensors",
+      "directory": "/vae/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "sdpose_wholebody_fp16.safetensors": {
+      "name": "sdpose_wholebody_fp16.safetensors",
+      "type": "CHECKPOINT",
+      "url": "https://huggingface.co/Comfy-Org/SDPose/resolve/main/checkpoints/sdpose_wholebody_fp16.safetensors",
+      "directory": "/checkpoints/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "birefnet.safetensors": {
+      "name": "birefnet.safetensors",
+      "type": "Background removal",
+      "url": "https://huggingface.co/Comfy-Org/BiRefNet/resolve/main/background_removal/birefnet.safetensors",
+      "directory": "background_removal",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "depth_anything_3_mono_large.safetensors": {
+      "name": "depth_anything_3_mono_large.safetensors",
+      "type": "Depth estimation",
+      "url": "https://huggingface.co/Comfy-Org/Depth-Anything-3/resolve/main/geometry_estimation/depth_anything_3_mono_large.safetensors",
+      "directory": "geometry_estimation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "RealESRGAN_x4plus.safetensors": {
+      "name": "RealESRGAN_x4plus.safetensors",
+      "type": "upscaler",
+      "url": "https://huggingface.co/Comfy-Org/Real-ESRGAN_repackaged/resolve/main/RealESRGAN_x4plus.safetensors",
+      "directory": "upscale_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "RealESRGAN_x2.pth": {
+      "name": "RealESRGAN_x2.pth",
+      "type": "upscaler",
+      "url": "https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x2.pth",
+      "directory": "upscale_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "4x-UltraSharp.pth": {
+      "name": "4x-UltraSharp.pth",
+      "type": "upscaler",
+      "url": "https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth",
+      "directory": "upscale_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "4x-AnimeSharp.pth": {
+      "name": "4x-AnimeSharp.pth",
+      "type": "upscaler",
+      "url": "https://huggingface.co/Harvey6969/4x-AnimeSharp/resolve/main/4x-AnimeSharp.pth",
+      "directory": "upscale_models",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "seedvr2_3b_int8_convrot.safetensors": {
+      "name": "seedvr2_3b_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/diffusion_models/seedvr2_3b_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "sam3.1_multiplex_fp16.safetensors": {
+      "name": "sam3.1_multiplex_fp16.safetensors",
+      "type": "CHECKPOINT",
+      "url": "https://huggingface.co/Comfy-Org/sam3.1/resolve/main/checkpoints/sam3.1_multiplex_fp16.safetensors",
+      "directory": "/checkpoints/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "film_net_fp16.safetensors": {
+      "name": "film_net_fp16.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/film_net_fp16.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "rife_v4.25.safetensors": {
+      "name": "rife_v4.25.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.25.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "rife_v4.25_heavy.safetensors": {
+      "name": "rife_v4.25_heavy.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.25_heavy.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "rife_v4.25_lite.safetensors": {
+      "name": "rife_v4.25_lite.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.25_lite.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "rife_v4.26.safetensors": {
+      "name": "rife_v4.26.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.26.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "rife_v4.26_heavy.safetensors": {
+      "name": "rife_v4.26_heavy.safetensors",
+      "type": "Frame interpolation",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.26_heavy.safetensors",
+      "directory": "frame_interpolation",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen_image_2.1_turbo_int8_convrot.safetensors": {
+      "name": "qwen_image_2.1_turbo_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_turbo_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "flux2-vae_small.safetensors": {
+      "name": "flux2-vae_small.safetensors",
+      "type": "VAE",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae_small.safetensors",
+      "directory": "/vae/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "moss_image_sft_int8_convrot.safetensors": {
+      "name": "moss_image_sft_int8_convrot.safetensors",
+      "type": "Diffusion model",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_int8_convrot.safetensors",
+      "directory": "/diffusion_models/",
+      "thumbnail": "",
+      "source": "builder"
+    },
+    "qwen3.5_9b_w4a8_gptq.safetensors": {
+      "name": "qwen3.5_9b_w4a8_gptq.safetensors",
+      "type": "TEXT ENCODER",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_w4a8_gptq.safetensors",
+      "directory": "/text_encoders/",
       "thumbnail": "",
       "source": "builder"
     }

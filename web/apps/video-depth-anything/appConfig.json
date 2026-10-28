@@ -1,0 +1,142 @@
+{
+  "id": "viddepth3",
+  "name": "Video Depth (Depth Anything 3)",
+  "url": "video-depth-anything",
+  "description": "Estimate a depth map for every frame of a video with Depth Anything 3.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "DEPTH ANYTHING 3",
+    "models": [
+      "depth_anything_3_mono_large.safetensors"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesviddepth3",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "14_90.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipviddepth3",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "14_90.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "resolutionviddepth3",
+      "label": "Resolution",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "14_5.inputs.resolution",
+      "defValue": 504,
+      "minValue": 64,
+      "maxValue": 2048,
+      "step": 16,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixviddepth3",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "88.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideoviddepth3",
+      "label": "Video",
+      "nodePath": "87.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "resizemethodviddepth3",
+      "label": "Resize Method",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "14_5.inputs.resize_method",
+      "url": "DA3Inference",
+      "key": "resize_method"
+    },
+    {
+      "id": "outputviddepth3",
+      "label": "Output",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "14_7.inputs.output",
+      "url": "DA3Render",
+      "key": "output"
+    },
+    {
+      "id": "normalizationviddepth3",
+      "label": "Normalization",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "14_7.inputs.output.normalization",
+      "url": "DA3Render",
+      "key": "output.normalization"
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outviddepth3",
+      "label": "Save Video",
+      "nodeId": "88",
+      "type": "media"
+    }
+  ]
+}

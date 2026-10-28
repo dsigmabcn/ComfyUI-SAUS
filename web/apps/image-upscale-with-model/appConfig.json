@@ -1,0 +1,83 @@
+{
+  "id": "upscalem1",
+  "name": "Upscale with Model",
+  "url": "image-upscale-with-model",
+  "description": "Upscale an image with an ESRGAN-family model (RealESRGAN x2/x4, UltraSharp, AnimeSharp).",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Image tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "UPSCALE MODELS",
+    "models": [
+      "RealESRGAN_x4plus.safetensors",
+      "RealESRGAN_x2.pth",
+      "4x-UltraSharp.pth",
+      "4x-AnimeSharp.pth"
+    ]
+  },
+  "prompts": [],
+  "steppers": [],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixupscalem1",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "5.inputs.filename_prefix",
+      "defValue": "Upscale"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimageupscalem1",
+      "label": "Image",
+      "nodePath": "2.inputs.image"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "upscalemodelupscalem1",
+      "label": "Upscale Model",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "10.inputs.model_name",
+      "url": "UpscaleModelLoader",
+      "key": "model_name",
+      "options": [
+        "RealESRGAN_x4plus.safetensors",
+        "RealESRGAN_x2.pth",
+        "4x-UltraSharp.pth",
+        "4x-AnimeSharp.pth"
+      ]
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outupscalem1",
+      "label": "Save Image",
+      "nodeId": "5",
+      "type": "media"
+    }
+  ]
+}

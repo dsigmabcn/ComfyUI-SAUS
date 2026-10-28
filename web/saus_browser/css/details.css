@@ -1,29 +1,4 @@
-.preview-col {
-    width: 400px;
-    background-color: var(--color-background-secondary);
-    border-left: 1px dashed var(--color-border);
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    transition: width 0.3s ease, padding 0.3s ease, border-left-width 0.3s ease;
-    flex-shrink: 0;
-    overflow-x: hidden;
-}
 
-.preview-col.hidden {
-    display: flex !important;
-    width: 0;
-    padding: 0;
-    border-left-width: 0;
-    overflow: hidden;
-}
-
-.details-header {
-    margin-bottom: 20px;
-    border-bottom: 1px dashed var(--color-border);
-    padding-bottom: 15px;
-}
 
 .details-title {
     font-size: 1.5em;
@@ -64,7 +39,6 @@
    ("qwen_image_2.1_int8_convrot.safetensors"), so it wraps anywhere instead of
    running out of the card. */
 .component-name { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 4px; overflow-wrap: anywhere; }
-.component-filename { font-size: 0.8em; font-style: italic; color: var(--color-text-subtle); display: block; margin-bottom: 0; word-break: break-all; }
 
 .component-actions {
     display: flex;
@@ -261,17 +235,6 @@
     font-weight: bold;
     margin-bottom: 8px;
 }
-
-.variant-line {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    font-size: 0.85em;
-    margin-bottom: 3px;
-}
-
-.variant-key { color: var(--color-text-faint); }
-.variant-val { color: var(--color-primary-text); word-break: break-all; text-align: right; }
 
 .variant-settings {
     margin-top: 8px;

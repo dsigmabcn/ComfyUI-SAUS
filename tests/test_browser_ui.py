@@ -1,15 +1,4 @@
-"""The browser / app UI contracts behind the last round of fixes.
-
-Half of these are static on purpose: the browser modules (``sidebar.js``,
-``tabs.js``) and the app runtime (``main.js``) import DOM-bound modules, so they
-cannot be loaded in a bare node. What is checked is therefore the shape of the
-code that implements each behaviour - the call, the event, the guard - plus the
-palette numbers where a colour was the bug. The console dock's resize maths,
-which is pure arithmetic over a stubbed DOM, is executed for real by
-``tests/js/console_dock.harness.mjs`` (run through node when it is installed).
-
-Runs under pytest or directly (``python tests/test_browser_ui.py``).
-"""
+"""The browser / app UI contracts behind the last round of fixes."""
 
 import json
 import re
@@ -35,6 +24,8 @@ CONSOLE_HARNESS = ROOT / 'tests' / 'js' / 'console_dock.harness.mjs'
 MODEL_CARDS_HARNESS = ROOT / 'tests' / 'js' / 'model_status_cards.harness.mjs'
 DROPDOWN_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets' / 'dropdownHandler.js'
 SETTINGS_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'settings.js'
+TOGGLE_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets' / 'ToggleComponent.js'
+NOTICES_CSS = ROOT / 'web' / 'core' / 'css' / 'notices.css'
 FM_HEADER_JS = ROOT / 'web' / 'file_manager' / 'js' / 'header.js'
 DOWNLOADS_PY = ROOT / 'saus' / 'downloads.py'
 MODELS_JS = BROWSER / 'models.js'
@@ -118,9 +109,10 @@ def test_turbo_disappears_when_the_architecture_has_none():
     source = APP_MAIN_JS.read_text(encoding='utf-8')
     branch = source.split('} else if (arch) {', 1)[1].split('const defaultButton', 1)[0]
 
-    assert 'arch.turbo_settings' in branch, 'Turbo is only offered when it exists'
+    assert 'base_settings' not in branch and 'turbo_settings' not in branch, \
+        'the retired per-architecture settings are gone from the mode branch'
     assert branch.count('staticButtons.turbo?.remove()') == 2, \
-        'and its button is removed when it does not (both fallbacks)'
+        'Turbo is removed in both fallbacks (no variants, and no architecture)'
     assert "setButton(staticButtons.hd, 'HD', true)" in branch, \
         'with no variants the app simply runs as HD'
 
@@ -233,13 +225,7 @@ def test_the_day_theme_is_softer_without_losing_its_white_surfaces():
 
 
 def test_the_panel_handles_are_visible_in_the_light_themes():
-    """The handle's glyph has to contrast with the handle, not with the page.
-
-    --color-primary-text was used here: near-white on Night's *light* handle and
-    near-black on Day's *dark* one, so the chevron vanished in both. The handle
-    is painted with --color-button-primary, so it needs that button's own label
-    colour. (Fire keeps the pairing it always had.)
-    """
+    """The handle's glyph has to contrast with the handle, not with the page. --color-primary-text was used here: near-white on Night's *light* handle and near-black on Day's *dark* one, so the chevron vanished in both."""
     handle = _rules(APP_CSS, '.toggle-button')
     assert handle['background-color'] == 'var(--color-button-primary)'
     assert handle['color'] == 'var(--color-button-primary-text)', \
@@ -259,6 +245,35 @@ def test_the_prompt_arrow_has_a_theme_colour():
     assert rule['color'] == 'var(--color-primary-text)', \
         'the ▼ prompt handle is plain text and needs its own theme colour'
     assert _rule(APP_CSS, '.expand-arrow-bottom:hover')['color'] == 'var(--color-accent)'
+
+
+def test_a_variant_can_drive_a_toggle_as_well_as_a_stepper():
+    """A mode may *be* a toggle ("Enable manual sigmas"), so settings must reach toggles."""
+    source = APP_MAIN_JS.read_text(encoding='utf-8')
+
+    assert 'appConfig.steppers.find(s => s.label.toLowerCase() === wanted)' in source, \
+        'a variant still sets a stepper by label'
+    assert '(appConfig.toggles || []).find(t => t.label.toLowerCase() === wanted)' in source, \
+        'and can set a toggle by label too - HD and Turbo differ by exactly one'
+    assert 'widgetInstance.updateValue(stepper ? Number(value) : value)' in source, \
+        'a stepper needs a number; a toggle normalises its own value'
+
+
+def test_the_prompt_title_sits_above_a_full_width_box():
+    """The label is its own line; the box and its unfold handle span the component."""
+    container = _rule(APP_CSS, '.prompt-container')
+    assert container['flex-direction'] == 'column', \
+        'the title is a header line, not a column beside the box'
+    title = _rule(APP_CSS, '.title-text')
+    assert title['width'] == '100%', 'the title spans the component'
+    assert title.get('flex') in (None, 'none'), \
+        'and it no longer shares a row with the box'
+    wrapper = _rule(APP_CSS, '.prompt-input-wrapper')
+    assert wrapper['width'] == '100%', 'the box takes the whole width'
+    assert wrapper.get('flex') in (None, 'none'), \
+        'not a fraction of a row that no longer exists'
+    assert _rule(APP_CSS, '.expand-arrow-bottom')['width'] == '100%', \
+        'the unfold handle spans the box below it'
 
 
 def test_saus_opens_from_comfyuis_left_toolbar():
@@ -306,11 +321,7 @@ def test_the_rail_entry_wears_a_solid_flame():
 
 
 def test_the_rail_entry_opens_the_app_instead_of_a_panel():
-    """ComfyUI's tab API has no action hook: a tab click toggles its side panel.
-
-    The click is therefore taken in the capture phase (before the tab's own
-    handler) and turned into opening the app page.
-    """
+    """ComfyUI's tab API has no action hook: a tab click toggles its side panel."""
     source = RAIL_JS.read_text(encoding='utf-8')
 
     assert 'bindRailEntry' in source, 'the click binding exists'
@@ -323,12 +334,7 @@ def test_the_rail_entry_opens_the_app_instead_of_a_panel():
 
 
 def test_a_confirmation_opened_from_the_information_modal_stays_in_front():
-    """Deleting a model asks "are you sure?" while the information modal is open.
-
-    The information overlay sits at 20000, so the generic modal overlay - the one
-    every confirmation uses - has to be above it. It used to be at 2000, which
-    hid the question behind the very panel it was asked about.
-    """
+    """Deleting a model asks "are you sure?" while the information modal is open."""
     details = _rule(DETAILS_CSS, '.app-details-overlay')
     modal = _rule(MODALS_CSS, '.modal-overlay')
 
@@ -338,13 +344,44 @@ def test_a_confirmation_opened_from_the_information_modal_stays_in_front():
         f"the confirmation ({modal['z-index']}) is behind the information modal ({details['z-index']})"
 
 
-def test_the_dots_recover_after_a_delete():
-    """Dropping the status cache has to come with a re-check, or the dots stay grey.
+def test_a_toast_reports_in_front_of_the_information_modal():
+    """A toast says what a button inside the information modal just did."""
+    details = int(_rule(DETAILS_CSS, '.app-details-overlay')['z-index'])
+    confirm = int(_rule(MODALS_CSS, '.modal-overlay')['z-index'])
 
-    ``invalidateStatusCache()`` fires the status-change handler with an empty
-    cache; repainting alone would leave every visible row on "checking" until the
-    panel was rebuilt. The handler therefore warms the visible rows as well.
-    """
+    for path, selector in ((MODALS_CSS, '#toast-container'), (NOTICES_CSS, '#saus-notices')):
+        layer = int(_rule(path, selector)['z-index'])
+        assert layer > details, \
+            f'{selector} ({layer}) is behind the information panel ({details})'
+        assert layer > confirm, \
+            f'{selector} ({layer}) is behind a confirmation opened from it ({confirm})'
+
+
+def test_the_information_panel_closes_when_the_app_opens_in_a_tab():
+    """The panel is the way *to* an app, not a place to stay."""
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert "document.addEventListener('saus:open-app', close);" in source, \
+        'the panel listens for the event its own Open App button dispatches'
+    assert "document.removeEventListener('saus:open-app', close);" in source, \
+        'and unsubscribes when it closes, instead of leaving a dead listener behind'
+
+
+def test_the_app_toggle_takes_a_click_anywhere_on_it():
+    """A click on the visible switch has to reach its checkbox."""
+    track = _rule(APP_CSS, '.toggle-track')
+    assert track.get('pointer-events') == 'none', \
+        'the track must not take the click away from the checkbox behind it'
+
+    widget = TOGGLE_JS.read_text(encoding='utf-8')
+    assert '<label class="toggle-component-wrapper">' in widget, \
+        'the row is a label, so its text toggles the switch too'
+    assert _rule(APP_CSS, '.toggle-component .toggle:checked + .toggle-track'), \
+        'and the visual still follows the checkbox'
+
+
+def test_the_dots_recover_after_a_delete():
+    """Dropping the status cache has to come with a re-check, or the dots stay grey."""
     source = (BROWSER / 'sidebar.js').read_text(encoding='utf-8')
     handler = re.search(r'setStatusChangeHandler\(\(\) => \{(.*?)\}\)', source, re.S)
 
@@ -358,11 +395,7 @@ def test_the_dots_recover_after_a_delete():
 
 
 def test_the_console_docks_over_the_workspace_instead_of_a_tab():
-    """The console floats over the bottom of the workspace, ComfyUI-style.
-
-    The panes keep their size (absolute, not a flex sibling), it is reachable
-    from the rail, and it is no longer a tab kind.
-    """
+    """The console floats over the bottom of the workspace, ComfyUI-style."""
     markup = BROWSER_HTML.read_text(encoding='utf-8')
 
     assert 'id="consoleDock"' in markup and 'id="consoleDockBody"' in markup, \
@@ -449,12 +482,7 @@ def test_console_dock_harness():
 
 
 def test_the_app_info_button_asks_the_browser_for_the_panel():
-    """The (i) in an app tab opens the shell's information panel.
-
-    The app runs in an iframe and cannot draw the model list with its install
-    buttons, so it asks the shell for it - keeping its own small dialog for the case
-    where the page is opened on its own (no shell around it).
-    """
+    """The (i) in an app tab opens the shell's information panel."""
     app = APP_MAIN_JS.read_text(encoding='utf-8')
     assert 'askParentForAppInfo' in app, 'the app needs a way to ask the shell'
     assert re.search(r"if \(!url \|\| window\.parent === window\) return false;", app), \
@@ -472,37 +500,39 @@ def test_the_app_info_button_asks_the_browser_for_the_panel():
 
 
 def test_the_model_picker_lists_names_only():
-    """No pictures in the picker lists; nesting, search and the row thumbnail stay."""
+    """The picker is names only: no preview image, in the list or in the row."""
     handler = DROPDOWN_JS.read_text(encoding='utf-8')
 
     assert 'dropdownCardImage' not in handler, \
         'the list cards are the name (and its folder), not a 100x100 image'
     assert 'applyPreviewImagesToList' not in handler, 'and the code that filled them is gone'
-    assert 'dropdownElementPreviewImage' in handler, 'the row thumbnail is untouched'
-    assert re.search(r"DROPDOW_ELM_PREVIEW_WORKFLOW_PATHS = \[\s*\n\s*'ckpt_name',\s*\n\s*'unet_name',", handler), \
-        'the paths whose previews are fetched are unchanged'
+    assert 'dropdownElementPreviewImage' not in handler, \
+        'the row shows no model preview thumbnail'
+    assert 'model-preview' not in handler, 'nothing asks a preview API'
+    assert 'modelImagePreviews' not in handler and 'DEFAULT_PREVIEW_THUMBNAIL' not in handler, \
+        'nor caches or falls back to a preview image'
     assert 'createNestedList' in handler and 'createLeanList' in handler, \
         'both list shapes survive'
     assert 'leanListItem' in handler, 'so does the CLIP/VAE style plain list'
-    assert 'dropdownCardImage' not in APP_CSS.read_text(encoding='utf-8'), \
-        'and its dead rule left the stylesheet'
+    css = APP_CSS.read_text(encoding='utf-8')
+    assert 'dropdownCardImage' not in css, 'and its dead rule left the stylesheet'
+    assert 'dropdownElementPreviewImage' not in css and 'modelPreviewContextMenu' not in css, \
+        'as did the preview styles'
 
 
 def test_a_model_in_several_variants_updates_every_card():
-    """A download or a delete has to reach every card that lists the model.
-
-    The same file appears once per variant (plus the shared compulsory section), so
-    stopping at the first match left the other cards stale - one red where three
-    should be. The in-flight download is remembered too, so a panel that is closed
-    and reopened shows the card as it was.
-    """
+    """A download or a delete has to reach every card that lists the model."""
     source = MODELS_JS.read_text(encoding='utf-8')
 
     assert 'const activeDownloads = new Map();' in source, 'downloads in flight are remembered'
-    assert re.search(r"rememberDownload\(fileId, status, progress\);[\s\S]*?const items = scope", source), \
+    assert re.search(r"rememberDownload\(fileId, status, progress\);[\s\S]*?const items = \[\.\.\.document", source), \
         'and remembered before any card is looked up, so a closed panel keeps it'
-    assert re.search(r"const items = scope\s*\n\s*\? \[\.\.\.scope\.querySelectorAll\('\.component-item'\)\]\.filter", source), \
-        'every matching card is collected'
+    assert re.search(r"document\.querySelectorAll\('\.component-item'\)\]\s*\n\s*\.filter", source), \
+        'every matching card in the document is collected - the app details modal and '
+    assert 'export function updateComponentStatus' in source, \
+        'the shell calls it for every download event'
+    assert "getElementById('app-details-content')" not in source.split('export function updateComponentStatus', 1)[1], \
+        'so the lookup may not be scoped to the details modal any more'
     assert 'items.forEach((item) => applyStatusToItem(item, status, progress));' in source, \
         'and each of them is painted'
     assert 'function applyStatusToItem(item, status, progress)' in source, \
@@ -552,12 +582,7 @@ def test_model_status_cards_harness():
 
 
 def test_the_explorer_thumbnail_is_small_and_cacheable():
-    """The row paints a small copy, and the browser may keep it.
-
-    It used to ask for the ~23 KB master with a per-session cache-buster, while the
-    shell marked every /saus/ file no-cache - so opening the panel re-downloaded all
-    the thumbnails every time (29 apps, ~666 KB).
-    """
+    """The row paints a small copy, and the browser may keep it."""
     ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
     assert 'app.thumbnailRow' in ui, 'the row asks for the small copy'
     assert "thumb.loading = 'lazy'" in ui and "thumb.decoding = 'async'" in ui, \
@@ -571,14 +596,96 @@ def test_the_explorer_thumbnail_is_small_and_cacheable():
     assert "return 'no-cache'" in cache, 'while html / js / css keep revalidating'
 
 
-def test_the_app_list_reports_both_thumbnail_sizes():
+def test_the_row_thumbnail_falls_back_to_the_master():
+    """The resolver itself is test_media_formats' job; this is only the wiring."""
     source = (ROOT / 'saus' / 'management.py').read_text(encoding='utf-8')
-    assert "ROW_THUMBNAIL_NAME = 'thumbnail.row.webp'" in source, 'the row name is declared'
-    assert "'thumbnail.row.webp'," in source, 'and is one of the known names'
-    assert 'exclude=(ROW_THUMBNAIL_NAME,)' in source, \
-        'the master never resolves to the small copy'
     assert "config['thumbnailRow']" in source and "or config['thumbnail']" in source, \
-        'and the row falls back to the master when an app ships only one'
+        'the row falls back to the master when an app ships only one'
+
+
+def test_the_information_panels_open_app_button_opens_a_workspace_tab():
+    """The "Open App" button of the details modal must not leave the shell."""
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert "'saus:open-app'" in source, \
+        'the panel asks the shell to open the app, the way the explorer row does'
+    assert 'document.dispatchEvent(new CustomEvent(' in source, \
+        'through a document event, so models.js needs no tabs.js import'
+    assert "state.allApps.find" in source, \
+        'and the catalog entry is resolved, not taken from the data attribute'
+    assert not re.search(r"window\.open\(\s*`saus/", source), \
+        'no window.open() on an app url: that is the new-window bug'
+    assert 'openAppByUrl' not in source, \
+        'tabs.js owns the tab; models.js only asks for it'
+
+
+def test_open_app_reaches_the_tab_strip():
+    """The event the panel dispatches is the one tabs.js turns into a tab."""
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert "document.addEventListener('saus:open-app', handleOpenAppEvent)" in shell, \
+        'main.js wires the event to the tab handler'
+
+    tabs = (BROWSER / 'tabs.js').read_text(encoding='utf-8')
+    assert 'export function handleOpenAppEvent(event)' in tabs, \
+        'tabs.js owns the handler'
+    assert re.search(r"openAppByUrl\(detail\.url, detail\.name, detail\.id\)", tabs), \
+        'which opens the app in the workspace, not a new window'
+
+
+def test_deprecated_apps_are_hidden_until_the_switch_is_on():
+    """Apps in web/apps/deprecated/ stay out of every explorer list by default."""
+    state = (BROWSER / 'state.js').read_text(encoding='utf-8')
+    assert 'showDeprecatedApps: false' in state, \
+        'deprecated apps are hidden unless the user opts in'
+
+    ui = (BROWSER / 'ui.js').read_text(encoding='utf-8')
+    assert "preferencesManager.get('showDeprecatedApps')" in ui, \
+        'the explorer consults the preference'
+    # The rule lives in the shared predicate now, because the App Manager has to
+    # list exactly what the panel may offer (and never a parked app while it is off).
+    listed = ui.split('export function isAppListed(app) {', 1)[1].split('}', 1)[0]
+    assert 'showDeprecatedApps' in listed and 'deprecated' in listed, \
+        'and drops the apps the API flagged deprecated'
+    assert 'state.allApps.filter(isAppShown)' in ui, \
+        'the panel asks for its list through that predicate'
+
+    settings = SETTINGS_JS.read_text(encoding='utf-8')
+    assert 'show-deprecated-apps' in settings, 'the Settings pane owns the switch'
+    assert 'showDeprecatedSwitch' in settings, \
+        'and offers it only where it means something (the browser, not the File Manager)'
+    assert "'saus:preference-changed'" in settings, \
+        'flipping it tells the shell through a document event'
+
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert "document.addEventListener('saus:preference-changed'" in shell, 'the shell listens'
+    assert 'preferencesManager.reload()' in shell, 're-reads its stale copy'
+    assert 'renderExplorer();' in shell, 'and repaints the side panel'
+
+    tabs = (BROWSER / 'tabs.js').read_text(encoding='utf-8')
+    assert 'showDeprecatedSwitch: true' in tabs, \
+        'the app browser is the host that opts in'
+
+
+def test_the_settings_switch_actually_renders():
+    """The switch must survive the host's own `.settings-form label` rule."""
+    settings = SETTINGS_JS.read_text(encoding='utf-8')
+
+    for selector in ('.settings-form .settings-switch {',
+                     '.settings-form .settings-switch-track {'):
+        assert selector in settings, \
+            f'{selector} must be scoped, or .settings-form label wins and collapses it'
+    assert '.settings-form .settings-switch input:checked ~ .settings-switch-track' in settings, \
+        'the checked state needs `~`: the text sits between the input and the track'
+    assert 'var(--color-neutral)' in settings, 'off is grey'
+    assert 'var(--color-success)' in settings, 'on is green'
+
+    text_at = settings.index('<span class="settings-switch-text">')
+    track_at = settings.index('<span class="settings-switch-track"')
+    assert text_at < track_at, 'the label reads "Show deprecated apps" and then the toggle'
+
+    block = settings.split('showDeprecatedSwitch ?')[1].split('` : ')[0]
+    assert 'settings-switch-text' in block, 'the Apps section holds the switch'
+    assert 'settings-hint' not in block, 'and no explanatory paragraph under it'
 
 
 def main():

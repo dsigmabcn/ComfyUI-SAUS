@@ -1,0 +1,330 @@
+/* ------------------------------------------------------------------ *
+ * The manager panes (App Manager, Model Manager).
+ *
+ * They are built-in shell views, not app iframes, so their layout lives here.
+ * Palette variables only - a colour is defined once, in /core/css/themes.css.
+ * ------------------------------------------------------------------ */
+
+.manager-host {
+    height: 100%;
+    overflow: hidden;
+}
+
+.manager-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    padding: 18px 22px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.manager-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.manager-title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-primary-text);
+}
+
+.manager-count {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+/* "Show all": the bulk switch sitting under the filters. It shows everything; hiding
+   stays a per-app decision. */
+.manager-showall {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 4px;
+}
+
+.manager-showall-text {
+    font-weight: 600;
+    color: var(--color-primary-text);
+}
+
+/* Nothing to restore: the switch is a no-op, so it reads as switched off. */
+.manager-showall-disabled {
+    opacity: 0.55;
+}
+
+.manager-showall-disabled .manager-showall-text {
+    font-weight: 400;
+}
+
+/* Section buttons, then the categories of the selected section. */
+.manager-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.manager-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: transparent;
+    color: var(--color-primary-text);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.manager-chip:hover {
+    color: var(--color-accent);
+    border-color: var(--color-border-hover);
+}
+
+.manager-chip.active {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.manager-chip-count {
+    color: var(--color-text-subtle);
+    font-size: 0.8em;
+}
+
+.manager-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.manager-empty {
+    padding: 18px 4px;
+    color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------ App Manager groups
+   Section -> subcategory, three rows of apps across: the panel's own filing,
+   with enough on screen to actually use the space. */
+
+/* The headings carry the filing, so they are not muted text: a section gets an
+   accent bar, a subcategory (or a model kind) a filled band. */
+.manager-section-title {
+    margin: 18px 0 10px;
+    padding-left: 8px;
+    border-left: 3px solid var(--color-accent);
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--color-primary-text);
+}
+
+/* One box per subcategory: a border, not just a heading, so where one group ends
+   and the next begins is obvious at a glance. */
+.manager-subgroup {
+    margin-bottom: 12px;
+    padding: 10px 14px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-background);
+}
+
+.manager-group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--color-background-pattern);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-primary-text);
+}
+
+.manager-group-count {
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+/* A column is as wide as the explorer panel (300px - shell.css), so the number of
+   columns follows the window instead of being pinned to three. */
+.manager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 4px 12px;
+}
+
+@media (max-width: 1050px) {
+    .manager-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------ Model Manager cards
+   As wide as an explorer panel, like the App Manager. Each card is the model (and
+   its install state) in a band on top - the only part the red / green covers - with
+   the apps that need it below, on the page's own background. */
+
+.manager-model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+}
+
+.manager-model-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.manager-model-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: start;
+    /* The band owns the top corners; the apps below sit outside it. */
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.manager-model-main { min-width: 0; }
+
+/* The Install / Uninstall button (or the progress bar) sits top right. */
+.manager-model-row .component-actions {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+/* No background of its own: whatever the page paints shows through, in any theme. */
+.manager-model-uses {
+    padding: 6px 10px 2px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.manager-uses-empty {
+    color: var(--color-text-subtle);
+    font-size: 0.78rem;
+}
+
+/* The apps, filed by category (the label only shows on hover). */
+.manager-apps {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.manager-app-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+}
+
+.manager-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--color-primary-text);
+}
+
+.manager-app-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: cover;
+    background-color: var(--color-scrollbar-track);
+}
+
+.manager-app-more { color: var(--color-text-muted); }
+
+@media (max-width: 1050px) {
+    .manager-model-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Model Manager rows are .component-item (details.css) with two extra lines. */
+.manager-list .component-item {
+    align-items: flex-start;
+}
+
+.manager-meta,
+.manager-uses {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.manager-meta { color: var(--color-text-muted); }
+
+.manager-uses {
+    color: var(--color-text-subtle);
+    margin-top: 2px;
+}
+
+/* The rows keep the panel's look (.app-row and friends, explorer.css): a hidden app
+   keeps its row - that is how it comes back - but reads as switched off. */
+.app-row.manager-hidden .app-row-thumb,
+.app-row.manager-hidden .app-row-name {
+    opacity: 0.5;
+}
+
+/* Nothing in the manager launches anything: the row is not a button here. */
+.manager-grid .app-row { cursor: default; }
+
+/* The display switch. The panel row keeps the star; here the one slot that can be
+   acted on is "does the panel show this app". */
+.manager-switch {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.manager-switch input {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.manager-switch-track {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: var(--color-neutral);            /* off = grey */
+    transition: background-color 0.15s ease;
+}
+
+.manager-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--color-text-on-accent);
+    transition: transform 0.15s ease;
+}
+
+.manager-switch input:checked ~ .manager-switch-track {
+    background-color: var(--color-success);            /* shown = green */
+}
+
+.manager-switch input:checked ~ .manager-switch-track::after {
+    transform: translateX(18px);
+}
+
+.manager-switch input:focus-visible ~ .manager-switch-track {
+    box-shadow: 0 0 0 2px var(--color-accent-soft);
+}

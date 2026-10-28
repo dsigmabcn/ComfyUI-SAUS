@@ -12,6 +12,7 @@
 import { strict as assert } from 'node:assert';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { install } from './_fake_clock.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORIGIN = 'http://localhost:8188';
@@ -90,6 +91,11 @@ const liveFrame = (workflow, variant = null, ready = () => true) => ({
     },
 });
 
+/* The exporter polls for the app to report itself ready (150ms x a 3s grace), and
+ * scenario 8 waits that whole grace out; a virtual clock makes the same waits
+ * elapse in order, immediately (the >= 3s assertion still holds). */
+install({ auto: true });
+
 const { exportWorkflowToComfyUI } = await import(
     pathToFileURL(join(ROOT, 'web', 'saus_browser', 'js', 'workflow_export.js')).href
 );
@@ -110,7 +116,7 @@ function reset(overrides = {}) {
 /* 1. the happy path: blank window reserved, then pointed at ComfyUI */
 {
     reset();
-    const result = await exportWorkflowToComfyUI({ url: '65j5u-background-remover', name: 'Background Remover' });
+    const result = await exportWorkflowToComfyUI({ url: 'image-upscale-with-model', name: 'Upscale with Model' });
 
     assert.equal(result, true);
     assert.equal(state.opened.length, 1, 'exactly one window');
@@ -124,13 +130,13 @@ function reset(overrides = {}) {
     assert.equal(parsed.pathname, '/');
     const param = parsed.searchParams.get('saus_workflow');
     assert.ok(param, 'ComfyUI is told which workflow to open');
-    assert.equal(param, copyUrl('Background Remover.json'));
+    assert.equal(param, copyUrl('Upscale with Model.json'));
 
     assert.deepEqual(state.fetch.map((call) => call.method), ['GET', 'GET', 'POST'],
         'the app workflow is read, any stored copy checked, then the copy saved');
-    assert.ok(state.fetch[0].url.startsWith('/saus/65j5u-background-remover/wf.json?cacheSaus='),
+    assert.ok(state.fetch[0].url.startsWith('/saus/image-upscale-with-model/wf.json?cacheSaus='),
         `unexpected first request: ${state.fetch[0].url}`);
-    assert.equal(state.fetch[2].url, `${copyUrl('Background Remover.json')}?overwrite=false`,
+    assert.equal(state.fetch[2].url, `${copyUrl('Upscale with Model.json')}?overwrite=false`,
         'nothing is overwritten');
     console.log('1. reserves a window, saves to userdata, hands over ?saus_workflow=: OK');
 }

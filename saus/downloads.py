@@ -508,14 +508,11 @@ async def check_model_status_handler(request: web.Request) -> web.Response:
 
 
 async def check_model_status_batch_handler(request: web.Request) -> web.Response:
-    """Batch form of ``check_model_status_handler``.
+    """Batch form of ``check_model_status_handler``: the explorer asks about every model
+    of every visible app at once, so one request replaces dozens of folder walks.
 
-    The explorer asks about every model of every visible app at once, so one
-    request replaces dozens of round-trips (each of which walks the model
-    folders).
-
-    Body: ``{"files": [{"file_id": "...", "model_path": "...", "type": "..."}]}``
-    Response: ``{"statuses": {"<file_id>": "ready" | "missing"}}``
+    Body: ``{"files": [{"file_id", "model_path", "type"}]}`` ->
+    ``{"statuses": {"<file_id>": "ready" | "missing"}}``
     """
     guard = require_json(request)
     if guard is not None:

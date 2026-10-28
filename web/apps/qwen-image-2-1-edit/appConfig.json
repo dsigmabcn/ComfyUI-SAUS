@@ -1,14 +1,15 @@
 {
   "id": "q21edit",
-  "name": "Qwen Image 2.1 Edit",
+  "name": "Qwen Image 2.1 Edit (2 images)",
   "url": "qwen-image-2-1-edit",
-  "description": "Edit images with Qwen-Image-2.1, with an optional prompt enhancer (Gemma-style qwen3.5 9B i2i).",
+  "description": "Edit an image from two references with Qwen-Image-2.1 (HD or Turbo), with an optional prompt enhancer (qwen3.5 9B i2i).",
   "metadata": {
     "schemaVersion": 1,
-    "category": "image-to-image (editing)",
+    "category": "image-to-image (reference)",
     "tags": {
       "type": [
-        "base"
+        "base",
+        "distilled-fast"
       ],
       "base_models": [
         "QWEN"
@@ -21,8 +22,8 @@
     "models": [
       "qwen_image_2.1_int8_convrot.safetensors",
       "qwen3vl_8b_int8_convrot.safetensors",
-      "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors",
-      "qwen_image_2.1_vae_bf16.safetensors"
+      "qwen_image_2.1_vae_bf16.safetensors",
+      "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
     ]
   },
   "prompts": [
@@ -41,31 +42,89 @@
     {
       "id": "stepsq21edit",
       "label": "Steps",
+      "nodePath": "9002.inputs.steps",
       "minValue": 1,
       "maxValue": 100,
       "step": 1,
       "defValue": 25,
       "precision": 0,
       "scaleFactor": 1,
-      "nodePath": "459_458.inputs.steps",
       "layout": {
         "region": "basic",
-        "order": 1
+        "order": 2
       }
     },
     {
       "id": "cfgq21edit",
       "label": "CFG",
+      "nodePath": "9001.inputs.cfg",
       "minValue": 0,
       "maxValue": 20,
       "step": 0.1,
       "defValue": 1,
       "precision": 1,
       "scaleFactor": 1,
-      "nodePath": "459_458.inputs.cfg",
       "layout": {
         "region": "advanced",
-        "order": 6
+        "order": 8
+      }
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "typeq21edit",
+      "label": "Type",
+      "nodePath": "459_451.inputs.weight_dtype",
+      "url": "UNETLoader",
+      "key": "weight_dtype",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      }
+    },
+    {
+      "id": "unetq21edit",
+      "label": "Model",
+      "nodePath": "459_451.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name",
+      "default": "qwen_image_2.1_int8_convrot.safetensors",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      }
+    },
+    {
+      "id": "clipehq21edit",
+      "label": "CLIP (Prompt Enhancer)",
+      "nodePath": "459_477.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      }
+    },
+    {
+      "id": "clipq21edit",
+      "label": "CLIP",
+      "nodePath": "459_453.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name",
+      "layout": {
+        "region": "advanced",
+        "order": 11
+      }
+    },
+    {
+      "id": "vaeq21edit",
+      "label": "VAE",
+      "nodePath": "459_454.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name",
+      "layout": {
+        "region": "advanced",
+        "order": 12
       }
     }
   ],
@@ -73,19 +132,7 @@
     {
       "id": "seedq21edit",
       "label": "Seed",
-      "nodePath": "459_458.inputs.seed",
-      "layout": {
-        "region": "basic",
-        "order": 2
-      }
-    }
-  ],
-  "inputs": [
-    {
-      "id": "fnq21edit",
-      "label": "Filename Prefix",
-      "nodePath": "461.inputs.filename_prefix",
-      "defValue": "Qwen_image_2.1_edit",
+      "nodePath": "9004.inputs.noise_seed",
       "layout": {
         "region": "basic",
         "order": 3
@@ -96,67 +143,19 @@
     {
       "id": "imgq21a",
       "label": "Image 1",
-      "nodePath": "470.inputs.image"
+      "nodePath": "470.inputs.image",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      }
     },
     {
       "id": "imgq21b",
       "label": "Image 2",
-      "nodePath": "475.inputs.image"
-    }
-  ],
-  "dropdowns": [
-    {
-      "id": "unetq21edit",
-      "label": "Model",
-      "url": "UNETLoader",
-      "key": "unet_name",
-      "nodePath": "459_451.inputs.unet_name",
+      "nodePath": "475.inputs.image",
       "layout": {
-        "region": "advanced",
+        "region": "basic",
         "order": 7
-      }
-    },
-    {
-      "id": "clipehq21edit",
-      "label": "CLIP (Prompt Enhancer)",
-      "url": "CLIPLoader",
-      "key": "clip_name",
-      "nodePath": "459_477.inputs.clip_name",
-      "layout": {
-        "region": "advanced",
-        "order": 8
-      }
-    },
-    {
-      "id": "clipq21edit",
-      "label": "CLIP",
-      "url": "CLIPLoader",
-      "key": "clip_name",
-      "nodePath": "459_453.inputs.clip_name",
-      "layout": {
-        "region": "advanced",
-        "order": 9
-      }
-    },
-    {
-      "id": "vaeq21edit",
-      "label": "VAE",
-      "url": "VAELoader",
-      "key": "vae_name",
-      "nodePath": "459_454.inputs.vae_name",
-      "layout": {
-        "region": "advanced",
-        "order": 10
-      }
-    },
-    {
-      "id": "typeq21edit",
-      "label": "Type",
-      "url": "UNETLoader",
-      "key": "weight_dtype",
-      "nodePath": "459_451.inputs.weight_dtype",
-      "style": {
-        "display": "none"
       }
     }
   ],
@@ -164,8 +163,30 @@
     {
       "id": "petoggle",
       "label": "Prompt Enhance",
-      "defaultValue": false,
       "nodePath": "459_484.inputs.switch",
+      "defaultValue": false,
+      "layout": {
+        "region": "basic",
+        "order": 1
+      }
+    },
+    {
+      "id": "togmanual3",
+      "label": "Enable manual sigmas",
+      "nodePath": "9007.inputs.switch",
+      "defaultValue": false,
+      "layout": {
+        "region": "advanced",
+        "order": 20
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnq21edit",
+      "label": "Filename Prefix",
+      "nodePath": "461.inputs.filename_prefix",
+      "defValue": "Qwen_image_2.1_edit",
       "layout": {
         "region": "basic",
         "order": 4
@@ -185,7 +206,7 @@
   "multiComponents": [],
   "outputs": [
     {
-      "id": "outq21edit",
+      "id": "output461",
       "label": "Save Image",
       "nodeId": "461",
       "type": "media"

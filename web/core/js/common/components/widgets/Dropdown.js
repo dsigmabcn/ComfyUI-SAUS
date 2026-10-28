@@ -114,12 +114,32 @@ export default class Dropdown {
 
     populateDropdown(
       this.config.id,
-      options,
+      this.allowedOptions(options),
       this.config.label,
       this.config.nodePath,
       this.workflow
     );
     return true;
+  }
+
+  /**
+   * The node's option list, narrowed by the app's own `options` allow-list: the app's
+   * order is the curated one, a name the node does not have is dropped (a stale entry
+   * must never offer a file ComfyUI cannot load), and when *none* of them is installed
+   * the full list is shown instead - an empty dropdown would make the app unrunnable.
+   */
+  allowedOptions(options) {
+    const only = this.config.options;
+    if (!Array.isArray(only) || !only.length) return options;
+
+    const available = new Set(options);
+    const picked = only.filter((name) => available.has(name));
+    if (!picked.length) {
+      console.warn(`[SAUS] Dropdown "${this.config.id}": none of its ${only.length} `
+        + 'preferred models is installed, so the full list is shown.');
+      return options;
+    }
+    return picked;
   }
 
   displayMissingComponentMessage() {

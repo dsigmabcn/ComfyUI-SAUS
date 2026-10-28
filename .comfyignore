@@ -7,6 +7,9 @@
 docs/
 tests/
 
+# Build scratch (workflow drafts; shipped graphs live in each app's wf.json)
+temp/
+
 # Documentation screenshots. The guides load them from the GitHub raw URL
 # (as do the registry Icon/Banner), so the archive does not need 5 MB of PNGs.
 web/core/media/git/

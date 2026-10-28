@@ -2,7 +2,6 @@ import StepperComponent from './Stepper.js';
 
 class MultiStepper {
     constructor(config, workflow) {
-        //console.log("config:", config.id);
         this.container = document.getElementById(config.id);
 
         if (!this.container) {
@@ -21,7 +20,6 @@ class MultiStepper {
 
         this.config.steppers.forEach(stepperConfig => {
             const stepperId = `${this.config.id}-${stepperConfig.id}`;
-            //console.log("stepperId", stepperId);
             const stepperContainer = document.createElement('div');
             stepperContainer.id = stepperId;
             stepperContainer.className = 'stepper-container';

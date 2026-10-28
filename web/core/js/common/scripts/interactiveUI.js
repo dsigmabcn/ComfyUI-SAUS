@@ -40,8 +40,6 @@ function moveLeftElementsToControls() {
             leftElementPlaceholders.set(element.id, { placeholder, parent: sideWorkflowControls });
 
             controlsDiv.appendChild(element);
-            //console.log(`Moved "${element.id}" to #controls.`);
-            // updateElementsWithIcons("controls", iconList, true, "add");
         }
     });
 }
@@ -52,7 +50,6 @@ function moveLeftElementsBack() {
         if (element) {
             parent.replaceChild(element, placeholder);
             console.log(`Moved "${elementId}" back to its original parent.`);
-            // updateElementsWithIcons("side-workflow-controls", iconList, true, "add");
         } else {
             console.warn(`Element with ID "${elementId}" not found.`);
         }
@@ -62,27 +59,7 @@ function moveLeftElementsBack() {
 }
 
 function moveRightElementsToControls() {
-
-    console.log("rightCol", rightCol); //Need to fix
-    // const elementsRight = getElementsToMoveById(rightCol, idsToMoveRight);
-    // elementsRight.forEach(element => {
-    //     if (element.id && !rightElementPlaceholders.has(element.id)) {
-    //         // Create a placeholder
-    //         const placeholder = document.createElement('div');
-    //         placeholder.className = 'element-placeholder';
-    //         placeholder.dataset.elementId = element.id;
-
-    //         // Replace the element with the placeholder
-    //         rightCol.replaceChild(placeholder, element);
-
-    //         // Store the placeholder and parent in the map
-    //         rightElementPlaceholders.set(element.id, { placeholder, parent: rightCol });
-
-    //         // Append the element to controlsDiv
-    //         controlsDiv.appendChild(element);
-    //         console.log(`Moved "${element.id}" to #controls.`);
-    //     }
-    // });
+    // Nothing to move: its body was the old element-placeholder layout.
 }
 
 function moveRightElementsBack() {
@@ -90,7 +67,6 @@ function moveRightElementsBack() {
         const element = document.getElementById(elementId);
         if (element) {
             parent.replaceChild(element, placeholder);
-            //console.log(`Moved "${elementId}" back to its original parent.`);
         } else {
             console.warn(`Element with ID "${elementId}" not found.`);
         }

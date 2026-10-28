@@ -1,10 +1,4 @@
-"""The batch model-status route: one request for a whole screenful of apps.
-
-``check_model_status_batch_handler`` is thin aiohttp plumbing around
-``model_lookup.find_model``, so it is driven here with two tiny stubs -- aiohttp
-and ComfyUI's ``server`` module -- instead of a running ComfyUI. Runs under
-pytest or directly (``python tests/test_model_status_batch.py``).
-"""
+"""The batch model-status route: one request for a whole screenful of apps."""
 
 import asyncio
 import json

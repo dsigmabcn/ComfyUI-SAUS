@@ -15,7 +15,6 @@ const loadScript = (src, name = '') => {
         script.src = src;
         script.async = false;
         script.onload = () => {
-            // console.log(`${name || src} loaded successfully`);
             resolve();
         };
         script.onerror = () => {
@@ -31,9 +30,7 @@ const loadDependencies = async () => {
     try {
         await Promise.all([
             loadScript('/core/js/common/components/canvas/fabric.5.2.4.min.js', 'Fabric.js'),
-            // loadScript('/core/js/common/components/canvas/pica.min.js', 'Pica.js')
         ]);
-        // console.log('All dependencies loaded successfully');
     } catch (error) {
         console.error('Failed to load dependencies:', error);
     }
@@ -273,10 +270,8 @@ export class CanvasLoader {
                 this.canvasManager.registerPlugin(imageAdderPlugin);
             }
 
-            //console.log('All canvas plugins registered successfully');
 
             this.canvasManager.on('switchView', (newView) => {
-                // console.log(`Switching viewType to: ${newView}`);
                 setView(newView);
 
                 store.dispatch({
@@ -288,8 +283,6 @@ export class CanvasLoader {
 
             });
             this.canvasManager.on('switchMaskingPreviewType', (PreviewType) => {
-                //console.log(`Switching switchMaskingPreviewType to: ${PreviewType}`);
-                // setView(PreviewType);
 
                 store.dispatch({
                     type: 'SET_MASKING_TYPE',

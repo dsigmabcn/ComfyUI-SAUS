@@ -12,7 +12,7 @@ const createElement = (type, className, textContent = '') => {
 // Never *guess* a file name instead: requesting `thumbnail.jpg` for an app whose master
 // is a webp is a 404 in the console, and it hides the real reason (see the lesson on
 // guessed fallbacks in the saus-developer skill).
-const APP_THUMB_FALLBACK = '/core/media/ui/saus_logo.png';
+export const APP_THUMB_FALLBACK = '/core/media/ui/saus_logo.png';
 
 /* ------------------------------------------------------------------ *
  * Re-render hook. ui.js never imports the explorer directly (that would
@@ -30,7 +30,7 @@ export function requestRender() {
     if (renderHandler) renderHandler();
 }
 
-export function toggleFavorite(appId) {
+function toggleFavorite(appId) {
     if (state.favorites.has(appId)) {
         state.favorites.delete(appId);
     } else {
@@ -45,6 +45,21 @@ export function toggleFavorite(appId) {
  * Clicking it opens the app in a workspace tab.
  * ------------------------------------------------------------------ */
 
+/**
+ * The thumbnail a row paints: the small copy the app ships, or the SAUS logo.
+ *
+ * The API reports the file the app actually ships (.webp, .jpg, .avif, ...) next to
+ * its appConfig.json, and `thumbnailRow` is the 128px copy, so a 40px square never
+ * pulls the ~23 KB master. With no name reported there is nothing to fetch: show the
+ * logo rather than request a file that is probably not there. The URL carries no
+ * cache-buster any more - with one, every session re-downloaded every thumbnail
+ * (see saus/static_cache.py for the cache policy).
+ */
+export function appThumbSrc(app) {
+    const rowThumb = app.thumbnailRow || app.thumbnail;
+    return rowThumb ? `saus/${app.url}/${rowThumb}` : APP_THUMB_FALLBACK;
+}
+
 export function createAppRow(app) {
     const row = createElement('div', 'app-row');
     row.dataset.appId = app.id;
@@ -56,23 +71,12 @@ export function createAppRow(app) {
     thumb.alt = '';
     thumb.loading = 'lazy';
     thumb.decoding = 'async';
-    // The API reports the file the app actually ships (.webp, .jpg, .avif, ...) next to
-    // its appConfig.json, and `thumbnailRow` is the 128px copy, so a 40px square never
-    // pulls the ~23 KB master. With no name reported there is nothing to fetch: show the
-    // logo rather than request a file that is probably not there. The URL carries no
-    // cache-buster any more - with one, every session re-downloaded every thumbnail
-    // (see saus/static_cache.py for the cache policy).
-    const rowThumb = app.thumbnailRow || app.thumbnail;
-    if (rowThumb) {
-        const onThumbError = () => {
-            thumb.removeEventListener('error', onThumbError);
-            thumb.src = APP_THUMB_FALLBACK;
-        };
-        thumb.addEventListener('error', onThumbError);
-        thumb.src = `saus/${app.url}/${rowThumb}`;
-    } else {
+    const onThumbError = () => {
+        thumb.removeEventListener('error', onThumbError);
         thumb.src = APP_THUMB_FALLBACK;
-    }
+    };
+    thumb.addEventListener('error', onThumbError);
+    thumb.src = appThumbSrc(app);
 
     // The name may wrap onto a second line so long titles are fully visible.
     const name = createElement('span', 'app-row-name', app.name || app.id);
@@ -146,7 +150,7 @@ export function applyAppRowStatus(row, status) {
  * Filtering / sorting
  * ------------------------------------------------------------------ */
 
-export function sortApps(apps, sortValue) {
+function sortApps(apps, sortValue) {
     const sortedApps = [...apps];
 
     switch (sortValue) {
@@ -189,11 +193,34 @@ function matchesSearch(app, term) {
         || (app.flatTags || []).some(tag => tag.toLowerCase().includes(term));
 }
 
+/**
+ * Whether an app belongs in the explorer *at all*.
+ *
+ * The guaranteed-invisible apps (`noshowAppIds`) never are, and a deprecated app
+ * only is while "Show deprecated apps" is on. The App Manager lists exactly these
+ * apps - so that Settings switch is also the gate for managing a parked app, and
+ * there is no way to turn one on from the manager while it is off.
+ */
+export function isAppListed(app) {
+    if (!app || app.id === 'menu' || noshowAppIds.includes(app.id)) return false;
+    if (app.deprecated && !preferencesManager.get('showDeprecatedApps')) return false;
+    return true;
+}
+
+/** Whether the panel shows the app: listed, and not hidden by the App Manager. */
+export function isAppShown(app) {
+    return isAppListed(app) && !state.hiddenAppIds.has(app.id);
+}
+
 /** Apps that pass the current search / tag / favorites filters. */
 export function filterCurrentApps() {
     const searchTerm = (state.searchTerm || '').trim().toLowerCase();
 
-    let filteredApps = state.allApps.filter(app => app.id !== 'menu' && !noshowAppIds.includes(app.id));
+    // Everything the panel offers goes through isAppShown(): the guaranteed-
+    // invisible apps, the deprecated ones (until the Settings switch is on) and
+    // the apps the App Manager hides. Filtered in one place - the explorer asks
+    // for its list here - so the tree, favourites and search cannot disagree.
+    let filteredApps = state.allApps.filter(isAppShown);
 
     if (searchTerm) {
         filteredApps = filteredApps.filter(app => matchesSearch(app, searchTerm));
@@ -227,7 +254,9 @@ export function renderTagsFilter() {
     const visibleOtherTags = new Set();
 
     state.allApps.forEach(app => {
-        if (noshowAppIds.includes(app.id) || !app.tags) return;
+        // Hidden apps are shown nowhere, tags included - otherwise a chip would
+        // filter for something no row can match.
+        if (noshowAppIds.includes(app.id) || state.hiddenAppIds.has(app.id) || !app.tags) return;
 
         if (Array.isArray(app.tags)) {
             app.tags.forEach(tag => visibleOtherTags.add(tag));

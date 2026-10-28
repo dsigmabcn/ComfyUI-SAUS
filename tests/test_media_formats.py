@@ -1,17 +1,4 @@
-"""avif, and the thumbnail names an app actually ships.
-
-Two format bugs that the browser found: the File Manager did not recognise
-``.avif`` (it was missing from its image regexes, and the thumbnail endpoint
-answered 415 for the extension), and an app whose thumbnail is not called
-``thumbnail.jpg`` showed no thumbnail at all - the row fell back to the SAUS
-logo. Both come down to *where the accepted names live*, so both are checked
-here: the regexes in the File Manager, the extension set in the endpoint, and
-the discovery helper the app list uses.
-
-The discovery helper is imported for real (``saus.management`` needs nothing
-from ComfyUI). Runs under pytest or directly
-(``python tests/test_media_formats.py``).
-"""
+"""avif, and the thumbnail names an app actually ships."""
 
 import ast
 import os
@@ -31,12 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 
 def _thumbnail_helper():
-    """`APP_THUMBNAIL_NAMES` + `_find_app_thumbnail` out of saus/management.py.
-
-    Importing the module would drag aiohttp (and ComfyUI) in, and this suite has
-    to run under a bare python3, so its two top-level blocks are executed on
-    their own. The helper only needs ``Path``.
-    """
+    """`APP_THUMBNAIL_NAMES` + `_find_app_thumbnail` out of saus/management.py."""
     source = (ROOT / 'saus' / 'management.py').read_text(encoding='utf-8')
     start = source.index('APP_THUMBNAIL_NAMES = (')
     block = source[start:source.index('def _load_app_configs():')]
@@ -139,10 +121,6 @@ def test_the_browser_uses_the_thumbnail_it_is_given():
             f'{path.name} guesses a file name - that is a 404 for a webp master'
         assert 'saus_logo.png' in source, f'{path.name} needs the logo for apps without one'
 
-    # The explorer row asks for the small copy first; the details modal keeps the master.
-    assert 'app.thumbnailRow' in UI_JS.read_text(encoding='utf-8'), \
-        'the row should not download the master to draw a 40px square'
-
 
 def test_the_row_copy_is_resolved_separately():
     """The explorer row gets the 128px copy, the information panel keeps the master."""
@@ -163,21 +141,22 @@ def test_the_row_copy_is_resolved_separately():
 
 
 def test_no_shipped_app_keeps_a_thumbnail_in_a_media_folder():
-    """The thumbnails were flattened on purpose: a leftover media/ loses the picture.
-
-    Every shipped app must also still *resolve* a master and a row copy - this is the
-    end-to-end net for `tools/thumbnail.py --flatten-old` and `--rebuild-rows`.
-    """
+    """The thumbnails were flattened on purpose: a leftover media/ loses the picture."""
     apps = ROOT / 'web' / 'apps'
+    # Keyed on appConfig.json and walked recursively: apps parked in
+    # web/apps/deprecated/ must stay covered too, and the deprecated/ folder itself
+    # is not an app.
+    app_folders = sorted(conf.parent for conf in apps.rglob('appConfig.json'))
     stragglers, unresolved = [], []
-    for app in sorted(apps.iterdir()):
+    for app in app_folders:
+        label = app.relative_to(apps).as_posix()
         media = app / 'media'
         if media.is_dir() and any(f.name.startswith('thumbnail') for f in media.iterdir()):
-            stragglers.append(app.name)
+            stragglers.append(label)
         if not _find_app_thumbnail(app, exclude=(ROW_THUMBNAIL_NAME,)):
-            unresolved.append(app.name + ' (no master)')
+            unresolved.append(label + ' (no master)')
         elif not _find_app_thumbnail(app, names=(ROW_THUMBNAIL_NAME,)):
-            unresolved.append(app.name + ' (no row copy)')
+            unresolved.append(label + ' (no row copy)')
     assert not stragglers, ('these apps still keep a thumbnail in media/ - run '
                             'python tools/thumbnail.py --flatten-old: ' + ', '.join(stragglers))
     assert not unresolved, ('these apps have no flat thumbnail next to appConfig.json - run '

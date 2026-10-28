@@ -96,7 +96,6 @@ export class CanvasControlsPlugin extends CanvasPlugin {
 
         if (this.canvasManager && typeof this.canvasManager.emit === 'function') {
             this.canvasManager.emit('switchView', this.currentView);
-            // this.canvasManager.emit('switchMaskingPreviewType', this.maskingPreviewType);
         } else {
             console.warn('canvasManager.emit is not a function. Unable to emit switchView event.');
         }
@@ -238,7 +237,6 @@ export class CanvasControlsPlugin extends CanvasPlugin {
             const evt = opt.e;
             this.lastPosX = evt.clientX;
             this.lastPosY = evt.clientY;
-            // this.canvas.setCursor(`url(${this.getPanIcon()}), auto`);
             this.canvas.setCursor('move');
 
             evt.preventDefault();
@@ -265,8 +263,6 @@ export class CanvasControlsPlugin extends CanvasPlugin {
                 panFactor = (zoom + 1) / 10;
             }
 
-            // console.log('panFactor', panFactor);
-            // console.log('zoom', zoom);
             
             vpt[4] += deltaX * panFactor;
             vpt[5] += deltaY * panFactor;
@@ -274,7 +270,6 @@ export class CanvasControlsPlugin extends CanvasPlugin {
             this.lastPosX = e.clientX;
             this.lastPosY = e.clientY;
             this.canvas.setCursor('move');
-            // this.canvas.setCursor(`url(${this.getPanIcon()}), auto`);
         }
 
     }
@@ -288,11 +283,9 @@ export class CanvasControlsPlugin extends CanvasPlugin {
     togglePanMode() {
         this.isPanMode = !this.isPanMode;
         this.updatePanButtonState();
-        // this.canvasManager.emit('pan:toggled');
         if (this.isPanMode) {
             this.canvasManager.emit('pan:activated');
         } else {
-            // this.canvasManager.emit('pan:deactivated');
         }
     }
     
@@ -333,7 +326,6 @@ export class CanvasControlsPlugin extends CanvasPlugin {
         const panDelta = delta / 10; 
         vpt[4] += panDelta;
         this.canvas.requestRenderAll();
-        // this.canvasManager.emit('pan:changed', { x: vpt[4], y: vpt[5] });
     }
 
     verticalPan(delta) {
@@ -341,15 +333,12 @@ export class CanvasControlsPlugin extends CanvasPlugin {
         const panDelta = delta / 10;
         vpt[5] += panDelta;
         this.canvas.requestRenderAll();
-        // this.canvasManager.emit('pan:changed', { x: vpt[4], y: vpt[5] });        
     }
 
     onMouseWheel(opt) {
         const e = opt.e;
         const delta = e.deltaY;
         const pointer = this.canvas.getPointer(e);
-        // console.log('pointer', pointer);
-        // console.log('isDrawingMode', this.isDrawingMode);
         if (!this.isDrawingMode) {
                 if (e.altKey) {
                     this.zoom(e,delta);

@@ -1,0 +1,129 @@
+{
+  "id": "vidupscale",
+  "name": "Video Upscale with Model",
+  "url": "video-upscale-with-model",
+  "description": "Upscale a video with an ESRGAN-family model. Frame Batch Size feeds the upscaler a few frames at a time instead of the whole clip.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "UPSCALE MODELS",
+    "models": [
+      "RealESRGAN_x4plus.safetensors",
+      "RealESRGAN_x2.pth",
+      "4x-UltraSharp.pth",
+      "4x-AnimeSharp.pth"
+    ]
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesvidupscale",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "950.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidupscale",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "950.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "framebatchsizevidupscale",
+      "label": "Frame Batch Size",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "960.inputs.batch_size",
+      "defValue": 8,
+      "minValue": 1,
+      "maxValue": 64,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidupscale",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "12.inputs.filename_prefix",
+      "defValue": ""
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidupscale",
+      "label": "Video",
+      "nodePath": "9.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "upscalemodelvidupscale",
+      "label": "Upscale Model",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "1.inputs.model_name",
+      "url": "UpscaleModelLoader",
+      "key": "model_name",
+      "options": [
+        "RealESRGAN_x4plus.safetensors",
+        "RealESRGAN_x2.pth",
+        "4x-UltraSharp.pth",
+        "4x-AnimeSharp.pth"
+      ]
+    }
+  ],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidupscale",
+      "label": "Save Video",
+      "nodeId": "12",
+      "type": "media"
+    }
+  ]
+}

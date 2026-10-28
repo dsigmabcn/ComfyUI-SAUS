@@ -252,7 +252,6 @@ export class CustomBrushPlugin extends CanvasPlugin {
         if (this.canvasElement) {
             this.canvasElement.addEventListener('pointerenter', this.onCanvasPointerEnter);
             this.canvasElement.addEventListener('pointerleave', this.onCanvasPointerLeave);
-            // console.log('Attached pointerenter and pointerleave to canvasElement.');
         }
         
     }
@@ -279,7 +278,6 @@ export class CustomBrushPlugin extends CanvasPlugin {
         }
 
         if (this.drawingMode && !this.showSystemCursor) {
-            // this.updateCursorCircle();
             if (this.canvas.lowerCanvasEl) this.canvas.lowerCanvasEl.classList.add(this.hiddenCursorClass);
             if (this.canvas.upperCanvasEl) this.canvas.upperCanvasEl.classList.add(this.hiddenCursorClass);
         }
@@ -316,7 +314,6 @@ export class CustomBrushPlugin extends CanvasPlugin {
             if (this.drawingMode) {
                 this.disableDrawingMode();
                 this.brushToggledByKey = true; 
-                // console.log(`Brush disabled via ${key} key press.`);
             }
         }
         if (key === 'd' || key === 'D' || key === 'm' || key === 'M') {
@@ -333,7 +330,6 @@ export class CustomBrushPlugin extends CanvasPlugin {
             if (this.brushToggledByKey) {
                 this.enableDrawingMode();
                 this.brushToggledByKey = false;
-                // console.log(`Brush re-enabled via ${key} key release.`);
             }
         }
 

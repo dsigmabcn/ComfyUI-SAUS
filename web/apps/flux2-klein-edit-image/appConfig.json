@@ -40,7 +40,7 @@
   "steppers": [
     {
       "id": "mpkleinedit1",
-      "label": "Image Megapixels",
+      "label": "Scale Megapixels",
       "nodePath": "143.inputs.megapixels",
       "minValue": 0.5,
       "maxValue": 8,

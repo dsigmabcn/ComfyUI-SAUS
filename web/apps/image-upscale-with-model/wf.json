@@ -1,0 +1,49 @@
+{
+  "2": {
+    "inputs": {
+      "image": "pray.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  },
+  "5": {
+    "inputs": {
+      "images": [
+        "9",
+        0
+      ],
+      "filename_prefix": "Upscale"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "9": {
+    "inputs": {
+      "upscale_model": [
+        "10",
+        0
+      ],
+      "image": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "ImageUpscaleWithModel"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus.safetensors"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "UpscaleModelLoader"
+    }
+  }
+}

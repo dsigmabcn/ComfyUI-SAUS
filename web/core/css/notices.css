@@ -1,0 +1,47 @@
+/* The completion notice (the "breadcrumb"): the same card the Settings toasts use,
+   styled here because the shell renders it and never loads core/css/main.css.
+   In front of the app-information overlay (20000) and the confirmation modal
+   (21000): a notice must not hide behind the panel that caused it. */
+
+#saus-notices {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 22000;
+    pointer-events: none;
+}
+
+#saus-notices .saus-toast {
+    position: static;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--color-surface);
+    color: var(--color-primary-text);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+    font-family: sans-serif;
+    font-size: 1em;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#saus-notices .saus-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#saus-notices .saus-toast.toast-success {
+    background-color: var(--color-success);
+    color: var(--color-text-on-accent);
+}
+
+#saus-notices .saus-toast i {
+    margin-right: 8px;
+}
+

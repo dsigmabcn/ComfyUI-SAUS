@@ -1,4 +1,4 @@
-export class ConfigurationLoader {
+class ConfigurationLoader {
     constructor() {
         this.basePath = window.location.pathname.split('/saus/')[1];
         this.configPath = `/saus/${this.basePath}/appConfig.json`;
@@ -17,7 +17,7 @@ export class ConfigurationLoader {
     }
 }
 
-export class UIUpdater {
+class UIUpdater {
     static updateTitle(title) {
         document.title = title;
     }

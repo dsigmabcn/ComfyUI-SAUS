@@ -13,6 +13,10 @@ saus/data/.secret.key
 *.py[cod]
 node.zip
 
+# Build scratch: workflow drafts used while building an app. The shipped graph
+# is each app's wf.json, so nothing here belongs in the repo.
+/temp/
+
 # Migration / backup artifacts
 *.bak
 web/saus_browser/data/migration_report.json

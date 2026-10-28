@@ -1,15 +1,10 @@
 """Cache headers for SAUS's own files.
 
-aiohttp serves static files without a ``Cache-Control`` header, which leaves a
-browser free to reuse its own copy for a while (heuristic caching). A changed
-CSS, JS or HTML file could then stay invisible until a hard refresh, so a fix to
-the shell looked like it "did not arrive" - and an older ``content.html`` could
-even bring an older layout back. Revalidating every time costs a 304 and always
-serves the current file.
-
-``/core/`` (the shared page shell) and everything mounted under ``/saus/`` (the
-browser, the file manager, the apps themselves) are covered; the JSON APIs keep
-their own headers.
+aiohttp sends no ``Cache-Control`` for a static file, which leaves the browser free
+to reuse its own copy (heuristic caching) - so a changed CSS, JS or HTML file could
+stay invisible until a hard refresh, and an older ``content.html`` could bring an
+older layout back. Everything under ``/core/`` and ``/saus/`` revalidates instead;
+the JSON APIs keep their own headers.
 """
 
 from aiohttp import web

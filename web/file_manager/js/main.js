@@ -1,5 +1,6 @@
 
 import { SettingsComponent } from '../../../core/js/common/components/settings.js';
+import { setMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
 import { insertElement } from './header.js';
 import { initTheme } from '/core/js/common/scripts/theme.js';
 // NOTE: footer.js is deliberately NOT imported — the File Manager has no footer.
@@ -21,8 +22,8 @@ const MEDIA_RE = /\.(jpe?g|png|gif|webp|avif|bmp|mp4|webm|ogg|mov|mkv)$/i;
 
 // One state object per pane. Input / Output are the two (and only) roots.
 const panes = {
-    input: { root: 'input', path: 'input', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
-    output: { root: 'output', path: 'output', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: 'list' },
+    input: { root: 'input', path: 'input', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: rememberedViewMode('input') },
+    output: { root: 'output', path: 'output', items: [], view: [], selected: new Set(), anchor: null, sortKey: 'name', sortDir: 1, viewMode: rememberedViewMode('output') },
 };
 
 let settingsComponent = null;
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createUploadModal();
     createDeleteModal();
     createRenameModal();
+    createNewFolderModal();
 
     const hiddenUpload = document.getElementById('hidden-upload');
     if (hiddenUpload) hiddenUpload.addEventListener('change', handleFileUpload);
@@ -381,12 +383,44 @@ function setupPanes() {
         el.querySelectorAll('.fm-view-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 panes[root].viewMode = btn.dataset.view;
+                saveViewModes();
                 renderPane(root);
             });
         });
     });
 
     document.addEventListener('keydown', onGlobalKeyDown);
+}
+
+/**
+ * The view mode (list / medium / large) each pane was last left in.
+ *
+ * `rememberedViewMode` runs while the pane objects above are being built, so the first
+ * render already paints the remembered layout and the matching button comes up active -
+ * which is why it is a hoisted `function` with the key and the allowed values written
+ * *inside* it: a `const` up here would still be in its dead zone at that moment.
+ *
+ * The key is the File Manager's own (`SausFileManagerViews`), not one of the shell's
+ * preferences, and the two panes remember theirs independently.
+ */
+function rememberedViewMode(root) {
+    try {
+        const saved = JSON.parse(localStorage.getItem('SausFileManagerViews') || '{}');
+        return ['list', 'medium', 'large'].includes(saved[root]) ? saved[root] : 'list';
+    } catch (_) {
+        return 'list';
+    }
+}
+
+function saveViewModes() {
+    try {
+        localStorage.setItem('SausFileManagerViews', JSON.stringify({
+            input: panes.input.viewMode,
+            output: panes.output.viewMode,
+        }));
+    } catch (error) {
+        console.warn('[SAUS] Could not remember the File Manager view mode:', error);
+    }
 }
 
 function onPaneClick(root, e) {
@@ -400,6 +434,7 @@ function onPaneClick(root, e) {
     if (action) {
         switch (action.dataset.act) {
             case 'upload': triggerFileUpload(); return;
+            case 'newfolder': doNewFolder(root); return;
             case 'rename': doRename(root); return;
             case 'download': doDownload(root); return;
             case 'delete': doDelete(root); return;
@@ -464,6 +499,12 @@ function selectItem(root, node, e) {
 /* ------------------------------------------------------------------ *
  * Header actions
  * ------------------------------------------------------------------ */
+
+function doNewFolder(root) {
+    // Acts on the folder the pane is *showing*, so unlike rename / delete it
+    // needs no selection and is never disabled.
+    showNewFolderModal(panes[root].path, root);
+}
 
 function doRename(root) {
     const pane = panes[root];
@@ -533,6 +574,20 @@ function onDragStart(root, e) {
 
     dragState = { root, names: Array.from(pane.selected) };
     focusedPane = root;
+    // Also publish the dragged file as a SAUS media drag, so it can be dropped onto an
+    // app's "Load Image" / "Video" input (see core/js/common/scripts/appDrag.js).
+    if (item.type !== 'folder') {
+        const subfolder = pane.path.startsWith(root)
+            ? pane.path.slice(root.length).replace(/^\/+/, '') : '';
+        setMediaDrag({
+            filename: item.name,
+            subfolder,
+            type: root,
+            path: joinPath(pane.path, item.name),
+        }, e.dataTransfer);
+    } else {
+        endMediaDrag();
+    }
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'copyMove';
         try { e.dataTransfer.setData('text/plain', item.name); } catch (_) { /* ignore */ }
@@ -608,15 +663,35 @@ async function transferItems(sourceRoot, names, targetDir, copy) {
 }
 
 /* ------------------------------------------------------------------ *
- * Keyboard: F2 renames the selected file
+ * Keyboard: arrows move the selection, F2 renames, Del deletes
  * ------------------------------------------------------------------ */
 
+// The step each arrow makes in the focused pane: dx a column, dy a row. With a
+// preview open ← / ↑ and → / ↓ collapse to the previous/next image (see below).
+const ARROW_STEPS = {
+    ArrowLeft: { dx: -1, dy: 0 },
+    ArrowRight: { dx: 1, dy: 0 },
+    ArrowUp: { dx: 0, dy: -1 },
+    ArrowDown: { dx: 0, dy: 1 },
+};
+
 function onGlobalKeyDown(e) {
-    if (e.key !== 'F2' && e.key !== 'Delete') return;
+    const step = ARROW_STEPS[e.key];
+    if (e.key !== 'F2' && e.key !== 'Delete' && !step) return;
     const tag = (document.activeElement && document.activeElement.tagName) || '';
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
     const pane = panes[focusedPane];
     if (!pane) return;
+
+    if (step) {
+        e.preventDefault();
+        // A preview on this pane turns the arrows into its ‹ › : they step straight
+        // to the previous/next image, folders and other files skipped, and the
+        // panel shows it. With no preview they just walk the selection.
+        if (preview.pane === focusedPane) stepPreview(step.dx + step.dy);
+        else moveSelection(focusedPane, step.dx, step.dy);
+        return;
+    }
 
     // Del asks before it removes anything (showDeleteModal), so the key is as
     // safe as the toolbar button it mirrors.
@@ -632,6 +707,51 @@ function onGlobalKeyDown(e) {
         e.preventDefault();
         doRename(focusedPane);
     }
+}
+
+/** 1 in list view; in a grid, the number of columns the CSS actually lays out. */
+function paneColumns(root) {
+    const pane = panes[root];
+    const listEl = paneRole(root, 'list');
+    if (!listEl || pane.viewMode === 'list') return 1;
+    const tracks = getComputedStyle(listEl).gridTemplateColumns.split(/\s+/).filter(Boolean);
+    return tracks.length > 0 ? tracks.length : 1;
+}
+
+/**
+ * Move the pane's selection by one step: dx a column, dy a row.
+ *
+ * With nothing selected the first item is the anchor going forwards and the last
+ * one going backwards, so a single arrow always lands on something.
+ */
+function moveSelection(root, dx, dy) {
+    const pane = panes[root];
+    if (!pane.view.length) return;
+
+    const last = pane.view.length - 1;
+    const selected = pane.view.findIndex(i => pane.selected.has(i.name));
+    let idx;
+    if (selected < 0) idx = (dx + dy) < 0 ? last : 0;
+    else idx = Math.max(0, Math.min(last, selected + dx + dy * paneColumns(root)));
+
+    const item = pane.view[idx];
+    pane.selected.clear();
+    pane.selected.add(item.name);
+    pane.anchor = item.name;
+    applySelection(root);
+    updateTools(root);
+    revealSelected(root);
+}
+
+/** Keep the highlighted row/tile in view, or a keyboard move sends it off-screen. */
+function revealSelected(root) {
+    const listEl = paneRole(root, 'list');
+    const pane = panes[root];
+    if (!listEl) return;
+    const idx = pane.view.findIndex(i => pane.selected.has(i.name));
+    if (idx < 0) return;
+    const node = listEl.querySelector(`[data-idx="${idx}"]`);
+    if (node && node.scrollIntoView) node.scrollIntoView({ block: 'nearest' });
 }
 
 /* ------------------------------------------------------------------ *
@@ -678,6 +798,7 @@ function stepPreview(delta) {
     pane.anchor = item.name;
     applySelection(preview.pane);
     updateTools(preview.pane);
+    revealSelected(preview.pane);
     renderPreview();
 }
 
@@ -751,6 +872,31 @@ function syncPreviewAfterReload(root, keepName) {
     renderPreview();
 }
 
+/**
+ * The file the preview should show once `items` are gone.
+ *
+ * The image on screen when it is not among them; otherwise the first survivor
+ * below it, or above it when it was the last. Null when nothing is left, which
+ * is what makes reloadPane hide the panel.
+ */
+function previewNameAfterDelete(items, root) {
+    if (preview.pane !== root) return null;
+    const media = mediaItems(panes[root]);
+    const current = media[preview.index];
+    if (!current) return null;
+
+    const deleted = new Set(items.map(i => i.name));
+    if (!deleted.has(current.name)) return current.name;
+
+    for (let i = preview.index + 1; i < media.length; i += 1) {
+        if (!deleted.has(media[i].name)) return media[i].name;
+    }
+    for (let i = preview.index - 1; i >= 0; i -= 1) {
+        if (!deleted.has(media[i].name)) return media[i].name;
+    }
+    return null;
+}
+
 
 /* ------------------------------------------------------------------ *
  * Toast
@@ -763,7 +909,7 @@ function showToast(message, type = 'info') {
         style.innerHTML = `
             .saus-toast {
                 position: fixed; top: 20px; right: 20px; background-color: #333;
-                color: white; padding: 15px 20px; border-radius: 5px; z-index: 10000;
+                color: white; padding: 15px 20px; border-radius: 5px; z-index: 22000;
                 opacity: 0; transform: translateY(-20px);
                 transition: opacity 0.3s ease, transform 0.3s ease;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-family: sans-serif;
@@ -1045,8 +1191,8 @@ function createDeleteModal() {
             <h3 style="margin-top: 0; margin-bottom: 15px;">Delete</h3>
             <p id="delete-modal-message">Are you sure you want to delete this?</p>
             <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-                <button id="delete-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
-                <button id="delete-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: #d32f2f; color: white; border: none; border-radius: 4px;">Delete</button>
+                <button id="delete-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="delete-confirm-btn" class="btn-modal-primary delete">Delete</button>
             </div>
         </div>
     </div>`;
@@ -1078,6 +1224,11 @@ function closeDeleteModal() {
 }
 
 async function deleteItems(items, root) {
+    // Work out what the preview should show afterwards *before* the files go:
+    // the image on screen when it survives, else the next one still there (the
+    // previous at the end), so deleting it moves on instead of closing the panel.
+    const keepName = previewNameAfterDelete(items, root);
+
     let failed = 0;
     for (const item of items) {
         try {
@@ -1096,8 +1247,7 @@ async function deleteItems(items, root) {
     if (failed) showToast(`Deleted ${ok}/${items.length} item(s).`, 'error');
     else showToast(items.length === 1 ? 'Item deleted.' : `${items.length} items deleted.`, 'success');
 
-    // reloadPane hides the preview when the file it was showing is gone.
-    await reloadPane(root);
+    await reloadPane(root, keepName);
 }
 
 
@@ -1113,8 +1263,8 @@ function createRenameModal() {
             <h3 style="margin-top: 0; margin-bottom: 15px;">Rename</h3>
             <input type="text" id="rename-input" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
             <div style="display: flex; justify-content: center; gap: 10px;">
-                <button id="rename-cancel-btn" class="btn-modal-secondary" style="padding: 8px 16px; cursor: pointer;">Cancel</button>
-                <button id="rename-confirm-btn" class="btn-modal-primary" style="padding: 8px 16px; cursor: pointer; background-color: var(--color-accent, #007bff); color: white; border: none; border-radius: 4px;">Rename</button>
+                <button id="rename-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="rename-confirm-btn" class="btn-modal-primary">Rename</button>
             </div>
         </div>
     </div>`;
@@ -1158,6 +1308,82 @@ async function renameFile(path, newName, root) {
     } catch (error) {
         console.error('Rename error:', error);
         showToast('Failed to rename file.', 'error');
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * New folder
+ * ------------------------------------------------------------------ */
+
+function createNewFolderModal() {
+    if (document.getElementById('newfolder-modal')) return;
+    const modalHTML = `
+    <div id="newfolder-modal" class="modal hidden">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px;">New folder</h3>
+            <input type="text" id="newfolder-input" placeholder="Folder name" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box; background: #333; color: white; border: 1px solid #555; border-radius: 4px;" />
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="newfolder-cancel-btn" class="btn-modal-secondary">Cancel</button>
+                <button id="newfolder-confirm-btn" class="btn-modal-primary">Create</button>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const cancelBtn = document.getElementById('newfolder-cancel-btn');
+    if (cancelBtn) cancelBtn.onclick = closeNewFolderModal;
+    const input = document.getElementById('newfolder-input');
+    // A name dialog is expected to take Enter (the rename one has nothing to add:
+    // it opens pre-filled).
+    if (input) {
+        input.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            const confirmBtn = document.getElementById('newfolder-confirm-btn');
+            if (confirmBtn) confirmBtn.click();
+        });
+    }
+}
+
+function showNewFolderModal(path, root) {
+    const modal = document.getElementById('newfolder-modal');
+    const input = document.getElementById('newfolder-input');
+    const confirmBtn = document.getElementById('newfolder-confirm-btn');
+    if (!modal || !input || !confirmBtn) return;
+
+    input.value = '';
+    confirmBtn.onclick = async () => {
+        const folderName = input.value.trim();
+        closeNewFolderModal();
+        if (folderName) await createFolder(path, folderName, root);
+    };
+    modal.classList.remove('hidden');
+    input.focus();
+}
+
+function closeNewFolderModal() {
+    const modal = document.getElementById('newfolder-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function createFolder(path, folderName, root) {
+    try {
+        const response = await fetch('/saus/api/create-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentPath: path, folderName })
+        });
+        if (!response.ok) {
+            // The server knows why (name taken, not allowed): say that instead of
+            // a generic failure.
+            let reason = '';
+            try { reason = (await response.json()).error || ''; } catch (error) { /* not JSON */ }
+            throw new Error(reason || response.statusText);
+        }
+        showToast('Folder created.', 'success');
+        await reloadPane(root, folderName);
+    } catch (error) {
+        console.error('Create folder error:', error);
+        showToast(`Failed to create folder: ${error.message}`, 'error');
     }
 }
 
