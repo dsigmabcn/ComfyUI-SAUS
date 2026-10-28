@@ -41,7 +41,7 @@ Workflows converted into a clean, production-ready application environment.
 ## Why SAUS?
 * **Simple:** Built for creators who need results without the node-induced headaches.
 * **App:** A powerful wrapper that extends ComfyUI's capabilities into a standalone-app feel.
-* **U See:** A clean, expansive "view" of your creative output - not just your backend.
+* **U See:** A clean, expansive view of your creative output - not just your backend.
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
