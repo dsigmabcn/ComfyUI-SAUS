@@ -12,7 +12,7 @@ When you already have models installed, **the exact folder does not matter**, be
 
 Extra model locations configured with `--models-directory`, `--base-directory` or `extra_model_paths.yaml` are searched too.
 
-For the model files to be recognized, **they need to have the exact name set in the ComfyUI templates**. If you already have the model but under a **different file name, you can still open the app** and select the file manually under **Advanced Options**.
+For the model files to be recognized, **they need to have the exact name the app expects**. If you already have the model but under a **different file name, you can still open the app** and select the file manually under **Advanced Options**.
 
 ## Model Status
 Every app row in the explorer carries a status dot. Apps can offer several **variants** (for example HD and Turbo), each with its own models, and the dot reports the app as a whole:
@@ -23,7 +23,7 @@ Every app row in the explorer carries a status dot. Apps can offer several **var
 
 A variant needs what it is built on: the models it picks (including its own distillation/lightning LoRA) are required **for that variant**, while models that no variant picks never block anything. Where the app offers several alternatives — a VAE, a sampler, a family of interpolation models — **one of that group** is enough, and a group is a group: an app that needs an interpolation model *and* an upscaler is not complete with only one of the two.
 
-The dot on a **variant card** in the information panel is computed by the same rule as the dot on the app row (`web/saus_browser/js/variantStatus.js`), so the two never disagree — a card is not orange for an alternative it does not need, and an uninstalled *optional* model never colours anything.
+Every card carries its own dot, and it means the same thing as the dot on the app row: <span style="color:green">green</span> when everything that variant needs is installed, <span style="color:orange">orange</span> when some of it is, <span style="color:red">red</span> when none of it is. A missing *optional* model never colours anything, and neither does an alternative the variant does not need.
 
 When an app has several variants, hovering the row shows one line per variant (e.g. `HD ✓`, `Turbo — 2 models missing`); with a single variant it simply lists the missing models.
 To install models, open the information panel: click the **(i)** button on the row.
@@ -52,12 +52,11 @@ click starts every model that variant still needs. Optional models are never dow
 that is already downloading is not started twice, and a variant whose models are all there shows
 **All installed** instead of the button.
 
-An app whose architecture has **no variants** — a single choice, such as one upscaler, one pose detector or
-one interpolation model — shows a single **Base** card listing the files it can use. Any one file of a
-"one of" group is enough, and when the app opens it binds the first *installed* one (falling back to the
-first declared, which is what the app ships with).
+An app with only one model to choose — one upscaler, one pose detector, one interpolation model — shows a
+single **Base** card listing the files that work with it. Any one of them is enough: install the one you
+want and the app runs on it.
 
-Where a tool's whole choice is the model, the architecture offers **one variant per model** instead
+Where a tool's whole choice *is* the model, the app offers **one button per model** instead
 (the upscale apps: ESRGAN x2 / x4, UltraSharp x4, AnimeSharp x4; the frame-interpolation tools: FILM net
 or RIFE 4.26; the SeedVR2 upscalers: 3B or 7B). Pick one from the row of buttons in the app — Custom is
 still there if you want to choose a file yourself. Installing one of those therefore shows the **app row**
@@ -73,8 +72,8 @@ If you want to free up space because you no longer use an app, you can delete it
 
 ## The Model Manager
 
-**Settings → Managers → Model Manager** opens the other half in its own tab: every model the registry
-knows, not just the ones one app needs.
+**Settings → Managers → Model Manager** opens the other half in its own tab: every model SAUS knows
+about, not just the ones one app needs.
 
 - The list is **grouped by model kind** — one boxed section per kind, the way the App Manager files its
   subcategories — and inside each, cards in **flexible columns** as wide as the side panel. Each card is
@@ -84,13 +83,12 @@ knows, not just the ones one app needs.
   background. (The folder a model belongs in is not shown: SAUS finds it by file name anywhere.)
 - Two chip rows filter the list: **All / Installed / Not installed / Unused**, and a chip per **model
   kind** (Diffusion model, VAE, TEXT ENCODER, LORA, …) with its count. **Unused** finds files no app
-  *and* no architecture references any more — architectures are counted for that answer, but the cards
-  themselves only name apps.
+  needs any more.
 - **Install** and **Uninstall** work exactly as they do in the app's **(i)** panel, and share the same
   progress: starting a download in one view shows up in the other, and both write to the same ComfyUI
   model folders.
 
-Uninstalling still only ever touches model weight folders (`custom_nodes` and `datasets` are never
-touched), and it asks before deleting.
+Uninstalling only ever touches model files — never code, and never the folders ComfyUI itself runs
+from — and it asks before deleting.
 
 [Return to User Guide](USER_GUIDE.md#installing-and-uninstalling-models)

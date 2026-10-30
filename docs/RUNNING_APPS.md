@@ -12,10 +12,10 @@ After you have installed all models needed for an app, open it by clicking on it
 Next to the app's **name** sits an **(i)** that opens the [information panel](MODELS.md), where you can install or uninstall the required models for the app.
 
 Just below are the app's **modes**: **HD** is what the app runs as by default and
-**Custom** always stays (it exposes the parameters as they are). Any other button comes
-from the app's architecture — **Turbo** only appears where that architecture defines it,
-and named variants replace the HD / Turbo pair completely. A mode whose models are not
-installed is greyed out; hover it to see which file it is missing.
+**Custom** always stays (it exposes the parameters as they are). Any other button is one the
+app itself offers — **Turbo** only appears where the app has a Turbo mode, and named variants
+replace the HD / Turbo pair completely. A mode whose models are not installed is greyed out;
+hover it to see which file it is missing.
 
 <img src="../web/core/media/git/running_apps/variants.png">
 
@@ -52,7 +52,7 @@ By default, the seed is random and it changes after you run the image/video gene
 
 ### Steps ###
 
-You can define here the number of steps for the KSampler (steps for the diffusion/checkpoint model) to generate the image. In general, more steps, more detailed images.
+You can define here the number of steps the model uses to generate the image. In general, more steps, more detailed images.
 
 For video generation, steps are generally under **Advanced**
 
@@ -72,7 +72,7 @@ Below the lora model, you have the strength slider, where you can set the streng
 To add another LoRA, click **Add Lora** again; use the **✕** in the corner of a block to remove it.
 
 > [!NOTE]
-> As for the models, the Wan 2.2 app has 2 lora buttons that can be used for the Lightxv2 models. The first one corresponds to the first model (high), and the second for the second model (low).
+> As for the models, the Wan 2.2 app has 2 LoRA buttons, for its two models (high and low noise). The first one belongs to the first model (high), the second to the second (low).
 
 ### Image (Video) Loader
 For Image-to-image or image-to-video apps, you will need to use a reference image, which can be loaded into the 'input' folder of ComfyUI:
@@ -83,7 +83,7 @@ You can add an image by:
 - Drag and drop an image over the image space
 - **Click** the image space (or the 'Image Loader' title) to open the picker and choose a file from ComfyUI's `input` folder
 - Drag a result from the **Recent** panel or the File Manager onto it
-- **Upload** — the button inside the picker adds a file from your computer to `input` first
+- **Upload** — the button inside the picker adds a file from your computer into ComfyUI's input folder.
 
 The picker only lists what that input can actually take: an image input is offered the pictures in
 `input`, a video input the videos. The empty space is a button too, so it can be reached with the
@@ -101,7 +101,11 @@ The Advanced controls are hidden behind a **Show Advanced** fold at the bottom o
 
 The available controls will depend on the app you are running, but some common ones are:
 
-- **Model**: if you want to use a different model than the one provided in the variants, you can choose the one you prefer. In a tool whose whole choice *is* the model — the upscalers, the frame-interpolation tools — the models appear as **variant buttons** next to Custom, because a dropdown of four alternatives is a question and a row of buttons is an answer. In an app whose architecture has no variants at all (a pose detector, a depth estimator, a generative upscaler such as SeedVR2) this selector stays visible: the app binds its model there, so hiding it would leave you with a model you could neither see nor change.
+- **Model**: if you want a different model than the one the variants offer, pick it here. In a tool whose
+  only choice *is* the model — the upscalers, the frame-interpolation tools — the models appear as
+  **variant buttons** next to Custom, one per model, instead of a dropdown to dig through. And where an
+  app has no modes at all (a pose detector, a depth estimator, a generative upscaler such as SeedVR2)
+  this selector always stays visible, so you can see and change the model the app runs on.
 - **CLIP and VAE**: if you want to use different text encoder or VAE models, you can select them here.
 - **Sampler and scheduler**: you can change the sampler and scheduler for the diffusion process here.
 - **Number of steps and CFG**: in the advanced settings, you can also change the number of steps for the diffusion process and the Classifier-Free Guidance (CFG) value. In general, the default values are good, but if you are going to use **distilled or lightning LoRAs**, you will need to change them, normally by **reducing the steps to 4-8** (depending on the LoRA) and the **CFG to 1**.
@@ -132,7 +136,9 @@ The images or videos can be seen here and can also be downloaded by right-clicki
 
 On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
 
-The tiles in that panel are small **previews** rendered by the server, not the full-size file — opening a panel full of large results no longer downloads them at full size. Click a tile to see the result in the centre, or drag it (see below) to use it as another app's input.
+The tiles in that panel are small **previews**, not the full-size file — a panel full of large results
+does not download them at full size. Click a tile to see the result in the centre, or drag it (see
+below) to use it as another app's input.
 
 **Dragging a result into an app.** Take an image (or video) from the Recent panel - or from the File Manager - and drop it on a **Load Image** / **Video** input to use it as that app's input. Hold it over a workspace tab and that app opens after a moment, so the file can go to an app in another tab. The file is copied into ComfyUI's `input/` folder, so the original result stays where it is.
 

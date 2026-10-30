@@ -16,11 +16,11 @@ Deploy **ComfyUI latest - SAUS - KN**: the latest ComfyUI with ComfyUI-Manager a
 - **Network Disk:** the template requires one. It is where ComfyUI, its `models/` folder and your generated files live between pods (it mounts at `/workspace`).
 
 > [!NOTE]
-> The first start takes a while: the template updates ComfyUI and SAUS and downloads what they need. Later starts are much shorter. Once the log prints `Redirect server running on port 7771`, SAUS is up.
+> The first start takes a while: the template updates ComfyUI and SAUS and downloads what they need. Later starts are much shorter — the pod log tells you when SAUS is ready.
 
 ## Accessing SAUS on a pod
 
-**Open port 7771** — from the pod panel, or from **Connect → HTTP Service** (Runpod shows it as `<pod-id>-7771.proxy.runpod.net`, handy to bookmark). On a pod SAUS answers there and sends you on to ComfyUI with `/saus` appended, so 7771 is the address to remember.
+**Open port 7771** — from the pod panel, or from **Connect → HTTP Service**, where it shows up as the pod's URL (bookmarkable). Clicking it opens SAUS.
 
 You can also open ComfyUI itself (port 8188) and click the **Simple App** flame in the left toolbar. See [Accessing SAUS](ACCESSING.md) for the walk-through.
 

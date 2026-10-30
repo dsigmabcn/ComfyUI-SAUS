@@ -85,6 +85,7 @@ If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyU
 <img src="web/core/media/git/custom nodes manager.png">
 
 Search for ComfyUI-SAUS and install it.
+<img src="web/core/media/git/saus_search_manager.png">
 
 ## Manual Install - git clone
 
@@ -100,7 +101,7 @@ git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 
 ## Automatic Install (scripts)
 
-To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
+To simplify installation, we provide scripts for Windows and Linux that install SAUS automatically.
 
 The SAUS installers consider you already have [ComfyUI and ComfyUI-Manager already installed](docs/ComfyUI_install_instructions.md).
 
@@ -139,15 +140,7 @@ See the [Runpod guide](docs/RUNPOD.md) for the required CUDA version, the port t
 
 # Accessing SAUS 
 
-## 1. Direct Link
-
-To run SAUS, simply navigate to this address in your web browser:
-
-```
-http://127.0.0.1:8188/saus
-```
-
-## 2. in ComfyUI
+## 1. in ComfyUI
 
 <table>
   <tr>
@@ -156,12 +149,21 @@ http://127.0.0.1:8188/saus
   </tr>
 </table>
 
+## 2. Direct Link Browser address
+
+To run SAUS, simply navigate to this address in your web browser:
+
+```
+http://127.0.0.1:8188/saus
+```
+
+
 ## 3. in Runpod
-After a pod with the **ComfyUI latest - SAUS - KN** template has started (the first run installs and updates), SAUS is reachable on port 7771 — it shows up among the pod's HTTP services in the control panel, and clicking it opens SAUS. It is also the `<pod-id>-7771.proxy.runpod.net` URL, which you can bookmark.
+After a pod with the **ComfyUI latest - SAUS - KN** template has started (the first run installs and updates), SAUS is reachable on port 7771 — it shows up among the pod's HTTP services in the control panel, and clicking it opens SAUS. That URL is bookmarkable, so you can come back to the same pod without going through the panel.
 
 <img src="web/core/media/git/port 7771.png">
 
-Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#2-in-comfyui">2. in ComfyUI</a>.
+Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#1-in-comfyui">2. in ComfyUI</a>.
 
 > [!TIP]
 > **Now what?** The [User Guide](docs/USER_GUIDE.md) shows how to use SAUS — browsing apps, installing the models an app needs, adjusting the settings and running a generation.

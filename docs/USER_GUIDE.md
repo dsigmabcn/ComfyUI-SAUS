@@ -23,18 +23,19 @@ Not installed yet? Start with [Installation and Setup](INSTALLATION.md).
 
 ## Accessing the Interface
 
-To run SAUS, simply navigate to this address in your web browser:
+To run SAUS:
+<table>
+  <tr>
+    <td valign="middle"><img src="../web/core/media/git/Access-button-ComfyUI.png" width="61"></td>
+    <td>Clicking the <b>Simple App</b> icon on ComfyUI's left toolbar.</td>
+  </tr>
+</table>
+
+Or navigate to this address in your web browser:
 
 ```
 http://127.0.0.1:8188/saus
 ```
-
-<table>
-  <tr>
-    <td valign="middle"><img src="../web/core/media/git/Access-button-ComfyUI.png" width="61"></td>
-    <td>or by clicking the <b>Simple App</b> icon on ComfyUI's left toolbar.</td>
-  </tr>
-</table>
 
 If you are accessing via [Runpod](RUNPOD.md), open the pod panel and click over the SAUS port (7771)
 
@@ -93,7 +94,7 @@ The tools live at the bottom of the rail.
 ### File Manager
 A simple File Manager to access and perform basic management of the files in your ComfyUI installation.
 - **Folders**: Shortcut access to the 'Input' and 'Output' folders inside ComfyUI.
-- **Upload File**: Upload files to your local machine/ComfyUI installation.
+- **Upload File**: upload files from your computer into ComfyUI's input folder.
 - **Folder Navigation**: Click on folders to navigate into them, and use 'Go Up' to move one level up in the directory structure.
 - **Image Visualization**: Click on an image or video file to open a preview panel and view it. Use the **arrow keys** to walk the files (with the panel open they flip straight through the images), and deleting the shown image moves the panel on to the next one.
 - **File Management**: Use the icons on each file to rename, download, or delete it.
