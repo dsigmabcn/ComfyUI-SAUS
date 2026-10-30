@@ -72,7 +72,7 @@ Below the lora model, you have the strength slider, where you can set the streng
 To add another LoRA, click **Add Lora** again; use the **✕** in the corner of a block to remove it.
 
 > [!NOTE]
-> As for the models, the Wan 2.2 app has 2 LoRA buttons, for its two models (high and low noise). The first one belongs to the first model (high), the second to the second (low).
+> As for the models, the Wan 2.2 app has 2 lora buttons that can be used for the Lightxv2 models. The first one corresponds to the first model (high), and the second for the second model (low).
 
 ### Image (Video) Loader
 For Image-to-image or image-to-video apps, you will need to use a reference image, which can be loaded into the 'input' folder of ComfyUI:
@@ -83,7 +83,7 @@ You can add an image by:
 - Drag and drop an image over the image space
 - **Click** the image space (or the 'Image Loader' title) to open the picker and choose a file from ComfyUI's `input` folder
 - Drag a result from the **Recent** panel or the File Manager onto it
-- **Upload** — the button inside the picker adds a file from your computer into ComfyUI's input folder.
+- **Upload** — the button inside the picker adds a file from your computer to `input` first
 
 The picker only lists what that input can actually take: an image input is offered the pictures in
 `input`, a video input the videos. The empty space is a button too, so it can be reached with the
