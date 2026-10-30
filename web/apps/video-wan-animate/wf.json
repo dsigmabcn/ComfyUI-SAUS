@@ -1,0 +1,818 @@
+{
+  "189": {
+    "inputs": {
+      "image": "pink_hair_mech_arms_ref.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image (Reference Image)"
+    }
+  },
+  "240": {
+    "inputs": {
+      "file": "street_dance_drive.mp4"
+    },
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "Load Video (Pose Video)"
+    }
+  },
+  "246": {
+    "inputs": {
+      "video": [
+        "720",
+        0
+      ],
+      "filename_prefix": "video/ComfyUI",
+      "format": "auto",
+      "format.codec": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "SaveVideo"
+    }
+  },
+  "241": {
+    "inputs": {
+      "video": [
+        "240",
+        0
+      ],
+      "start_time": 0,
+      "duration": 0.0,
+      "strict_duration": false
+    },
+    "class_type": "Video Slice",
+    "_meta": {
+      "title": "Video Slice"
+    }
+  },
+  "673": {
+    "inputs": {
+      "unet_name": "wan_animate_2_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "675": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "676": {
+    "inputs": {
+      "clip_name": "clip_vision_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "677": {
+    "inputs": {
+      "vae_name": "Wan2_1_VAE_bf16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "678": {
+    "inputs": {
+      "input": [
+        "189",
+        0
+      ],
+      "resize_type.width": [
+        "680",
+        0
+      ],
+      "resize_type.height": [
+        "680",
+        1
+      ],
+      "resize_type": "scale dimensions",
+      "resize_type.crop": "center",
+      "scale_method": "area"
+    },
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "ResizeImageMaskNode"
+    }
+  },
+  "679": {
+    "inputs": {
+      "video": [
+        "241",
+        0
+      ]
+    },
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "GetVideoComponents"
+    }
+  },
+  "680": {
+    "inputs": {
+      "image": [
+        "682",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "681": {
+    "inputs": {
+      "image": [
+        "682",
+        0
+      ],
+      "batch_index": 0,
+      "length": 1
+    },
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "ImageFromBatch"
+    }
+  },
+  "682": {
+    "inputs": {
+      "input": [
+        "679",
+        0
+      ],
+      "resize_type": "scale dimensions",
+      "resize_type.width": 482,
+      "resize_type.height": 854,
+      "resize_type.crop": "center",
+      "scale_method": "area"
+    },
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "ResizeImageMaskNode"
+    }
+  },
+  "683": {
+    "inputs": {
+      "clip": [
+        "675",
+        0
+      ],
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "684": {
+    "inputs": {
+      "clip": [
+        "675",
+        0
+      ],
+      "text": "Character Description: Cartoon character lost\nBackground description: The background is an empty white room"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "685": {
+    "inputs": {
+      "clip": [
+        "675",
+        0
+      ],
+      "text": "A girl doing energetic street dance with rhythmic steps and dynamic arm gestures, background stationary\n"
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIPTextEncode"
+    }
+  },
+  "686": {
+    "inputs": {
+      "clip_vision": [
+        "676",
+        0
+      ],
+      "image": [
+        "678",
+        0
+      ],
+      "crop": "none"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "687": {
+    "inputs": {
+      "clip_vision": [
+        "676",
+        0
+      ],
+      "image": [
+        "681",
+        0
+      ],
+      "crop": "none"
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIPVisionEncode"
+    }
+  },
+  "688": {
+    "inputs": {
+      "model": [
+        "673",
+        0
+      ],
+      "context_length": 21,
+      "context_overlap": 8,
+      "context_schedule": "standard_static",
+      "context_stride": 1,
+      "closed_loop": false,
+      "fuse_method": "pyramid",
+      "dim": 2,
+      "freenoise": true,
+      "cond_retain_index_list": "0",
+      "split_conds_to_windows": false,
+      "latent_retain_index_list": "",
+      "causal_window_fix": true
+    },
+    "class_type": "ContextWindowsManual",
+    "_meta": {
+      "title": "ContextWindowsManual"
+    }
+  },
+  "689": {
+    "inputs": {
+      "image": [
+        "695",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "690": {
+    "inputs": {
+      "values.a": [
+        "689",
+        2
+      ],
+      "values.b": [
+        "704",
+        0
+      ],
+      "expression": "floor((a - 2) / (b - 1))"
+    },
+    "class_type": "ComfyMathExpression",
+    "_meta": {
+      "title": "ComfyMathExpression"
+    }
+  },
+  "691": {
+    "inputs": {
+      "mode.num_iterations": [
+        "692",
+        1
+      ],
+      "mode": "simple",
+      "cache_iterations": false
+    },
+    "class_type": "StartLoop",
+    "_meta": {
+      "title": "StartLoop"
+    }
+  },
+  "692": {
+    "inputs": {
+      "values.a": [
+        "690",
+        1
+      ],
+      "expression": "a + 1"
+    },
+    "class_type": "ComfyMathExpression",
+    "_meta": {
+      "title": "ComfyMathExpression"
+    }
+  },
+  "693": {
+    "inputs": {
+      "on_false": [
+        "704",
+        0
+      ],
+      "on_true": [
+        "705",
+        1
+      ],
+      "switch": [
+        "691",
+        2
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "If/Else Switch(length)"
+    }
+  },
+  "694": {
+    "inputs": {
+      "list": [
+        "691",
+        4
+      ],
+      "index": 0
+    },
+    "class_type": "GetItemFromList",
+    "_meta": {
+      "title": "GetItemFromList"
+    }
+  },
+  "695": {
+    "inputs": {
+      "video": [
+        "241",
+        0
+      ]
+    },
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "GetVideoComponents"
+    }
+  },
+  "696": {
+    "inputs": {
+      "positive": [
+        "684",
+        0
+      ],
+      "negative": [
+        "683",
+        0
+      ],
+      "vae": [
+        "677",
+        0
+      ],
+      "reference_image": [
+        "678",
+        0
+      ],
+      "pose_video": [
+        "682",
+        0
+      ],
+      "clip_vision_output": [
+        "686",
+        0
+      ],
+      "positive_pose": [
+        "685",
+        0
+      ],
+      "clip_vision_output_pose": [
+        "687",
+        0
+      ],
+      "continue_motion": [
+        "700",
+        0
+      ],
+      "width": [
+        "680",
+        0
+      ],
+      "height": [
+        "680",
+        1
+      ],
+      "length": [
+        "693",
+        0
+      ],
+      "video_frame_offset": [
+        "706",
+        0
+      ],
+      "batch_size": 1,
+      "pose_strength": 1,
+      "pose_start_percent": 0,
+      "pose_end_percent": 1,
+      "reference_image_strength": 1
+    },
+    "class_type": "WanAnimate2ToVideo",
+    "_meta": {
+      "title": "WanAnimate2ToVideo"
+    }
+  },
+  "697": {
+    "inputs": {
+      "on_false": [
+        "673",
+        0
+      ],
+      "on_true": [
+        "688",
+        0
+      ],
+      "switch": false
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "ComfySwitchNode"
+    }
+  },
+  "698": {
+    "inputs": {
+      "model": [
+        "697",
+        0
+      ],
+      "device": "gpu",
+      "dtype": "int8"
+    },
+    "class_type": "WanAnimate2Cache",
+    "_meta": {
+      "title": "WanAnimate2Cache"
+    }
+  },
+  "699": {
+    "inputs": {
+      "list": [
+        "691",
+        4
+      ],
+      "index": 1
+    },
+    "class_type": "GetItemFromList",
+    "_meta": {
+      "title": "GetItemFromList"
+    }
+  },
+  "700": {
+    "inputs": {
+      "on_false": [
+        "694",
+        0
+      ],
+      "switch": [
+        "691",
+        1
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "If/Else Switch (continue_motion)"
+    }
+  },
+  "701": {
+    "inputs": {
+      "model": [
+        "698",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 6,
+      "denoise": 1
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "702": {
+    "inputs": {
+      "model": [
+        "698",
+        0
+      ],
+      "shift": 5
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "ModelSamplingSD3"
+    }
+  },
+  "703": {
+    "inputs": {
+      "sampler_name": "lcm"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "704": {
+    "inputs": {
+      "value": 81
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Int (fragment_length)"
+    }
+  },
+  "705": {
+    "inputs": {
+      "values.a": [
+        "689",
+        2
+      ],
+      "values.b": [
+        "704",
+        0
+      ],
+      "values.c": [
+        "690",
+        1
+      ],
+      "expression": "4 * ceil((a - b * c + c - 1) / 4) + 1"
+    },
+    "class_type": "ComfyMathExpression",
+    "_meta": {
+      "title": "ComfyMathExpression"
+    }
+  },
+  "706": {
+    "inputs": {
+      "on_false": [
+        "699",
+        0
+      ],
+      "on_true": [
+        "707",
+        0
+      ],
+      "switch": [
+        "691",
+        1
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "If/Else Switch(video_frame_offset)"
+    }
+  },
+  "707": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "PrimitiveInt"
+    }
+  },
+  "709": {
+    "inputs": {
+      "model": [
+        "702",
+        0
+      ],
+      "positive": [
+        "696",
+        0
+      ],
+      "negative": [
+        "696",
+        1
+      ],
+      "sampler": [
+        "703",
+        0
+      ],
+      "sigmas": [
+        "701",
+        0
+      ],
+      "latent_image": [
+        "696",
+        2
+      ],
+      "add_noise": true,
+      "noise_seed": 582699151003550,
+      "cfg": 1
+    },
+    "class_type": "SamplerCustom",
+    "_meta": {
+      "title": "SamplerCustom"
+    }
+  },
+  "710": {
+    "inputs": {
+      "values.a": [
+        "689",
+        2
+      ],
+      "values.b": [
+        "704",
+        0
+      ],
+      "expression": "(a % 4 == 1) and ((b - 1) % 4 == 0)"
+    },
+    "class_type": "ComfyMathExpression",
+    "_meta": {
+      "title": "Exact w/o trim? (F%4==1 and b%4==1)"
+    }
+  },
+  "711": {
+    "inputs": {
+      "samples": [
+        "712",
+        0
+      ],
+      "vae": [
+        "677",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "712": {
+    "inputs": {
+      "samples": [
+        "709",
+        0
+      ],
+      "trim_amount": [
+        "696",
+        3
+      ]
+    },
+    "class_type": "TrimVideoLatent",
+    "_meta": {
+      "title": "TrimVideoLatent"
+    }
+  },
+  "713": {
+    "inputs": {
+      "image": [
+        "711",
+        0
+      ],
+      "batch_index": 1,
+      "length": 4096
+    },
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "ImageFromBatch"
+    }
+  },
+  "714": {
+    "inputs": {
+      "on_false": [
+        "713",
+        0
+      ],
+      "on_true": [
+        "711",
+        0
+      ],
+      "switch": [
+        "691",
+        1
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "ComfySwitchNode"
+    }
+  },
+  "715": {
+    "inputs": {
+      "inputs.input0": [
+        "711",
+        0
+      ],
+      "inputs.input1": [
+        "696",
+        5
+      ]
+    },
+    "class_type": "CreateList",
+    "_meta": {
+      "title": "CreateList"
+    }
+  },
+  "716": {
+    "inputs": {
+      "output_value": [
+        "714",
+        0
+      ],
+      "next_iteration_value": [
+        "715",
+        0
+      ],
+      "terminations.termination0": [
+        "696",
+        5
+      ],
+      "accumulate": true
+    },
+    "class_type": "EndLoop",
+    "_meta": {
+      "title": "EndLoop"
+    }
+  },
+  "717": {
+    "inputs": {
+      "images": [
+        "716",
+        0
+      ],
+      "batch_size": [
+        "689",
+        2
+      ]
+    },
+    "class_type": "RebatchImages",
+    "_meta": {
+      "title": "RebatchImages"
+    }
+  },
+  "718": {
+    "inputs": {
+      "image": [
+        "717",
+        0
+      ],
+      "length": [
+        "689",
+        2
+      ],
+      "batch_index": 0
+    },
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "Trim tail to F"
+    }
+  },
+  "719": {
+    "inputs": {
+      "on_false": [
+        "718",
+        0
+      ],
+      "on_true": [
+        "717",
+        0
+      ],
+      "switch": [
+        "710",
+        2
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "Apply tail trim?"
+    }
+  },
+  "720": {
+    "inputs": {
+      "images": [
+        "719",
+        0
+      ],
+      "audio": [
+        "695",
+        1
+      ],
+      "fps": [
+        "695",
+        2
+      ],
+      "bit_depth": "auto",
+      "color_space": "sRGB",
+      "codec": "none"
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "CreateVideo"
+    }
+  }
+}

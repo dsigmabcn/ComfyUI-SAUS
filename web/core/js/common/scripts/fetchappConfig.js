@@ -1,3 +1,5 @@
+import { cacheQuery } from './cacheQuery.js';
+
 export async function fetchappConfig(appName) {
     try {
         let app = appName;
@@ -9,8 +11,7 @@ export async function fetchappConfig(appName) {
                 throw new Error('Invalid path: Expected /saus/{name}');
             }
         }
-        const cacheBuster = `?cacheSaus=${Date.now()}`;
-        const jsonPath = `/saus/${encodeURIComponent(app)}/appConfig.json${cacheBuster}`;
+        const jsonPath = `/saus/${encodeURIComponent(app)}/appConfig.json${cacheQuery(app)}`;
         const response = await fetch(jsonPath);
         if (!response.ok) {
             throw new Error(`Failed to fetch appConfig.json for app '${app}'. HTTP status: ${response.status}`);

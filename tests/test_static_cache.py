@@ -56,6 +56,15 @@ def test_saus_pages_and_assets_revalidate():
     assert static_cache.should_revalidate('/saus/file_manager/css/styles.css') is True
 
 
+def test_vendored_fonts_are_cached_like_media():
+    """A webfont never changes, so revalidating it is a round trip for nothing."""
+    assert static_cache.cache_control_for(
+        '/core/media/vendor/fontawesome/webfonts/fa-solid-900.woff2') == 'public, max-age=3600'
+    assert static_cache.cache_control_for(
+        '/core/media/vendor/fontawesome/css/all.min.css') == 'no-cache', \
+        'the stylesheet that points at them still revalidates'
+
+
 def test_api_responses_keep_their_own_headers():
     assert static_cache.should_revalidate('/saus/api/model-status-batch') is False
     assert static_cache.should_revalidate('/saus/api/saus-version') is False

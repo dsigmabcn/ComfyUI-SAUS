@@ -383,6 +383,14 @@ a {
     cursor: pointer;
 }
 
+/* The gears are a control (they open the console): a keyboard user has to be able to
+   see where they are. */
+#spinner:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
 #spinner::after {
   content: '';
   left: 35px;
@@ -794,9 +802,18 @@ input[type="number"] {
 }
 
 .ratio-icon-btn.active {
-    background-color: var(--color-background-pattern-light);
+    /* The selected tile has to be unmistakable: a solid accent ring plus an
+       accent tint. The old fill (--color-background-pattern-light) sat a hair
+       away from the tile's own background in Night, so the choice was invisible. */
+    background-color: var(--color-accent-soft);
     color: var(--color-primary-text);
-    border-color: var(--color-background-pattern-light);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.ratio-icon-btn.active .ratio-ratio {
+    color: var(--color-highlight);
+    font-weight: 700;
 }
 
 .ratio-shape {
@@ -1018,23 +1035,6 @@ select option:hover {
     /* background: red; */
 
 }
-.add-lora-button {
-    background-color: var(--color-button-secondary);
-    color: var(--color-primary-text);
-    padding: 0px;
-    /* margin: 0 10px; */
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    /* width:80%; */
-    overflow: hidden;
-}
-
-.add-lora-button:hover {
-    background-color: var(--color-button-secondary-hover);
-    color: var(--color-button-secondary-text-hover);
-}
-
 button {
     padding: 5px;
     border: none;
@@ -1628,19 +1628,6 @@ body.saus-dragging .image-loader {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: var(--color-accent);
-}
-
-.add-lora-button {
-    background-color: var(--color-button-secondary);
-    color: var(--color-button-primary-text-active);
-    /* padding: 10px; */
-    /* margin: 0 10px; */
-    border: 1px solid var(--color-background-pattern-light);
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    width: 100%;
-    /*font-size: 24px;*/
-    margin: 2px;
 }
 
 /* Large Tablets and Desktops */
@@ -2880,7 +2867,7 @@ html:not(.css-loading) body {
     border-bottom: 1px dashed var(--color-border);
 }
 
-.mode-group-left, .mode-group-right {
+.mode-group-left {
     display: flex;
     gap: 5px;
 }
@@ -2996,12 +2983,6 @@ html:not(.css-loading) body {
     margin-top: 16px;
 }
 
-.mode-group-right {
-    margin-left: 15px;
-    padding-left: 15px;
-    border-left: 1px solid var(--color-border);
-}
-
 .mode-button {
     padding: 6px 12px;
     border: 1px solid var(--color-border);
@@ -3088,9 +3069,12 @@ html:not(.css-loading) body {
     white-space: nowrap;
 }
 
-/* "Add Lora+" styled like the other list controls, only slimmer. */
+/* "Add Lora" styled like the other list controls, only slimmer. The icon and
+   the label sit on one line, so the button is a flex row. */
 .add-lora-button {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     width: 100%;
     margin: 0;
     padding: 7px 10px;
@@ -3101,6 +3085,7 @@ html:not(.css-loading) body {
     font-size: 0.9em;
     font-weight: 600;
     text-align: left;
+    overflow: hidden;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
 }

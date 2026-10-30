@@ -21,7 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const UUID = 'c291ceec-b98f-4751-9d0b-7bc288f27b30';
 
-const state = { requested: [], answers: {}, lookups: 0, root: null };
+const state = { requested: [], answers: {}, lookups: 0, root: null, containers: 1 };
 
 function element(id) {
     return {
@@ -48,9 +48,10 @@ globalThis.document = {
     // The widget looks its own container up first; every later lookup (the
     // dropdown handler's) finds nothing, which is that handler's documented
     // "nothing to draw into" path - so this stays a lookup test, not a DOM test.
+    // `state.containers` is how many widgets a scenario wants to give a home to.
     getElementById: (id) => {
         state.lookups += 1;
-        if (state.lookups > 1) return null;
+        if (state.lookups > state.containers) return null;
         state.root = element(id);
         return state.root;
     },
@@ -72,6 +73,11 @@ globalThis.fetch = async (url) => {
 const { default: Dropdown } = await import(
     pathToFileURL(join(ROOT, 'web/core/js/common/components/widgets/Dropdown.js')).href
 );
+// The cache lives for one page load, so a scenario has to start from a fresh one -
+// that is what a reload does in the browser.
+const { clearObjectInfoCache } = await import(
+    pathToFileURL(join(ROOT, 'web/core/js/common/scripts/objectInfo.js')).href
+);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const settle = async () => {
@@ -91,6 +97,7 @@ async function load(config, workflow, answers = {}) {
     state.requested = [];
     state.answers = answers;
     state.lookups = 0;
+    clearObjectInfoCache();
     const dropdown = new Dropdown(config, workflow);
     await settle();
     return dropdown;
@@ -167,6 +174,48 @@ function inspect(config, workflow) {
     const unknownNode = inspect({ id: 'compUnknown', label: 'Unknown', nodePath: '12.inputs.steps', url: UUID, key: 'steps' }, {});
     assert.deepEqual(unknownNode.nodeTypeCandidates, [UUID], 'a workflow without the node adds nothing');
     console.log('5. missing workflow entries are handled: OK');
+}
+
+/* 6. the same node type is fetched once for the whole page */
+{
+    clearObjectInfoCache();
+    state.requested = [];
+    state.lookups = 0;
+    state.containers = 4;
+    state.answers = combo('CLIPLoader', 'clip_name', ['clip_l.safetensors']);
+    const workflow = { 459: { class_type: 'CLIPLoader', inputs: {} } };
+    const widget = (id) => ({ id, label: 'Clip Name', nodePath: '459.inputs.clip_name', url: 'CLIPLoader', key: 'clip_name' });
+
+    new Dropdown(widget('clipA'), workflow);
+    await settle();
+    new Dropdown(widget('clipB'), workflow);
+    await settle();
+
+    assert.deepEqual(state.requested, ['CLIPLoader'],
+        'two dropdowns over one class cost one request - a loader answers with every model on disk');
+
+    // A class ComfyUI does not know is remembered too: the next widget must not
+    // re-ask for a type the first already proved is unknown.
+    state.answers = {};
+    new Dropdown(widget('clipC'), workflow);
+    await settle();
+    assert.deepEqual(state.requested, ['CLIPLoader'],
+        'an unknown type is not asked for twice either');
+
+    // A failure is NOT remembered, so a retry is still possible.
+    clearObjectInfoCache();
+    state.requested = [];
+    state.lookups = 0;
+    state.containers = 2;
+    const working = globalThis.fetch;
+    globalThis.fetch = async () => { throw new Error('offline'); };
+    new Dropdown(widget('clipD'), workflow);
+    await settle();
+    globalThis.fetch = working;
+    new Dropdown(widget('clipE'), workflow);
+    await settle();
+    assert.deepEqual(state.requested, ['CLIPLoader'], 'the retry after a failure does fetch');
+    console.log('6. one /object_info request per node type, per page: OK');
 }
 
 console.log('\ndropdown lookup: all scenarios passed');

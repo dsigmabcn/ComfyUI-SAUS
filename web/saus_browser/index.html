@@ -4,9 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAUS</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome, served from /core (web/core/media/vendor/fontawesome/).
+         It used to come from cdnjs: the only cross-origin, render-blocking request
+         in the UI, and the one thing that could hang on a slow or offline box.
+         Re-vendor on a version bump: tools/vendor_fontawesome.py. -->
+    <link href="/core/media/vendor/fontawesome/css/all.min.css" rel="stylesheet">
     <link rel="icon" href="/core/media/ui/saus_logo.png" type="image/png">
-    <link rel="stylesheet" href="saus/css/styles.css">
+
+    <!-- One link per stylesheet, in the order the old `styles.css` @import chain
+         applied them. The browser now discovers them all in the first pass instead
+         of parsing ~13 sheets one after another before the first paint. -->
+    <link rel="stylesheet" href="saus/css/variables.css">
+    <link rel="stylesheet" href="saus/css/base.css">
+    <link rel="stylesheet" href="saus/css/home.css">
+    <link rel="stylesheet" href="saus/css/shell.css">
+    <link rel="stylesheet" href="saus/css/explorer.css">
+    <link rel="stylesheet" href="saus/css/controls.css">
+    <link rel="stylesheet" href="saus/css/details.css">
+    <link rel="stylesheet" href="saus/css/updates.css">
+    <link rel="stylesheet" href="saus/css/settings.css">
+    <link rel="stylesheet" href="saus/css/managers.css">
+    <link rel="stylesheet" href="saus/css/modals.css">
+    <link rel="stylesheet" href="/core/css/notices.css">
 
     <!-- Show the remembered theme before the first paint (see core/css/themes.css).
          Night is what :root already gives, so only Day and Fire need setting. -->
@@ -65,10 +84,12 @@
                         <div id="homeContainer" class="pane home-container">
                             <div class="home-content">
                                 <h1>Welcome to SAUS</h1>
-                                <h3 style="text-align: center;">A Simple App U See</h3>
-                                <img src="/core/media/ui/Saus%20quick%20start%20card.png" alt="Quick Start" style="max-width: 100%; max-height: 55vh; height: auto; margin: 20px 0;">
-                                <h4 style="font-size: 1.1em; text-align: center;">Click one of the icons on the left to browse the apps.</h4>
-                                <h4 style="font-size: 1.1em; text-align: center;">Every app you open stays here as a tab.</h4>
+                                <h3>A Simple App U See</h3>
+                                <!-- Sized by home.css: this card must keep its 16:9 shape
+                                     whatever the window (or the console dock) does. -->
+                                <img src="/core/media/ui/Saus%20quick%20start%20card.webp"
+                                     alt="Quick start: choose a category, install the models, open the app, set the prompt and run"
+                                     width="1366" height="768" decoding="async">
                             </div>
                         </div>
                     </div>

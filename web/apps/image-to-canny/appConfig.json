@@ -1,0 +1,91 @@
+{
+  "id": "imgcanny",
+  "name": "Image to Canny",
+  "url": "image-to-canny",
+  "description": "Turn an image into its edge map with ComfyUI's Detect Edges (Canny) node - the control image an image-to-image or ControlNet app expects.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Image tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "CANNY EDGES",
+    "models": []
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "lowthresholdimgcanny",
+      "label": "Low Threshold",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "2.inputs.low_threshold",
+      "defValue": 0.4,
+      "minValue": 0.01,
+      "maxValue": 0.99,
+      "step": 0.01,
+      "precision": 2,
+      "scaleFactor": 1
+    },
+    {
+      "id": "highthresholdimgcanny",
+      "label": "High Threshold",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "2.inputs.high_threshold",
+      "defValue": 0.8,
+      "minValue": 0.01,
+      "maxValue": 0.99,
+      "step": 0.01,
+      "precision": 2,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefiximgcanny",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "3.inputs.filename_prefix",
+      "defValue": "Canny"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgimageimgcanny",
+      "label": "Image",
+      "nodePath": "1.inputs.image"
+    }
+  ],
+  "dropdowns": [],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outimgcanny",
+      "label": "Save Image",
+      "nodeId": "3",
+      "type": "media"
+    }
+  ]
+}

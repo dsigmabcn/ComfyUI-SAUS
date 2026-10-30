@@ -1,41 +1,34 @@
 # Security
 
-SAUS is served **by ComfyUI itself**, on ComfyUI's origin (`/saus/**`), so the SAUS
-shell, every app and ComfyUI share one origin. That shapes what SAUS can defend.
+SAUS runs **inside ComfyUI**, on the same address and port as it: that is what shapes what SAUS can
+defend, and it is why the checks below are the ones that matter.
 
 ## Cross-site requests
 
-Every mutating route requires a JSON body (`Content-Type: application/json`), and
-the multipart upload route requires the `X-SAUS-Request` header — both force a CORS
-preflight, which this server never answers. Do **not** start ComfyUI with
-`--enable-cors-header`: answering those preflights would remove that protection
-from SAUS *and* from ComfyUI's own endpoints.
+Everything you do in the SAUS interface — uploads, renames, deletes, downloads — is sent in a way a
+random web page cannot imitate, so a site you happen to have open in another tab cannot act on your
+ComfyUI behind your back. Do **not** start ComfyUI with `--enable-cors-header`: that option removes this
+protection, for SAUS *and* for ComfyUI itself.
 
-## Code inside the ComfyUI origin
+## Custom nodes and extensions
 
-Custom nodes and other extensions run inside the ComfyUI origin, so they can
-already read and call SAUS — there is no boundary to enforce there. Apps are
-trusted content, exactly like a custom node.
+Custom nodes and other extensions you install run inside ComfyUI itself, so they can already read and
+call SAUS — there is no boundary to enforce there. Apps are trusted content, exactly like a custom node.
 
 ## Filesystem access
 
-The file / upload / rename / delete API is confined to ComfyUI's `input`, `output`
-and `models` folders: absolute, drive-letter, UNC and `..` paths are refused before
-anything touches disk, then the path is resolved and checked against those roots.
-The roots themselves are never renamed, deleted or moved — only their contents.
-(`download-file` accepts the absolute paths ComfyUI's executor sends, so there the
-UNC form alone is refused, checked as a *string* before anything resolves it.)
+The File Manager (and everything SAUS does with files: uploading, renaming, deleting, moving) stays
+inside ComfyUI's `input`, `output` and `models` folders. `..`, drive letters and network paths are
+refused before anything touches the disk. Those three folders themselves are never renamed, deleted or
+moved — only what is inside them.
 
 ## Downloads
 
-A model download only lands in a folder ComfyUI uses for models: `custom_nodes`
-and `datasets` are never a destination, because a file written there could be
-imported and run after a restart. A downloaded file name is reduced to a base name
-and refused if it carries a script or native-library extension, exactly as an
-upload is. Downloads only fetch http(s) URLs that resolve to public addresses, that
-check is repeated on every redirect, and an API token is attached only for hosts on
-the allow-list kept in `saus/data/allowed_download_hosts.json`. SAUS never stores
-tokens.
+A model download only ever lands in a folder ComfyUI uses for models — never in a folder ComfyUI loads
+code from, where a file could be imported and run after a restart. A downloaded file name is reduced to
+its base name and refused if it carries a script or native-library extension, exactly as an upload is.
+Downloads only fetch public http(s) addresses, that check is repeated on every redirect, and a login
+token is attached only for hosts on a shipped allow-list of trusted sources. SAUS never stores tokens.
 
 ## Reporting a vulnerability
 
@@ -44,7 +37,3 @@ Please report security issues privately through GitHub's
 rather than in a public issue. Reports are reviewed as time allows; if one is
 accepted, a fix is released and the reporter is credited unless they prefer
 otherwise.
-
-Contributors: the concrete invariants every route must keep — and the checks that
-enforce them — are documented in the developer skill at
-`.clinerules/skills/saus-developer/references/security-invariants.md`.

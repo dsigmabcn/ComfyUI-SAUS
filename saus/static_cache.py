@@ -12,12 +12,14 @@ from aiohttp import web
 REVALIDATE_PREFIXES = ('/core/', '/saus/')
 API_PREFIX = '/saus/api/'
 
-# Images and media are content, not chrome: revalidating each one on every panel
-# open is a round trip *per thumbnail* (29 of them), and the URL used to carry a
-# cache-buster, which made it a full download instead of a 304. They may be reused
+# Images, media and fonts are content, not chrome: revalidating each one on every
+# panel open is a round trip *per thumbnail* (29 of them), and the URL used to carry
+# a cache-buster, which made it a full download instead of a 304. They may be reused
 # for an hour; HTML, JS and CSS keep revalidating, so a fix is never invisible.
+# The vendored webfonts belong here for the same reason - a `no-cache` font is a
+# round trip on every page load, for a file that never changes.
 MEDIA_SUFFIXES = ('.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.svg', '.ico',
-                  '.bmp', '.mp4', '.webm', '.ogg')
+                  '.bmp', '.mp4', '.webm', '.ogg', '.woff', '.woff2')
 MEDIA_MAX_AGE = 3600
 
 MIDDLEWARE_FLAG = '_saus_revalidate_middleware'

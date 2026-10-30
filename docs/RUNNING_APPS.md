@@ -12,10 +12,10 @@ After you have installed all models needed for an app, open it by clicking on it
 Next to the app's **name** sits an **(i)** that opens the [information panel](MODELS.md), where you can install or uninstall the required models for the app.
 
 Just below are the app's **modes**: **HD** is what the app runs as by default and
-**Custom** always stays (it exposes the parameters as they are). Any other button comes
-from the app's architecture — **Turbo** only appears where that architecture defines it,
-and named variants replace the HD / Turbo pair completely. A mode whose models are not
-installed is greyed out; hover it to see which file it is missing.
+**Custom** always stays (it exposes the parameters as they are). Any other button is one the
+app itself offers — **Turbo** only appears where the app has a Turbo mode, and named variants
+replace the HD / Turbo pair completely. A mode whose models are not installed is greyed out;
+hover it to see which file it is missing.
 
 <img src="../web/core/media/git/running_apps/variants.png">
 
@@ -52,7 +52,7 @@ By default, the seed is random and it changes after you run the image/video gene
 
 ### Steps ###
 
-You can define here the number of steps for the KSampler (steps for the diffusion/checkpoint model) to generate the image. In general, more steps, more detailed images.
+You can define here the number of steps the model uses to generate the image. In general, more steps, more detailed images.
 
 For video generation, steps are generally under **Advanced**
 
@@ -61,7 +61,7 @@ For video generation, steps are generally under **Advanced**
 Indicate here the prefix of the filename of your results saved in the output folder.
 
 ### Lora
-At the bottom, you will see an **Add Lora+** button, which lets you use LoRAs.
+At the bottom, you will see an **Add Lora** button, which lets you use LoRAs.
 
 When you click it, a new LoRA block appears: the LoRA dropdown, with the **strength** control below.
 
@@ -69,10 +69,10 @@ As with model loading, just click on the dropdown, and a pop-up window listing y
 
 Below the lora model, you have the strength slider, where you can set the strength between 0 and 2 (default is 1, typically in the range of 0.5-1).
 
-To add another LoRA, click **Add Lora+** again; use the **✕** in the corner of a block to remove it.
+To add another LoRA, click **Add Lora** again; use the **✕** in the corner of a block to remove it.
 
 > [!NOTE]
-> As for the models, the Wan 2.2 app has 2 lora buttons that can be used for the Lightxv2 models. The first one corresponds to the first model (high), and the second for the second model (low).
+> As for the models, the Wan 2.2 app has 2 LoRA buttons, for its two models (high and low noise). The first one belongs to the first model (high), the second to the second (low).
 
 ### Image (Video) Loader
 For Image-to-image or image-to-video apps, you will need to use a reference image, which can be loaded into the 'input' folder of ComfyUI:
@@ -81,8 +81,13 @@ For Image-to-image or image-to-video apps, you will need to use a reference imag
 
 You can add an image by:
 - Drag and drop an image over the image space
-- Double clicking over the image space
-- Click over 'Image Loader' to open the 'input' folder and select the image you want to use
+- **Click** the image space (or the 'Image Loader' title) to open the picker and choose a file from ComfyUI's `input` folder
+- Drag a result from the **Recent** panel or the File Manager onto it
+- **Upload** — the button inside the picker adds a file from your computer into ComfyUI's input folder.
+
+The picker only lists what that input can actually take: an image input is offered the pictures in
+`input`, a video input the videos. The empty space is a button too, so it can be reached with the
+keyboard (Tab, then Enter).
 
 After dropping the image or selecting it from local or input folder, the image will be loaded and ready to be used in the app for transformation, editing or as reference.
 
@@ -96,7 +101,11 @@ The Advanced controls are hidden behind a **Show Advanced** fold at the bottom o
 
 The available controls will depend on the app you are running, but some common ones are:
 
-- **Model**: if you want to use a different model than the one provided in the variants, you can choose the one you prefer.
+- **Model**: if you want a different model than the one the variants offer, pick it here. In a tool whose
+  only choice *is* the model — the upscalers, the frame-interpolation tools — the models appear as
+  **variant buttons** next to Custom, one per model, instead of a dropdown to dig through. And where an
+  app has no modes at all (a pose detector, a depth estimator, a generative upscaler such as SeedVR2)
+  this selector always stays visible, so you can see and change the model the app runs on.
 - **CLIP and VAE**: if you want to use different text encoder or VAE models, you can select them here.
 - **Sampler and scheduler**: you can change the sampler and scheduler for the diffusion process here.
 - **Number of steps and CFG**: in the advanced settings, you can also change the number of steps for the diffusion process and the Classifier-Free Guidance (CFG) value. In general, the default values are good, but if you are going to use **distilled or lightning LoRAs**, you will need to change them, normally by **reducing the steps to 4-8** (depending on the LoRA) and the **CFG to 1**.
@@ -111,7 +120,8 @@ The available controls will depend on the app you are running, but some common o
 The small rotating gears will start rotating, and the **number of queued runs left** appears right below the gears. Next to the progress bar you can see which nodes are being processed in the ComfyUI background. When the sampler starts, you will also see the progress bar progressing with the number of steps.
 
 
-More detailed logs can be accessed via the **Console** at the bottom of the SAUS rail. This is useful when a model takes too long, or for troubleshooting.
+More detailed logs can be accessed via the **Console** at the bottom of the SAUS rail — or by clicking the
+small rotating **gears** next to the progress bar, which opens (and closes) the Console tab.
 
 
 If you want to stop the generation process, just click the **✕** next to the progress bar, and the sampling will stop.
@@ -125,6 +135,10 @@ When the image or video generation process is finished, you can see the results:
 The images or videos can be seen here and can also be downloaded by right-clicking and selecting 'Save As'. All images and videos are saved in the 'output' folder of ComfyUI, which you can access with the File Manager.
 
 On the right, there is the 'Recent' panel, which shows the images that have been generated in the current session. You can navigate and open them to compare with the latest generation. The 'Recent' panel will not show generated images from previous sessions, so to see them you will need to access the File Manager.
+
+The tiles in that panel are small **previews**, not the full-size file — a panel full of large results
+does not download them at full size. Click a tile to see the result in the centre, or drag it (see
+below) to use it as another app's input.
 
 **Dragging a result into an app.** Take an image (or video) from the Recent panel - or from the File Manager - and drop it on a **Load Image** / **Video** input to use it as that app's input. Hold it over a workspace tab and that app opens after a moment, so the file can go to an app in another tab. The file is copied into ComfyUI's `input/` folder, so the original result stays where it is.
 

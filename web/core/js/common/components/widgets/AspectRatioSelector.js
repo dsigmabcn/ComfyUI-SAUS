@@ -1,5 +1,6 @@
 import { updateWorkflow, getValueFromWorkflow } from '../workflowManager.js';
 import { extractComboOptions } from './comboOptions.js';
+import { getObjectInfo, objectInfoPath } from '../../scripts/objectInfo.js';
 
 const RATIO_RE = /(\d+)\s*[:x×]\s*(\d+)/;
 const DEFAULT_QUICK_RATIOS = '1:1, 16:9, 9:16';
@@ -164,13 +165,9 @@ class AspectRatioSelector {
             return;
         }
 
-        fetch(`${window.location.origin}/object_info/${url}`)
-            .then((response) => {
-                if (!response.ok) throw new Error(response.statusText);
-                return response.json();
-            })
-            .then((data) => {
-                const info = data[url] || Object.values(data)[0];
+        // Shared with every other combo on the page (see scripts/objectInfo.js).
+        getObjectInfo(objectInfoPath(url))
+            .then((info) => {
                 const spec =
                     info?.input?.required?.[key] ?? info?.input?.optional?.[key];
                 this.options = extractComboOptions(spec) || this.config.options || [];
@@ -297,7 +294,10 @@ class AspectRatioSelector {
         const label = entry.ratio
             ? ratioKey(entry.ratio.w, entry.ratio.h)
             : entry.value;
-        return `<button class="ratio-icon-btn ${entry.value === selected ? 'active' : ''}" data-value="${escapeHtml(entry.value)}" title="${escapeHtml(entry.value)}">
+        // aria-pressed carries the choice for assistive tech; the accent ring is
+        // only the paint of the same state.
+        const active = entry.value === selected;
+        return `<button class="ratio-icon-btn ${active ? 'active' : ''}" aria-pressed="${active}" data-value="${escapeHtml(entry.value)}" title="${escapeHtml(entry.value)}">
                     ${shapeHtml(entry.ratio)}
                     <span class="ratio-ratio">${escapeHtml(label)}</span>
                     <span class="ratio-size">${escapeHtml(this.sizeText(entry))}</span>

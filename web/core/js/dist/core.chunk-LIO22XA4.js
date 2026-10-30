@@ -1,0 +1,63 @@
+/* saus-bundle:38f23f2b6ad13f97664ee0c56dabb147491e58e2 - built by tools/bundle_core.py; do not edit */
+import{b as c}from"./core.chunk-ZH4T4732.js";var m=class extends c{constructor(e={}){super("ImageLoaderPlugin"),this.options={mode:"Single",...e},this.canvasManager=null,this.canvas=null,this.uiContainer=null,this.toggleButton=null,this.loadButton=null,this.fileInput=null,this.loadedImages=[],this.originalImages={},this.loadedImageType="uploaded",this.onImageDrop=this.onImageDrop.bind(this),this.onDoubleClick=this.onDoubleClick.bind(this),this.onToggleMode=this.onToggleMode.bind(this),this.onCanvasResized=this.onCanvasResized.bind(this),this.onDragOver=this.onDragOver.bind(this),this.onImageRemove=this.onImageRemove.bind(this),this.onLoadButtonClick=this.onLoadButtonClick.bind(this),this.onFileInputChange=this.onFileInputChange.bind(this),this.handleFinalImageData=this.handleFinalImageData.bind(this),this.handlePreviewImageData=this.handlePreviewImageData.bind(this)}init(e){this.canvasManager=e,this.canvas=e.canvas,this.createUI(),this.attachEventListeners(),this.canvasManager.on("canvas:resized",this.onCanvasResized),this.canvasManager.on("image:remove",this.onImageRemove),window.addEventListener("finalImageData",this.handleFinalImageData),window.addEventListener("previewImageData",this.handlePreviewImageData)}createUI(){if(!document.querySelector('style[data-plugin="image-loader"]')){let t=document.createElement("style");t.setAttribute("data-plugin","image-loader"),t.textContent=`
+                .il-container * {
+                    box-sizing: border-box;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                
+                .il-container {
+                    display: inline-flex;
+                    padding: 0.5rem;
+                    gap: 0.5rem;
+                }
+
+                .il-button {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem;
+                    background: var(--color-button-primary, #007BFF);
+                    border: none;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    color: var(--color-primary-text, #FFFFFF);
+                    height: 36px;
+                }
+
+                .il-button:hover {
+                    background: var(--color-button-primary-hover, #0056b3);
+                }
+
+                .il-button svg {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                }
+
+                .il-toggle-button[data-mode="Multi"] {
+                    border: 1px dashed var(--color-button-secondary-text-active, #FFC107);
+                }
+
+                .il-hidden-file-input {
+                    display: none;
+                }
+                /* Temporary fix for hidden future functionality */
+                #toggleModeBtn {
+                    display: none;
+                }
+            `,document.head.appendChild(t)}this.uiContainer=document.createElement("div"),this.uiContainer.className="il-container",this.renderToggleButton(),this.renderLoadButton(),this.createHiddenFileInput();let e=document.getElementById("pluginUIContainer");e&&e.appendChild(this.uiContainer)}renderToggleButton(){this.toggleButton=document.createElement("button"),this.toggleButton.className="il-button il-toggle-button",this.toggleButton.id="toggleModeBtn",this.toggleButton.setAttribute("data-mode",this.options.mode),this.toggleButton.innerHTML=`
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            ${this.options.mode}
+        `,this.toggleButton.addEventListener("click",this.onToggleMode),this.uiContainer.appendChild(this.toggleButton)}renderLoadButton(){this.loadButton=document.createElement("button"),this.loadButton.className="il-button il-load-button",this.loadButton.id="loadImageBtn",this.loadButton.title="Load Image",this.loadButton.innerHTML=`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="4" width="18" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M12 14V8m0 0l3 3m-3-3l-3 3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+        `,this.loadButton.addEventListener("click",this.onLoadButtonClick),this.uiContainer.appendChild(this.loadButton)}createHiddenFileInput(){this.fileInput=document.createElement("input"),this.fileInput.type="file",this.fileInput.accept="image/*",this.fileInput.className="il-hidden-file-input",this.fileInput.addEventListener("change",this.onFileInputChange),document.body.appendChild(this.fileInput)}onToggleMode(){this.options.mode=this.options.mode==="Single"?"Multi":"Single",this.toggleButton.setAttribute("data-mode",this.options.mode),this.toggleButton.innerHTML=`
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            ${this.options.mode}
+        `,this.options.mode==="Single"&&this.loadedImages.length>1&&this.loadedImages.slice(0,-1).forEach(({id:t})=>{this.removeImageById(t)})}onLoadButtonClick(){this.fileInput&&this.fileInput.click()}onFileInputChange(e){let t=e.target.files[0];t&&this.handleImageFile(t),e.target.value=""}attachEventListeners(){this.canvas.upperCanvasEl.addEventListener("dragover",this.onDragOver),this.canvas.upperCanvasEl.addEventListener("drop",this.onImageDrop)}detachEventListeners(){this.canvas.upperCanvasEl.removeEventListener("dragover",this.onDragOver),this.canvas.upperCanvasEl.removeEventListener("drop",this.onImageDrop),this.toggleButton&&this.toggleButton.removeEventListener("click",this.onToggleMode),this.loadButton&&this.loadButton.removeEventListener("click",this.onLoadButtonClick),this.fileInput&&this.fileInput.removeEventListener("change",this.onFileInputChange),this.canvasManager.off("canvas:resized",this.onCanvasResized),this.canvasManager.off("image:remove",this.onImageRemove)}updateImageScaleAndPosition(e,t,a,i,n,o){let s=t.strokeWidth||2,r=a-s*2,h=i-s*2,l=n/o,g=a/i,d;return l>g?d=r/n:d=h/o,e.set({scaleX:d,scaleY:d,left:a/2,top:i/2,originX:"center",originY:"center",selectable:!1,evented:!1}),t.set({width:e.getScaledWidth(),height:e.getScaledHeight(),scaleX:1,scaleY:1,left:a/2,top:i/2,originX:"center",originY:"center"}),d}onCanvasResized({width:e,height:t}){this.loadedImages.forEach(a=>{let{imageObject:i,borderRect:n,originalWidth:o,originalHeight:s}=a,r=this.updateImageScaleAndPosition(i,n,e,t,o,s);a.scaleFactor=r}),this.canvas.requestRenderAll()}onDragOver(e){e.preventDefault(),e.dataTransfer.dropEffect="copy"}onImageDrop(e){e.preventDefault();let t=e.dataTransfer.files;t&&t[0]&&this.handleImageFile(t[0])}onDoubleClick(e){let t=document.createElement("input");t.type="file",t.accept="image/*",t.style.display="none",t.addEventListener("change",a=>{let i=a.target.files[0];i&&this.handleImageFile(i)}),document.body.appendChild(t),t.click(),document.body.removeChild(t)}removeImageById(e){let t=this.loadedImages.findIndex(a=>a.id===e);if(t!==-1){let{imageObject:a,borderRect:i}=this.loadedImages[t];this.canvas.remove(a),this.canvas.remove(i),this.loadedImages.splice(t,1),delete this.originalImages[e],this.canvasManager.emit("image:removed",{id:e}),this.canvasManager.emit("image:list:updated",{images:this.loadedImages.map(n=>({id:n.id,left:n.imageObject.left,top:n.imageObject.top,scaleX:n.imageObject.scaleX,scaleY:n.imageObject.scaleY}))}),this.options.mode==="Single"&&this.loadedImages.length===0&&this.canvas.clear(),this.canvas.requestRenderAll()}else console.warn(`ImageLoaderPlugin: Image with ID=${e} not found`)}onImageRemove({id:e}){this.removeImageById(e)}async handleImageFile(e){if(!e.type.startsWith("image/")){alert("Please drop a valid image file.");return}try{let t=await this.readFileAsDataURL(e);this.loadImageFromDataURL(t),this.loadedImageType="uploaded"}catch(t){console.error("ImageLoaderPlugin: Failed to read the image file.",t)}}readFileAsDataURL(e){return new Promise((t,a)=>{let i=new FileReader;i.onload=n=>{let o=n.target.result;this.isValidDataURL(o)?t(o):a(new Error("FileReader did not return a valid data URL."))},i.onerror=()=>{a(new Error("Failed to read the image file."))},i.readAsDataURL(e)})}processLoadedImage(e,t){if(!this.isValidDataURL(t)){console.error("ImageLoaderPlugin: Provided dataURL is not a valid image data URL.");return}let a=`Image_${Date.now()}_${Math.random().toString(36).slice(2,11)}`;e.set({id:a,originX:"center",originY:"center",selectable:!1,evented:!1}),this.originalImages[a]=t;let i=e.width,n=e.height,o=this.canvas.getWidth(),s=this.canvas.getHeight(),r=new fabric.Rect({fill:"transparent",strokeWidth:2,strokeDashArray:[10,5],strokeUniform:!0,selectable:!1,evented:!1,hasControls:!1,hasBorders:!1,lockMovementX:!0,lockMovementY:!0,originX:"center",originY:"center",objectCaching:!1}),h=this.updateImageScaleAndPosition(e,r,o,s,i,n);this.canvas.add(e),this.canvas.add(r),r.bringToFront(),this.loadedImages.push({id:a,imageObject:e,borderRect:r,originalWidth:i,originalHeight:n,scaleFactor:h}),this.options.mode==="Single"&&this.loadedImages.length>1&&this.loadedImages.slice(0,-1).forEach(({id:g})=>{this.removeImageById(g)}),this.canvasManager.emit("image:loaded",{image:e,id:a,originalWidth:i,originalHeight:n,scaleFactor:h,loadedImageType:this.loadedImageType}),this.canvasManager.emit("image:list:updated",{images:this.loadedImages.map(l=>({id:l.id,left:l.imageObject.left,top:l.imageObject.top,scaleX:l.imageObject.scaleX,scaleY:l.imageObject.scaleY}))}),this.canvas.requestRenderAll()}async handlePreviewImageData(e){let t=e.detail;if(typeof t!="string"){console.error("ImageLoaderPlugin: Invalid image data received in previewImageData event.");return}let a=t;if(!this.isValidDataURL(a))try{a=await this.convertURLToDataURL(a)}catch(i){console.error("ImageLoaderPlugin: Unable to convert image URL to Data URL.",i);return}this.loadedImageType="preview",this.loadImageFromDataURL(a)}async handleFinalImageData(e){let t=e.detail;if(typeof t!="string"){console.error("ImageLoaderPlugin: Invalid image data received in finalImageData event.");return}let a=t;if(!this.isValidDataURL(a))try{a=await this.convertURLToDataURL(a)}catch(i){console.error("ImageLoaderPlugin: Unable to convert image URL to Data URL.",i);return}this.loadedImageType="final",this.loadImageFromDataURL(a)}isValidDataURL(e){return typeof e=="string"&&e.startsWith("data:image/")}convertURLToDataURL(e){return new Promise((t,a)=>{let i=new Image;i.crossOrigin="anonymous",i.onload=()=>{let n=document.createElement("canvas");n.width=i.width,n.height=i.height,n.getContext("2d").drawImage(i,0,0);try{let s=n.toDataURL();t(s)}catch{a(new Error("Failed to convert image to Data URL."))}},i.onerror=()=>{a(new Error("Failed to load image for conversion."))},i.src=e})}loadImageFromDataURL(e){if(!this.isValidDataURL(e)){console.error("ImageLoaderPlugin: Provided dataURL is not a valid image data URL.");return}fabric.Image.fromURL(e,t=>{this.processLoadedImage(t,e)},{crossOrigin:"anonymous"})}getOriginalImage(e){if(this.loadedImages.length===0)return console.error("No images loaded."),null;let t;if(e)t=this.originalImages[e];else{let a=this.loadedImages[this.loadedImages.length-1];t=this.originalImages[a.id]}return this.isValidDataURL(t)?t:(console.error("ImageLoaderPlugin: Original image is not a valid data URL."),null)}destroy(){this.uiContainer&&this.uiContainer.parentNode&&this.uiContainer.parentNode.removeChild(this.uiContainer),this.detachEventListeners(),this.loadedImages.forEach(({imageObject:e,borderRect:t})=>{this.canvas.remove(e),this.canvas.remove(t)}),this.loadedImages=[],this.originalImages={},this.canvas.requestRenderAll(),window.removeEventListener("finalImageData",this.handleFinalImageData),window.removeEventListener("previewImageData",this.handlePreviewImageData)}};export{m as ImageLoaderPlugin};

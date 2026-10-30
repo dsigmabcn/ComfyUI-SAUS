@@ -19,7 +19,10 @@ MAIN_JS = BROWSER / 'js' / 'main.js'
 TABS_JS = BROWSER / 'js' / 'tabs.js'
 MANAGER_JS = BROWSER / 'js' / 'app_manager.js'
 MANAGERS_CSS = BROWSER / 'css' / 'managers.css'
-STYLES_CSS = BROWSER / 'css' / 'styles.css'
+# The shell's page lists its stylesheets one by one (a <link> each) instead of a
+# single stylesheet that @imports the rest: @import is discovered only after its
+# parent is parsed, which serialised ~13 round trips before the first paint.
+BROWSER_HTML = BROWSER / 'index.html'
 
 
 def _text(path):
@@ -146,9 +149,9 @@ def test_the_switch_carries_the_theme():
     import re
 
     css = _text(MANAGERS_CSS)
-    styles = _text(STYLES_CSS)
+    shell = _text(BROWSER_HTML)
 
-    assert "@import 'managers.css';" in styles, 'the shell loads the new stylesheet'
+    assert 'href="saus/css/managers.css"' in shell, 'the shell loads the new stylesheet'
     assert '.manager-switch input:checked ~ .manager-switch-track' in css
     assert 'background-color: var(--color-success)' in css, 'shown = the theme green'
     assert 'background-color: var(--color-neutral)' in css, 'hidden = the theme grey'

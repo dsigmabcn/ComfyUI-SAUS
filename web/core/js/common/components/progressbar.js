@@ -82,6 +82,34 @@
     const runsInc = document.getElementById('runsInc');
     if (runsDec) runsDec.addEventListener('click', () => clampRuns(-1));
     if (runsInc) runsInc.addEventListener('click', () => clampRuns(1));
+
+    // The gears open the ComfyUI console, as they did before it became a dock of the
+    // SAUS shell. This page cannot draw that dock - it is the app frame inside a
+    // workspace tab - so it asks its parent, the same way the (i) asks for the
+    // information panel. Opened on its own there is nothing to ask, so the click is a
+    // no-op instead of an error.
+    const gears = document.getElementById('spinner');
+    if (gears) {
+      gears.setAttribute('role', 'button');
+      gears.setAttribute('tabindex', '0');
+      gears.setAttribute('aria-label', 'Open the ComfyUI console');
+      gears.title = 'Open the ComfyUI console';
+      const openConsole = () => {
+        if (window.parent === window) return;
+        try {
+          window.parent.document.dispatchEvent(new CustomEvent('saus:toggle-console'));
+        } catch (error) {
+          console.warn('[SAUS] could not ask the browser for the console:', error);
+        }
+      };
+      gears.addEventListener('click', openConsole);
+      gears.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openConsole();
+        }
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

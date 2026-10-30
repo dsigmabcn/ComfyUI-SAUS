@@ -32,6 +32,17 @@ BOOT_SCRIPTS = (
 # swatches in the settings picker (they *show* a theme, so they are the point).
 SWATCH_COLOURS = {'#14171c', '#e7eaee', '#f4f6f9', '#1b2430', '#0b1622', '#ff4500'}
 
+# Third-party assets we ship but do not own (today: the vendored Font Awesome
+# stylesheet). It carries its own `--fa-*` variables and colours, so the project's
+# palette rules - no hex outside themes.css, every `var()` defined here - do not
+# apply to it, exactly as they never applied to a `*.min.js`.
+VENDOR_DIR = ROOT / 'web' / 'core' / 'media' / 'vendor'
+
+
+def _is_third_party(path):
+    return VENDOR_DIR in Path(path).resolve().parents or 'min.js' in Path(path).name
+
+
 STORAGE_KEY = 'SausTheme'
 
 
@@ -131,7 +142,7 @@ def test_every_surface_imports_the_single_palette():
 
 def test_no_component_hardcodes_a_colour():
     for path in sorted((ROOT / 'web').rglob('*.css')):
-        if path.name == 'themes.css' or 'min.js' in path.name:
+        if path.name == 'themes.css' or _is_third_party(path):
             continue
         source = re.sub(r'/\*.*?\*/', '', path.read_text(encoding='utf-8'), flags=re.S)
         literals = re.findall(r':[^;{}]*#[0-9a-fA-F]{3,8}\b', source)
@@ -154,7 +165,7 @@ def test_every_variable_used_is_defined():
     paths = list((ROOT / 'web').rglob('*.css')) + list((ROOT / 'web').rglob('*.js')) \
         + list((ROOT / 'web').rglob('*.html'))
     for path in paths:
-        if 'min.js' in path.name:
+        if _is_third_party(path):
             continue
         # Comments talk about variables too ("ComfyUI's rule reads
         # var(--sidebar-icon-size)") - only real usages count.
@@ -208,6 +219,8 @@ def test_a_generic_font_family_never_hides_the_named_ones():
     checked = 0
 
     for path in sorted((ROOT / 'web').rglob('*.css')):
+        if _is_third_party(path):
+            continue
         for declaration in path.read_text(encoding='utf-8').split('font-family:')[1:]:
             value = declaration.split(';')[0].split('}')[0]
             names = [n.strip().strip('"\'') for n in value.split(',') if n.strip()]

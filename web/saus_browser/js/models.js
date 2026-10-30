@@ -1,4 +1,8 @@
 import { state } from './state.js';
+import {
+    bucketsComplete, bucketsMissing, missingEntries, statusesFromReadyMap, variantBuckets,
+    variantColour,
+} from './variantStatus.js';
 
 /** Escape a value so it is safe inside HTML text OR a quoted attribute. */
 export function escapeHtml(value) {
@@ -16,7 +20,8 @@ export function escapeHtml(value) {
  * model names, URLs) can never be interpreted as code.
  */
 /**
- * Install / uninstall / open, from a click anywhere in a `.component-item`.
+ * Install / uninstall / download-all / open, from a click anywhere in a
+ * `.component-item` (or on a variant card's own "Download All").
  *
  * Delegated on the list that holds the rows, so the app details modal and the Model
  * Manager share one dispatcher and one implementation of each action.
@@ -26,6 +31,13 @@ export function handleModelActionClick(event) {
     if (!btn) return;
 
     const action = btn.dataset.action;
+    if (action === 'download-all') {
+        // Not inside a .component-item: it belongs to the whole variant card.
+        event.stopPropagation();
+        downloadMissingInVariant(btn.closest('.variant-card'));
+        return;
+    }
+
     if (action === 'open-app') {
         event.stopPropagation();
         // Opening is routed through the document event main.js wires to tabs.js -
@@ -262,58 +274,19 @@ export async function fetchModelStatuses(entries) {
     return statuses;
 }
 
-/** Per-listType tally of a variant's entries. */
-function variantBuckets(block, statuses) {
-    const buckets = new Map();
-    block.entries.forEach(entry => {
-        const bucket = buckets.get(entry.listType) || { ready: 0, missing: [] };
-        if ((statuses.get(entry.file) || 'missing') === 'ready') {
-            bucket.ready++;
-        } else {
-            bucket.missing.push(statusEntry(entry.file).label);
-        }
-        buckets.set(entry.listType, bucket);
-    });
-    return buckets;
-}
-
-/**
- * A variant is complete when every compulsory file is present and every
- * "one of" group has at least one file. Optional models never block it.
- */
-function bucketsComplete(buckets) {
-    for (const [listType, bucket] of buckets) {
-        if (listType === 'optional') continue;
-        if (listType === 'at_least_one') {
-            if (bucket.ready === 0) return false;
-        } else if (bucket.missing.length > 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/** What a variant still needs: a satisfied "one of" group stays silent. */
-function bucketsMissing(buckets) {
-    const missing = [];
-    buckets.forEach((bucket, listType) => {
-        if (listType === 'optional') return;
-        if (listType === 'at_least_one' && bucket.ready > 0) return;
-        missing.push(...bucket.missing);
-    });
-    return missing;
-}
-
 /**
  * App status across its variants (pure function):
  *
  *   green  = every variant has all of its required models
  *   orange = at least one variant is complete, another is not
  *   red    = no variant is complete
+ *
+ * The rule itself lives in `variantStatus.js`, so the explorer's dot and the
+ * information panel's card dot cannot disagree (they used to).
  */
 function computeAppStatus(app, statuses, at) {
     const variants = variantBlocks(app).map(block => {
-        const buckets = variantBuckets(block, statuses);
+        const buckets = variantBuckets(block.entries, statuses);
         return {
             title: block.title,
             ready: bucketsComplete(buckets),
@@ -460,11 +433,14 @@ export async function showAppDetails(app) {
     const blocks = variantBlocks(app);
 
     const allFiles = [...new Set(blocks.flatMap((b) => b.entries.map((e) => e.file)))];
+    // One batched request for the whole panel. Asking per file cost a round trip
+    // each (with many models that is what made the panel feel slow to open); the
+    // batch route exists for exactly this - see fetchModelStatuses.
+    const statuses = allFiles.length
+        ? await fetchModelStatuses(allFiles.map(statusEntry))
+        : new Map();
     const readyByFile = {};
-    await Promise.all(allFiles.map(async (file) => {
-        const model = state.MODELS_DATA[file] || { name: file };
-        readyByFile[file] = (await checkModelStatus(file, model.directory || '', model.type || '')) === 'ready';
-    }));
+    allFiles.forEach((file) => { readyByFile[file] = statuses.get(file) === 'ready'; });
 
     if (!blocks.some((b) => b.entries.length)) {
         html += `<p>This app has no model requirements.</p>`;
@@ -472,14 +448,22 @@ export async function showAppDetails(app) {
         html += `<p class="details-instructions">Install or manage the models required for each variant below.</p>`;
         html += `<div class="variant-list">`;
         blocks.forEach((block) => {
-            const uniq = [...new Set(block.entries.map((e) => e.file))];
-            const ready = uniq.filter((f) => readyByFile[f]).length;
-            const dot = uniq.length === 0 ? '#9e9e9e'
-                : (ready === uniq.length ? '#4caf50' : (ready === 0 ? '#f44336' : '#ff9800'));
+            // The same rule the explorer's dot uses (variantStatus.js): the colour is
+            // what the variant is *missing*, not how many of its alternatives are on
+            // disk - and an uninstalled optional model never turns it orange.
+            const dot = variantColour(block.entries, statuses);
+            const missing = missingEntries(block.entries, statuses).length;
             html += `
                 <div class="variant-card">
                     <div class="variant-card-title">
-                        <i class="fas fa-circle" style="color:${dot}; margin-right:8px;"></i>${escapeHtml(block.title)}
+                        <span class="variant-card-label"><i class="fas fa-circle" style="color:${dot}; margin-right:8px;"></i>${escapeHtml(block.title)}</span>
+                        <span class="variant-card-actions">
+                            <button type="button" class="btn-action download-all-btn${missing ? '' : ' hidden'}" data-action="download-all"
+                                    title="Install every model this variant still needs">
+                                <i class="fas fa-download" aria-hidden="true"></i> Download All
+                            </button>
+                            <span class="variant-card-ready${missing ? ' hidden' : ''}"><i class="fas fa-check" aria-hidden="true"></i> All installed</span>
+                        </span>
                     </div>
                     <div class="variant-models">
                         ${block.entries.map((e) => componentItemHtml(e.file, e.listType, readyByFile[e.file], e.label)).join('')}
@@ -493,6 +477,10 @@ export async function showAppDetails(app) {
     }
 
     detailsContent.innerHTML = html;
+
+    // The buttons are painted with the card's first state; from here on
+    // refreshVariantDots() keeps them in step with the model cards.
+    detailsContent.querySelectorAll('.variant-card').forEach(syncDownloadAllButton);
 }
 
 /** Friendly names for the model types (unify how we display them). */
@@ -568,7 +556,7 @@ function componentItemHtml(filename, listType, isReady, label = '') {
 
     return `
         ${typeHeader}
-        <div class="component-item ${backgroundClass}" data-file-id="${escapeHtml(filename)}" data-list-type="${escapeHtml(listType)}">
+        <div class="component-item ${backgroundClass}" data-file-id="${escapeHtml(filename)}" data-list-type="${escapeHtml(listType)}" data-list-label="${escapeHtml(label)}">
             <div class="component-info">
                 <span class="component-name">${escapeHtml(model.name || filename)}</span>
             </div>
@@ -577,53 +565,82 @@ function componentItemHtml(filename, listType, isReady, label = '') {
     `;
 }
 
-/** Semaphore colour for a set of component items (red / orange / green). */
-function semaphoreColor(items) {
-    if (!items.length) return '#9e9e9e';
-    const ready = items.filter((it) => it.classList.contains('required-installed')
-        || it.classList.contains('optional-installed')).length;
-    if (ready === items.length) return '#4caf50';
-    if (ready === 0) return '#f44336';
-    return '#ff9800';
+/** The entries one card's DOM holds, in the shape the status rule reads. */
+function cardEntries(card) {
+    return [...card.querySelectorAll('.component-item')].map((item) => ({
+        file: item.dataset.fileId || '',
+        listType: item.dataset.listType || 'compulsory',
+        label: item.dataset.listLabel || '',
+        installed: item.classList.contains('required-installed')
+            || item.classList.contains('optional-installed'),
+    }));
 }
 
-/** Refresh the red/orange/green dot of every variant card after a status change. */
+/**
+ * Refresh a variant card after a status change: its red/orange/green dot and the
+ * "Download All" button, which only means something while a model is still missing.
+ *
+ * The dot goes through the same rule the render and the explorer use, read back from
+ * the card's own rows - so a download that finishes repaints the card exactly as
+ * reopening the panel would.
+ */
 function refreshVariantDots() {
     document.querySelectorAll('.variant-card').forEach((card) => {
+        const entries = cardEntries(card);
+        const statuses = statusesFromReadyMap(
+            Object.fromEntries(entries.map((entry) => [entry.file, entry.installed])));
         const dot = card.querySelector('.variant-card-title .fa-circle');
-        if (!dot) return;
-        dot.style.color = semaphoreColor([...card.querySelectorAll('.component-item')]);
+        if (dot) dot.style.color = variantColour(entries, statuses);
+        syncDownloadAllButton(card);
     });
 }
 
-async function renderComponentList(title, filenames, listType) {
-    if (!filenames || filenames.length === 0) return '';
+/**
+ * The card's models a "Download All" would still fetch: required (compulsory or
+ * "one of"), missing, named once and not already in flight - the shared rule decides
+ * *what* is missing (`missingEntries` in variantStatus.js), this only maps it back to
+ * the rows so the buttons know what they belong to.
+ */
+function variantMissingItems(card) {
+    if (!card) return [];
+    const entries = cardEntries(card);
+    const statuses = statusesFromReadyMap(
+        Object.fromEntries(entries.map((entry) => [entry.file, entry.installed])));
+    const wanted = new Set(missingEntries(entries, statuses).map((entry) => entry.file));
 
-    const modelStatuses = await Promise.all(filenames.map(async (filename) => {
-        const model = state.MODELS_DATA[filename] || { name: filename };
-        const directory = model.directory || "";
-        const status = await checkModelStatus(filename, directory, model.type || '');
-        return { filename, model, status };
-    }));
+    return [...card.querySelectorAll('.component-item')].filter((item) => {
+        const fileId = item.dataset.fileId || '';
+        if (!wanted.has(fileId)) return false;
+        // A download already in flight is not started a second time.
+        return downloadProgressOf(fileId) === null;
+    });
+}
 
-    const readyCount = modelStatuses.filter(m => m.status === 'ready').length;
-    const totalCount = modelStatuses.length;
+/** Paint the card's "Download All" button / "All installed" note for its state. */
+function syncDownloadAllButton(card) {
+    const button = card.querySelector('.download-all-btn');
+    const ready = card.querySelector('.variant-card-ready');
+    if (!button || !ready) return;
+    const missing = variantMissingItems(card).length;
+    button.classList.toggle('hidden', missing === 0);
+    ready.classList.toggle('hidden', missing > 0);
+}
 
-    let color = '#f44336'; // red
-    if (listType === 'optional') {
-        color = '#9e9e9e';                                   // neutral grey
-    } else if (listType === 'at_least_one') {
-        color = readyCount > 0 ? '#4caf50' : '#f44336';      // ≥1 installed
-    } else if (readyCount === totalCount) {
-        color = '#4caf50';                                   // green
-    } else if (readyCount > 0) {
-        color = '#ff9800';                                   // orange
+/**
+ * One click installs everything the variant still needs.
+ *
+ * Sequential on purpose: the progress bars and the websocket events stay readable,
+ * and a model with no URL is skipped rather than firing an error toast per file.
+ */
+async function downloadMissingInVariant(card) {
+    const targets = variantMissingItems(card);
+    if (!targets.length) return;
+    for (const item of targets) {
+        const fileId = item.dataset.fileId || '';
+        const model = state.MODELS_DATA[fileId] || {};
+        if (!model.url) continue;
+        await window.downloadModel(model.type || '', model.url, model.directory || '', fileId);
     }
-
-    let html = `<div class="component-section"><h4><i class="fas fa-circle" style="color: ${color}; margin-right: 8px;"></i>${escapeHtml(title)}</h4>`;
-    html += modelStatuses.map(({ filename, status }) => componentItemHtml(filename, listType, status === 'ready')).join('');
-    html += `</div>`;
-    return html;
 }
 
 function updateSectionHeader(section, listType) {

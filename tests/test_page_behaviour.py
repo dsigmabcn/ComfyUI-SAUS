@@ -12,6 +12,13 @@ FAVICON_JS = EXTENSION_DIR / 'favicon.js'
 APP_MAIN_JS = ROOT / 'web' / 'core' / 'main.js'
 SIDEBAR_JS = ROOT / 'web' / 'saus_browser' / 'js' / 'sidebar.js'
 SETTINGS_HARNESS = ROOT / 'tests' / 'js' / 'settings.harness.mjs'
+ARCHITECTURE_MODELS_JS = ROOT / 'web' / 'core' / 'js' / 'common' / 'scripts' / 'architectureModels.js'
+ARCHITECTURE_HARNESS = ROOT / 'tests' / 'js' / 'architecture_models.harness.mjs'
+ARCHITECTURES_JSON = ROOT / 'web' / 'saus_browser' / 'data' / 'architectures.json'
+CORE_TEMPLATE = ROOT / 'web' / 'core' / 'templates' / 'index.html'
+CORE_BOOT = ROOT / 'web' / 'core' / 'loadScripts.js'
+BUILDER_TEMPLATE = (ROOT.parent / 'ComfyUI-SAUS-builder' / 'builder_assets'
+                    / 'appTemplate' / 'index.html')
 
 
 class SkippedTest(Exception):
@@ -126,6 +133,154 @@ def test_settings_harness():
                             capture_output=True, text=True)
     assert result.returncode == 0, \
         f'{SETTINGS_HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
+
+
+def test_the_app_page_preloads_its_entry_module():
+    """The runtime is ~50 modules: start the graph before the document is parsed.
+
+    Today the browser learns about them only once loadScripts.js runs, which is
+    itself behind the content.html fetch - two round trips of nothing.
+    """
+    source = CORE_TEMPLATE.read_text(encoding='utf-8')
+    boot = CORE_BOOT.read_text(encoding='utf-8')
+
+    assert '<link rel="modulepreload" href="/core/loadScripts.js">' in source, \
+        'the boot script is preloaded'
+    assert "'/core/js/dist/core.bundle.min.js'" in source, 'and so is the entry module'
+    assert "encodeURIComponent(config.appName)" in boot, \
+        'the query loadScripts.js builds for the entry module'
+    assert "encodeURIComponent(sausPreloadApp)" in source, \
+        'which the preload mirrors, so the bundle is not fetched twice'
+
+    # The builder keeps its own copy of this page: it has to get the same head.
+    if BUILDER_TEMPLATE.is_file():
+        builder = BUILDER_TEMPLATE.read_text(encoding='utf-8')
+        assert "sausEntry.rel = 'modulepreload'" in builder, \
+            'the builder preview page keeps the same head as the page SAUS serves'
+
+
+CANVAS_DIR = ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'canvas'
+
+
+def test_a_page_that_cannot_mask_does_not_download_the_brushes():
+    """The canvas plugins are ~200 KB, and only a masking app can ever show them.
+
+    They were static imports of CanvasLoader, so they were part of *every* app
+    page's module graph - a text-to-image app downloaded the brushes it has no UI
+    for. Each one is now imported by the branch that registers it.
+    """
+    loader = (CANVAS_DIR / 'CanvasLoader.js').read_text(encoding='utf-8')
+
+    for plugin in ('MaskBrushPlugin', 'CustomBrushPlugin', 'ImageLoaderPlugin',
+                   'ImageCompareSliderPlugin', 'CanvasControlsPlugin', 'UndoRedoPlugin',
+                   'CanvasScaleForSavePlugin', 'ImageAdderPlugin'):
+        assert "from './%s.js'" % plugin not in loader, \
+            '%s must not be in the page-wide module graph' % plugin
+        assert "await import('./%s.js')" % plugin in loader, \
+            'and the branch that registers it still loads it'
+
+    assert 'loadDependencies()' in loader, \
+        'fabric is still only pulled in when the canvas is actually built'
+    assert 'await import(' in (CANVAS_DIR / 'CanvasLoader.js').read_text(encoding='utf-8'), \
+        'the plugin fetch happens during init(), which the Run path awaits'
+
+
+def test_architecture_models_harness():
+    """The group -> file rule, executed: see tests/js/architecture_models.harness.mjs."""
+    node = shutil.which('node') or shutil.which('nodejs')
+    if node is None:
+        _skip(f'{ARCHITECTURE_HARNESS.name} needs node, which is not installed here')
+
+    result = subprocess.run([node, str(ARCHITECTURE_HARNESS)], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.returncode == 0, (
+        f'{ARCHITECTURE_HARNESS.name} failed:' + result.stdout + result.stderr)
+
+
+def test_a_variant_less_app_still_binds_its_model():
+    """Fifteen architectures have models but no variants: pick one *is* the choice.
+
+    They used to be a dead end. The mode selector bound models only for a named
+    variant, so an app on one of them ran whatever its graph happened to contain -
+    and 'hd' hides the model selectors, so the user could neither see nor change it.
+    """
+    js = APP_MAIN_JS.read_text(encoding='utf-8')
+
+    assert "from './js/common/scripts/architectureModels.js'" in js, \
+        'the group -> file rule is shared, not written twice'
+    assert 'groupFile' in js and 'dropdownForGroup' in js, \
+        'both rules - which file, and which dropdown - come from that module'
+    assert "if (variant || (mode !== 'custom' && !hasVariants)) {" in js, \
+        'a variant-less architecture takes the same binding path, with an empty pick'
+    assert 'groupFile(group, variant && variant.pick, fileInstalled)' in js, \
+        'and asks the shared rule which file to bind'
+    assert 'let file = (variant.pick || {})[group.id];' not in js, \
+        'the hand-rolled pick is gone from the binding'
+    assert "if (!file && group.need === 'all' && files.length) file = files[0];" not in js, \
+        'and from the button gate'
+
+    # The selectors are only taken away when HD really does pick the files itself.
+    assert 'hdPicksModels = hasVariants;' in js, 'HD picks models only where variants do'
+    assert "setModelWidgetsVisible(mode === 'custom' || !hdPicksModels);" in js, \
+        'so a variant-less app keeps its model selectors'
+    assert "else { // for 'hd' and 'turbo'" not in js, \
+        'the unconditional hide is gone'
+
+
+def test_every_variant_less_architecture_has_somewhere_to_bind():
+    """The implicit Base only helps if each group names the node it fills."""
+    import json
+
+    architectures = json.loads(ARCHITECTURES_JSON.read_text(encoding='utf-8'))
+    variant_less = {name: arch for name, arch in architectures.items()
+                    if arch.get('models') and not arch.get('variants')}
+
+    assert variant_less, 'the shape this fix exists for is real'
+    for name, arch in variant_less.items():
+        for group in arch['models']:
+            assert (group.get('node') or {}).get('nodeType'), \
+                '%s/%s names no node, so its file has nowhere to go' % (name, group.get('id'))
+
+
+def test_a_control_that_fails_does_not_take_the_page_with_it():
+    """The SeedVR2 input was missing and nothing said so: an exception aborted main()."""
+    js = APP_MAIN_JS.read_text(encoding='utf-8')
+
+    assert 'function buildControls(kind, configs, build) {' in js, 'one guarded loop per kind'
+    assert 'failedControls.push(`${kind} "${label}"`)' in js, 'the failure is remembered'
+    assert 'console.error(`[SAUS] ${kind} "${label}" failed:`, error)' in js, \
+        'and named, so the console says which control and why'
+
+    for kind in ('dropdown', 'stepper', 'dimension selector', 'aspect ratio', 'input',
+                 'toggle', 'seeder', 'multi component', 'data component'):
+        assert f"buildControls('{kind}'" in js, f'{kind} is built through the guard'
+
+    assert 'appConfig.dropdowns.forEach(config => {' not in js, \
+        'no kind is still built by a bare forEach'
+    assert "failedControls.push('input loader')" in js, \
+        'the drop area is the widget that was missing - it is guarded too'
+
+
+def test_the_page_says_which_controls_never_rendered():
+    """A configured control that is absent is a half-built app; name it."""
+    js = APP_MAIN_JS.read_text(encoding='utf-8')
+
+    assert 'function reportMissingControls() {' in js
+    assert 'if (!id || !document.getElementById(id))' in js, \
+        'a control counts as rendered when its container is in the DOM'
+    assert "reportMissingControls();" in js, 'and the report runs'
+    assert js.index('await setupModeSelector();') < js.index('reportMissingControls();'), \
+        'after the mode selector: it is the last thing that can render a control'
+
+    report = js.split('function reportMissingControls()', 1)[1].split('\n    }', 1)[0]
+    assert 'data component' not in report.split('const wanted = [', 1)[1].split('];', 1)[0], \
+        'a data component draws nothing on purpose, so its absence means nothing'
+    assert 'multi component' in report.split('const wanted = [', 1)[1].split('];', 1)[0], \
+        'a multi component does draw, so its absence means something'
+    assert "getElementById('load-image-container')" in report, \
+        'and the input loader is checked by the container it creates'
+    assert 'failed: ' not in report and 'failedControls' in report, \
+        'the report is both halves: what threw and what never appeared'
 
 
 def main():

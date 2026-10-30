@@ -1,0 +1,298 @@
+{
+  "id": "vidmmfun",
+  "name": "Fun Control (MiniMax H3)",
+  "url": "video-minimax-h3-fun-control",
+  "description": "Video to video with MiniMax H3: your clip's poses drive a new video, synchronized audio included. The control signal is the pose skeleton the SDPose pack extracts from the clip.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "video-to-video",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "MINIMAX H3 FUN CONTROL",
+    "models": [
+      "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "minimax_h3_video_vae_int8_convrot.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors",
+      "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "minimax_h3_fun_controlnet_union_pruned_int8_convrot.safetensors",
+      "sdpose_wholebody_fp16.safetensors",
+      "rt_detr_v4-x-hgnet_fp16.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptvidmmfun",
+      "label": "Prompt",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "138.inputs.value",
+      "defValue": ""
+    }
+  ],
+  "steppers": [
+    {
+      "id": "starttimesvidmmfun",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "705.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidmmfun",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "705.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "durvidmmfun",
+      "label": "Duration (s)",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "132.inputs.value",
+      "defValue": 5,
+      "minValue": 1,
+      "maxValue": 30,
+      "step": 0.5,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "mpvidmmfun",
+      "label": "Megapixels",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      },
+      "nodePath": "115.inputs.megapixels",
+      "defValue": 0.4,
+      "minValue": 0.1,
+      "maxValue": 2,
+      "step": 0.1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "stepsvidmmfun",
+      "label": "Steps",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "143.inputs.value",
+      "defValue": 20,
+      "minValue": 1,
+      "maxValue": 60,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    }
+  ],
+  "toggles": [
+    {
+      "id": "turbovidmmfun",
+      "label": "Turbo (4-step LoRA)",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      },
+      "nodePath": "146.inputs.value",
+      "defaultValue": false
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedvidmmfun",
+      "label": "Seed",
+      "layout": {
+        "region": "basic",
+        "order": 6
+      },
+      "nodePath": "129.inputs.noise_seed"
+    }
+  ],
+  "aspectRatioSelectors": [
+    {
+      "id": "arcvidmmfun",
+      "label": "Aspect Ratio",
+      "layout": {
+        "region": "basic",
+        "order": 7
+      },
+      "nodePath": "115.inputs.aspect_ratio"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidmmfun",
+      "label": "Control Video",
+      "nodePath": "174.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "unetvidmmfun",
+      "label": "Model",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "127.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "clipvidmmfun",
+      "label": "CLIP",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "128.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name"
+    },
+    {
+      "id": "vaevidmmfun",
+      "label": "Video VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "119.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    },
+    {
+      "id": "avaevidmmfun",
+      "label": "Audio VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 4
+      },
+      "nodePath": "120.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    },
+    {
+      "id": "loravidmmfun",
+      "label": "Turbo LoRA",
+      "layout": {
+        "region": "advanced",
+        "order": 5
+      },
+      "nodePath": "145.inputs.lora_name",
+      "url": "LoraLoaderModelOnly",
+      "key": "lora_name"
+    },
+    {
+      "id": "patchvidmmfun",
+      "label": "Control Patch",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      },
+      "nodePath": "173.inputs.name",
+      "url": "ModelPatchLoader",
+      "key": "name"
+    },
+    {
+      "id": "posevidmmfun",
+      "label": "Pose Checkpoint",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      },
+      "nodePath": "700_673.inputs.ckpt_name",
+      "url": "CheckpointLoaderSimple",
+      "key": "ckpt_name"
+    },
+    {
+      "id": "detectvidmmfun",
+      "label": "Person Detector",
+      "layout": {
+        "region": "advanced",
+        "order": 8
+      },
+      "nodePath": "700_677.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "samplervidmmfun",
+      "label": "Sampler",
+      "layout": {
+        "region": "advanced",
+        "order": 9
+      },
+      "nodePath": "123.inputs.sampler_name",
+      "url": "KSamplerSelect",
+      "key": "sampler_name"
+    },
+    {
+      "id": "schedulervidmmfun",
+      "label": "Scheduler",
+      "layout": {
+        "region": "advanced",
+        "order": 10
+      },
+      "nodePath": "124.inputs.scheduler",
+      "url": "BasicScheduler",
+      "key": "scheduler"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidmmfun",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 8
+      },
+      "nodePath": "707.inputs.filename_prefix",
+      "defValue": "MiniMax_H3"
+    }
+  ],
+  "dimensionSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidmmfun",
+      "label": "Save Video",
+      "nodeId": "707",
+      "type": "media"
+    }
+  ]
+}

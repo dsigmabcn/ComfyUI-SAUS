@@ -67,10 +67,12 @@ ComfyUI-Manager lists SAUS among the installed custom nodes. Use **Try update** 
 
 ## Runpod - pods
 
-Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and use the **ComfyUI SAUS template**.
+Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and deploy the **ComfyUI latest - SAUS - KN** template — the latest ComfyUI with ComfyUI-Manager and SAUS already in it.
+
+**[Open the template →](https://console.runpod.io/hub/template/3c0tdgrly3?ref=617ypn0k)**
 
 <img src="../web/core/media/git/RUNPOD-SAUS-template.png">
 
-See the [Runpod guide](RUNPOD.md) for the port to open and the first-run notes.
+See the [Runpod guide](RUNPOD.md) for the required CUDA version, the port to open and the first-run notes.
 
 [Return to User Guide](USER_GUIDE.md#detailed-guide)

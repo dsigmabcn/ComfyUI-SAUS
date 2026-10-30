@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title></title>
 <link rel="stylesheet" href="/core/css/main.css">
+<!-- The app runtime is ~50 modules, and the browser can only start discovering
+     them once loadScripts.js has run - which is itself behind content.html. A
+     modulepreload pulls the whole import graph in while this document is still
+     being parsed. The entry URL is built exactly the way loadScripts.js builds
+     it, so this is never a second, wasted fetch. -->
+<link rel="modulepreload" href="/core/loadScripts.js">
+<script>
+    const sausPreloadApp = new URLSearchParams(window.location.search).get('app');
+    const sausEntry = document.createElement('link');
+    sausEntry.rel = 'modulepreload';
+    sausEntry.href = '/core/js/dist/core.bundle.min.js' + (sausPreloadApp ? '?app=' + encodeURIComponent(sausPreloadApp) : '');
+    document.head.appendChild(sausEntry);
+</script>
 </head>
 <body>
     <div id="container" class="container"></div>

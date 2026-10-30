@@ -22,14 +22,17 @@ In the bottom part, you can find:
 - **ComfyUI**: opens ComfyUI in a new window.
 - **Files**: the [File Manager](FILE_MANAGER.md), as a tab in the workspace.
 - **Guide**: this user guide, in a new window.
-- **Console**: the ComfyUI console/log feed, as a tab in the workspace.
+- **Console**: the ComfyUI console/log feed, as a tab in the workspace. The rotating **gears** next to an
+  app's progress bar open the same tab, so the logs are one click away while an app is running.
 - **Settings**: theme picker, installed SAUS version and Social Media links.
 
 ## The panel
 
 The side panel is divided in a header, where you can search and filter apps and quickly reach your favorite apps, and the tree, which displays the available SAUS apps per sub-category.
 
-The tree lists the apps that are *current*. When a newer model supersedes an older one, the older apps are parked in a `deprecated` folder and left out, so the panel only offers what is up to date — [Settings](SETTINGS.md) has a **Show deprecated apps** switch that brings them back.
+The tree lists the apps that are *current*. When a newer model supersedes an older one, the older apps are
+parked out of the way and left out, so the panel only offers what is up to date — [Settings](SETTINGS.md)
+has a **Show deprecated apps** switch that brings them back.
 
 <img src="../web/core/media/git/app_browsing/sidebar full.png">
 
@@ -63,7 +66,8 @@ Clicking over the **thumbnail** or the **name** opens the app in the workspace o
 
 In addition to the **status dot**, a tooltip when hovering the app will indicate if models are needed or not.
 
-In every case, click **(i)** to see the details and [install](MODELS.md) the missing models.
+In every case, click **(i)** to see the details and [install](MODELS.md) the missing models. Each variant
+card there carries a **Download All** button, so a variant's models can be installed in one click.
 
 **☆** marks the app as a favorite; favorites then appear in the panel head.
 
@@ -104,6 +108,15 @@ Each tab carries:
 *Settings* and *Files* will also load in the workspace as tabs.
 
 The *Console* instead docks over the bottom of the workspace, while ComfyUI and the guide open in a new browser window.
+
+### Closing an app by mistake
+
+Closing a tab **frees the app**, so opening it again used to start from scratch. It does not any more:
+for as long as this browser session lasts, an app comes back as you left it - its settings, the
+prompt, the version (HD / Turbo / another variant), the LoRAs you added and the results still in the
+**Recent** panel. Reloading the page keeps that memory; **closing the browser** or **restarting
+ComfyUI** does not — those really are a new session. Turn it off in **Settings → Apps** if you would
+rather every app start from its defaults.
 
 ### Apps
 

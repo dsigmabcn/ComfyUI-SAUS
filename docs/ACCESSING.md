@@ -27,7 +27,7 @@ http://127.0.0.1:8188/saus
 </table>
 
 ## 3. From Runpod
-If using the SAUS template, access via port 7771 or through the ComfyUI interface.
+If you deployed the **ComfyUI latest - SAUS - KN** template, access via port 7771 or through the ComfyUI interface.
 
 When the pod starts, Runpod automatically opens the panel, where you just need to click on port 7771:
 <img src="../web/core/media/git/accessing/Runpod panel.png">

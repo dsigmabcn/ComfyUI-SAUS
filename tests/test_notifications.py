@@ -10,7 +10,7 @@ PROGRESS_JS = CORE / 'components' / 'progressbar.js'
 SETTINGS_JS = CORE / 'components' / 'settings.js'
 SHELL_JS = ROOT / 'web' / 'saus_browser' / 'js' / 'main.js'
 NOTICES_CSS = ROOT / 'web' / 'core' / 'css' / 'notices.css'
-SHELL_CSS = ROOT / 'web' / 'saus_browser' / 'css' / 'styles.css'
+SHELL_HTML = ROOT / 'web' / 'saus_browser' / 'index.html'
 MAIN_CSS = ROOT / 'web' / 'core' / 'css' / 'main.css'
 
 
@@ -46,13 +46,13 @@ def test_the_breadcrumb_is_styled_where_both_documents_load_it():
     """The shell renders the notice, and the shell does **not** load main.css."""
     notices = NOTICES_CSS.read_text(encoding='utf-8')
     main = MAIN_CSS.read_text(encoding='utf-8')
-    shell_styles = SHELL_CSS.read_text(encoding='utf-8')
+    shell_styles = SHELL_HTML.read_text(encoding='utf-8')
     notify = NOTIFY_JS.read_text(encoding='utf-8')
 
     assert '#saus-notices' in notices and '.saus-toast' in notices, \
         'the notice needs a home and a look'
     assert "url('/core/css/notices.css')" in main, 'the app pages have to reach it'
-    assert "url('/core/css/notices.css')" in shell_styles, \
+    assert 'href="/core/css/notices.css"' in shell_styles, \
         'and so does the shell - it is the document that shows it now'
     assert "setAttribute('role', 'status')" in notify, \
         'and a screen reader should announce it too'

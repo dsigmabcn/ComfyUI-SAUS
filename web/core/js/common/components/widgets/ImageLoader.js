@@ -1,5 +1,19 @@
 import { showSpinner, hideSpinner, escapeHtml } from '../utils.js';
 import { getMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
+import {
+  filterByKind, acceptForKind, thumbnailUrlForPath,
+} from '/core/js/common/scripts/mediaKinds.js';
+
+export { filterByKind, acceptForKind };
+
+/**
+ * A compressed preview URL for a file in ComfyUI's `input/`. The picker used to point
+ * every 120 px tile at the full-size original through `/view`, so opening it on a
+ * folder of 4000x3000 photos downloaded all of them at full size.
+ */
+function thumbnailUrl(name, size = 256) {
+  return thumbnailUrlForPath(`input/${name}`, size);
+}
 
 /**
  * Extensions this control never uploads: they mirror `BLOCKED_UPLOAD_EXTENSIONS`
@@ -31,7 +45,7 @@ export function isBlockedUploadName(filename) {
 export default class ImageLoader {
   static DEFAULT_CONFIG = {
     allowedFileType: 'video',
-    defaultImageSrc: '/core/media/ui/drop_image_rect_no_border_trans.png',
+    defaultImageSrc: '/core/media/ui/drop_image_rect_no_border_trans.webp',
     showIndicator: false,
   };
 
@@ -84,9 +98,19 @@ export default class ImageLoader {
     this.imageDropArea.appendChild(this.imgElement);
     this.container.appendChild(this.imageDropArea);
 
+    // The whole rectangle opens the picker on a single click. Only the small header
+    // button used to, which is why the drop area read as decoration - the picker is
+    // what "load an input" means here, and a drag still works on top of it.
+    this.imageDropArea.setAttribute('role', 'button');
+    this.imageDropArea.setAttribute('tabindex', '0');
+    this.imageDropArea.setAttribute('aria-label', `Choose ${this.kindNoun()}`);
+    this.imageDropArea.title = `Click to choose ${this.kindNoun()}, or drop one here`;
+
     this.fileInputElement = document.createElement('input');
     this.fileInputElement.type = 'file';
-    // this.fileInputElement.accept = `${this.config.allowedFileType}/*`;
+    // The OS dialog filters as well as the picker (the list is also filtered by
+    // `filterByKind`, since `accept` is only a hint the user can override).
+    this.fileInputElement.accept = acceptForKind(this.config.allowedFileType);
     this.fileInputElement.style.display = 'none';
 
     this.container.appendChild(this.fileInputElement);
@@ -140,8 +164,13 @@ export default class ImageLoader {
     this.imageDropArea.addEventListener('dragleave', this.handleDragLeave, false);
     this.imageDropArea.addEventListener('drop', this.handleDrop, false);
 
-    this.handleDoubleClick = (e) => this.onDoubleClick(e);
-    this.imageDropArea.addEventListener('dblclick', this.handleDoubleClick, false);
+    // A click (or Enter/Space) opens the picker. There is no separate double click any
+    // more: the file dialog it used to open is a button inside the picker, so a double
+    // click cannot open two things at once.
+    this.handleClick = (e) => this.onClick(e);
+    this.imageDropArea.addEventListener('click', this.handleClick, false);
+    this.handleKeyDown = (e) => this.onKeyDown(e);
+    this.imageDropArea.addEventListener('keydown', this.handleKeyDown, false);
 
     this.handleFileInputChange = (e) => this.onFileInputChange(e);
     this.fileInputElement.addEventListener('change', this.handleFileInputChange, false);
@@ -157,7 +186,8 @@ export default class ImageLoader {
     this.imageDropArea.removeEventListener('dragleave', this.handleDragLeave, false);
     this.imageDropArea.removeEventListener('drop', this.handleDrop, false);
 
-    this.imageDropArea.removeEventListener('dblclick', this.handleDoubleClick, false);
+    this.imageDropArea.removeEventListener('click', this.handleClick, false);
+    this.imageDropArea.removeEventListener('keydown', this.handleKeyDown, false);
 
     if (this.fileInputElement) {
       this.fileInputElement.removeEventListener('change', this.handleFileInputChange, false);
@@ -257,7 +287,28 @@ export default class ImageLoader {
     return saved.subfolder ? `${saved.subfolder}/${saved.name}` : saved.name;
   }
 
-  onDoubleClick(e) {
+  /** "an image" / "a video" / "an audio file", for titles, labels and tooltips. */
+  kindNoun() {
+    const kind = this.config.allowedFileType || 'image';
+    if (kind === 'video') return 'a video';
+    if (kind === 'audio') return 'an audio file';
+    return 'an image';
+  }
+
+  /** The rectangle is one big button for the picker (the header button is separate). */
+  onClick(e) {
+    if (e.target === this.browseButton || this.browseButton.contains(e.target)) return;
+    this.openBrowseModal();
+  }
+
+  onKeyDown(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    this.openBrowseModal();
+  }
+
+  /** The OS file dialog, offered from inside the picker. */
+  openFileDialog() {
     this.fileInputElement.click();
   }
 
@@ -394,7 +445,9 @@ export default class ImageLoader {
       const response = await fetch('/saus/api/files/input');
       if (!response.ok) throw new Error('Failed to fetch input files');
       const files = await response.json();
-      this.createModalUI(files);
+      // Only what this node can load: a LoadVideo input was offered every picture in
+      // `input/`, and choosing one wrote a name the graph could not read.
+      this.createModalUI(filterByKind(files, this.config.allowedFileType));
     } catch (error) {
       console.error(error);
       alert('Error loading input files: ' + error.message);
@@ -425,7 +478,19 @@ export default class ImageLoader {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginBottom: '10px', borderBottom: '1px dashed var(--color-border)', paddingBottom: '5px'
     });
-    header.innerHTML = '<h3 style="margin:0; color:var(--color-primary-text)">Select Input File</h3>';
+    header.innerHTML =
+      `<h3 style="margin:0; color:var(--color-primary-text)">Select ${this.kindNoun()}</h3>`;
+
+    // The file dialog lives here now: a double click on the rectangle used to open it,
+    // which is also what a single click now does (the picker), so it moved inside.
+    const uploadBtn = document.createElement('button');
+    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+    uploadBtn.className = 'image-loader-upload-btn';
+    Object.assign(uploadBtn.style, {
+      marginLeft: 'auto', marginRight: '10px', cursor: 'pointer', padding: '4px 10px'
+    });
+    uploadBtn.onclick = () => this.openFileDialog();
+    header.appendChild(uploadBtn);
 
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '&times;';
@@ -457,17 +522,25 @@ export default class ImageLoader {
         document.body.removeChild(overlay);
       };
 
-      const mediaUrl = `/view?filename=${encodeURIComponent(filename)}&type=input`;
       const isVideo = this.guessMimeType(filename).startsWith('video/');
+      // Pictures come through the server's thumbnail endpoint (a 120 px tile of a
+      // full-size photo is what made the picker slow); a video keeps a real <video>
+      // - muted, and only its metadata - because there is nothing to resize.
+      const mediaUrl = isVideo
+        ? `/view?filename=${encodeURIComponent(filename)}&type=input`
+        : thumbnailUrl(filename);
 
       let mediaEl;
       if (isVideo) {
         mediaEl = document.createElement('video');
         mediaEl.src = mediaUrl;
         mediaEl.muted = true;
+        mediaEl.preload = 'metadata';
       } else {
         mediaEl = document.createElement('img');
         mediaEl.src = mediaUrl;
+        mediaEl.loading = 'lazy';
+        mediaEl.alt = filename;
       }
       Object.assign(mediaEl.style, {
         width: '100px', height: '100px', objectFit: 'cover',
@@ -485,6 +558,17 @@ export default class ImageLoader {
       item.appendChild(label);
       grid.appendChild(item);
     });
+
+    if (!files.length) {
+      // An empty grid looks broken: say which folder was empty and what it was filtered to.
+      const empty = document.createElement('p');
+      empty.className = 'image-loader-empty';
+      empty.textContent = `No ${this.config.allowedFileType || 'image'} files in input/ yet.`;
+      Object.assign(empty.style, {
+        margin: '20px', color: 'var(--color-primary-text)', opacity: '0.7'
+      });
+      grid.appendChild(empty);
+    }
 
     modal.appendChild(header);
     modal.appendChild(grid);

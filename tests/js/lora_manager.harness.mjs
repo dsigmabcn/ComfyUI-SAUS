@@ -60,6 +60,8 @@ globalThis.document = {
         return el;
     },
     createElement: (tag) => makeElement(tag),
+    // The label is a text node beside the icon, so the stub needs one.
+    createTextNode: (text) => ({ nodeType: 3, textContent: String(text), data: String(text) }),
     querySelector: () => null,
     querySelectorAll: () => [],
 };
@@ -116,6 +118,12 @@ function build(workflow, appConfig = {}) {
     const manager = new LoraWorkflowManager(workflow, appConfig);
     const button = findButton(document.getElementById('lora-slot'));
     assert.ok(button, 'the "+Lora" button must be on the page for a graph with a loader');
+    // The control is an icon plus a plain label, not the old 'Add Lora+' text.
+    const label = button.children.map((child) => child.textContent || '').join('');
+    assert.ok(button.children.some((child) => String(child.className || '').includes('fas')),
+        'the Add Lora button wears an icon');
+    assert.equal(label, 'Add Lora', 'and its label is Add Lora, with no plus sign');
+
     return { manager, button };
 }
 

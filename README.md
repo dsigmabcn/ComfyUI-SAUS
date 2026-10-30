@@ -61,7 +61,7 @@ SAUS is a custom node for ComfyUI that works as a robust and simple user interfa
 
 For detailed instructions, check out the **[User Guide](docs/USER_GUIDE.md).**
 
-<img src="web/core/media/ui/Saus quick start card.png" width="800">
+<img src="web/core/media/ui/Saus quick start card.webp" width="800">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -85,6 +85,7 @@ If you already have installed [ComfyUI](https://github.com/comfyanonymous/ComfyU
 <img src="web/core/media/git/custom nodes manager.png">
 
 Search for ComfyUI-SAUS and install it.
+<img src="web/core/media/git/saus_search_manager.png">
 
 ## Manual Install - git clone
 
@@ -100,7 +101,7 @@ git clone https://github.com/dsigmabcn/ComfyUI-SAUS.git
 
 ## Automatic Install (scripts)
 
-To simplify installation, we provide scripts for Windows and Linux that install SAUS and the recommended custom nodes automatically.
+To simplify installation, we provide scripts for Windows and Linux that install SAUS automatically.
 
 The SAUS installers consider you already have [ComfyUI and ComfyUI-Manager already installed](docs/ComfyUI_install_instructions.md).
 
@@ -127,25 +128,19 @@ sudo apt install git-all
    ```
 
 ## Runpod - pods
-Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and use the **ComfyUI SAUS template**.
+Runpod offers GPU rental at a good price for running the latest image and video models, so you do not have to grind and optimise workflows yourself. After signing up, create a Network Disk (large enough for the models) and deploy the **ComfyUI latest - SAUS - KN** template — the latest ComfyUI with ComfyUI-Manager and SAUS already in it.
+
+**[Open the template →](https://console.runpod.io/hub/template/3c0tdgrly3?ref=617ypn0k)**
 
 <img src="web/core/media/git/RUNPOD-SAUS-template.png">
 
-See the [Runpod guide](docs/RUNPOD.md) for the port to open and the first-run notes.
+See the [Runpod guide](docs/RUNPOD.md) for the required CUDA version, the port to open and the first-run notes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Accessing SAUS 
 
-## 1. Direct Link
-
-To run SAUS, simply navigate to this address in your web browser:
-
-```
-http://127.0.0.1:8188/saus
-```
-
-## 2. in ComfyUI
+## 1. in ComfyUI
 
 <table>
   <tr>
@@ -154,12 +149,21 @@ http://127.0.0.1:8188/saus
   </tr>
 </table>
 
+## 2. Direct Link Browser address
+
+To run SAUS, simply navigate to this address in your web browser:
+
+```
+http://127.0.0.1:8188/saus
+```
+
+
 ## 3. in Runpod
-After start (and installation) of a pod with the ComfyUI SAUS template, SAUS is accessible in port 7771. This is visible in the HTTP services in the Pod control panel, and can be accessed by clicking there.
+After a pod with the **ComfyUI latest - SAUS - KN** template has started (the first run installs and updates), SAUS is reachable on port 7771 — it shows up among the pod's HTTP services in the control panel, and clicking it opens SAUS. That URL is bookmarkable, so you can come back to the same pod without going through the panel.
 
 <img src="web/core/media/git/port 7771.png">
 
-Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#2-in-comfyui">2. in ComfyUI</a>.
+Alternatively, open ComfyUI and click on the SAUS button as indicated in <a href="#1-in-comfyui">2. in ComfyUI</a>.
 
 > [!TIP]
 > **Now what?** The [User Guide](docs/USER_GUIDE.md) shows how to use SAUS — browsing apps, installing the models an app needs, adjusting the settings and running a generation.

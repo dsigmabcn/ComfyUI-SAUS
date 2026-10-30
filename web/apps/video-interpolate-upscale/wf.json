@@ -57,7 +57,7 @@
   },
   "1": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus.safetensors"
+      "model_name": "RealESRGAN_x2.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {

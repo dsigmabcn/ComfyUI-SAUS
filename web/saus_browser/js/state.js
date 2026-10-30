@@ -19,6 +19,9 @@ export const state = {
     hideDescriptions: false,
     hideTitles: false,
     sessionTimestamp: Date.now(),
+    // The server run this page is talking to (/saus/api/session). Handed to every app
+    // tab, so an app's remembered state can tell a reload from a ComfyUI restart.
+    sessionStamp: '',
     // Per-app model status, filled by models.js (see getAppStatus).
     statusCache: new Map(),
     // Tabs: [{ id, url, name, kind }] with the id of the active one.

@@ -1,0 +1,230 @@
+{
+  "id": "vidwananim",
+  "name": "Wan Animate 2",
+  "url": "video-wan-animate",
+  "description": "Animate a character with a driving video: Wan 2.2 Animate-2 moves the person in your reference image with the motion of the clip. Base or Distilled.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "video-to-video",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "WAN ANIMATE 2",
+    "models": [
+      "wan_animate_2_int8_convrot.safetensors",
+      "wan_animate_2_distill_int8_convrot.safetensors",
+      "lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+      "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "clip_vision_h.safetensors",
+      "Wan2_1_VAE_bf16.safetensors"
+    ]
+  },
+  "prompts": [
+    {
+      "id": "promptvidwananim",
+      "label": "Prompt",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "685.inputs.text",
+      "defValue": ""
+    },
+    {
+      "id": "charactervidwananim",
+      "label": "Character Description",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "684.inputs.text",
+      "defValue": ""
+    },
+    {
+      "id": "negativevidwananim",
+      "label": "Negative Prompt",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "683.inputs.text",
+      "defValue": ""
+    }
+  ],
+  "steppers": [
+    {
+      "id": "starttimesvidwananim",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 4
+      },
+      "nodePath": "241.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidwananim",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 5
+      },
+      "nodePath": "241.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "stepsvidwananim",
+      "label": "Steps",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "701.inputs.steps",
+      "defValue": 6,
+      "minValue": 1,
+      "maxValue": 60,
+      "step": 1,
+      "precision": 0,
+      "scaleFactor": 1
+    },
+    {
+      "id": "cfgvidwananim",
+      "label": "CFG",
+      "layout": {
+        "region": "advanced",
+        "order": 2
+      },
+      "nodePath": "709.inputs.cfg",
+      "defValue": 1,
+      "minValue": 1,
+      "maxValue": 10,
+      "step": 0.5,
+      "precision": 1,
+      "scaleFactor": 1
+    }
+  ],
+  "toggles": [
+    {
+      "id": "contextvidwananim",
+      "label": "Context Windows",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "697.inputs.switch",
+      "defaultValue": false
+    }
+  ],
+  "seeders": [
+    {
+      "id": "seedvidwananim",
+      "label": "Seed",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "709.inputs.noise_seed"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgrefvidwananim",
+      "label": "Reference Image",
+      "nodePath": "189.inputs.image"
+    },
+    {
+      "id": "imgdrivevidwananim",
+      "label": "Driving Video",
+      "nodePath": "240.inputs.file"
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "modelvidwananim",
+      "label": "Model",
+      "layout": {
+        "region": "advanced",
+        "order": 4
+      },
+      "nodePath": "673.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "clipvidwananim",
+      "label": "CLIP",
+      "layout": {
+        "region": "advanced",
+        "order": 5
+      },
+      "nodePath": "675.inputs.clip_name",
+      "url": "CLIPLoader",
+      "key": "clip_name"
+    },
+    {
+      "id": "visionvidwananim",
+      "label": "CLIP Vision",
+      "layout": {
+        "region": "advanced",
+        "order": 6
+      },
+      "nodePath": "676.inputs.clip_name",
+      "url": "CLIPVisionLoader",
+      "key": "clip_name"
+    },
+    {
+      "id": "vaevidwananim",
+      "label": "VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 7
+      },
+      "nodePath": "677.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidwananim",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 3
+      },
+      "nodePath": "246.inputs.filename_prefix",
+      "defValue": "Wan-Animate"
+    }
+  ],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidwananim",
+      "label": "Save Video",
+      "nodeId": "246",
+      "type": "media"
+    }
+  ]
+}

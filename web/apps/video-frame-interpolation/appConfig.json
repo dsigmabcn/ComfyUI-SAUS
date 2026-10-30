@@ -14,11 +14,7 @@
     "architecture": "FRAME INTERPOLATION",
     "models": [
       "film_net_fp16.safetensors",
-      "rife_v4.26.safetensors",
-      "rife_v4.26_heavy.safetensors",
-      "rife_v4.25.safetensors",
-      "rife_v4.25_heavy.safetensors",
-      "rife_v4.25_lite.safetensors"
+      "rife_v4.26.safetensors"
     ]
   },
   "prompts": [],
@@ -102,11 +98,7 @@
       "key": "model_name",
       "options": [
         "film_net_fp16.safetensors",
-        "rife_v4.26.safetensors",
-        "rife_v4.26_heavy.safetensors",
-        "rife_v4.25.safetensors",
-        "rife_v4.25_heavy.safetensors",
-        "rife_v4.25_lite.safetensors"
+        "rife_v4.26.safetensors"
       ]
     }
   ],

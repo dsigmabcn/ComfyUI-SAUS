@@ -15,7 +15,16 @@ COMFY_EXTRAS = ROOT.parents[1] / 'comfy_extras'
 # Every video app graph, plus the image tools (same nodes, same rules).
 APP_GLOBS = ('video-*', 'image-*')
 
-INPUT_RE = re.compile(r'\.Input\(\s*"([^"]+)"')
+# An input is declared either positionally - `io.Image.Input("image")` - or with an
+# explicit id: `io.Int.Input(id="multiple", ...)`. Matching only the positional form
+# made the older templates look like they wrote a key the node does not declare, and
+# "fixing" that would have rewritten seventeen graphs for nothing.
+INPUT_RE = re.compile(r'\.Input\(\s*(?:"([^"]+)"|id="([^"]+)")')
+
+
+def input_names(source):
+    """The input names `source` declares, whichever declaration style it uses."""
+    return {match.group(1) or match.group(2) for match in INPUT_RE.finditer(source)}
 
 
 class Skipped(Exception):
@@ -34,13 +43,13 @@ def declared_inputs():
     per_node, per_file = {}, {}
     for path in comfy_extras().glob('*.py'):
         source = path.read_text(encoding='utf-8', errors='replace')
-        per_file[path.name] = {m.group(1) for m in INPUT_RE.finditer(source)}
+        per_file[path.name] = input_names(source)
         for match in re.finditer(r'node_id="([A-Za-z0-9_]+)"', source):
             # Stop at the node's own methods, and never cross into the next node.
             block = source[match.end():match.end() + 4000]
             block = block.split('def execute', 1)[0]
             block = re.split(r'node_id="', block)[0]
-            names = {m.group(1) for m in INPUT_RE.finditer(block)}
+            names = input_names(block)
             if names:
                 per_node.setdefault(match.group(1), (path.name, set()))[1].update(names)
     return per_node, per_file
