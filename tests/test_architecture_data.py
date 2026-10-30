@@ -54,6 +54,28 @@ def test_every_named_model_is_in_the_registry():
     )
 
 
+def test_a_variant_picks_groups_its_own_architecture_declares():
+    """A pick naming somebody else's group id binds nothing - and shows up as buttons.
+
+    This is the shape a misplaced edit takes: a `"variants"` block that landed in the
+    architecture *above* the one it was written for parses, passes every registry check
+    (the files are real) and still breaks the app it was dropped into - SAM3 would
+    offer four upscaler variants and bind none of them.
+    """
+    architectures, _ = _load()
+    strayed = []
+    for name, arch in architectures.items():
+        groups = {group.get('id') for group in arch.get('models') or []}
+        for vid, variant in (arch.get('variants') or {}).items():
+            unknown = sorted(set(variant.get('pick') or {}) - groups)
+            if unknown:
+                strayed.append(f'{name}/{vid}: {unknown}')
+    assert not strayed, (
+        'these variants pick a group their own architecture does not declare - '
+        'the block is probably in the wrong architecture: ' + '; '.join(strayed)
+    )
+
+
 def test_a_variant_always_has_model_groups_to_bind():
     """Variant buttons are built from `models`; without groups they bind nothing."""
     architectures, _ = _load()

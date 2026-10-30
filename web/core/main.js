@@ -14,12 +14,19 @@ import imageLoaderComp from './js/common/components/widgets/imageLoaderComp.js';
 import { uuidv4, showSpinner, hideSpinner } from './js/common/components/utils.js';
 import { initializeWebSocket, messageHandler } from './js/common/components/messageHandler.js';
 import { updateWorkflowValue, updateWorkflow } from './js/common/components/workflowManager.js';
+import { groupFile, dropdownForGroup } from './js/common/scripts/architectureModels.js';
 import { fetchWorkflow } from './js/common/scripts/fetchWorkflow.js'; 
 import { fetchappConfig } from './js/common/scripts/fetchappConfig.js'; 
+import { getObjectInfo, objectInfoPath } from './js/common/scripts/objectInfo.js';
+import { PreferencesManager } from './js/common/scripts/preferences.js';
+import {
+    collectValues, fingerprint, load as loadAppState, save as saveAppState, pluckValues,
+} from './js/common/scripts/sessionState.js';
 import { setFaviconStatus } from './js/common/scripts/favicon.js'; 
 import { initialize } from './js/common/scripts/interactiveUI.js';
 import injectStylesheet from './js/common/scripts/injectStylesheet.js';
 import LoraWorkflowManager from './js/common/components/LoraWorkflowManager.js';
+import { getHistoryUrls, restoreHistory } from './js/common/components/imagedisplay.js';
 import { CanvasLoader } from './js/common/components/canvas/CanvasLoader.js';
 import CanvasComponent from './js/common/components/CanvasComponent.js';
 import { store } from  './js/common/scripts/stateManagerMain.js';
@@ -79,12 +86,6 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
 
     const appName = getAppName();
     const client_id = uuidv4();
-    const appConfig = await fetchappConfig(appName);
-
-    // Optional per-app output selection: only display media produced by these nodes.
-    if (appConfig.outputs && Array.isArray(appConfig.outputs)) {
-        messageHandler.setOutputNodes(appConfig.outputs.map(output => output.nodeId).filter(Boolean));
-    }
 
     // Defensive: a failing/non-JSON endpoint must not abort the whole app.
     const safeJson = (url, fallback) =>
@@ -92,14 +93,30 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
             console.warn('[SAUS] could not load', url, err);
             return fallback;
         });
-    const architectures = await safeJson('/saus/api/architectures', {});
-    // Filename-keyed registry (used to apply the new architecture "models"/"variants").
-    const modelsRegistry = await safeJson('/saus/api/models', {});
+
+    // The app config, its workflow and the two catalogs are independent, so they are
+    // asked for *together*: awaiting them one after another cost three extra round
+    // trips (and the catalogs are ~86 KB) before a single control could be built.
+    const [appConfig, initialWorkflow, architectures, modelsRegistry] = await Promise.all([
+        fetchappConfig(appName),
+        fetchWorkflow(appName),
+        safeJson('/saus/api/architectures', {}),
+        // Filename-keyed registry (used to apply the architecture "models"/"variants").
+        safeJson('/saus/api/models', {}),
+    ]);
+
+    // The LoRA manager re-writes the graph in place further down, so it cannot be const.
+    let workflow = initialWorkflow;
+
+    // Optional per-app output selection: only display media produced by these nodes.
+    // Set before the websocket is wired, so no early message slips through.
+    if (appConfig.outputs && Array.isArray(appConfig.outputs)) {
+        messageHandler.setOutputNodes(appConfig.outputs.map(output => output.nodeId).filter(Boolean));
+    }
 
     // Architecture now comes from the app's own metadata (no app_list.json).
     const architectureName = (appConfig.metadata && appConfig.metadata.architecture) || null;
-    
-    let workflow = await fetchWorkflow(appName);
+
     let canvasLoader;
 
     // Set once the whole interface is built: the SAUS app browser waits for it
@@ -114,7 +131,9 @@ import { store } from  './js/common/scripts/stateManagerMain.js';
     initializeWebSocket(client_id);
     setFaviconStatus.Default();
     injectStylesheet('/core/css/main.css', 'main');
-    injectStylesheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'font-awesome');
+    // Font Awesome from /core, not cdnjs: same origin, cached, and it works offline
+    // (the vendor copy and its re-vendoring tool are noted on the shell's page).
+    injectStylesheet('/core/media/vendor/fontawesome/css/all.min.css', 'font-awesome');
     
 
 
@@ -320,11 +339,11 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         let availableModels = [];
         const loaderOptions = {};   // cfg.id -> the loader's own valid values
         const loaderConfigs = (appConfig.dropdowns || []).filter(d => d.url && d.key && LOADER_TYPES.has(d.url));
+        // The dropdowns on this page have already asked for most of these classes:
+        // the shared cache (scripts/objectInfo.js) makes this a lookup, not a fetch.
         await Promise.all(loaderConfigs.map(async (cfg) => {
             try {
-                const res = await fetch(`${window.location.origin}/object_info/${cfg.url}`);
-                const data = await res.json();
-                const info = data[Object.keys(data)[0]];
+                const info = await getObjectInfo(objectInfoPath(cfg.url));
                 const spec = info && info.input && (info.input.required?.[cfg.key] || info.input.optional?.[cfg.key]);
                 const opts = (spec && Array.isArray(spec[0]) ? spec[0] : []).filter(o => typeof o === 'string');
                 loaderOptions[cfg.id] = opts;
@@ -340,9 +359,7 @@ function setPromptComponents(config, options = { clearInputs: false }) {
         const loraOptions = [];
         for (const loraType of ['LoraLoaderModelOnly', 'LoraLoader']) {
             try {
-                const res = await fetch(`${window.location.origin}/object_info/${loraType}`);
-                const data = await res.json();
-                const info = data[Object.keys(data)[0]];
+                const info = await getObjectInfo(objectInfoPath(loraType));
                 const spec = info && info.input && info.input.required && info.input.required.lora_name;
                 const opts = (spec && Array.isArray(spec[0]) ? spec[0] : []).filter(o => typeof o === 'string');
                 if (opts.length) {
@@ -413,9 +430,10 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                 const missing = [];
                 const optionalMissing = [];
                 (arch.models || []).forEach((group) => {
-                    const files = modelFiles(group);
-                    let file = (variant.pick || {})[group.id];
-                    if (!file && group.need === 'all' && files.length) file = files[0];
+                    // The same choice the binding makes below (architectureModels.js):
+                    // a variant that names an absent model but has an installed
+                    // alternative is usable, because that is what it will bind.
+                    const file = groupFile(group, variant.pick, fileInstalled);
                     if (file && !fileInstalled(file)) {
                         // A "none" group (typically a LoRA) is optional: it is reported
                         // in the tooltip but must never stop the variant being selectable.
@@ -501,66 +519,86 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                     .filter(el => el);
                 const loraWidgetElement = document.querySelector('.lora-component-container');
                 const dynamicLoraWidgets = document.querySelectorAll('#side-workflow-controls .dropdown-stepper-container[id^="LoraLoader_"]');
-                
-                if (mode === 'custom') {
-                    modelWidgetElements.forEach(el => el.style.display = '');
-                    typeWidgetElements.forEach(el => el.style.display = '');
-                    if (loraWidgetElement) loraWidgetElement.style.display = '';
-                    dynamicLoraWidgets.forEach(w => w.style.display = '');
-                } else { // for 'hd' and 'turbo'
-                    modelWidgetElements.forEach(el => el.style.display = 'none');
-                    typeWidgetElements.forEach(el => el.style.display = 'none');
-                    if (loraWidgetElement) loraWidgetElement.style.display = 'none';
-                    dynamicLoraWidgets.forEach(w => w.style.display = 'none');
-                }
 
+                // Applied once the architecture is known, further down: HD only takes
+                // these controls out of the user's hands when it really does pick the
+                // files itself (see where `hdPicksModels` is set).
+                const setModelWidgetsVisible = (visible) => {
+                    const display = visible ? '' : 'none';
+                    modelWidgetElements.forEach(el => el.style.display = display);
+                    typeWidgetElements.forEach(el => el.style.display = display);
+                    if (loraWidgetElement) loraWidgetElement.style.display = display;
+                    dynamicLoraWidgets.forEach(w => w.style.display = display);
+                };
 
+                // Reset to the author's layout before deciding, so switching modes twice
+                // cannot leave a control hidden.
+                setModelWidgetsVisible(true);
+
+                let hdPicksModels = false;
                 if (architectureName && architectures[architectureName]) {
                     const arch = architectures[architectureName];
                     // A variant names the model each group takes ("pick") plus its own
                     // settings (steps/cfg); models are placed by group -> node.
                     let settings = null;
-                    if (mode === 'variant' && arch.variants) {
-                        const variant = arch.variants[clickedButton.dataset.variant];
-                        if (variant) {
-                            // A variant can name its LoRAs either in the model group it
-                            // picks from ("pick") or in its own list ("loras"): collect
-                            // the file names from both.
-                            const pickedLoras = [];
-                            (arch.models || []).forEach((group) => {
-                                const files = (group.files || []).map(f => (typeof f === 'string' ? f : f.file)).filter(Boolean);
-                                let file = (variant.pick || {})[group.id];
-                                if (file && !fileInstalled(file)) file = files.find(fileInstalled) || file;
-                                if (!file && group.need === 'all' && files.length) file = files[0];
-                                // LoRA groups are applied through the "+Lora" button (there
-                                // is usually no lora dropdown), so remember the file here.
-                                if (file && /lora/i.test(String((group.node || {}).nodeType || ''))) {
-                                    pickedLoras.push(file);
-                                }
-                                if (!file || !group.node || !group.node.nodeType) return;
-                                const cfg = appConfig.dropdowns.find(d => d.url === group.node.nodeType && d.key === group.node.input);
-                                if (!cfg || !cfg.nodePath) return;
-                                // Use the loader's OWN valid option for this file (the
-                                // registry "directory" includes the model-type root,
-                                // which the loader must NOT get).
-                                const opts = loaderOptions[cfg.id] || [];
-                                let value = opts.find((o) => o === file) || opts.find((o) => o.endsWith('/' + file));
-                                if (!value) {
-                                    const segs = String((modelsRegistry[file] || {}).directory || '').split('/').filter(Boolean);
-                                    const sub = segs.length > 1 ? segs.slice(1).join('/') : '';
-                                    value = sub ? `${sub}/${file}` : file;
-                                }
-                                updateWorkflow(workflow, cfg.nodePath, value);
-                                const container = document.getElementById(cfg.id);
-                                const input = container && container.querySelector('input');
-                                if (input) { input.value = file; input.title = value; }
-                            });
-                            settings = {
-                                name: variant.label,
-                                loraFiles: [...(variant.loras || []), ...pickedLoras],
-                                ...(variant.settings || {})
-                            };
-                        }
+                    const hasVariants = Boolean(arch.variants && Object.keys(arch.variants).length);
+                    hdPicksModels = hasVariants;
+                    const variant = hasVariants && mode === 'variant'
+                        ? arch.variants[clickedButton.dataset.variant]
+                        : null;
+                    // Either a named variant, or - for an architecture with no variants,
+                    // which is what the information panel shows as its single "Base" - the
+                    // group's own choice. Without this second case such an app never
+                    // bound its model at all: it ran whatever the graph happened to hold,
+                    // and (because HD hides the model selectors) the user could not even
+                    // see which model that was. `custom` never rebinds: the user is
+                    // choosing the models there.
+                    if (variant || (mode !== 'custom' && !hasVariants)) {
+                        // A variant can name its LoRAs either in the model group it
+                        // picks from ("pick") or in its own list ("loras"): collect
+                        // the file names from both.
+                        const pickedLoras = [];
+                        // Two groups may share a (node class, input) - a video VAE and an
+                        // audio VAE are both VAELoader.vae_name, so the app config holds
+                        // two dropdowns that look identical to this lookup. Take them in
+                        // declaration order; always taking the first wrote the audio VAE's
+                        // file into the video VAE's node.
+                        const usedLoaderDropdowns = new Set();
+                        (arch.models || []).forEach((group) => {
+                            const file = groupFile(group, variant && variant.pick, fileInstalled);
+                            if (!file || !group.node || !group.node.nodeType) return;
+                            const cfg = dropdownForGroup(group, appConfig.dropdowns, usedLoaderDropdowns);
+                            // A LoRA group is normally attached through the "+Lora" button
+                            // (there is rarely a lora dropdown). When the graph *does* have
+                            // one - because the template wires a LoRA node in - the file
+                            // belongs in that dropdown: adding a block as well would apply
+                            // the same LoRA twice.
+                            if (/lora/i.test(String(group.node.nodeType)) && !cfg) {
+                                pickedLoras.push(file);
+                                return;
+                            }
+                            if (cfg && cfg.id) usedLoaderDropdowns.add(cfg.id);
+                            if (!cfg || !cfg.nodePath) return;
+                            // Use the loader's OWN valid option for this file (the
+                            // registry "directory" includes the model-type root,
+                            // which the loader must NOT get).
+                            const opts = loaderOptions[cfg.id] || [];
+                            let value = opts.find((o) => o === file) || opts.find((o) => o.endsWith('/' + file));
+                            if (!value) {
+                                const segs = String((modelsRegistry[file] || {}).directory || '').split('/').filter(Boolean);
+                                const sub = segs.length > 1 ? segs.slice(1).join('/') : '';
+                                value = sub ? `${sub}/${file}` : file;
+                            }
+                            updateWorkflow(workflow, cfg.nodePath, value);
+                            const container = document.getElementById(cfg.id);
+                            const input = container && container.querySelector('input');
+                            if (input) { input.value = file; input.title = value; }
+                        });
+                        settings = {
+                            name: (variant && variant.label) || 'Base',
+                            loraFiles: [...((variant && variant.loras) || []), ...pickedLoras],
+                            ...((variant && variant.settings) || {})
+                        };
                     }
 
                     if (settings) {
@@ -632,30 +670,16 @@ function setPromptComponents(config, options = { clearInputs: false }) {
                         }
                     }
                 }
-            } else {
-                clickedButton.classList.toggle('active');
-
-                if (clickedButton.dataset.mode === 'fp8') {
-                    const typeDropdownConfigs = appConfig.dropdowns.filter(d => d.label === 'Type');
-                    const newValue = clickedButton.classList.contains('active') ? 'fp8_e4m3fn' : 'default';
-
-                    typeDropdownConfigs.forEach(typeDropdownConfig => {
-                        if (typeDropdownConfig && typeDropdownConfig.nodePath) {
-                            const typeInput = document.querySelector(`#${typeDropdownConfig.id} input[type="text"]`);
-                            if (typeInput) {
-                                typeInput.value = newValue;
-                                typeInput.title = newValue;
-                                updateWorkflow(workflow, typeDropdownConfig.nodePath, newValue);
-                            } else {
-                                console.warn(`Could not find the <input> element for the Type widget (ID: ${typeDropdownConfig.id}). UI might not update.`);
-                            }
-                        } else {
-                            console.warn(`Could not find config or nodePath for a Type widget with id: ${typeDropdownConfig ? typeDropdownConfig.id : 'undefined'}`);
-                        }
-                    });
-                }
             }
-    
+
+            // HD and Turbo only take the model out of the user's hands when the
+            // architecture's variants name the files themselves. An app whose
+            // architecture has no variants has no model choice to make: HD binds
+            // its implicit Base (above), so hiding the selectors left the user with
+            // a model they could neither see nor change - and on the twenty-two apps
+            // in that shape the selectors were hidden while nothing was bound at all.
+            setModelWidgetsVisible(mode === 'custom' || !hdPicksModels);
+
             const activeButtons = modeSelectorContainer.querySelectorAll('.mode-button.active');
             const modes = Array.from(activeButtons).map(btn => btn.dataset.mode);
             console.log('Active modes:', modes);
@@ -670,99 +694,147 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     const loraWorkflowManager = new LoraWorkflowManager(workflow, appConfig);
 
     workflow = loraWorkflowManager.getWorkflow();
-    
-    if (appConfig.dropdowns) {
-        appConfig.dropdowns.forEach(config => {
-            const instance = new Dropdown(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
-    }
 
-    if (appConfig.steppers) {
-        appConfig.steppers.forEach(config => {
-            const instance = new Stepper(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
-    }
+    const failedControls = [];
 
-    if (appConfig.dimensionSelectors) {
-        appConfig.dimensionSelectors.forEach(config => {
-            const tags = (appConfig.metadata && appConfig.metadata.tags) || appConfig.tags;
-            if (tags && tags.base_models) {
-                const baseModels = tags.base_models;
-                if (baseModels.includes('FLUX-2')) {
-                    config.modelType = 'FLUX-2';
-                } else if (baseModels.includes('FLUX')) {
-                    config.modelType = 'FLUX';
-                } else if (baseModels.includes('WAN 2.2')) {
-                    config.modelType = 'WAN 2.2';
-                } else if (baseModels.includes('WAN')) {
-                    config.modelType = 'WAN';
-                } else if (baseModels.includes('QWEN')) {
-                    config.modelType = 'QWEN';
-                } else if (baseModels.includes('LTX-2')) {
-                    config.modelType = 'LTX-2';
-                } else if (baseModels.includes('Z-image')) {
-                    config.modelType = 'Z-image';
-                } else if (baseModels.includes('SDXL')) {
-                    config.modelType = 'SDXL';
-                } else if (baseModels.includes('SD1.5')) {
-                    config.modelType = 'SDXL';
-                }
+    /**
+     * Build one kind of control, reporting a failure instead of dying on it.
+     *
+     * An exception in one of these loops used to abort the whole of `main()`: every
+     * control below it - and the mode selector, which is what binds the model - was
+     * never built, and the page just looked half-drawn. An app whose drop area was
+     * "missing" gave no clue that a control above it had thrown.
+     */
+    function buildControls(kind, configs, build) {
+        (configs || []).forEach((config) => {
+            const label = (config && (config.label || config.id)) || kind;
+            try {
+                build(config);
+            } catch (error) {
+                failedControls.push(`${kind} "${label}"`);
+                console.error(`[SAUS] ${kind} "${label}" failed:`, error);
             }
-            const instance = new DimensionSelector(config, workflow);
-            widgetInstances[config.id] = instance;
         });
     }
 
-    if (appConfig.aspectRatioSelectors) {
-        appConfig.aspectRatioSelectors.forEach(config => {
-            const instance = new AspectRatioSelector(config, workflow);
-            widgetInstances[config.id] = instance;
+    /**
+     * Name every control the app declares but the page never rendered.
+     *
+     * A configured control that is simply absent is a silently half-built app: a widget
+     * is missing from the panel, nothing was logged, and the only symptom is "there is
+     * no drop area". Data components are exempt - they bind a store value to the graph
+     * and draw nothing on purpose - and a multi component inserts its own container into
+     * `#side-workflow-controls` (which is why one is not created for it up front).
+     */
+    function reportMissingControls() {
+        const wanted = [
+            ['dropdown', appConfig.dropdowns], ['stepper', appConfig.steppers],
+            ['dimension selector', appConfig.dimensionSelectors],
+            ['aspect ratio', appConfig.aspectRatioSelectors],
+            ['input', appConfig.inputs], ['toggle', appConfig.toggles],
+            ['seeder', appConfig.seeders], ['multi component', appConfig.multiComponents],
+        ];
+        const missing = [];
+        wanted.forEach(([kind, configs]) => {
+            (configs || []).forEach((config) => {
+                const id = config && config.id;
+                if (!id || !document.getElementById(id)) {
+                    missing.push(`${kind} "${(config && (config.label || config.id)) || '?'}"`);
+                }
+            });
         });
+        if ((appConfig.imageLoaders || []).length
+            && !document.getElementById('load-image-container')) {
+            const labels = appConfig.imageLoaders
+                .map((config) => config.label || config.id || '?').join(', ');
+            missing.push(`input loader "${labels}"`);
+        }
+        // Both halves of the same story: a control that threw on construction, and one
+        // that was built but never appeared. Either way the panel is missing a widget.
+        const report = [...failedControls, ...missing];
+        if (report.length) {
+            console.warn(
+                `[SAUS] ${report.length} configured control(s) are not in the panel: ${report.join(', ')}`);
+        }
+        return report;
     }
 
-    if (appConfig.inputs) {
-        appConfig.inputs.forEach(config => {
-            const instance = new InputComponent(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
+    buildControls('dropdown', appConfig.dropdowns, (config) => {
+        widgetInstances[config.id] = new Dropdown(config, workflow);
+    });
+
+    buildControls('stepper', appConfig.steppers, (config) => {
+        widgetInstances[config.id] = new Stepper(config, workflow);
+    });
+
+    buildControls('dimension selector', appConfig.dimensionSelectors, (config) => {
+        const tags = (appConfig.metadata && appConfig.metadata.tags) || appConfig.tags;
+        if (tags && tags.base_models) {
+            const baseModels = tags.base_models;
+            if (baseModels.includes('FLUX-2')) {
+                config.modelType = 'FLUX-2';
+            } else if (baseModels.includes('FLUX')) {
+                config.modelType = 'FLUX';
+            } else if (baseModels.includes('WAN 2.2')) {
+                config.modelType = 'WAN 2.2';
+            } else if (baseModels.includes('WAN')) {
+                config.modelType = 'WAN';
+            } else if (baseModels.includes('QWEN')) {
+                config.modelType = 'QWEN';
+            } else if (baseModels.includes('LTX-2')) {
+                config.modelType = 'LTX-2';
+            } else if (baseModels.includes('Z-image')) {
+                config.modelType = 'Z-image';
+            } else if (baseModels.includes('SDXL')) {
+                config.modelType = 'SDXL';
+            } else if (baseModels.includes('SD1.5')) {
+                config.modelType = 'SDXL';
+            }
+        }
+        widgetInstances[config.id] = new DimensionSelector(config, workflow);
+    });
+
+    buildControls('aspect ratio', appConfig.aspectRatioSelectors, (config) => {
+        widgetInstances[config.id] = new AspectRatioSelector(config, workflow);
+    });
+
+    buildControls('input', appConfig.inputs, (config) => {
+        widgetInstances[config.id] = new InputComponent(config, workflow);
+    });
+
+    buildControls('toggle', appConfig.toggles, (config) => {
+        widgetInstances[config.id] = new ToggleComponent(config, workflow);
+    });
+
+    buildControls('seeder', appConfig.seeders, (config) => {
+        const seeder = new Seeder(config, workflow);
+        seeders.push(seeder);
+        widgetInstances[config.id] = seeder;
+    });
+
+    buildControls('multi component', appConfig.multiComponents, (config) => {
+        widgetInstances[config.id] = new MultiComponent(config, workflow);
+    });
+
+    // A data component binds a store value to the graph and renders nothing.
+    buildControls('data component', appConfig.dataComponents, (config) => {
+        widgetInstances[config.id] = new DataComponent(config, workflow);
+    });
+
+
+    try {
+        imageLoaderComp(appConfig, workflow);
+    } catch (error) {
+        failedControls.push('input loader');
+        console.error('[SAUS] input loader failed:', error);
     }
 
-    if (appConfig.toggles) {
-        appConfig.toggles.forEach(config => {
-            const instance = new ToggleComponent(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
-    }
-
-    if (appConfig.seeders) {
-        appConfig.seeders.forEach(config => {
-            const seeder = new Seeder(config, workflow);
-            seeders.push(seeder);
-            widgetInstances[config.id] = seeder;
-        });
-    }
-
-    if (appConfig.multiComponents && Array.isArray(appConfig.multiComponents)) {
-        appConfig.multiComponents.forEach(config => {
-            const instance = new MultiComponent(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
-    }
-
-    if (appConfig.dataComponents && Array.isArray(appConfig.dataComponents)) {
-        appConfig.dataComponents.forEach(config => {
-            const instance = new DataComponent(config, workflow);
-            widgetInstances[config.id] = instance;
-        });
-    }
-
-
-    imageLoaderComp(appConfig, workflow);
-    
     // Now that all widgets are created and instances stored, setup the mode selector
     await setupModeSelector();
+
+    // Last, because only now can a control be counted as rendered: this is the line that
+    // turns "there is no drop area" into a console report naming what never appeared.
+    reportMissingControls();
 
     const initCanvas = async () => {
         canvasLoader = new CanvasLoader('imageCanvas', appConfig);
@@ -779,6 +851,158 @@ function setPromptComponents(config, options = { clearInputs: false }) {
     };
     
     initCanvas();
+
+
+    /* ---------------------------------------------------------------------- *
+     * This app's memory for the current browser session
+     *
+     * Closing a tab destroys this page (tabs.js), so a mistaken close used to lose
+     * everything: the settings, the prompt, the variant, the LoRAs and the results.
+     * The state lives in sessionStorage - the shell's own open tabs do too - scoped
+     * to the server run handed over in `?session=`, so a page reload or a re-opened
+     * tab gets it back, while a ComfyUI restart is a new session by definition (see
+     * scripts/sessionState.js and the `/saus/api/session` route).
+     * ---------------------------------------------------------------------- */
+    const sessionPrefs = new PreferencesManager({ rememberAppState: true });
+    const sessionStamp = new URLSearchParams(window.location.search).get('session') || '';
+
+    // Every component kind an appConfig can declare, for the restore below.
+    const widgetConfigs = [];
+    ['dropdowns', 'steppers', 'toggles', 'seeders', 'multiComponents',
+     'dataComponents', 'dimensionSelectors'].forEach((kind) => {
+        (appConfig[kind] || []).forEach((config) => widgetConfigs.push(config));
+    });
+
+    /** The LoRA files the user added here: graph nodes the app did not ship with. */
+    function addedLoraFiles() {
+        const shipped = new Set(Object.keys(initialWorkflow || {}));
+        return Object.entries(workflow || {})
+            .filter(([nodeId, node]) => !shipped.has(nodeId) && node
+                && typeof node.class_type === 'string'
+                && node.class_type.startsWith('LoraLoader'))
+            .map(([, node]) => (node.inputs || {}).lora_name)
+            .filter((name) => typeof name === 'string' && name);
+    }
+
+    function captureAppState() {
+        // The prompts are the one control not written into the graph as you type.
+        collectPromptValues(workflow);
+        const prompts = {};
+        (appConfig.prompts || []).forEach(({ id }) => {
+            const element = document.getElementById(id);
+            if (element) prompts[id] = element.value;
+        });
+        return {
+            fingerprint: fingerprint(initialWorkflow),
+            values: collectValues(workflow),
+            prompts,
+            mode: activeMode ? { ...activeMode } : null,
+            loras: addedLoraFiles(),
+            recent: getHistoryUrls(),
+        };
+    }
+
+    function rememberAppState() {
+        if (sessionPrefs.get('rememberAppState') === false || !sessionStamp) return;
+        saveAppState(appName, sessionStamp, captureAppState());
+    }
+
+    /** Put back what the user had, skipping whatever this app no longer has. */
+    function restoreAppState() {
+        if (sessionPrefs.get('rememberAppState') === false) return;
+        const remembered = loadAppState(appName, sessionStamp);
+        if (!remembered) return;
+
+        if (remembered.fingerprint
+            && remembered.fingerprint !== fingerprint(initialWorkflow)) {
+            console.info('[SAUS] this app has changed since it was remembered: only the '
+                + 'settings it still has are restored');
+        }
+
+        // 1. The mode first: choosing it re-applies that variant (its model, settings
+        //    and LoRAs), and the saved values are then layered on top of it.
+        if (remembered.mode && remembered.mode.mode) {
+            const selector = remembered.mode.variant
+                ? `[data-mode="variant"][data-variant="${remembered.mode.variant}"]`
+                : `[data-mode="${remembered.mode.mode}"]`;
+            const button = document.querySelector(`#mode-selector-container ${selector}`);
+            if (button && !button.disabled && !button.classList.contains('disabled-saus')) {
+                button.click();
+            } else {
+                console.info('[SAUS] the mode this app was remembered in is not available');
+            }
+        }
+
+        // 2. The values the user chose: into the graph, and shown by the widget that
+        //    owns each one.
+        const { apply, dropped } = pluckValues(remembered.values, workflow);
+        const byPath = new Map();
+        Object.entries(apply).forEach(([nodeId, inputs]) => {
+            Object.entries(inputs).forEach(([key, value]) => {
+                byPath.set(`${nodeId}.inputs.${key}`, value);
+            });
+        });
+        byPath.forEach((value, path) => {
+            updateWorkflow(workflow, path, value);
+            const config = widgetConfigs.find((candidate) => candidate.nodePath === path);
+            const instance = config ? widgetInstances[config.id] : null;
+            if (instance && typeof instance.updateValue === 'function') {
+                instance.updateValue(value);
+            }
+            window.dispatchEvent(new CustomEvent('workflowValueUpdate', {
+                detail: { path, value },
+            }));
+        });
+        if (dropped.length) {
+            console.info('[SAUS] settings this app no longer has were skipped:', dropped);
+        }
+
+        // 3. The LoRAs the user added. The variant's own are already in the graph, so
+        //    only the ones missing from it are put back - never twice.
+        const inGraph = new Set(addedLoraFiles());
+        (remembered.loras || []).forEach((file) => {
+            if (inGraph.has(file)) return;
+            try {
+                loraWorkflowManager.addLoraBlock(file);
+            } catch (error) {
+                console.warn('[SAUS] could not put back a LoRA:', file, error);
+            }
+        });
+
+        // 4. The prompt boxes, which then write themselves into the graph exactly the
+        //    way they do on Run.
+        let promptsRestored = false;
+        (appConfig.prompts || []).forEach(({ id }) => {
+            const element = document.getElementById(id);
+            if (element && remembered.prompts && id in remembered.prompts) {
+                element.value = remembered.prompts[id];
+                promptsRestored = true;
+            }
+        });
+        if (promptsRestored) collectPromptValues(workflow);
+
+        // 5. The results panel: the thumbnails, and the image that was showing.
+        restoreHistory(remembered.recent);
+    }
+
+    restoreAppState();
+
+    // One write per quiet moment rather than one per keystroke. Every way of changing a
+    // setting raises an event on the page (typing, a pick, a click, a dropped image), so
+    // watching for those covers every widget without touching any of them.
+    let rememberTimer = null;
+    const scheduleRemember = () => {
+        clearTimeout(rememberTimer);
+        rememberTimer = setTimeout(rememberAppState, 500);
+    };
+    ['input', 'change', 'click'].forEach((type) =>
+        document.addEventListener(type, scheduleRemember, true));
+
+    // Closing or reloading the tab is the moment that matters most: write it out now.
+    window.addEventListener('pagehide', () => {
+        clearTimeout(rememberTimer);
+        rememberAppState();
+    });
 
 
     /**

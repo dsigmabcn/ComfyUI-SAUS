@@ -1,0 +1,91 @@
+{
+  "1": {
+    "inputs": {
+      "file": "example.mp4"
+    },
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "LoadVideo"
+    }
+  },
+  "2": {
+    "inputs": {
+      "video": [
+        "1",
+        0
+      ],
+      "start_time": 0,
+      "duration": 0.0,
+      "strict_duration": false
+    },
+    "class_type": "Video Slice",
+    "_meta": {
+      "title": "Video Slice"
+    }
+  },
+  "3": {
+    "inputs": {
+      "video": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "GetVideoComponents"
+    }
+  },
+  "4": {
+    "inputs": {
+      "image": [
+        "3",
+        0
+      ],
+      "low_threshold": 0.4,
+      "high_threshold": 0.8
+    },
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Canny"
+    }
+  },
+  "5": {
+    "inputs": {
+      "images": [
+        "4",
+        0
+      ],
+      "audio": [
+        "3",
+        1
+      ],
+      "fps": [
+        "3",
+        2
+      ],
+      "bit_depth": "auto",
+      "color_space": "sRGB",
+      "codec": "none"
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "CreateVideo"
+    }
+  },
+  "6": {
+    "inputs": {
+      "video": [
+        "5",
+        0
+      ],
+      "filename_prefix": "Video-Canny",
+      "format": "auto",
+      "format.codec": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "SaveVideo"
+    }
+  }
+}

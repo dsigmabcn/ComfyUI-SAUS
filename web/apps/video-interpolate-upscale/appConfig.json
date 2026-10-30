@@ -2,7 +2,7 @@
   "id": "vidupinterp",
   "name": "Video Interpolate + Upscale",
   "url": "video-interpolate-upscale",
-  "description": "Upscale a video with a model and interpolate extra frames in one run.",
+  "description": "Upscale a video with ESRGAN x2 and interpolate extra frames in one run: FILM net or RIFE 4.26 does the interpolation.",
   "metadata": {
     "schemaVersion": 1,
     "category": "Video tools",
@@ -15,14 +15,7 @@
     "models": [
       "film_net_fp16.safetensors",
       "rife_v4.26.safetensors",
-      "rife_v4.26_heavy.safetensors",
-      "rife_v4.25.safetensors",
-      "rife_v4.25_heavy.safetensors",
-      "rife_v4.25_lite.safetensors",
-      "RealESRGAN_x4plus.safetensors",
-      "RealESRGAN_x2.pth",
-      "4x-UltraSharp.pth",
-      "4x-AnimeSharp.pth"
+      "RealESRGAN_x2.pth"
     ]
   },
   "prompts": [],
@@ -121,11 +114,7 @@
       "key": "model_name",
       "options": [
         "film_net_fp16.safetensors",
-        "rife_v4.26.safetensors",
-        "rife_v4.26_heavy.safetensors",
-        "rife_v4.25.safetensors",
-        "rife_v4.25_heavy.safetensors",
-        "rife_v4.25_lite.safetensors"
+        "rife_v4.26.safetensors"
       ]
     },
     {
@@ -139,10 +128,7 @@
       "url": "UpscaleModelLoader",
       "key": "model_name",
       "options": [
-        "RealESRGAN_x4plus.safetensors",
-        "RealESRGAN_x2.pth",
-        "4x-UltraSharp.pth",
-        "4x-AnimeSharp.pth"
+        "RealESRGAN_x2.pth"
       ]
     }
   ],

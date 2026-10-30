@@ -61,7 +61,7 @@ SAUS is a custom node for ComfyUI that works as a robust and simple user interfa
 
 For detailed instructions, check out the **[User Guide](docs/USER_GUIDE.md).**
 
-<img src="web/core/media/ui/Saus quick start card.png" width="800">
+<img src="web/core/media/ui/Saus quick start card.webp" width="800">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

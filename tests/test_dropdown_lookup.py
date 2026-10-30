@@ -92,6 +92,35 @@ def test_dropdown_harness():
     assert result.returncode == 0, f'{HARNESS.name} failed:\n{result.stdout}\n{result.stderr}'
 
 
+def test_one_object_info_request_per_node_type():
+    """Every combo on a page shares one answer per node type - see scripts/objectInfo.js.
+
+    An app with six dropdowns over four classes made ~10 requests for 4 answers, and
+    the mode selector then re-asked for the loader classes the dropdowns had just
+    fetched. A loader class answers with *every* model on disk, so the repeats are the
+    expensive ones.
+    """
+    shared = (ROOT / 'web' / 'core' / 'js' / 'common' / 'scripts' / 'objectInfo.js')
+    source = shared.read_text(encoding='utf-8')
+
+    assert 'export async function getObjectInfo(' in source, 'the one place that asks'
+    assert 'cache.has(key)' in source and 'cache.set(key, entry)' in source, 'it caches by key'
+    assert 'if (answerable) cache.set' in source, \
+        'and never caches an unanswered request, so a retry is still possible'
+    assert 'export function clearObjectInfoCache()' in source, \
+        'a harness (or a deliberate refresh) can start over'
+
+    # Both combo widgets, and the app runtime's model checks, go through it.
+    for name, path in (('Dropdown', DROPDOWN_JS), ('the aspect ratio picker', RATIO_JS)):
+        consumer = path.read_text(encoding='utf-8')
+        assert 'getObjectInfo(' in consumer, f'{name} uses the shared lookup'
+        assert 'fetch(' not in consumer, f'{name} no longer fetches /object_info itself'
+
+    runtime = (ROOT / 'web' / 'core' / 'main.js').read_text(encoding='utf-8')
+    assert 'getObjectInfo(' in runtime, 'the mode selector uses it too'
+    assert '/object_info/' not in runtime, 'and builds no URL of its own any more'
+
+
 def main():
     tests = [(name, fn) for name, fn in sorted(globals().items())
              if name.startswith('test_') and callable(fn)]

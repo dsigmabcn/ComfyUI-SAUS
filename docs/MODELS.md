@@ -21,7 +21,9 @@ Every app row in the explorer carries a status dot. Apps can offer several **var
 - <span style="color:orange">orange</span>: at least one variant is complete, but another one is not.
 - <span style="color:red">red</span>: no variant is complete yet.
 
-A variant needs what it is built on: the models it picks (including its own distillation/lightning LoRA) are required **for that variant**, while models that no variant picks never block anything. Where the app offers several alternatives (two VAEs, for example), having any one of them is enough.
+A variant needs what it is built on: the models it picks (including its own distillation/lightning LoRA) are required **for that variant**, while models that no variant picks never block anything. Where the app offers several alternatives — a VAE, a sampler, a family of interpolation models — **one of that group** is enough, and a group is a group: an app that needs an interpolation model *and* an upscaler is not complete with only one of the two.
+
+The dot on a **variant card** in the information panel is computed by the same rule as the dot on the app row (`web/saus_browser/js/variantStatus.js`), so the two never disagree — a card is not orange for an alternative it does not need, and an uninstalled *optional* model never colours anything.
 
 When an app has several variants, hovering the row shows one line per variant (e.g. `HD ✓`, `Turbo — 2 models missing`); with a single variant it simply lists the missing models.
 To install models, open the information panel: click the **(i)** button on the row.
@@ -44,6 +46,24 @@ Even if not all models are installed, you can open the app and pick the models b
 ### Models
 
 Below the App information, you will see a list of models, showing if the model is <span style="color:green">Installed</span> or <span style="color:red">Missing</span> and a button to install/uninstall them. When you click on install, the model will start downloading (you will see a progress bar)
+
+The models are grouped **one card per variant**, and each card's title carries a **Download All** button: one
+click starts every model that variant still needs. Optional models are never downloaded for you, a model
+that is already downloading is not started twice, and a variant whose models are all there shows
+**All installed** instead of the button.
+
+An app whose architecture has **no variants** — a single choice, such as one upscaler, one pose detector or
+one interpolation model — shows a single **Base** card listing the files it can use. Any one file of a
+"one of" group is enough, and when the app opens it binds the first *installed* one (falling back to the
+first declared, which is what the app ships with).
+
+Where a tool's whole choice is the model, the architecture offers **one variant per model** instead
+(the upscale apps: ESRGAN x2 / x4, UltraSharp x4, AnimeSharp x4; the frame-interpolation tools: FILM net
+or RIFE 4.26; the SeedVR2 upscalers: 3B or 7B). Pick one from the row of buttons in the app — Custom is
+still there if you want to choose a file yourself. Installing one of those therefore shows the **app row**
+as <span style="color:orange">orange</span> (one variant complete, the others not) while the app itself runs
+perfectly: the dot is telling you which models are still installable, and the information panel shows it
+per variant.
 
 ## Installing Models
 If a model is missing, click over the 'download' icon and the model will start downloading and will be installed in a pre-defined location used by the app.

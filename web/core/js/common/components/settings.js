@@ -268,6 +268,12 @@ export class SettingsComponent {
                             <span class="settings-switch-text">Show deprecated apps</span>
                             <span class="settings-switch-track" aria-hidden="true"></span>
                         </label>
+                        <label class="settings-switch">
+                            <input type="checkbox" id="remember-app-state"
+                                   ${this.preferences().get('rememberAppState') !== false ? 'checked' : ''}>
+                            <span class="settings-switch-text">Remember app settings in this session</span>
+                            <span class="settings-switch-track" aria-hidden="true"></span>
+                        </label>
                     </section>` : ''}
                     <section class="settings-section">
                         <h2>Notifications</h2>
@@ -332,6 +338,12 @@ export class SettingsComponent {
         if (deprecatedSwitch) {
             deprecatedSwitch.addEventListener('change', () =>
                 this.setShowDeprecatedApps(deprecatedSwitch.checked));
+        }
+
+        const rememberSwitch = view.querySelector('#remember-app-state');
+        if (rememberSwitch) {
+            rememberSwitch.addEventListener('change', () =>
+                this.setRememberAppState(rememberSwitch.checked));
         }
 
         const soundSwitch = view.querySelector('#play-sound-on-complete');
@@ -400,6 +412,23 @@ export class SettingsComponent {
             detail: { key: 'showDeprecatedApps', value: on },
         }));
         this.showToast(on ? 'Deprecated apps: shown' : 'Deprecated apps: hidden',
+            'success', 1500);
+    }
+
+    /**
+     * Persist the "remember app settings" switch.
+     *
+     * An app page reads this itself (its own `PreferencesManager` over the same
+     * `SausMenuPref` key), so nothing has to be sent to it: while the switch is off a
+     * snapshot is neither written nor restored. What is already stored stays where it
+     * is until the session ends.
+     */
+    setRememberAppState(value) {
+        const on = value === true;
+        this.preferences().set('rememberAppState', on);
+        this.showToast(
+            on ? 'App settings: remembered during this session'
+               : 'App settings: no longer remembered',
             'success', 1500);
     }
 

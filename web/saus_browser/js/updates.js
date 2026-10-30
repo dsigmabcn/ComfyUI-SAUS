@@ -30,7 +30,7 @@ function isNewerVersion(current, latest) {
 function createFloatingCharacter(currentVersion) {
     const floatingHTML = `
         <div class="floating-update-character">
-            <img src="/core/media/ui/update_logo.png" alt="Update Character" />
+            <img src="/core/media/ui/update_logo.webp" alt="Update Character" />
             <div class="update-indicator">
                 <span class="update-dot"></span>
                 <span class="version-label">${currentVersion}</span>
@@ -48,7 +48,7 @@ function showUpdateDialog(currentVersion, latestVersion) {
         <div class="update-dialog-overlay">
             <div class="update-dialog-container">
                 <div class="update-character">
-                    <img src="/core/media/ui/update_logo.png" alt="Update Avatar" />
+                    <img src="/core/media/ui/update_logo.webp" alt="Update Avatar" />
                 </div>
                 <div class="update-dialog">
                     <div class="update-content">

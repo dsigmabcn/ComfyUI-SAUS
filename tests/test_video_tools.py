@@ -10,9 +10,12 @@ SIDEBAR = ROOT / 'web' / 'saus_browser' / 'js' / 'sidebar.js'
 
 UPSCALE_MODELS = ['RealESRGAN_x4plus.safetensors', 'RealESRGAN_x2.pth',
                   '4x-UltraSharp.pth', '4x-AnimeSharp.pth']
-INTERP_MODELS = ['film_net_fp16.safetensors', 'rife_v4.26.safetensors',
-                 'rife_v4.26_heavy.safetensors', 'rife_v4.25.safetensors',
-                 'rife_v4.25_heavy.safetensors', 'rife_v4.25_lite.safetensors']
+# The two the apps offer as variants now: FILM net and the RIFE build ComfyUI's own
+# node ships with. The other RIFE builds (4.25, its lite/heavy, 4.26 heavy) are gone
+# from the architecture *and* the registry - they were never anything but a dropdown.
+INTERP_MODELS = ['film_net_fp16.safetensors', 'rife_v4.26.safetensors']
+# The interpolate+upscale app pairs one interpolation model with ESRGAN x2.
+COMBO_UPSCALE_MODELS = ['RealESRGAN_x2.pth']
 
 VIDEO_APPS = [
     'video-upscale-seedvr2',
@@ -22,8 +25,14 @@ VIDEO_APPS = [
     'video-frame-interpolation',
     'video-segmentation',
     'video-interpolate-upscale',
+    'video-to-canny',
 ]
 BATCHED = ['video-upscale-with-model', 'video-interpolate-upscale']
+# The video-to-video half of the family: one graph, a clip in and a clip out.
+VIDEO_TO_VIDEO_APPS = [
+    'video-wan-animate',
+    'video-minimax-h3-fun-control',
+]
 
 
 def config(url):
@@ -56,7 +65,7 @@ def source_of(value):
     return None
 
 
-def test_all_seven_are_filed_under_video_tools():
+def test_every_video_tool_is_filed_under_video_tools():
     taxonomy = json.loads((DATA / 'taxonomy.json').read_text(encoding='utf-8'))
     cats = {c['id']: c for c in taxonomy['categories']}
     assert 'Video tools' in cats, 'the panel shows the category id, so the id is the name'
@@ -172,8 +181,42 @@ def test_the_model_dropdowns_offer_only_their_models():
                  '1.inputs.model_name')['options'] == UPSCALE_MODELS
 
     combo = config('video-interpolate-upscale')
-    assert bound(combo, '1.inputs.model_name')['options'] == UPSCALE_MODELS
+    assert bound(combo, '1.inputs.model_name')['options'] == COMBO_UPSCALE_MODELS
     assert bound(combo, '16_1.inputs.model_name')['options'] == INTERP_MODELS
+
+
+def test_the_variants_are_what_makes_the_model_choice_obvious():
+    """A dropdown of four models is a question; a row of variants is an answer.
+
+    Each of these apps is one model choice, so the choice is a mode button now - and
+    the dropdown lists exactly what its variants can bind.
+    """
+    architectures = json.loads((DATA / 'architectures.json').read_text(encoding='utf-8'))
+
+    upscalers = architectures['UPSCALE MODELS']['variants']
+    assert [v['label'] for v in upscalers.values()] == \
+        ['ESRGAN x2', 'ESRGAN x4', 'UltraSharp x4', 'AnimeSharp x4'], \
+        'the upscale apps offer one variant per model'
+    assert sorted(p for v in upscalers.values() for p in v['pick'].values()) == \
+        sorted(UPSCALE_MODELS), 'covering every model they declare'
+
+    interp = architectures['FRAME INTERPOLATION']['variants']
+    assert [v['label'] for v in interp.values()] == ['FILM net', 'RIFE 4.26']
+    assert sorted(p for v in interp.values() for p in v['pick'].values()) == \
+        sorted(INTERP_MODELS), 'and nothing else: the other RIFE builds are deleted'
+
+    combo = architectures['VIDEO INTERPOLATE UPSCALE']['variants']
+    assert len(combo) == 2, 'one variant per interpolation model'
+    for variant in combo.values():
+        assert variant['pick']['upscale_model'] == 'RealESRGAN_x2.pth', \
+            'both pair the interpolation model with ESRGAN x2'
+    assert sorted(v['pick']['interpolation_model'] for v in combo.values()) == \
+        sorted(INTERP_MODELS)
+
+    # And the apps themselves are no longer the place the choice lives: their model
+    # dropdowns are what Custom mode offers, not the only way in.
+    for url in ('video-frame-interpolation', 'video-interpolate-upscale'):
+        assert config(url)['metadata']['architecture'] in architectures
 
 
 def test_the_combined_app_runs_both_stages():
@@ -205,6 +248,104 @@ def test_the_result_pane_names_the_save_node():
         save_class = wf[out['nodeId']]['class_type']
         assert out['label'] == {'SaveVideo': 'Save Video', 'SaveImage': 'Save Image'}[save_class], \
             f'{url}: output labelled {out["label"]!r} for a {save_class}'
+
+
+def test_the_canny_tools_need_no_model():
+    """Both are pure node graphs, so nothing is downloaded and nothing can be gated."""
+    architectures = json.loads((DATA / 'architectures.json').read_text(encoding='utf-8'))
+    arch = architectures['CANNY EDGES']
+    assert arch['models'] == [], 'ComfyUI ships the Canny node itself'
+    assert arch['variants'] == {}
+
+    for url in ('image-to-canny', 'video-to-canny'):
+        cfg = config(url)
+        assert cfg['metadata']['architecture'] == 'CANNY EDGES', url
+        assert cfg['metadata']['models'] == [], f'{url} must declare no models'
+
+        canny = nodes_of_type(workflow(url), 'Canny')
+        assert len(canny) == 1, f'{url}: expected exactly one Canny node'
+        node_id, node = next(iter(canny.items()))
+        assert node['inputs']['low_threshold'] == 0.4 and node['inputs']['high_threshold'] == 0.8
+
+        for threshold in ('low_threshold', 'high_threshold'):
+            entry = bound(cfg, '%s.inputs.%s' % (node_id, threshold))
+            assert entry, f'{url}: {threshold} is not bound'
+            assert entry['precision'] == 2, 'a threshold is a two-decimal number'
+
+
+def test_the_animate_app_offers_base_and_distilled_in_one_graph():
+    """Two templates, one app: the variant swaps the model and the step count.
+
+    The base template wires a LightX2V distill LoRA into the graph, the distilled one
+    carries a different transformer and no LoRA. The LoRA node is bypassed in the
+    app's copy (the *variant* attaches it), so the distilled variant never asks for a
+    file its graph would not use.
+    """
+    cfg = config('video-wan-animate')
+    wf = workflow('video-wan-animate')
+    architectures = json.loads((DATA / 'architectures.json').read_text(encoding='utf-8'))
+    variants = architectures['WAN ANIMATE 2']['variants']
+
+    assert list(variants) == ['BASE', 'DISTILLED'], 'Base first, then Distilled'
+    assert variants['BASE']['pick']['Diffusion_model'] == 'wan_animate_2_int8_convrot.safetensors'
+    assert variants['DISTILLED']['pick']['Diffusion_model'] == \
+        'wan_animate_2_distill_int8_convrot.safetensors'
+    assert variants['BASE']['loras'], 'the base model needs its 4-step distill LoRA'
+    assert 'loras' not in variants['DISTILLED'], 'the distilled transformer needs none'
+    for variant in variants.values():
+        assert variant['settings']['Steps'], 'each variant sets its own step count'
+
+    assert not nodes_of_type(wf, 'LoraLoaderModelOnly'), \
+        'the in-graph LoRA node is bypassed: the variant attaches it'
+    unets = {k: v for k, v in wf.items() if v['class_type'] == 'UNETLoader'}
+    assert len(unets) == 1, 'one transformer node, whichever variant is picked'
+
+    # The variant settings are label-matched, so the labels have to exist.
+    labels = {s['label'].lower() for s in cfg['steppers']}
+    for key in (variants['BASE']['settings']):
+        assert key.lower() in labels, f'no stepper is labelled {key!r}'
+
+    # Both media inputs are bound, and the driving clip can be trimmed.
+    loaders = {entry['nodePath'] for entry in cfg['imageLoaders']}
+    assert loaders == {'189.inputs.image', '240.inputs.file'}, \
+        'a reference image and a driving video'
+    slice_id = next(iter(nodes_of_type(wf, 'Video Slice')))
+    assert wf[slice_id]['inputs']['duration'] == 0, 'the whole clip by default'
+    assert bound(cfg, '%s.inputs.start_time' % slice_id), 'Start Time is offered'
+    for reader in nodes_of_type(wf, 'GetVideoComponents'):
+        assert wf[reader]['inputs']['video'][0] == slice_id, \
+            'every component reader must read the sliced clip'
+
+
+def test_the_fun_control_app_binds_every_loader_it_needs():
+    """A pose-driven app: the union patch, the pose pack and the detector are all real."""
+    cfg = config('video-minimax-h3-fun-control')
+    wf = workflow('video-minimax-h3-fun-control')
+    architectures = json.loads((DATA / 'architectures.json').read_text(encoding='utf-8'))
+    arch = architectures['MINIMAX H3 FUN CONTROL']
+
+    # Every group's file is declared by the app's metadata, so the panel can offer it.
+    declared = set(cfg['metadata']['models'])
+    for group in arch['models']:
+        for entry in group['files']:
+            assert entry['file'] in declared, entry['file']
+
+    # ... and every loader the graph uses has a dropdown to bind it through.
+    loaders = {(g['node']['nodeType'], g['node']['input']) for g in arch['models']}
+    dropdowns = {(d['url'], d['key']) for d in cfg['dropdowns']}
+    for node_type, input_name in loaders:
+        assert (node_type, input_name) in dropdowns, \
+            '%s.%s has no dropdown, so its variant/Base binding would be skipped' % (node_type, input_name)
+
+    # Two VAEs share VAELoader.vae_name: the binding pairs them in declaration order,
+    # so the video VAE must be declared before the audio one.
+    vae_dropdowns = [d['nodePath'] for d in cfg['dropdowns'] if d['url'] == 'VAELoader']
+    assert vae_dropdowns == ['119.inputs.vae_name', '120.inputs.vae_name'], vae_dropdowns
+    vae_groups = [g['id'] for g in arch['models'] if g['node']['nodeType'] == 'VAELoader']
+    assert vae_groups == ['video_vae', 'audio_vae'], vae_groups
+
+    assert nodes_of_type(wf, 'MiniMaxH3FunControlNetApply'), 'the control patch is applied'
+    assert nodes_of_type(wf, 'Video Slice'), 'the clip can be trimmed'
 
 
 def main():

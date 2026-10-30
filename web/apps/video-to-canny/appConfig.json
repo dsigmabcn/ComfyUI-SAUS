@@ -1,0 +1,121 @@
+{
+  "id": "vidcanny",
+  "name": "Video to Canny",
+  "url": "video-to-canny",
+  "description": "Turn every frame of a video into an edge map with ComfyUI's Detect Edges (Canny) node, keeping the clip's own frame rate and its audio.",
+  "metadata": {
+    "schemaVersion": 1,
+    "category": "Video tools",
+    "tags": {
+      "type": [],
+      "base_models": [],
+      "other": []
+    },
+    "architecture": "CANNY EDGES",
+    "models": []
+  },
+  "prompts": [],
+  "steppers": [
+    {
+      "id": "starttimesvidcanny",
+      "label": "Start Time (s)",
+      "layout": {
+        "region": "basic",
+        "order": 0
+      },
+      "nodePath": "2.inputs.start_time",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "duration0wholeclipvidcanny",
+      "label": "Duration (0 = whole clip)",
+      "layout": {
+        "region": "basic",
+        "order": 1
+      },
+      "nodePath": "2.inputs.duration",
+      "defValue": 0,
+      "minValue": 0,
+      "maxValue": 3600,
+      "step": 1,
+      "precision": 1,
+      "scaleFactor": 1
+    },
+    {
+      "id": "lowthresholdvidcanny",
+      "label": "Low Threshold",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "4.inputs.low_threshold",
+      "defValue": 0.4,
+      "minValue": 0.01,
+      "maxValue": 0.99,
+      "step": 0.01,
+      "precision": 2,
+      "scaleFactor": 1
+    },
+    {
+      "id": "highthresholdvidcanny",
+      "label": "High Threshold",
+      "layout": {
+        "region": "advanced",
+        "order": 1
+      },
+      "nodePath": "4.inputs.high_threshold",
+      "defValue": 0.8,
+      "minValue": 0.01,
+      "maxValue": 0.99,
+      "step": 0.01,
+      "precision": 2,
+      "scaleFactor": 1
+    }
+  ],
+  "seeders": [],
+  "inputs": [
+    {
+      "id": "fnfilenameprefixvidcanny",
+      "label": "Filename Prefix",
+      "layout": {
+        "region": "basic",
+        "order": 2
+      },
+      "nodePath": "6.inputs.filename_prefix",
+      "defValue": "Video-Canny"
+    }
+  ],
+  "imageLoaders": [
+    {
+      "id": "imgvideovidcanny",
+      "label": "Video",
+      "nodePath": "1.inputs.file"
+    }
+  ],
+  "dropdowns": [],
+  "toggles": [],
+  "dimensionSelectors": [],
+  "aspectRatioSelectors": [],
+  "dataComponents": [],
+  "canvasOutputs": [],
+  "canvasLoadedImages": [],
+  "canvasAlphaOutputs": [],
+  "canvasSelectedMaskOutputs": [],
+  "canvasCroppedMaskOutputs": [],
+  "canvasCroppedImageOutputs": [],
+  "canvasCroppedAlphaOnImageOutputs": [],
+  "multiComponents": [],
+  "outputs": [
+    {
+      "id": "outvidcanny",
+      "label": "Save Video",
+      "nodeId": "6",
+      "type": "media"
+    }
+  ]
+}

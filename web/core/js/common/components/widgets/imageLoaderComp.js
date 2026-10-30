@@ -33,15 +33,21 @@ export default function imageLoaderComp(appConfig, workflow) {
     appConfig.imageLoaders.forEach((imageConfig, index) => {
         const containerId = loadImageContainer.id;
 
+        // What the app actually loads, from the node the config points at: it decides
+        // the drop area's glyph, the title and - the point of this lookup - which files
+        // the picker offers and which the OS dialog filters on. A LoadVideo input used
+        // to be offered every picture in `input/`, whatever it was drawn with.
+        const nodeType = workflow?.[String(imageConfig.nodePath).split('.')[0]]?.class_type || '';
+        const kind = nodeType === 'LoadVideo' ? 'video'
+            : (nodeType === 'LoadAudio' ? 'audio' : 'image');
+
         // this.imageDropAreaTitle.textContent = 'Drop an image or video here';
         const imageLoader = new ImageLoader(containerId, {
-            allowedFileType: 'image',
-            defaultImageSrc: '/core/media/ui/drop_image_rect_no_border_trans.png',
+            allowedFileType: kind,
+            defaultImageSrc: '/core/media/ui/drop_image_rect_no_border_trans.webp',
             label: imageConfig.label,
-            // What the app actually loads: a LoadVideo input gets the video glyph,
-            // anything else the image one (the same node lookup the dropdowns use).
-            placeholderIcon: (workflow?.[String(imageConfig.nodePath).split('.')[0]]
-                ?.class_type === 'LoadVideo') ? 'fas fa-video' : 'fas fa-image',
+            placeholderIcon: kind === 'video' ? 'fas fa-video'
+                : (kind === 'audio' ? 'fas fa-volume-high' : 'fas fa-image'),
             showIndicator: true,
         }, (localSrc, serverResult) => {
             console.log(`Image ${index + 1} loaded:`, serverResult);

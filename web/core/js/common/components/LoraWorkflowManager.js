@@ -53,7 +53,14 @@ class LoraWorkflowManager {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'add-lora-button';
-            btn.textContent = 'Add Lora+';
+            // An icon plus the plain label reads as one control on one line. The
+            // icon is static markup and the label a text node, so nothing here can
+            // ever be parsed as code.
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-layer-group';
+            icon.setAttribute('aria-hidden', 'true');
+            btn.appendChild(icon);
+            btn.appendChild(document.createTextNode('Add Lora'));
             btn.addEventListener('click', () => {
                 try {
                     this.addLoraBlock(null, loader, loaderWrapper);

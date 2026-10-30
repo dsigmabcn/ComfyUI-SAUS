@@ -1,0 +1,2 @@
+/* saus-bundle:38f23f2b6ad13f97664ee0c56dabb147491e58e2 - built by tools/bundle_core.py; do not edit */
+var o=Object.defineProperty;var i=(t,e,r)=>e in t?o(t,e,{enumerable:!0,configurable:!0,writable:!0,value:r}):t[e]=r;var s=(t,e,r)=>i(t,typeof e!="symbol"?e+"":e,r);var n=class{constructor(e){this.name=e}init(e){throw new Error("init() must be implemented by the plugin.")}destroy(){throw new Error("destroy() must be implemented by the plugin.")}};export{s as a,n as b};

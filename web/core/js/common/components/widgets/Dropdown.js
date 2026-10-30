@@ -1,5 +1,6 @@
 import { populateDropdown } from './dropdownHandler.js';
 import { extractComboOptions } from './comboOptions.js';
+import { getObjectInfo } from '../../scripts/objectInfo.js';
 
 // Re-exported for backwards compatibility (the helper now lives in its own module).
 export { extractComboOptions };
@@ -55,19 +56,15 @@ export default class Dropdown {
 
   tryNodeType(candidates, index) {
     const nodeType = candidates[index];
-    const url = `${window.location.origin}/object_info/${encodeURIComponent(nodeType)}`;
+    // Shared with every other combo on the page (see scripts/objectInfo.js): a class
+    // another widget already asked about is not asked again.
+    const path = `/object_info/${encodeURIComponent(nodeType)}`;
 
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
-      .then(data => {
+    getObjectInfo(path)
+      .then((loaderData) => {
         // populate() reports whether the combo made it onto the page; if it did
         // not, the next candidate is worth a try.
-        if (!this.populate(data)) {
+        if (!this.populate(loaderData)) {
           this.tryNextNodeType(candidates, index);
         }
       })
@@ -86,9 +83,7 @@ export default class Dropdown {
   }
 
   /** @returns {boolean} true once the combo is on the page. */
-  populate(data) {
-    const firstKey = data ? Object.keys(data)[0] : undefined;
-    const loaderData = firstKey ? data[firstKey] : null;
+  populate(loaderData) {
     if (!loaderData || !loaderData.input) {
       // An unknown node type comes back as {} - let the caller try its next guess.
       return false;

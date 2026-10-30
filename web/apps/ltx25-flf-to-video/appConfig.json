@@ -66,6 +66,21 @@
         "region": "basic",
         "order": 3
       }
+    },
+    {
+      "id": "stepperltx25flfdur",
+      "label": "Duration (s)",
+      "nodePath": "294.inputs.value",
+      "minValue": 1,
+      "maxValue": 20,
+      "step": 0.5,
+      "defValue": 5,
+      "precision": 1,
+      "scaleFactor": 1,
+      "layout": {
+        "region": "basic",
+        "order": 4
+      }
     }
   ],
   "dropdowns": [

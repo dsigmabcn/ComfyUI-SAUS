@@ -24,6 +24,12 @@ want for an older workflow or a project already built on them. The setting is re
 It also decides whether deprecated apps appear in the **App Manager** below — while it is off they
 are not listed there either, so this switch is what you turn on to manage them.
 
+**Remember app settings in this session** — on by default. While it is on, an app you close (or a
+page you reload) comes back as you left it: its settings, prompt, version, LoRAs and recent results.
+The memory lives in the browser tab, so it disappears when you close the browser, and a ComfyUI
+restart also starts a fresh session. Switch it off to make every re-opened app start from its
+defaults instead.
+
 ## Managers
 
 Two buttons, each opening a view in its own workspace tab (like the settings themselves):

@@ -27,7 +27,7 @@ from .downloads import (
     check_model_status_batch_handler, delete_model_handler
 )
 from .system import (
-    saus_version_handler, restart_server_handler
+    saus_version_handler, restart_server_handler, session_handler
 )
 
 # aiohttp serves static files without a Cache-Control header, which leaves a
@@ -99,6 +99,7 @@ class AppManager:
             (f'/saus/api/app-visibility', 'GET', get_app_visibility_handler),
             (f'/saus/api/app-visibility', 'POST', set_app_visibility_handler),
             (f'/saus/api/saus-version', 'GET', saus_version_handler),
+            (f'/saus/api/session', 'GET', session_handler),
             (f"/saus/api/directory", "GET", directory_listing_handler),
             (f'/saus/api/thumbnail', 'GET', thumbnail_handler),
             (f'/saus/api/move-file', 'POST', move_copy_handler),

@@ -1,4 +1,5 @@
 import { loadWorkflow } from './workflowLoader.js';
+import { cacheQuery } from './cacheQuery.js';
 
 export async function fetchWorkflow(appName) {
     try {
@@ -11,8 +12,7 @@ export async function fetchWorkflow(appName) {
                 throw new Error('Invalid path: Expected /saus/{name}');
             }
         }
-        const cacheBuster = `?cacheSaus=${Date.now()}`;
-        const wfpath_url = `/saus/${encodeURIComponent(app)}/wf.json${cacheBuster}`;
+        const wfpath_url = `/saus/${encodeURIComponent(app)}/wf.json${cacheQuery(app)}`;
         const workflow = await loadWorkflow(wfpath_url);
         return workflow;
     } catch (error) {

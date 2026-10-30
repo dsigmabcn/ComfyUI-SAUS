@@ -1,8 +1,8 @@
 {
   "id": "vidseedvr",
-  "name": "Video Upscale (SeedVR2 3B)",
+  "name": "Video Upscale (SeedVR2)",
   "url": "video-upscale-seedvr2",
-  "description": "Upscale a video with SeedVR2 3B. Temporal Chunking processes it in latent chunks, which is what keeps long clips inside the VRAM budget.",
+  "description": "Upscale a video with SeedVR2, in the 3B or the 7B size. Temporal Chunking processes it in latent chunks, which is what keeps long clips inside the VRAM budget.",
   "metadata": {
     "schemaVersion": 1,
     "category": "Video tools",
@@ -14,6 +14,7 @@
     "architecture": "SEEDVR2 VIDEO UPSCALE",
     "models": [
       "seedvr2_3b_int8_convrot.safetensors",
+      "seedvr2_7b_int8_convrot.safetensors",
       "seedvr2_ema_vae_fp16.safetensors"
     ]
   },
@@ -126,6 +127,28 @@
     }
   ],
   "dropdowns": [
+    {
+      "id": "modelvidseedvr",
+      "label": "Model",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "66_52.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "vaevidseedvr",
+      "label": "VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "66_51.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    },
     {
       "id": "samplervidseedvr",
       "label": "Sampler",

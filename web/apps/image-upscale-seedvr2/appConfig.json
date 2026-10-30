@@ -2,7 +2,7 @@
   "id": "seedvr2up",
   "name": "Image Upscale (SeedVR2)",
   "url": "image-upscale-seedvr2",
-  "description": "Upscale an image with SeedVR2 7B (one-step generative upscaling).",
+  "description": "Upscale an image with SeedVR2 (one-step generative upscaling), in the 3B or the 7B size.",
   "metadata": {
     "schemaVersion": 1,
     "category": "Image tools",
@@ -13,6 +13,7 @@
     },
     "architecture": "SEEDVR2 UPSCALE",
     "models": [
+      "seedvr2_3b_int8_convrot.safetensors",
       "seedvr2_7b_int8_convrot.safetensors",
       "seedvr2_ema_vae_fp16.safetensors"
     ]
@@ -81,6 +82,28 @@
     }
   ],
   "dropdowns": [
+    {
+      "id": "modelseedvr2up",
+      "label": "Model",
+      "layout": {
+        "region": "advanced",
+        "order": 0
+      },
+      "nodePath": "66_52.inputs.unet_name",
+      "url": "UNETLoader",
+      "key": "unet_name"
+    },
+    {
+      "id": "vaeseedvr2up",
+      "label": "VAE",
+      "layout": {
+        "region": "advanced",
+        "order": 3
+      },
+      "nodePath": "66_51.inputs.vae_name",
+      "url": "VAELoader",
+      "key": "vae_name"
+    },
     {
       "id": "samplerseedvr2up",
       "label": "Sampler",

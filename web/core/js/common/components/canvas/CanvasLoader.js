@@ -1,12 +1,4 @@
 import { CanvasManager } from './CanvasManager.js';
-import { ImageLoaderPlugin } from './ImageLoaderPlugin.js';
-import { ImageCompareSliderPlugin } from './ImageCompareSliderPlugin.js';
-import { MaskBrushPlugin } from './MaskBrushPlugin.js';
-import { CanvasControlsPlugin } from './CanvasControlsPlugin.js';
-import { CustomBrushPlugin } from './CustomBrushPlugin.js';
-import { UndoRedoPlugin } from './UndoRedoPlugin.js';
-import { ImageAdderPlugin } from './ImageAdderPlugin.js';
-import { CanvasScaleForSavePlugin } from './CanvasScaleForSavePlugin.js';
 import { store } from '../../scripts/stateManagerMain.js';
 
 const loadScript = (src, name = '') => {
@@ -192,7 +184,14 @@ export class CanvasLoader {
 
             this.canvasManager = new CanvasManager({ canvasId: this.canvasId });
 
+            // Every plugin is imported at the moment its option says it is wanted.
+            // Together they are ~200 KB of brush / mask / compare code that only a
+            // masking or reference app ever needs, and they used to be part of the
+            // page's module graph for *every* app - a text-to-image app downloaded
+            // the brushes it can never show. Each import is awaited, so
+            // `isInitialized` still means "the canvas and its plugins are ready".
             if (this.options.imageLoader) {
+                const { ImageLoaderPlugin } = await import('./ImageLoaderPlugin.js');
                 const imageLoaderPlugin = new ImageLoaderPlugin({
                     mode: 'Single' // Set to 'Single' or 'Multi' as needed
                 });
@@ -200,6 +199,7 @@ export class CanvasLoader {
             }
 
             if (this.options.canvasControls) {
+                const { CanvasControlsPlugin } = await import('./CanvasControlsPlugin.js');
                 const canvasControlsPlugin = new CanvasControlsPlugin({
                     switchViewToggleButton: this.options.switchViewToggleButton
                 });
@@ -207,12 +207,14 @@ export class CanvasLoader {
             }
 
             if (this.options.undo) {
+                const { UndoRedoPlugin } = await import('./UndoRedoPlugin.js');
                 const undoRedoPlugin = new UndoRedoPlugin({
                     maxHistory: 100,
                 });
                 this.canvasManager.registerPlugin(undoRedoPlugin);
             }
             if (this.options.canvasScaleForSave) {
+                const { CanvasScaleForSavePlugin } = await import('./CanvasScaleForSavePlugin.js');
                 const canvasScaleForSave = new CanvasScaleForSavePlugin({
                     defaultScale: 1,
                     showDownloadButton: true,
@@ -220,6 +222,7 @@ export class CanvasLoader {
                 this.canvasManager.registerPlugin(canvasScaleForSave);
             }
             if (this.options.maskBrush) {
+                const { MaskBrushPlugin } = await import('./MaskBrushPlugin.js');
                 const maskBrushPlugin = new MaskBrushPlugin({
                     brushSize: 75,
                     brushOpacity: 0.5,
@@ -236,6 +239,7 @@ export class CanvasLoader {
             }
 
             if (this.options.customBrush) {
+                const { CustomBrushPlugin } = await import('./CustomBrushPlugin.js');
                 const customBrushPlugin = new CustomBrushPlugin({
                     brushSize: 25,
                     brushOpacity: 1,
@@ -252,6 +256,7 @@ export class CanvasLoader {
             }
 
             if (this.options.imageCompareSlider) {
+                const { ImageCompareSliderPlugin } = await import('./ImageCompareSliderPlugin.js');
                 const imageCompareSliderPlugin = new ImageCompareSliderPlugin({
                     sliderColor: '#570d7b',
                     sliderWidth: 2,
@@ -266,6 +271,7 @@ export class CanvasLoader {
             }
 
             if (this.options.imageAdder) {
+                const { ImageAdderPlugin } = await import('./ImageAdderPlugin.js');
                 const imageAdderPlugin = new ImageAdderPlugin();
                 this.canvasManager.registerPlugin(imageAdderPlugin);
             }

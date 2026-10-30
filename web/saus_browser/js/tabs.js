@@ -300,8 +300,11 @@ function ensurePane(id) {
     frame.setAttribute('allow', 'clipboard-write');
     // embed=1 lets the page drop its own header/footer: the tab provides them.
     // The theme travels in the URL as well as in localStorage, so an app paints
-    // correctly the very first time (see core/js/common/scripts/theme.js).
-    frame.src = `saus/${tab.url}?embed=1&theme=${encodeURIComponent(currentTheme())}`;
+    // correctly the very first time (see core/js/common/scripts/theme.js). The
+    // session stamp travels with it so the app can tell a reload of this page from
+    // a ComfyUI restart, which is what decides whether it restores its state.
+    frame.src = `saus/${tab.url}?embed=1&theme=${encodeURIComponent(currentTheme())}`
+        + `&session=${encodeURIComponent(state.sessionStamp || '')}`;
     pane.appendChild(frame);
     container.appendChild(pane);
     return pane;

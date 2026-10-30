@@ -1,0 +1,6 @@
+# The app runtime is generated (tools/bundle_core.py in the ComfyUI-SAUS-builder repo)
+# and committed, because ComfyUI serves those files straight from the checkout. It is
+# never edited by hand: keep it out of diffs and out of the language stats, and edit
+# the sources under web/core/ instead - `test_runtime_bundle.py` fails on a stale build.
+web/core/js/dist/* linguist-generated=true
+web/core/js/dist/* -diff

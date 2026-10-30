@@ -231,9 +231,39 @@
 .variant-models .model-type:first-child { margin-top: 0; }
 
 .variant-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
     color: var(--color-accent);
     font-weight: bold;
     margin-bottom: 8px;
+}
+
+/* The variant name keeps its own box so the actions stay right-aligned even when
+   a long name wraps. */
+.variant-card-label {
+    min-width: 0;
+}
+
+.variant-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+.download-all-btn {
+    padding: 4px 8px;
+    font-weight: normal;
+}
+
+/* "All installed" replaces the button once nothing is left to fetch. */
+.variant-card-ready {
+    font-size: 0.85em;
+    font-weight: normal;
+    color: var(--color-success);
 }
 
 .variant-settings {

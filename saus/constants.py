@@ -58,6 +58,10 @@ BLOCKED_UPLOAD_EXTENSIONS = {
     'rb', 'lua', 'htaccess', 'service', 'desktop',
 }
 mimetypes.add_type('application/javascript', '.js')
+# aiohttp answers static files from mimetypes, and a font served as
+# application/octet-stream is refused by some browsers.
+mimetypes.add_type('font/woff2', '.woff2')
+mimetypes.add_type('font/woff', '.woff')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 APPS_CONFIG_FILE = 'appConfig.json'

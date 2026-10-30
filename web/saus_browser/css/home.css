@@ -1,18 +1,65 @@
 .home-container {
-    padding: 40px;
+    /* Exactly the pane, never more: `min-height: 100%` plus a card whose cap could not
+       resolve (a percentage max-height against an auto-height parent falls back to
+       `none`) left the pane always overflowing - a scrollbar on a screen with room to
+       spare, and content that could not be centred because it did not fit. */
+    height: 100%;
+    padding: clamp(16px, 3vh, 40px);
     text-align: center;
     color: var(--color-primary-text);
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    /* The card shrinks below, so this only bites on a window too short for the text -
+       and then the pane scrolls instead of clipping it. */
+    overflow: auto;
+    scrollbar-width: thin;
+}
+
+.home-content {
+    /* A flex item at the mercy of the column: it may shrink, but never grow past the
+       pane, and it centres its own children. */
+    flex: 0 1 auto;
+    min-height: 0;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .home-content h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
+    font-size: clamp(1.8em, 3.4vh, 2.5em);
+    margin-bottom: clamp(8px, 1.6vh, 20px);
     color: var(--color-accent);
+}
+
+.home-content h3 {
+    text-align: center;
+}
+
+/**
+ * The quick-start card.
+ *
+ * It used to sit in a flex column with a fixed `height: 100%` pane, sized only by
+ * `max-height: 55vh`: on a short window the column traded the card's height for width
+ * and the illustration came out squashed. The shape is stated here instead, so every
+ * browser scales it by one factor - and `object-fit` is the last word should a height
+ * ever be forced on it by something else.
+ */
+.home-content img {
+    display: block;
+    flex: 0 1 auto;
+    min-height: 0;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    /* A definite cap - no percentage, which would resolve against an indefinite height
+       and silently disappear. */
+    max-height: 55vh;
+    aspect-ratio: 1366 / 768;
+    object-fit: contain;
+    margin-top: clamp(8px, 2vh, 20px);
 }
 
 .home-content p {

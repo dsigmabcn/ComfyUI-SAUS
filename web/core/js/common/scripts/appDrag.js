@@ -5,9 +5,16 @@
  * `.saus-dragging` on the body); and the graph needs a file in `input/`, while a Recent
  * result lives in `output/`.
  */
+import { mediaKindOf, thumbnailUrlForPath } from './mediaKinds.js';
 
 /** The private MIME type a SAUS media drag carries. */
 export const MEDIA_MIME = 'application/x-saus-media';
+
+/**
+ * How wide a Recent tile is asked to be. The right column is 100 px at its narrowest
+ * and the panel is not the place for a full-size original (see `thumbnailUrlFor`).
+ */
+export const HISTORY_THUMB_SIZE = 160;
 
 /** Set while a SAUS media drag is in flight (see the note above). */
 let active = null;
@@ -43,6 +50,21 @@ export function parseMediaUrl(url) {
         // The path the File Manager API speaks: root-qualified and posix-separated.
         path: [type, subfolder, filename].filter(Boolean).join('/'),
     };
+}
+
+/**
+ * A `/view?filename=…&type=output` URL -> a small preview of the *same* file, or
+ * `null` when a still preview makes no sense (a video, or a URL that names nothing).
+ *
+ * The Recent panel used to put the viewer URL straight into a 90 px tile, so a panel
+ * full of 4000x3000 results downloaded all of them at full size, every visit. The
+ * server resizes and caches them instead (`/saus/api/thumbnail`); a video tile stays a
+ * real `<video>` with `preload="metadata"`, because there is nothing to resize.
+ */
+export function thumbnailUrlFor(url, size = HISTORY_THUMB_SIZE) {
+    const payload = parseMediaUrl(url);
+    if (!payload || mediaKindOf(payload.filename) !== 'image') return null;
+    return thumbnailUrlForPath(payload.path, size);
 }
 
 /** Start a SAUS media drag on `dataTransfer` (a `dragstart`). */

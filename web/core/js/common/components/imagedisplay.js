@@ -1,4 +1,6 @@
-import { parseMediaUrl, setMediaDrag, endMediaDrag } from '/core/js/common/scripts/appDrag.js';
+import {
+    parseMediaUrl, setMediaDrag, endMediaDrag, thumbnailUrlFor,
+} from '/core/js/common/scripts/appDrag.js';
 
 let previousMediaElement = null;
 
@@ -183,12 +185,26 @@ class HistoryManager {
 
     createImageThumbnail(src) {
         const img = document.createElement('img');
-        img.src = src;
+        // The tile shows the server's small preview; the viewer URL stays on the element
+        // (and in `this.history`) so the lightbox and the drag payload keep pointing at
+        // the full-size file.
+        const thumb = thumbnailUrlFor(src);
+        img.src = thumb || src;
+        img.dataset.fullSrc = src;
         img.alt = 'History Image';
         img.loading = 'lazy';
         img.style.width = '100%';
         img.style.height = 'auto';
         img.onerror = (e) => {
+            // A preview can fail (an image Pillow cannot open, an old file that moved):
+            // the original still works, so fall back before the download route. The flag
+            // is a flag and not `img.src !== src`, because reading `src` back gives the
+            // absolute URL and would look like a fallback that never happened.
+            if (thumb && !img.dataset.fellBack) {
+                img.dataset.fellBack = 'true';
+                img.src = src;
+                return;
+            }
             if (!img.dataset.retried && src.includes('filename=')) {
                 img.dataset.retried = "true";
                 try {
@@ -767,4 +783,26 @@ function addImageToHistory(imageUrl) {
 
 export function updateProgress(max = 0, value = 0) {
     imageDisplayApp.updateProgress(max, value);
+}
+
+/** The "Recent" panel's URLs, newest first - what a session snapshot stores. */
+export function getHistoryUrls() {
+    return [...imageDisplayApp.historyManager.history];
+}
+
+/**
+ * Put a saved list back, newest first, and show the newest one again.
+ *
+ * The list is replayed through the same `addImage` the live results use, so the
+ * thumbnails, the panel and the main display all come back exactly as they were -
+ * the files themselves never moved (they are ComfyUI outputs on disk).
+ */
+export function restoreHistory(urls) {
+    const items = (urls || []).filter((url) => typeof url === 'string' && url);
+    if (!items.length) return;
+
+    imageDisplayApp.historyManager.history = [];
+    imageDisplayApp.historyManager.historyContainer.innerHTML = '';
+    [...items].reverse().forEach((url) => imageDisplayApp.historyManager.addImage(url));
+    imageDisplayApp.imageLoader.loadMedia(items[0], true);
 }

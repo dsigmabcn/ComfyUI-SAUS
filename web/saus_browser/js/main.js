@@ -8,11 +8,41 @@ import { restoreTabs, openBuiltIn, exitFocus, handleOpenAppEvent } from './tabs.
 import { toggleConsoleDock } from './console.js';
 import { initTheme } from '/core/js/common/scripts/theme.js';
 import { listenForGenerationComplete } from '/core/js/common/scripts/notifications.js';
+import { clearAll, isNewServerSession } from '/core/js/common/scripts/sessionState.js';
 
 // Night / Day / Fire, before the shell renders (palette: /core/css/themes.css).
 initTheme();
 
 const GUIDE_URL = 'https://github.com/dsigmabcn/ComfyUI-SAUS/blob/main/docs/USER_GUIDE.md';
+
+// Which server run this page belongs to. Kept in `sessionStorage` (like the open
+// tabs), so a reload keeps it and a new ComfyUI start does not match it.
+const SESSION_KEY = 'saus.session.v1';
+
+/**
+ * Ask the server which run this is, and forget the remembered app state when it is
+ * not the one we stored - a ComfyUI restart is a *new* session, so an app must not
+ * come back carrying the previous one's settings.
+ */
+async function syncSession() {
+    try {
+        const response = await fetch('/saus/api/session');
+        if (!response.ok) return;
+        const current = String((await response.json()).stamp || '');
+        if (!current) return;
+
+        const stored = sessionStorage.getItem(SESSION_KEY);
+        if (isNewServerSession(stored, current)) {
+            const dropped = clearAll();
+            if (dropped) console.info('[SAUS] new server session: forgot', dropped, 'remembered app(s)');
+        }
+        sessionStorage.setItem(SESSION_KEY, current);
+        state.sessionStamp = current;
+    } catch (error) {
+        // Offline or the route is missing: keep whatever the browser already had.
+        console.warn('[SAUS] could not read the session:', error);
+    }
+}
 
 async function loadApps() {
     state.sessionTimestamp = Date.now();
@@ -137,6 +167,9 @@ export function initializeUI() {
 
     document.addEventListener('saus:open-app', handleOpenAppEvent);
     document.addEventListener('saus:app-info', handleAppInfoEvent);
+    // An app's gears (next to its progress bar) ask for the console: the app runs in
+    // an iframe and cannot draw the shell's dock itself (see core/progressbar.js).
+    document.addEventListener('saus:toggle-console', () => toggleConsoleDock());
     // The Settings pane (a core component) writes the shared preferences through
     // its own manager, so our copy is stale the moment its switch is flipped:
     // re-read it, then repaint the explorer so deprecated apps appear/disappear
@@ -164,6 +197,9 @@ export function initializeUI() {
 
     initializeWebSocket();
     loadApps();
+    // The apps' remembered state is scoped to this server run, so the stamp is
+    // fetched alongside the catalogs rather than after them.
+    syncSession();
     checkForUpdate();
 
     window.addEventListener('appsSynced', () => loadApps());

@@ -18,6 +18,7 @@ SHELL_CSS = ROOT / 'web' / 'saus_browser' / 'css' / 'shell.css'
 DETAILS_CSS = ROOT / 'web' / 'saus_browser' / 'css' / 'details.css'
 MODALS_CSS = ROOT / 'web' / 'saus_browser' / 'css' / 'modals.css'
 BROWSER_HTML = ROOT / 'web' / 'saus_browser' / 'index.html'
+HOME_CSS = ROOT / 'web' / 'saus_browser' / 'css' / 'home.css'
 THEMES_CSS = ROOT / 'web' / 'core' / 'css' / 'themes.css'
 TAXONOMY_JSON = ROOT / 'web' / 'saus_browser' / 'data' / 'taxonomy.json'
 CONSOLE_HARNESS = ROOT / 'tests' / 'js' / 'console_dock.harness.mjs'
@@ -30,6 +31,15 @@ FM_HEADER_JS = ROOT / 'web' / 'file_manager' / 'js' / 'header.js'
 DOWNLOADS_PY = ROOT / 'saus' / 'downloads.py'
 MODELS_JS = BROWSER / 'models.js'
 BROWSER_MAIN_JS = BROWSER / 'main.js'
+DOWNLOAD_ALL_HARNESS = ROOT / 'tests' / 'js' / 'download_all.harness.mjs'
+VARIANT_STATUS_HARNESS = ROOT / 'tests' / 'js' / 'variant_status.harness.mjs'
+VARIANT_STATUS_JS = BROWSER / 'variantStatus.js'
+UI_MEDIA = ROOT / 'web' / 'core' / 'media' / 'ui'
+
+# The shell's own images are served as static files (no resize endpoint), so what is
+# committed is what the browser downloads. tools/optimise_ui_image.py keeps them webp
+# and small; this is the budget that notices when one slips back in.
+UI_IMAGE_BUDGET = 120 * 1024
 
 
 class SkippedTest(Exception):
@@ -59,6 +69,16 @@ def _rule(path, selector):
     assert body, f'{selector} is missing from {path.name}'
     return {name: value.strip() for name, value in
             re.findall(r'([\w-]+)\s*:\s*([^;]+);', body.group(1))}
+
+
+def _rules(path, selector):
+    """Every declaration for a selector (a file may refine a rule later on)."""
+    source = re.sub(r'/\*.*?\*/', '', path.read_text(encoding='utf-8'), flags=re.S)
+    merged = {}
+    for body in re.findall(re.escape(selector) + r'\s*\{([^}]*)\}', source):
+        merged.update(dict(re.findall(r'([\w-]+)\s*:\s*([^;]+);', body)))
+    assert merged, f'{selector} is missing from {path.name}'
+    return merged
 
 
 def _rules(path, selector):
@@ -686,6 +706,217 @@ def test_the_settings_switch_actually_renders():
     block = settings.split('showDeprecatedSwitch ?')[1].split('` : ')[0]
     assert 'settings-switch-text' in block, 'the Apps section holds the switch'
     assert 'settings-hint' not in block, 'and no explanatory paragraph under it'
+
+
+def test_download_all_harness():
+    """What one click queues, executed: see tests/js/download_all.harness.mjs."""
+    node = shutil.which('node') or shutil.which('nodejs')
+    if node is None:
+        _skip(f'{DOWNLOAD_ALL_HARNESS.name} needs node, which is not installed here')
+
+    result = subprocess.run([node, str(DOWNLOAD_ALL_HARNESS)], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.returncode == 0, (
+        f'{DOWNLOAD_ALL_HARNESS.name} failed: {result.stdout} {result.stderr}')
+
+
+def test_a_variant_card_offers_download_all():
+    """The button lives in the card title and goes through the one dispatcher."""
+    source = MODELS_JS.read_text(encoding='utf-8')
+
+    assert 'data-action="download-all"' in source, 'the card title carries the button'
+    assert 'Download All' in source and 'Download all' not in source, (
+        'the label reads exactly "Download All"')
+    assert 'download-all-count' not in source, 'and carries no "(N)" counter'
+    assert 'variant-card-actions' in source and 'variant-card-ready' in source, (
+        'the button and the "All installed" note share the title row')
+
+    handler = source.split('export function handleModelActionClick', 1)[1].split('const item =', 1)[0]
+    assert "action === 'download-all'" in handler, 'the delegated dispatcher owns it'
+    assert 'downloadMissingInVariant(' in handler, 'and routes it to the one implementation'
+
+    body = source.split('async function downloadMissingInVariant', 1)[1]
+    assert 'window.downloadModel(' in body, (
+        'each model still goes through the single install entry point')
+
+    title = _rule(DETAILS_CSS, '.variant-card-title')
+    assert title['display'] == 'flex' and title['justify-content'] == 'space-between', (
+        'the title is a row: the name left, the actions right')
+
+
+def test_the_information_panel_asks_once_for_every_model_status():
+    """N model files must cost one request, not one round trip each."""
+    source = MODELS_JS.read_text(encoding='utf-8')
+    panel = source.split('export async function showAppDetails', 1)[1]
+
+    assert 'await fetchModelStatuses(allFiles.map(statusEntry))' in panel, (
+        'the panel resolves every model through the batch route')
+    assert 'await Promise.all(allFiles.map' not in panel, (
+        'and the per-file fan-out it replaced is gone')
+
+
+def test_the_fp8_mode_button_is_gone():
+    """The extra FP8 source toggle is retired - Custom still reaches the type."""
+    content = CONTENT_HTML.read_text(encoding='utf-8')
+    assert 'data-mode="fp8"' not in content, 'the FP8 button left the app page'
+    assert 'mode-group-right' not in content, 'and so did the group that held it'
+    assert 'data-mode="custom"' in content, 'Custom stays, so the type is still reachable'
+
+    source = APP_MAIN_JS.read_text(encoding='utf-8')
+    assert 'fp8_e4m3fn' not in source, 'the value it wrote is gone from the runtime'
+
+    css = APP_CSS.read_text(encoding='utf-8')
+    assert '.mode-group-right' not in css, 'the retired layout rule left the stylesheet too'
+
+
+def test_the_selected_aspect_ratio_is_unmistakable():
+    """The pick was painted a hair off the tile background in Night."""
+    active = _rules(APP_CSS, '.ratio-icon-btn.active')
+    assert active['border-color'] == 'var(--color-accent)', 'the choice is ringed in the accent'
+    assert 'var(--color-accent)' in active['box-shadow'], 'thick enough to read at a glance'
+    assert _rules(APP_CSS, '.ratio-icon-btn.active .ratio-ratio')['font-weight'] == '700', (
+        'and its label is bold')
+
+    for theme in ('night', 'day', 'fire'):
+        palette = _palette(theme)
+        ratio = _contrast(palette['--color-accent'], palette['--color-background-secondary'])
+        assert ratio >= 3.0, f'{theme}: the selected ratio ring is only {ratio:.1f}:1'
+
+    widget = (ROOT / 'web' / 'core' / 'js' / 'common' / 'components' / 'widgets'
+              / 'AspectRatioSelector.js').read_text(encoding='utf-8')
+    assert 'aria-pressed=' in widget, 'and assistive tech is told which one is picked'
+
+
+def test_the_add_lora_button_wears_an_icon_and_no_plus():
+    """One control: an icon plus 'Add Lora' - the '+' read as part of the name."""
+    manager = (ROOT / 'web' / 'core' / 'js' / 'common' / 'components'
+               / 'LoraWorkflowManager.js').read_text(encoding='utf-8')
+    assert "'Add Lora+'" not in manager, 'the old label is gone'
+    assert "createTextNode('Add Lora')" in manager, 'the label is plain Add Lora'
+    assert 'fa-layer-group' in manager, 'and the button wears an icon'
+
+    css = _rule(APP_CSS, '.add-lora-button')
+    assert css['display'] == 'flex' and 'gap' in css, 'icon and label sit on one line'
+    assert 'overflow' in css, 'a long label still cannot leave the button'
+
+    docs = (ROOT / 'docs' / 'RUNNING_APPS.md').read_text(encoding='utf-8')
+    assert 'Add Lora+' not in docs, 'the guide names the button as it is'
+
+
+def test_the_ui_images_stay_small_and_the_card_reserves_its_box():
+    """A 456 KB welcome-pane PNG is the first screen a slow link has to survive."""
+    oversized = [(path.name, path.stat().st_size) for path in sorted(UI_MEDIA.iterdir())
+                 if path.is_file() and path.stat().st_size > UI_IMAGE_BUDGET]
+    assert not oversized, (
+        'these shell images are over the %d KB budget - re-run '
+        'tools/optimise_ui_image.py: %s' % (UI_IMAGE_BUDGET // 1024, oversized))
+
+    home = BROWSER_HTML.read_text(encoding='utf-8')
+    assert 'Saus%20quick%20start%20card.webp' in home, 'the welcome pane paints the webp'
+    # The tag spans lines (its alt text is a sentence), so read it as one block.
+    card = home.split('quick%20start%20card.webp', 1)[1].split('>', 1)[0]
+    assert 'width="1366"' in card and 'height="768"' in card, \
+        'the size is reserved, so the pane does not reflow while it decodes'
+    assert 'decoding="async"' in card, 'and it decodes off the main thread'
+    assert 'style=' not in card, 'the card is sized by home.css, not by an inline style'
+
+
+def test_the_welcome_card_cannot_be_stretched():
+    """The pane is a fixed-height flex column: it traded the card's height for width.
+
+    Only `max-height` used to size it, so on a short window the illustration came out
+    squashed. The shape is stated in CSS now, and `object-fit` has the last word.
+    """
+    def declarations(block):
+        """The block's actual rules - its explanatory comments name the old values."""
+        return re.sub(r'/\*.*?\*/', '', block, flags=re.S)
+
+    css = HOME_CSS.read_text(encoding='utf-8')
+    rule = declarations(css.split('.home-content img {', 1)[1].split('}', 1)[0])
+
+    assert 'aspect-ratio: 1366 / 768' in rule, 'the shape is declared, not inferred'
+    assert 'object-fit: contain' in rule, 'so a forced height letterboxes, never distorts'
+    assert 'flex: 0 1 auto' in rule, 'it may shrink, so it can never overflow the pane'
+    assert 'width: auto' in rule and 'height: auto' in rule
+    assert 'max-height: 55vh' in rule, 'a definite cap'
+    assert 'min(' not in rule, \
+        'a percentage inside min()/max() resolves against an indefinite height and ' \
+        'silently becomes no cap at all - which is what let the pane overflow'
+
+    pane = declarations(css.split('.home-container {', 1)[1].split('}', 1)[0])
+    assert 'height: 100%' in pane, 'exactly the pane, so it cannot overflow it'
+    assert 'min-height' not in pane, \
+        'min-height let the box grow past the pane on every screen'
+    assert 'overflow: auto' in pane, 'and a window too short for the text can still scroll'
+
+    home = BROWSER_HTML.read_text(encoding='utf-8')
+    assert 'Click one of the icons' not in home, 'the caption under the card is gone'
+    assert 'Every app you open stays here as a tab' not in home, 'and so is the second line'
+
+
+def test_the_app_asks_for_its_four_loads_at_once():
+    """Config, workflow and the two catalogs were awaited one after another."""
+    source = APP_MAIN_JS.read_text(encoding='utf-8')
+    start = source.index('const [appConfig, initialWorkflow, architectures, modelsRegistry]')
+    block = source[start:source.index(']);', start)]
+
+    assert 'await Promise.all([' in block, 'the four are asked for together'
+    for call in ('fetchappConfig(appName)', 'fetchWorkflow(appName)',
+                 "safeJson('/saus/api/architectures'", "safeJson('/saus/api/models'"):
+        assert call in block, '%s is part of the one Promise.all' % call
+
+
+def test_the_gears_open_the_console():
+    """They did before the console became a shell dock; the click was lost with it."""
+    progress = (ROOT / 'web' / 'core' / 'js' / 'common' / 'components'
+                / 'progressbar.js').read_text(encoding='utf-8')
+
+    assert "document.getElementById('spinner')" in progress, 'the gears are looked up'
+    assert "setAttribute('role', 'button')" in progress, 'and are a real control'
+    assert "setAttribute('tabindex', '0')" in progress, 'reachable by keyboard'
+    assert "'Open the ComfyUI console'" in progress, 'and named, so a tooltip says so'
+    assert "event.key === 'Enter' || event.key === ' '" in progress, \
+        'Enter and Space activate it, like a button'
+    assert 'if (window.parent === window) return;' in progress, \
+        'opened on its own there is no shell to ask - that is not an error'
+    assert "dispatchEvent(new CustomEvent('saus:toggle-console'))" in progress, \
+        'the app asks its parent for the console'
+
+    shell = BROWSER_MAIN_JS.read_text(encoding='utf-8')
+    assert "addEventListener('saus:toggle-console'" in shell, 'the shell listens'
+    assert '() => toggleConsoleDock()' in shell, 'and toggles its dock'
+
+    css = APP_CSS.read_text(encoding='utf-8')
+    assert '#spinner:focus-visible' in css, 'the keyboard focus is visible on the gears'
+
+
+
+def test_variant_status_harness():
+    """The completeness rule, executed: see tests/js/variant_status.harness.mjs."""
+    node = shutil.which('node') or shutil.which('nodejs')
+    if node is None:
+        _skip(f'{VARIANT_STATUS_HARNESS.name} needs node, which is not installed here')
+
+    result = subprocess.run([node, str(VARIANT_STATUS_HARNESS)], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.returncode == 0, (
+        f'{VARIANT_STATUS_HARNESS.name} failed: {result.stdout} {result.stderr}')
+
+
+def test_the_panel_and_the_explorer_share_one_rule():
+    """Two implementations is how a card came to be orange beside a green row."""
+    models = MODELS_JS.read_text(encoding='utf-8')
+    status = VARIANT_STATUS_JS.read_text(encoding='utf-8')
+
+    assert "from './variantStatus.js'" in models, 'models.js uses the shared rule'
+    for helper in ('variantBuckets', 'bucketsComplete', 'bucketsMissing', 'variantColour'):
+        assert helper in models, '%s is used by the explorer and the card dots' % helper
+        assert ('export function %s' % helper) in status, 'and defined once, there'
+    assert 'groupKey' in status, 'a group is its kind *and* its label'
+
+    assert 'function semaphoreColor' not in models, 'the second colour rule is gone'
+    assert 'const uniq = [...new Set(block.entries.map((e) => e.file))]' not in models, \
+        'and a variant is no longer coloured by how many alternatives are on disk'
 
 
 def main():

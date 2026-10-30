@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -87,11 +88,53 @@ def _load_app_configs():
     return configs
 
 
+# --------------------------------------------------------------------------- #
+# Revalidation for the catalogs
+#
+# The shell and *every app page* re-read these catalogs, and `no-cache` (see
+# static_cache.py) means the browser has to ask each time. Without a validator that
+# question costs the whole body - ~201 KB for the apps, ~55 KB for the architectures,
+# ~30 KB for the registry - so a validator is what makes "re-read on every request"
+# (above) affordable: the answer is still never cached, only the *question* is cheap.
+#
+# The tag is derived from (mtime, size) of the files the payload is built from: free
+# to compute, and it changes exactly when the content does.
+# --------------------------------------------------------------------------- #
+
+def _files_etag(paths) -> str:
+    """One entity tag over a set of files, whatever order they arrive in."""
+    digest = hashlib.sha1()
+    for path in sorted(str(p) for p in paths):
+        try:
+            stat = os.stat(path)
+        except OSError:
+            continue
+        digest.update(f'{path}:{stat.st_mtime_ns}:{stat.st_size}\n'.encode('utf-8'))
+    return '"%s"' % digest.hexdigest()
+
+
+def _file_etag(path: Path) -> str:
+    """The tag for one file, or None when it is not there yet."""
+    return _files_etag([path]) if Path(path).exists() else None
+
+
+def _json_unless_fresh(request: web.Request, payload, etag) -> web.Response:
+    """The payload as JSON, or a bodyless 304 when the caller already has it."""
+    headers = {'Cache-Control': 'no-cache'}
+    if etag:
+        headers['ETag'] = etag
+        if request.headers.get('If-None-Match') == etag:
+            return web.Response(status=304, headers=headers)
+    return web.json_response(payload, headers=headers)
+
+
 async def apps_handler(request: web.Request) -> web.Response:
     # Re-read on every request so newly created / edited apps (and their
     # metadata) appear without a ComfyUI restart.
     configs = _load_app_configs() or APP_CONFIGS
-    return web.json_response(configs, headers={'Cache-Control': 'no-cache'})
+    etag = _files_etag(SAUS_APPS_PATH.rglob(APPS_CONFIG_FILE))
+    return _json_unless_fresh(request, configs, etag)
+
 
 
 # The App Manager's hidden-app list. It is server-side, so every browser that
@@ -201,7 +244,7 @@ async def get_architectures_handler(request: web.Request) -> web.Response:
         with open(ARCHITECTURES_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        return web.json_response(data, status=200, headers={'Cache-Control': 'no-cache'})
+        return _json_unless_fresh(request, data, _file_etag(ARCHITECTURES_FILE))
 
     except json.JSONDecodeError:
         return web.json_response(
@@ -234,14 +277,15 @@ def _read_json_file(path: Path, default):
 
 async def get_taxonomy_handler(request: web.Request) -> web.Response:
     """Shared category / tag vocabulary (drives sidebar + builder dropdowns)."""
-    return web.json_response(_read_json_file(TAXONOMY_FILE, {}), headers={'Cache-Control': 'no-cache'})
+    return _json_unless_fresh(request, _read_json_file(TAXONOMY_FILE, {}),
+                              _file_etag(TAXONOMY_FILE))
 
 
 async def get_models_registry_handler(request: web.Request) -> web.Response:
     """The filename-keyed model registry (``models.json``)."""
     data = _read_json_file(MODELS_REGISTRY_FILE, {})
     models = data.get("models", data) if isinstance(data, dict) else {}
-    return web.json_response(models, headers={'Cache-Control': 'no-cache'})
+    return _json_unless_fresh(request, models, _file_etag(MODELS_REGISTRY_FILE))
 
 
 async def get_app_models_handler(request: web.Request) -> web.Response:

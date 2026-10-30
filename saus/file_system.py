@@ -133,11 +133,27 @@ async def thumbnail_handler(request: web.Request) -> web.Response:
     except (TypeError, ValueError):
         size = 256
 
+    # A preview is a pure function of (file, mtime, size), so let the browser keep it
+    # and revalidate instead of re-encoding: the icon grids ask for the same tiles on
+    # every visit, and re-encoding a 4000x3000 photo for a 120 px cell costs far more
+    # than the tile. The mtime in the ETag is what makes a replaced file show up.
+    try:
+        stat = file_path.stat()
+        etag = f'W/"{size}-{int(stat.st_mtime)}-{stat.st_size}"'
+    except OSError:
+        etag = None
+
+    cache_headers = {'Cache-Control': 'max-age=86400'}
+    if etag:
+        cache_headers['ETag'] = etag
+        if request.headers.get('If-None-Match') == etag:
+            return web.Response(status=304, headers=cache_headers)
+
     try:
         from PIL import Image
     except Exception:
         # No Pillow: hand back the original file (no compression).
-        return web.FileResponse(file_path, headers={'Cache-Control': 'max-age=600'})
+        return web.FileResponse(file_path, headers=cache_headers)
 
     try:
         with Image.open(file_path) as img:
@@ -154,14 +170,14 @@ async def thumbnail_handler(request: web.Request) -> web.Response:
         return web.Response(
             body=buffer.getvalue(),
             content_type=content_type,
-            headers={'Cache-Control': 'max-age=600'},
+            headers=cache_headers,
         )
     except Exception as e:
         # An image Pillow cannot open (avif without its plugin, or anything
         # broken): hand the original back so the browser - which does decode
         # avif - can still show it, instead of failing the tile outright.
         logger.warning(f"{SAUSMSG}: thumbnail failed for {file_path} ({e}); serving the original")
-        return web.FileResponse(file_path, headers={'Cache-Control': 'max-age=600'})
+        return web.FileResponse(file_path, headers=cache_headers)
 
 
 async def move_copy_handler(request: web.Request) -> web.Response:

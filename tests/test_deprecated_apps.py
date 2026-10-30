@@ -29,6 +29,9 @@ from saus import management  # noqa: E402  (after the stub)
 #   FLUX 2 Klein            -> FLUX 3 Image Klein
 #   Qwen Image / Qwen Image Edit -> Qwen Image 2.1 (and its Edit app)
 #   Flux Redux              -> the newer FLUX image-to-image apps
+#   Flux Dev                -> FLUX 2 / FLUX 3 Klein
+#   Stable Diffusion XL     -> the newer Z-Image / Qwen Image apps
+#   FLUX USO (both apps)    -> FLUX 2 / FLUX 3 Klein Edit
 DEPRECATED_URLS = (
     'flux3-klein-text-to-image',
     'flux3-klein-edit-image',
@@ -37,6 +40,10 @@ DEPRECATED_URLS = (
     'qwen-image-edit',
     'qwen-image-edit-2-images',
     'flux-redux-2-images',
+    'flux-dev-text-to-image',
+    'stable-diffusion-xl',
+    'flux-uso-2-references',
+    'flux-uso-subject-reference',
 )
 
 
